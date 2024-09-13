@@ -1,0 +1,7 @@
+# To ensure app dependencies are ported from your virtual environment/host machine into your container, run 'pip freeze > requirements.txt' in the terminal to overwrite this file
+pyturbo-aero
+plot3d
+numpy>1.80
+scipy
+cantera
+findiff
