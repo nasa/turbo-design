@@ -3,21 +3,21 @@ This tool is a streamline turbomachinery design tool solving the radial equilibr
 
 # Examples 
 ## Turbines
-[OptTurb](https://colab.research.google.com/github/nasa/turbo-design/blob/main/examples/optturb-turbine/optturb.ipynb) OptTurb is part of Paht's PhD work. It's a single stage HPT Turbine designed for Purdue's Experimental aeroThermal LAb (PETAL). It's an excellent candidate for verification because it can be easily modeled using a spreadsheet [OptTurb-SingleStage.xlsx](/references/optturb-turbine/optturb-fixed_pressure_loss2.xlsm) 
+[OptTurb](https://colab.research.google.com/github/nasa/turbo-design/blob/main/examples/optturb-turbine/optturb.ipynb) OptTurb is part of Paht's PhD work. It's a single stage HPT Turbine designed for Purdue's Experimental aeroThermal LAb (PETAL). It's an excellent candidate for verification because it can be easily modeled using a spreadsheet [OptTurb-SingleStage.xlsx](https://github.com/nasa/turbo-design/blob/main/examples/optturb-turbine/optturb-fixed_pressure_loss2.xlsm) 
 
-[OptTurb-multistage](https://colab.research.google.com/github/nasa/turbo-design/blob/main/examples/optturb-multistage/optturb-multistage.ipynb) Multi-stage example of OptTurb. This is based off a meanline spreadsheet model [OptTurb-MultiStage.xlsx](/references/optturb-multistage/multistage-fixed_pressure_loss2.xlsx) 
+[OptTurb-multistage](https://colab.research.google.com/github/nasa/turbo-design/blob/main/examples/optturb-multistage/optturb-multistage.ipynb) Multi-stage example of OptTurb. This is based off a meanline spreadsheet model [OptTurb-MultiStage.xlsx](https://github.com/nasa/turbo-design/blob/main/examples/optturb-multistage/multistage-fixed_pressure_loss2.xlsx) 
 
 [OptTurb-radial](https://colab.research.google.com/github/nasa/turbo-design/blob/main/examples/optturb-radial-turbine/) Radial Turbine Example. This example is not based on a meanline spreadsheet since radius is constantly changing. It still needs to be tested. It uses radial equilibrium to balance the massflow. 
 
 ## Building Turbine Loss Models from Correlations
 The loss correlations below were estimated using Axial steam turbines. Correlation figures are extracted and surface fitted. Each of these tutorials shows how to create and save the correlation files. 
-[Ainley Mathieson](references/Turbines/AinleyMathieson/ainley_mathieson.ipynb)
+[Ainley Mathieson](https://colab.research.google.com/github/nasa/turbo-design/blob/main/references/Turbines/AinleyMathieson/ainley_mathieson.ipynb)
 
-[Craig Cox](references/Turbines/CraigCox/craig_cox.ipynb)
+[Craig Cox](https://colab.research.google.com/github/nasa/turbo-design/blob/main/references/Turbines/CraigCox/craig_cox.ipynb)
 
-[Traupel](references/Turbines/Traupel/traupel.ipynb)
+[Traupel](https://colab.research.google.com/github/nasa/turbo-design/blob/main/references/Turbines/Traupel/traupel.ipynb)
 
-[KackerOkapuu](references/Turbines/KackerOkapuu/kacker_okapuu.ipynb)
+[KackerOkapuu](https://colab.research.google.com/github/nasa/turbo-design/blob/main/references/Turbines/KackerOkapuu/kacker_okapuu.ipynb)
 
 Need to add Dunham-Came, Moustapha-Kacker
 
