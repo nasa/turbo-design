@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "turbo-design"
-version = "1.0.0"
+version = "1.0.2"
 description = "TurboDesign is a library used to design turbines and compressors using radial equilibrium."
 authors = ["Paht Juangphanich <paht.juangphanich@nasa.gov>"]
 packages = [
@@ -8,13 +8,13 @@ packages = [
 ]
 
 [tool.poetry.dependencies]
+cantera = "*"
 pyturbo-aero = "*"
 plot3d = "*"
-numpy = ">2.1.0"
+numpy = ">=1.8.0"
 scipy = "*"
-cantera = "*"
 findiff = "*"
-matplotlib = ">=3.9.2"
+matplotlib = "*"
 pandas = "*"
 python = ">=3.10"
 
