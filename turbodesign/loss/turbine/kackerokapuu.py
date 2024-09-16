@@ -6,6 +6,7 @@ from ...enums import RowType, LossType
 import numpy as np
 import pathlib
 from ..losstype import LossBaseClass
+import requests
 
 class KrackerOkapuu(LossBaseClass):
 
@@ -24,7 +25,11 @@ class KrackerOkapuu(LossBaseClass):
         path = pathlib.Path(os.path.join(os.environ['TD3_HOME'],"kackerokapuu"+".pkl"))
         
         if not path.exists():
-            print('Download file if doesn\'t exist')    
+            url = "https://github.com/nasa/turbo-design/blob/main/references/Turbines/KackerOkapuu/kackerokapuu.pkl"
+            response = requests.get(url, stream=True)
+            with open(path.absolute(), mode="wb") as file:
+                for chunk in response.iter_content(chunk_size=10 * 1024):
+                    file.write(chunk)
         
         with open(path.absolute(),'rb') as f:
             self.data = pickle.load(f) # type: ignore

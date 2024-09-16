@@ -2,7 +2,7 @@
 # Create bspline surface with points
 import sys, os, pathlib
 sys.path.insert(0,"../../../")
-from td3 import LossInterp
+from turbodesign import LossInterp
 import pickle
 
 if __name__=="__main__": 
@@ -82,5 +82,6 @@ if __name__=="__main__":
     Fig08 = LossInterp("Fig08.csv",
                         xlabel='Clearance',
                         ylabel='Xi_Cl')
-    Fig08.plot()
-    print('check')
+    
+    import shutil
+    shutil.copyfile(path.absolute(),os.path.join(os.getcwd(),path.name))
