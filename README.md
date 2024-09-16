@@ -1,19 +1,13 @@
 # Turbo Design 3 
 This tool is a streamline turbomachinery design tool solving the radial equilibrium equations. It can be used for designing compressors and turbines. The designs can have counter rotating stages, different working fluids, and cooling. The intent of this tool is to enable added flexibility in which loss models are used. Because it's a python, it can connect with custom machine learning based loss models.
 
-# Folder Structure
-- docs: Contains documentation  
-- examples: Contains examples 
-- old: old obsolete files 
-- references: any papers or references used in this work 
-- td3: turbo design 3 library 
-
 # Examples 
 ## Turbines
-[OptTurb](/examples/optturb-turbine/) OptTurb is part of Paht's PhD work. It's a single stage HPT Turbine designed for Purdue's Experimental aeroThermal LAb (PETAL). It's an excellent candidate for verification because it can be easily modeled using a spreadsheet [OptTurb.xlsx](/references/OptTurb1D_v02.xlsx) 
+[OptTurb](https://colab.research.google.com/github/nasa/turbo-design/blob/examples/optturb-turbine/optturb.ipynb) OptTurb is part of Paht's PhD work. It's a single stage HPT Turbine designed for Purdue's Experimental aeroThermal LAb (PETAL). It's an excellent candidate for verification because it can be easily modeled using a spreadsheet [OptTurb-SingleStage.xlsx](/references/optturb-turbine/optturb-fixed_pressure_loss2.xlsm) 
 
-[TD2 Examples](/examples/td2-turbine-examples/) These are the example files for [TD2](https://software.nasa.gov/software/LEW-11029-1). I have no clue where these came from. If you are adding new features, it's a nightmare to troubleshoot with any of these files. The velocity triangles may not even be right. 
+[OptTurb-multistage](https://colab.research.google.com/github/nasa/turbo-design/blob/examples/optturb-multistage/optturb-multistage.ipynb) Multi-stage example of OptTurb. This is based off a meanline spreadsheet model [OptTurb-MultiStage.xlsx](/references/optturb-multistage/multistage-fixed_pressure_loss2.xlsx) 
 
+[OptTurb-radial](https://colab.research.google.com/github/nasa/turbo-design/blob/examples/optturb-radial-turbine/) Radial Turbine Example. This example is not based on a meanline spreadsheet since radius is constantly changing. It still needs to be tested. It uses radial equilibrium to balance the massflow. 
 
 ## Building Turbine Loss Models from Correlations
 The loss correlations below were estimated using Axial steam turbines. Correlation figures are extracted and surface fitted. Each of these tutorials shows how to create and save the correlation files. 
