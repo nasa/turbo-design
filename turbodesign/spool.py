@@ -16,7 +16,7 @@ from .inlet import Inlet
 from .outlet import Outlet 
 
 class Spool:
-    blade_rows: List[BladeRow] = []
+    blade_rows:List[BladeRow]=[]
     massflow:float=0
     rpm:float = 0
     
@@ -115,8 +115,7 @@ class Spool:
         Example: 
             # Station 0 has angles of [73.1,74.2,75.4] 
             # Station 5 has angles of [69,69,69] 
-            beta =  {0: [73.1,74.2,75.4],
-                      5: [69,69,69]}
+            beta =  {0: [73.1,74.2,75.4], 5: [69,69,69]}
 
         """
         for k,v in radius.items():                                   

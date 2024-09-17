@@ -22,7 +22,7 @@ class CraigCox(LossBaseClass):
         
         if not path.exists():
             # Download data from Github 
-            url = "https://github.com/nasa/turbo-design/blob/main/references/Turbines/CraigCox/craigcox.pkl"
+            url = "https://github.com/nasa/turbo-design/raw/main/references/Turbines/CraigCox/craigcox.pkl"
             response = requests.get(url, stream=True)
             with open(path.absolute(), mode="wb") as file:
                 for chunk in response.iter_content(chunk_size=10 * 1024):

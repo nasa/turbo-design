@@ -8,7 +8,7 @@ import pathlib
 from ..losstype import LossBaseClass
 import requests
 
-class KrackerOkapuu(LossBaseClass):
+class KackerOkapuu(LossBaseClass):
 
     def __init__(self):
         """KackerOkapuu model is an improvement to the Ainley Mathieson model. 
@@ -25,7 +25,7 @@ class KrackerOkapuu(LossBaseClass):
         path = pathlib.Path(os.path.join(os.environ['TD3_HOME'],"kackerokapuu"+".pkl"))
         
         if not path.exists():
-            url = "https://github.com/nasa/turbo-design/blob/main/references/Turbines/KackerOkapuu/kackerokapuu.pkl"
+            url = "https://github.com/nasa/turbo-design/raw/main/references/Turbines/KackerOkapuu/kackerokapuu.pkl"
             response = requests.get(url, stream=True)
             with open(path.absolute(), mode="wb") as file:
                 for chunk in response.iter_content(chunk_size=10 * 1024):

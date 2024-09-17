@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "turbo-design"
-version = "1.0.5"
+version = "1.0.6"
 description = "TurboDesign is a library used to design turbines and compressors using radial equilibrium."
 authors = ["Paht Juangphanich <paht.juangphanich@nasa.gov>"]
 packages = [

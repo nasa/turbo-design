@@ -14,7 +14,7 @@ class Traupel(LossBaseClass):
         path = pathlib.Path(os.path.join(os.environ['TD3_HOME'],"traupel"+".pkl"))
 
         if not path.exists():
-            url = "https://github.com/nasa/turbo-design/blob/main/references/Turbines/Traupel/traupel.pkl"
+            url = "https://github.com/nasa/turbo-design/raw/main/references/Turbines/Traupel/traupel.pkl"
             response = requests.get(url, stream=True)
             with open(path.absolute(), mode="wb") as file:
                 for chunk in response.iter_content(chunk_size=10 * 1024):
