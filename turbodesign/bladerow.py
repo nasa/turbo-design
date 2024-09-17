@@ -8,7 +8,7 @@ from .arrayfuncs import convert_to_ndarray
 from cantera import Solution, composite
 from .coolant import Coolant
 from pyturbo.helper import line2D
-from pyturbo.aero.airfoil2D import airfoil2D
+from pyturbo.aero.airfoil2D import Airfoil2D
 from .loss import LossBaseClass
 from .passage import Passage
     
@@ -298,12 +298,12 @@ class BladeRow:
             float: camber length
         """
         if self.row_type == RowType.Stator:
-            a2d = airfoil2D(np.degrees(self.alpha1.mean()),
+            a2d = Airfoil2D(np.degrees(self.alpha1.mean()),
                         np.degrees(self.alpha2.mean()),
                         self.axial_chord,
                         self.stagger)
         else:
-            a2d = airfoil2D(np.degrees(self.beta1.mean()),
+            a2d = Airfoil2D(np.degrees(self.beta1.mean()),
                         np.degrees(self.beta2.mean()),
                         self.axial_chord,
                         self.stagger)
