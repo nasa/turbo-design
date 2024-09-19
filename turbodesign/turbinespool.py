@@ -223,7 +223,7 @@ class TurbineSpool(Spool):
             else:
                 for i in range(1,len(blade_rows)-1):
                     for j in range(self.num_streamlines):
-                        blade_rows[i].P[j] = P[j]*x0[i+self.num_streamlines+j]    # x0 size = num_streamlines -1 
+                        blade_rows[i].P[j] = P[j]*x0[(i-1)*self.num_streamlines+j]    # x0 size = num_streamlines -1 
                         
             calculate_massflows(blade_rows,True)
             for row in blade_rows[1:]:
