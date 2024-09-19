@@ -192,18 +192,44 @@ class TurbineSpool(Spool):
         """
         
         # Balance the massflow between Stages
-        def balance_massflows(x0:List[float],blade_rows:List[List[BladeRow]],P0:npt.NDArray,P:npt.NDArray):
+        def balance_massflows(x0:List[float],blade_rows:List[List[BladeRow]],P0:npt.NDArray,P:npt.NDArray,balance_mean_pressure:bool=True):
+            """Balance Massflows. 
+            
+            Steps:
+                1. Balance the mean static pressure in between the blade rows. X0 = [0.2,0.5,...] size = num_rows
+                    P = outlet static pressure 
+                    
+                2. Keep the mean 
+
+            Args:
+                x0 (List[float]): _description_
+                blade_rows (List[List[BladeRow]]): _description_
+                P0 (npt.NDArray): _description_
+                P (npt.NDArray): (1) Outlet Static Pressure. (2) 
+                balance_mean_pressure (bool, optional): _description_. Defaults to True.
+
+            Returns:
+                _type_: _description_
+            """
             total_massflow = list(); massflow_stage = list()
             stage_ids = list(set([row.stage_id for row in self.blade_rows if row.stage_id>=0])); s = 0 
-            sign = 1 
-            for j in range(self.num_streamlines):                
-                Ps_range = outlet_pressure(x0,P0[j],P[j])
+            
+            if balance_mean_pressure:
+                for j in range(self.num_streamlines):                
+                    Ps_range = outlet_pressure(x0,P0[j],P[j])
+                    for i in range(1,len(blade_rows)-1):
+                        blade_rows[i].P[j] = Ps_range[i-1]
+                blade_rows[-1].P = P
+            else:
                 for i in range(1,len(blade_rows)-1):
-                    blade_rows[i].P[j] = Ps_range[i-1]
-            blade_rows[-1].P = P
+                    for j in range(self.num_streamlines):
+                        blade_rows[i].P[j] = P[j]*x0[i+self.num_streamlines+j]    # x0 size = num_streamlines -1 
+                        
             calculate_massflows(blade_rows,True)
             for row in blade_rows[1:]:
                 total_massflow.append(row.total_massflow_no_coolant)
+                
+            sign = 1
             for s in stage_ids:
                 for row in blade_rows:
                     if row.stage_id == s and row.row_type == RowType.Rotor:
@@ -236,6 +262,14 @@ class TurbineSpool(Spool):
             adjust_streamlines(self.blade_rows[:-1],self.passage)
             self.blade_rows[-1].transfer_quantities(self.blade_rows[-2])
             self.blade_rows[-1].P = self.blade_rows[-1].get_static_pressure(self.blade_rows[-1].percent_hub_shroud)
+            P = [row.P for row in self.blade_rows] # Average static pressures
+            bounds = []; guess = []
+            for i in range(1,len(self.blade_rows)-1): # set the bounds 
+                for j in range(self.num_streamlines):
+                    bounds.append([0.8,1.2]) # vary by +- 20%
+                    guess.append(1)
+            x = fmin_slsqp(func=balance_massflows,args=(self.blade_rows[:-1],self.blade_rows[0].P0,P,False), 
+                        bounds=bounds, x0=guess,epsilon=0.001,iter=100)
             err = balance_massflows(x,self.blade_rows[:-1],self.blade_rows[0].P0,self.blade_rows[-1].P)
         if err>5E-2:
             print(f"Massflow is not convergenced error:{err}")
