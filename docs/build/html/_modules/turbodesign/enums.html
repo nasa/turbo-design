@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>turbodesign.enums &mdash; Turbo Design 1.0.6 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../_static/documentation_options.js?v=e2a723ec"></script>
+        <script src="../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html">
+            
+          </a>
+              <div class="version">
+                1.0.6
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">python API</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../modules/bladerow.html">BladeRow</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/bladerow.html#turbodesign.bladerow.BladeRow"><code class="docutils literal notranslate"><span class="pre">BladeRow</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/bladerow.html#turbodesign.bladerow.compute_gas_constants"><code class="docutils literal notranslate"><span class="pre">compute_gas_constants()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/bladerow.html#turbodesign.bladerow.interpolate_quantities"><code class="docutils literal notranslate"><span class="pre">interpolate_quantities()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/bladerow.html#turbodesign.bladerow.interpolate_streamline_radii"><code class="docutils literal notranslate"><span class="pre">interpolate_streamline_radii()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/bladerow.html#turbodesign.bladerow.sutherland"><code class="docutils literal notranslate"><span class="pre">sutherland()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules/coolant.html">Coolant</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/coolant.html#turbodesign.coolant.Coolant"><code class="docutils literal notranslate"><span class="pre">Coolant</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules/enums.html">Enums</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/enums.html#turbodesign.enums.LossType"><code class="docutils literal notranslate"><span class="pre">LossType</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/enums.html#turbodesign.enums.MassflowConstraint"><code class="docutils literal notranslate"><span class="pre">MassflowConstraint</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/enums.html#turbodesign.enums.PassageType"><code class="docutils literal notranslate"><span class="pre">PassageType</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/enums.html#turbodesign.enums.PowerType"><code class="docutils literal notranslate"><span class="pre">PowerType</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/enums.html#turbodesign.enums.RowType"><code class="docutils literal notranslate"><span class="pre">RowType</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules/inlet.html">Inlet</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/inlet.html#turbodesign.inlet.Inlet"><code class="docutils literal notranslate"><span class="pre">Inlet</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules/isentropic.html">Isentropic Equations</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/isentropic.html#turbodesign.isentropic.A_As"><code class="docutils literal notranslate"><span class="pre">A_As()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/isentropic.html#turbodesign.isentropic.FindMachP0P"><code class="docutils literal notranslate"><span class="pre">FindMachP0P()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/isentropic.html#turbodesign.isentropic.IsenP"><code class="docutils literal notranslate"><span class="pre">IsenP()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/isentropic.html#turbodesign.isentropic.IsenT"><code class="docutils literal notranslate"><span class="pre">IsenT()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/isentropic.html#turbodesign.isentropic.Massflow"><code class="docutils literal notranslate"><span class="pre">Massflow()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules/loss.html">Turbine Loss</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/loss.html#loss-type">Loss Type</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/loss.html#ainley-mathieson">Ainley Mathieson</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/loss.html#traupel">Traupel</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/loss.html#craig-cox">Craig Cox</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/loss.html#kacker-okapuu">Kacker Okapuu</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/loss.html#turbine-design-default">Turbine Design (Default)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/loss.html#fixed-pressure-loss">Fixed Pressure Loss</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/loss.html#fixed-efficiency-loss">Fixed Efficiency Loss</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules/lossinterp.html">Loss Interpolations</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/lossinterp.html#turbodesign.lossinterp.LossInterp"><code class="docutils literal notranslate"><span class="pre">LossInterp</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules/outlet.html">Outlet</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/outlet.html#turbodesign.outlet.Outlet"><code class="docutils literal notranslate"><span class="pre">Outlet</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules/passage.html">Passage</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/passage.html#turbodesign.passage.Passage"><code class="docutils literal notranslate"><span class="pre">Passage</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules/radeq.html">Radial Equilibrium</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/radeq.html#turbodesign.radeq.radeq"><code class="docutils literal notranslate"><span class="pre">radeq()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/radeq.html#turbodesign.radeq.radeq_normalized"><code class="docutils literal notranslate"><span class="pre">radeq_normalized()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules/rotor.html">Rotor</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/rotor.html#turbodesign.rotor.Rotor"><code class="docutils literal notranslate"><span class="pre">Rotor</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules/solve_radeq.html">Solve Radial Equilibrium</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/solve_radeq.html#turbodesign.solve_radeq.adjust_streamlines"><code class="docutils literal notranslate"><span class="pre">adjust_streamlines()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules/spool.html">Spool</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/spool.html#turbodesign.spool.Spool"><code class="docutils literal notranslate"><span class="pre">Spool</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules/td_math.html">Turbine Design Math</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/td_math.html#turbodesign.td_math.T0_coolant_weighted_average"><code class="docutils literal notranslate"><span class="pre">T0_coolant_weighted_average()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/td_math.html#turbodesign.td_math.compute_massflow"><code class="docutils literal notranslate"><span class="pre">compute_massflow()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/td_math.html#turbodesign.td_math.compute_power"><code class="docutils literal notranslate"><span class="pre">compute_power()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/td_math.html#turbodesign.td_math.compute_quantities"><code class="docutils literal notranslate"><span class="pre">compute_quantities()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/td_math.html#turbodesign.td_math.compute_quantities_power"><code class="docutils literal notranslate"><span class="pre">compute_quantities_power()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/td_math.html#turbodesign.td_math.inlet_calc"><code class="docutils literal notranslate"><span class="pre">inlet_calc()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/td_math.html#turbodesign.td_math.rotor_calc"><code class="docutils literal notranslate"><span class="pre">rotor_calc()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/td_math.html#turbodesign.td_math.stator_calc"><code class="docutils literal notranslate"><span class="pre">stator_calc()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules/turbinespool.html">Turbine Spool</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/turbinespool.html#turbodesign.turbinespool.TurbineSpool"><code class="docutils literal notranslate"><span class="pre">TurbineSpool</span></code></a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Turbo Design</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">turbodesign.enums</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for turbodesign.enums</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">enum</span> <span class="kn">import</span> <span class="n">Enum</span>
+
+<div class="viewcode-block" id="LossType">
+<a class="viewcode-back" href="../../modules/enums.html#turbodesign.enums.LossType">[docs]</a>
+<span class="k">class</span> <span class="nc">LossType</span><span class="p">(</span><span class="n">Enum</span><span class="p">):</span>
+    <span class="n">Pressure</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">Enthalpy</span> <span class="o">=</span> <span class="mi">2</span>
+    <span class="n">Entropy</span> <span class="o">=</span> <span class="mi">3</span></div>
+
+
+<div class="viewcode-block" id="RowType">
+<a class="viewcode-back" href="../../modules/enums.html#turbodesign.enums.RowType">[docs]</a>
+<span class="k">class</span> <span class="nc">RowType</span><span class="p">(</span><span class="n">Enum</span><span class="p">):</span>
+    <span class="n">Stator</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">Rotor</span> <span class="o">=</span> <span class="mi">2</span> 
+    <span class="n">CounterRotating</span> <span class="o">=</span> <span class="mi">2</span>
+    <span class="n">Inlet</span> <span class="o">=</span> <span class="mi">3</span>
+    <span class="n">Outlet</span> <span class="o">=</span> <span class="mi">4</span></div>
+
+
+<div class="viewcode-block" id="MassflowConstraint">
+<a class="viewcode-back" href="../../modules/enums.html#turbodesign.enums.MassflowConstraint">[docs]</a>
+<span class="k">class</span> <span class="nc">MassflowConstraint</span><span class="p">(</span><span class="n">Enum</span><span class="p">):</span>
+    <span class="n">MatchMassFlow</span><span class="p">:</span><span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span> <span class="c1"># Changes the exit angles to match the massflow</span>
+    <span class="n">BalanceMassFlow</span><span class="p">:</span><span class="nb">int</span> <span class="o">=</span> <span class="mi">2</span> <span class="c1"># Keeps the exit angle but balances the massflow between the stages as best it can. This will affect the static pressure at the stage exit</span></div>
+
+
+<div class="viewcode-block" id="PowerType">
+<a class="viewcode-back" href="../../modules/enums.html#turbodesign.enums.PowerType">[docs]</a>
+<span class="k">class</span> <span class="nc">PowerType</span><span class="p">(</span><span class="n">Enum</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;The code for BladeRow will assume a PowerType automatically depending on what you specify. If you specify the blade row to have P0_P which is the stator inlet total pressure to rotor exit static pressure then that will be used to calculate all the quantities.</span>
+<span class="sd">    </span>
+<span class="sd">    Or if you specify the power for the blade row, the Total Temperature at Rotor Exit will change. </span>
+<span class="sd">    </span>
+<span class="sd">    P0_P: Assumes a Total-Static Pressure Ratio. Using this method will not allow you to match a particular massflow </span>
+<span class="sd">    </span>
+<span class="sd">    T0: Total Temperature at exit is specified based on power required</span>
+<span class="sd">    </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># </span>
+    <span class="n">P0_P</span><span class="p">:</span><span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span> 
+    <span class="n">T0</span><span class="p">:</span><span class="nb">int</span> <span class="o">=</span> <span class="mi">2</span> </div>
+
+
+
+<div class="viewcode-block" id="PassageType">
+<a class="viewcode-back" href="../../modules/enums.html#turbodesign.enums.PassageType">[docs]</a>
+<span class="k">class</span> <span class="nc">PassageType</span><span class="p">(</span><span class="n">Enum</span><span class="p">):</span>
+    <span class="n">Centrifugal</span><span class="p">:</span><span class="nb">int</span><span class="o">=</span><span class="mi">0</span>
+    <span class="n">Axial</span><span class="p">:</span><span class="nb">int</span><span class="o">=</span><span class="mi">1</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Paht Juangphanich.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

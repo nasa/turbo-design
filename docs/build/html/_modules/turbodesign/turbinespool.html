@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>turbodesign.turbinespool &mdash; Turbo Design 1.0.6 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../_static/documentation_options.js?v=e2a723ec"></script>
+        <script src="../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html">
+            
+          </a>
+              <div class="version">
+                1.0.6
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">python API</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../modules/bladerow.html">BladeRow</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/bladerow.html#turbodesign.bladerow.BladeRow"><code class="docutils literal notranslate"><span class="pre">BladeRow</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/bladerow.html#turbodesign.bladerow.compute_gas_constants"><code class="docutils literal notranslate"><span class="pre">compute_gas_constants()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/bladerow.html#turbodesign.bladerow.interpolate_quantities"><code class="docutils literal notranslate"><span class="pre">interpolate_quantities()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/bladerow.html#turbodesign.bladerow.interpolate_streamline_radii"><code class="docutils literal notranslate"><span class="pre">interpolate_streamline_radii()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/bladerow.html#turbodesign.bladerow.sutherland"><code class="docutils literal notranslate"><span class="pre">sutherland()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules/coolant.html">Coolant</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/coolant.html#turbodesign.coolant.Coolant"><code class="docutils literal notranslate"><span class="pre">Coolant</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules/enums.html">Enums</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/enums.html#turbodesign.enums.LossType"><code class="docutils literal notranslate"><span class="pre">LossType</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/enums.html#turbodesign.enums.MassflowConstraint"><code class="docutils literal notranslate"><span class="pre">MassflowConstraint</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/enums.html#turbodesign.enums.PassageType"><code class="docutils literal notranslate"><span class="pre">PassageType</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/enums.html#turbodesign.enums.PowerType"><code class="docutils literal notranslate"><span class="pre">PowerType</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/enums.html#turbodesign.enums.RowType"><code class="docutils literal notranslate"><span class="pre">RowType</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules/inlet.html">Inlet</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/inlet.html#turbodesign.inlet.Inlet"><code class="docutils literal notranslate"><span class="pre">Inlet</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules/isentropic.html">Isentropic Equations</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/isentropic.html#turbodesign.isentropic.A_As"><code class="docutils literal notranslate"><span class="pre">A_As()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/isentropic.html#turbodesign.isentropic.FindMachP0P"><code class="docutils literal notranslate"><span class="pre">FindMachP0P()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/isentropic.html#turbodesign.isentropic.IsenP"><code class="docutils literal notranslate"><span class="pre">IsenP()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/isentropic.html#turbodesign.isentropic.IsenT"><code class="docutils literal notranslate"><span class="pre">IsenT()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/isentropic.html#turbodesign.isentropic.Massflow"><code class="docutils literal notranslate"><span class="pre">Massflow()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules/loss.html">Turbine Loss</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/loss.html#loss-type">Loss Type</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/loss.html#ainley-mathieson">Ainley Mathieson</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/loss.html#traupel">Traupel</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/loss.html#craig-cox">Craig Cox</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/loss.html#kacker-okapuu">Kacker Okapuu</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/loss.html#turbine-design-default">Turbine Design (Default)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/loss.html#fixed-pressure-loss">Fixed Pressure Loss</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/loss.html#fixed-efficiency-loss">Fixed Efficiency Loss</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules/lossinterp.html">Loss Interpolations</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/lossinterp.html#turbodesign.lossinterp.LossInterp"><code class="docutils literal notranslate"><span class="pre">LossInterp</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules/outlet.html">Outlet</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/outlet.html#turbodesign.outlet.Outlet"><code class="docutils literal notranslate"><span class="pre">Outlet</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules/passage.html">Passage</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/passage.html#turbodesign.passage.Passage"><code class="docutils literal notranslate"><span class="pre">Passage</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules/radeq.html">Radial Equilibrium</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/radeq.html#turbodesign.radeq.radeq"><code class="docutils literal notranslate"><span class="pre">radeq()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/radeq.html#turbodesign.radeq.radeq_normalized"><code class="docutils literal notranslate"><span class="pre">radeq_normalized()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules/rotor.html">Rotor</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/rotor.html#turbodesign.rotor.Rotor"><code class="docutils literal notranslate"><span class="pre">Rotor</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules/solve_radeq.html">Solve Radial Equilibrium</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/solve_radeq.html#turbodesign.solve_radeq.adjust_streamlines"><code class="docutils literal notranslate"><span class="pre">adjust_streamlines()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules/spool.html">Spool</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/spool.html#turbodesign.spool.Spool"><code class="docutils literal notranslate"><span class="pre">Spool</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules/td_math.html">Turbine Design Math</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/td_math.html#turbodesign.td_math.T0_coolant_weighted_average"><code class="docutils literal notranslate"><span class="pre">T0_coolant_weighted_average()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/td_math.html#turbodesign.td_math.compute_massflow"><code class="docutils literal notranslate"><span class="pre">compute_massflow()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/td_math.html#turbodesign.td_math.compute_power"><code class="docutils literal notranslate"><span class="pre">compute_power()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/td_math.html#turbodesign.td_math.compute_quantities"><code class="docutils literal notranslate"><span class="pre">compute_quantities()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/td_math.html#turbodesign.td_math.compute_quantities_power"><code class="docutils literal notranslate"><span class="pre">compute_quantities_power()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/td_math.html#turbodesign.td_math.inlet_calc"><code class="docutils literal notranslate"><span class="pre">inlet_calc()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/td_math.html#turbodesign.td_math.rotor_calc"><code class="docutils literal notranslate"><span class="pre">rotor_calc()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/td_math.html#turbodesign.td_math.stator_calc"><code class="docutils literal notranslate"><span class="pre">stator_calc()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules/turbinespool.html">Turbine Spool</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/turbinespool.html#turbodesign.turbinespool.TurbineSpool"><code class="docutils literal notranslate"><span class="pre">TurbineSpool</span></code></a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Turbo Design</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">turbodesign.turbinespool</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for turbodesign.turbinespool</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span>
+<span class="kn">from</span> <span class="nn">cantera.composite</span> <span class="kn">import</span> <span class="n">Solution</span>
+<span class="kn">from</span> <span class="nn">.bladerow</span> <span class="kn">import</span> <span class="n">BladeRow</span><span class="p">,</span> <span class="n">interpolate_streamline_radii</span>
+<span class="kn">from</span> <span class="nn">.enums</span> <span class="kn">import</span> <span class="n">RowType</span><span class="p">,</span> <span class="n">MassflowConstraint</span><span class="p">,</span> <span class="n">LossType</span><span class="p">,</span> <span class="n">PassageType</span>
+<span class="kn">from</span> <span class="nn">.spool</span> <span class="kn">import</span> <span class="n">Spool</span>
+<span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">from</span> <span class="nn">.passage</span> <span class="kn">import</span> <span class="n">Passage</span>
+<span class="kn">from</span> <span class="nn">scipy.interpolate</span> <span class="kn">import</span> <span class="n">interp1d</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">numpy.typing</span> <span class="k">as</span> <span class="nn">npt</span>
+<span class="kn">from</span> <span class="nn">.td_math</span> <span class="kn">import</span> <span class="n">inlet_calc</span><span class="p">,</span><span class="n">rotor_calc</span><span class="p">,</span> <span class="n">stator_calc</span><span class="p">,</span> <span class="n">compute_massflow</span><span class="p">,</span> <span class="n">compute_power</span><span class="p">,</span> <span class="n">compute_gas_constants</span>
+<span class="kn">from</span> <span class="nn">.solve_radeq</span> <span class="kn">import</span> <span class="n">adjust_streamlines</span><span class="p">,</span> <span class="n">radeq</span>
+<span class="kn">from</span> <span class="nn">scipy.optimize</span> <span class="kn">import</span> <span class="n">minimize_scalar</span><span class="p">,</span> <span class="n">minimize</span><span class="p">,</span> <span class="n">fmin_slsqp</span>
+
+
+<div class="viewcode-block" id="TurbineSpool">
+<a class="viewcode-back" href="../../modules/turbinespool.html#turbodesign.turbinespool.TurbineSpool">[docs]</a>
+<span class="k">class</span> <span class="nc">TurbineSpool</span><span class="p">(</span><span class="n">Spool</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">passage</span><span class="p">:</span><span class="n">Passage</span><span class="p">,</span>
+                 <span class="n">massflow</span><span class="p">:</span><span class="nb">float</span><span class="p">,</span><span class="n">rows</span><span class="p">:</span><span class="n">List</span><span class="p">[</span><span class="n">BladeRow</span><span class="p">],</span>
+                 <span class="n">num_streamlines</span><span class="p">:</span><span class="nb">int</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+                 <span class="n">fluid</span><span class="p">:</span><span class="n">Solution</span><span class="o">=</span><span class="n">Solution</span><span class="p">(</span><span class="s1">&#39;air.yaml&#39;</span><span class="p">),</span>
+                 <span class="n">rpm</span><span class="p">:</span><span class="nb">float</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span>
+                <span class="n">massflow_constraint</span><span class="p">:</span><span class="n">MassflowConstraint</span><span class="o">=</span><span class="n">MassflowConstraint</span><span class="o">.</span><span class="n">MatchMassFlow</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initializes a Turbine Spool</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            passage (Passage): Passage defining hub and shroud</span>
+<span class="sd">            massflow (float): massflow at spool inlet </span>
+<span class="sd">            rows (List[BladeRow], optional): List of blade rows. Defaults to List[BladeRow].</span>
+<span class="sd">            num_streamlines (int, optional): number of streamlines. Defaults to 3.</span>
+<span class="sd">            fluid (ct.Solution, optional): cantera gas solution. Defaults to ct.Solution(&#39;air.yaml&#39;).</span>
+<span class="sd">            rpm (float, optional): RPM for the entire spool Optional, you can also set rpm of the blade rows individually. Defaults to -1.</span>
+<span class="sd">            massflow_constraint (MassflowConstraint, optional): MatchMassflow - Matches the massflow defined in the spool. BalanceMassflow - Balances the massflow between BladeRows, matches the lowest massflow.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">passage</span><span class="p">,</span> <span class="n">massflow</span><span class="p">,</span> <span class="n">rows</span><span class="p">,</span><span class="n">num_streamlines</span><span class="p">,</span> <span class="n">fluid</span><span class="p">,</span> <span class="n">rpm</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">massflow_constraint</span> <span class="o">=</span> <span class="n">massflow_constraint</span>
+        <span class="k">pass</span>
+
+<div class="viewcode-block" id="TurbineSpool.initialize_quantities">
+<a class="viewcode-back" href="../../modules/turbinespool.html#turbodesign.turbinespool.TurbineSpool.initialize_quantities">[docs]</a>
+    <span class="k">def</span> <span class="nf">initialize_quantities</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initializes the massflow throughout the rows </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Massflow from inlet already defined</span>
+        
+        <span class="c1"># Inlet</span>
+        <span class="n">W0</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">massflow</span>
+        <span class="n">inlet</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">blade_rows</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">blade_rows</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">row_type</span> <span class="o">==</span> <span class="n">RowType</span><span class="o">.</span><span class="n">Inlet</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">blade_rows</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">massflow</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">num_streamlines</span><span class="p">)</span><span class="o">*</span><span class="n">W0</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">blade_rows</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">total_massflow</span> <span class="o">=</span> <span class="n">W0</span> 
+            <span class="bp">self</span><span class="o">.</span><span class="n">blade_rows</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">total_massflow_no_coolant</span> <span class="o">=</span> <span class="n">W0</span> 
+            
+            <span class="n">interpolate_streamline_radii</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">blade_rows</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="bp">self</span><span class="o">.</span><span class="n">passage</span><span class="p">)</span>
+
+            <span class="c1"># Set the gas to total values for now             </span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">blade_rows</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">fluid</span><span class="o">.</span><span class="n">TP</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">blade_rows</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">T0</span><span class="o">.</span><span class="n">mean</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">blade_rows</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">P0</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">blade_rows</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">Cp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">blade_rows</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">fluid</span><span class="o">.</span><span class="n">cp</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">blade_rows</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">Cv</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">blade_rows</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">fluid</span><span class="o">.</span><span class="n">cv</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">blade_rows</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">R</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">blade_rows</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">Cp</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">blade_rows</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">Cv</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">blade_rows</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">gamma</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">blade_rows</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">Cp</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">blade_rows</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">Cv</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">blade_rows</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">rho</span><span class="p">[:]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">blade_rows</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">fluid</span><span class="o">.</span><span class="n">density</span>
+            <span class="n">inlet_calc</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">blade_rows</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        
+        <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">blade_rows</span><span class="p">:</span>
+            <span class="n">interpolate_streamline_radii</span><span class="p">(</span><span class="n">row</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">passage</span><span class="p">)</span>
+
+        <span class="n">outlet</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">blade_rows</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_streamlines</span><span class="p">):</span>
+            <span class="n">P0</span> <span class="o">=</span> <span class="n">inlet</span><span class="o">.</span><span class="n">get_total_pressure</span><span class="p">(</span><span class="n">inlet</span><span class="o">.</span><span class="n">percent_hub_shroud</span><span class="p">[</span><span class="n">j</span><span class="p">])</span>
+            <span class="n">percents</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">blade_rows</span><span class="p">)</span><span class="o">-</span><span class="mi">2</span><span class="p">))</span> <span class="o">+</span> <span class="mf">0.3</span>
+            <span class="n">percents</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="n">Ps_range</span> <span class="o">=</span> <span class="n">outlet_pressure</span><span class="p">(</span><span class="n">percents</span><span class="o">=</span><span class="n">percents</span><span class="p">,</span><span class="n">inletP0</span><span class="o">=</span><span class="n">inlet</span><span class="o">.</span><span class="n">P0</span><span class="p">[</span><span class="n">j</span><span class="p">],</span><span class="n">outletP</span><span class="o">=</span><span class="n">outlet</span><span class="o">.</span><span class="n">P</span><span class="p">[</span><span class="n">j</span><span class="p">])</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">blade_rows</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">blade_rows</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">P</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">Ps_range</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            
+        <span class="c1"># Pass T0 and P0 to all the other blade_rows</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">blade_rows</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+            <span class="n">upstream</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">blade_rows</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="c1"># Inlet conditions solved before this step</span>
+            <span class="k">if</span> <span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="o">&lt;</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">blade_rows</span><span class="p">):</span>
+                <span class="n">downstream</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">blade_rows</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">downstream</span> <span class="o">=</span> <span class="kc">None</span> 
+            
+            <span class="n">row</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">blade_rows</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">coolant</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">):</span>
+                <span class="n">T0c</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">blade_rows</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">coolant</span><span class="o">.</span><span class="n">fluid</span><span class="o">.</span><span class="n">T</span>
+                <span class="n">P0c</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">blade_rows</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">coolant</span><span class="o">.</span><span class="n">fluid</span><span class="o">.</span><span class="n">P</span>
+                <span class="n">W0c</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">blade_rows</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">coolant</span><span class="o">.</span><span class="n">massflow_percentage</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">massflow</span>
+                <span class="n">Cpc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">blade_rows</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">coolant</span><span class="o">.</span><span class="n">fluid</span><span class="o">.</span><span class="n">cp</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">T0c</span> <span class="o">=</span> <span class="mi">100</span>
+                <span class="n">P0c</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="n">W0c</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="n">Cpc</span> <span class="o">=</span> <span class="mi">0</span>
+            
+            <span class="n">T0</span> <span class="o">=</span> <span class="n">upstream</span><span class="o">.</span><span class="n">T0</span>
+            <span class="n">P0</span> <span class="o">=</span> <span class="n">upstream</span><span class="o">.</span><span class="n">P0</span>
+            <span class="n">Cp</span> <span class="o">=</span> <span class="n">upstream</span><span class="o">.</span><span class="n">Cp</span>
+            
+            <span class="n">T0</span> <span class="o">=</span> <span class="p">(</span><span class="n">W0</span><span class="o">*</span><span class="n">Cp</span><span class="o">*</span><span class="n">T0</span> <span class="o">+</span> <span class="n">W0c</span><span class="o">*</span><span class="n">Cpc</span><span class="o">*</span><span class="n">T0c</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="n">Cpc</span> <span class="o">*</span> <span class="n">W0c</span> <span class="o">+</span> <span class="n">Cp</span><span class="o">*</span><span class="n">W0</span><span class="p">)</span>
+            <span class="n">P0</span> <span class="o">=</span> <span class="p">(</span><span class="n">W0</span><span class="o">*</span><span class="n">Cp</span><span class="o">*</span><span class="n">P0</span> <span class="o">+</span> <span class="n">W0c</span><span class="o">*</span><span class="n">Cpc</span><span class="o">*</span><span class="n">P0c</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="n">Cpc</span> <span class="o">*</span> <span class="n">W0c</span> <span class="o">+</span> <span class="n">Cp</span><span class="o">*</span><span class="n">W0</span><span class="p">)</span>   
+            <span class="n">Cp</span> <span class="o">=</span> <span class="p">(</span><span class="n">W0</span><span class="o">*</span><span class="n">Cp</span> <span class="o">+</span> <span class="n">W0c</span><span class="o">*</span><span class="n">Cpc</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="n">W0c</span> <span class="o">+</span> <span class="n">W0</span><span class="p">)</span>                   <span class="c1"># Weighted </span>
+            
+            <span class="k">if</span> <span class="n">row</span><span class="o">.</span><span class="n">row_type</span> <span class="o">==</span> <span class="n">RowType</span><span class="o">.</span><span class="n">Stator</span><span class="p">:</span>
+                <span class="n">T0</span> <span class="o">=</span> <span class="n">upstream</span><span class="o">.</span><span class="n">T0</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">T0</span> <span class="o">=</span> <span class="n">upstream</span><span class="o">.</span><span class="n">T0</span> <span class="o">-</span> <span class="n">row</span><span class="o">.</span><span class="n">power</span> <span class="o">/</span> <span class="p">(</span><span class="n">Cp</span><span class="o">*</span><span class="p">(</span><span class="n">W0</span> <span class="o">+</span> <span class="n">W0c</span><span class="p">))</span>
+            
+            <span class="n">W0</span> <span class="o">+=</span> <span class="n">W0c</span>
+            <span class="n">row</span><span class="o">.</span><span class="n">T0</span> <span class="o">=</span> <span class="n">T0</span>
+            <span class="n">row</span><span class="o">.</span><span class="n">P0</span> <span class="o">=</span> <span class="n">P0</span>
+            <span class="n">row</span><span class="o">.</span><span class="n">Cp</span> <span class="o">=</span> <span class="n">Cp</span>
+            <span class="n">row</span><span class="o">.</span><span class="n">total_massflow</span> <span class="o">=</span> <span class="n">W0</span>
+            <span class="n">row</span><span class="o">.</span><span class="n">massflow</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">num_streamlines</span><span class="p">)</span><span class="o">*</span><span class="n">row</span><span class="o">.</span><span class="n">total_massflow</span>
+            <span class="c1"># Pass Quantities: rho, P0, T0</span>
+            
+            <span class="n">row</span><span class="o">.</span><span class="n">rho</span> <span class="o">=</span> <span class="n">upstream</span><span class="o">.</span><span class="n">rho</span>
+            <span class="n">row</span><span class="o">.</span><span class="n">gamma</span> <span class="o">=</span> <span class="n">upstream</span><span class="o">.</span><span class="n">gamma</span>
+            <span class="n">row</span><span class="o">.</span><span class="n">R</span> <span class="o">=</span> <span class="n">upstream</span><span class="o">.</span><span class="n">R</span>
+            
+            <span class="k">if</span> <span class="n">row</span><span class="o">.</span><span class="n">row_type</span> <span class="o">==</span> <span class="n">RowType</span><span class="o">.</span><span class="n">Stator</span><span class="p">:</span>
+                <span class="n">stator_calc</span><span class="p">(</span><span class="n">row</span><span class="p">,</span><span class="n">upstream</span><span class="p">,</span><span class="n">downstream</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">row</span><span class="o">.</span><span class="n">row_type</span> <span class="o">==</span> <span class="n">RowType</span><span class="o">.</span><span class="n">Rotor</span><span class="p">:</span>
+                <span class="n">rotor_calc</span><span class="p">(</span><span class="n">row</span><span class="p">,</span><span class="n">upstream</span><span class="p">)</span>
+                <span class="n">compute_massflow</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>
+                <span class="n">compute_power</span><span class="p">(</span><span class="n">row</span><span class="p">,</span><span class="n">upstream</span><span class="p">)</span>        </div>
+
+    
+<div class="viewcode-block" id="TurbineSpool.solve">
+<a class="viewcode-back" href="../../modules/turbinespool.html#turbodesign.turbinespool.TurbineSpool.solve">[docs]</a>
+    <span class="k">def</span> <span class="nf">solve</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            Solve for the exit flow angles to match the massflow distribution at the stage exit</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">initialize_streamlines</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">initialize_quantities</span><span class="p">()</span>
+        
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">massflow_constraint</span> <span class="o">==</span><span class="n">MassflowConstraint</span><span class="o">.</span><span class="n">MatchMassFlow</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__match_massflow</span><span class="p">()</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">massflow_constraint</span> <span class="o">==</span> <span class="n">MassflowConstraint</span><span class="o">.</span><span class="n">BalanceMassFlow</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__balance_massflow</span><span class="p">()</span></div>
+
+    
+    
+    <span class="k">def</span> <span class="nf">__match_massflow</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Matches the massflow between streamtubes by changing exit angles. Doesn&#39;t use radial equilibrium.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">):</span>
+            <span class="c1"># Step 1: Solve a blade row for exit angle to maintain massflow</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">blade_rows</span><span class="p">)):</span>
+                <span class="n">row</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">blade_rows</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+                <span class="c1"># Upstream Row</span>
+                <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">upstream</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">blade_rows</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">upstream</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">blade_rows</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">i</span><span class="o">&lt;</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">blade_rows</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+                    <span class="n">downstream</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">blade_rows</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">downstream</span> <span class="o">=</span> <span class="kc">None</span>
+                
+                <span class="k">if</span> <span class="n">row</span><span class="o">.</span><span class="n">row_type</span> <span class="o">==</span> <span class="n">RowType</span><span class="o">.</span><span class="n">Stator</span><span class="p">:</span>
+                    <span class="n">bounds</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">80</span><span class="p">]</span>
+                <span class="k">elif</span> <span class="n">row</span><span class="o">.</span><span class="n">row_type</span> <span class="o">==</span> <span class="n">RowType</span><span class="o">.</span><span class="n">Rotor</span><span class="p">:</span>
+                    <span class="n">bounds</span> <span class="o">=</span> <span class="p">[</span><span class="o">-</span><span class="mi">80</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">row</span><span class="o">.</span><span class="n">row_type</span> <span class="o">!=</span> <span class="n">RowType</span><span class="o">.</span><span class="n">Inlet</span><span class="p">:</span>
+                    <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">num_streamlines</span><span class="p">):</span>
+                        <span class="n">res</span> <span class="o">=</span> <span class="n">minimize_scalar</span><span class="p">(</span><span class="n">massflow_loss_function</span><span class="p">,</span> <span class="n">bounds</span><span class="o">=</span><span class="n">bounds</span><span class="p">,</span><span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">j</span><span class="p">,</span><span class="n">row</span><span class="p">,</span><span class="n">upstream</span><span class="p">,</span><span class="n">downstream</span><span class="p">),</span><span class="n">tol</span><span class="o">=</span><span class="mf">1E-2</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="n">row</span><span class="o">.</span><span class="n">row_type</span> <span class="o">==</span> <span class="n">RowType</span><span class="o">.</span><span class="n">Rotor</span><span class="p">:</span>
+                            <span class="n">row</span><span class="o">.</span><span class="n">beta2</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">res</span><span class="o">.</span><span class="n">x</span><span class="p">)</span>
+                             <span class="c1"># Initialize the value at the hub to not upset the mean</span>
+                            <span class="n">row</span><span class="o">.</span><span class="n">beta2</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span><span class="o">/</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">beta2</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="n">row</span><span class="o">.</span><span class="n">beta2</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+                        <span class="k">elif</span> <span class="n">row</span><span class="o">.</span><span class="n">row_type</span> <span class="o">==</span> <span class="n">RowType</span><span class="o">.</span><span class="n">Stator</span><span class="p">:</span>
+                            <span class="n">row</span><span class="o">.</span><span class="n">alpha2</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">res</span><span class="o">.</span><span class="n">x</span><span class="p">)</span>
+                            <span class="n">row</span><span class="o">.</span><span class="n">alpha2</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span><span class="o">/</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">alpha2</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="n">row</span><span class="o">.</span><span class="n">alpha2</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+                    <span class="n">upstream</span> <span class="o">=</span> <span class="n">compute_gas_constants</span><span class="p">(</span><span class="n">upstream</span><span class="p">)</span>
+                    <span class="n">row</span> <span class="o">=</span> <span class="n">compute_gas_constants</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>
+                    
+                    
+            <span class="c1"># Step 3: Adjust streamlines to evenly divide massflow</span>
+            <span class="n">adjust_streamlines</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">blade_rows</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">passage</span><span class="p">)</span>
+            
+    <span class="k">def</span> <span class="nf">__balance_massflow</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Balances the massflow between rows. Use radial equilibrium.</span>
+
+<span class="sd">            Types of stages:</span>
+<span class="sd">            1. Stator - Rotor         | Stator - Rotor</span>
+<span class="sd">            2. Rotor                  | Stator - Rotor | Stator - Rotor</span>
+<span class="sd">            3. Stator - Rotor         | CounterRotating | Stator - Rotor</span>
+<span class="sd">            4. Rotor-Counter Rotating | Stator - Rotor</span>
+<span class="sd">            5. Counter Rotating - Rotor | Stator - Rotor </span>
+<span class="sd">            </span>
+<span class="sd">            Steps:</span>
+<span class="sd">                1. Split the blade rows into stages stator-rotor pairs or rotor rotor or rotor </span>
+<span class="sd">                2. Change degree of reaction to match the total massflow</span>
+<span class="sd">                3. Adjust the streamlines for each blade row to balance the massflow</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        
+        <span class="c1"># Balance the massflow between Stages</span>
+        <span class="k">def</span> <span class="nf">balance_massflows</span><span class="p">(</span><span class="n">x0</span><span class="p">:</span><span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span><span class="n">blade_rows</span><span class="p">:</span><span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">BladeRow</span><span class="p">]],</span><span class="n">P0</span><span class="p">:</span><span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">,</span><span class="n">P</span><span class="p">:</span><span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">):</span>
+            <span class="n">total_massflow</span> <span class="o">=</span> <span class="nb">list</span><span class="p">();</span> <span class="n">massflow_stage</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+            <span class="n">stage_ids</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">([</span><span class="n">row</span><span class="o">.</span><span class="n">stage_id</span> <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">blade_rows</span> <span class="k">if</span> <span class="n">row</span><span class="o">.</span><span class="n">stage_id</span><span class="o">&gt;=</span><span class="mi">0</span><span class="p">]));</span> <span class="n">s</span> <span class="o">=</span> <span class="mi">0</span> 
+            <span class="n">sign</span> <span class="o">=</span> <span class="mi">1</span> 
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_streamlines</span><span class="p">):</span>                
+                <span class="n">Ps_range</span> <span class="o">=</span> <span class="n">outlet_pressure</span><span class="p">(</span><span class="n">x0</span><span class="p">,</span><span class="n">P0</span><span class="p">[</span><span class="n">j</span><span class="p">],</span><span class="n">P</span><span class="p">[</span><span class="n">j</span><span class="p">])</span>
+                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">blade_rows</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+                    <span class="n">blade_rows</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">P</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">Ps_range</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">blade_rows</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">P</span> <span class="o">=</span> <span class="n">P</span>
+            <span class="n">calculate_massflows</span><span class="p">(</span><span class="n">blade_rows</span><span class="p">,</span><span class="kc">True</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">blade_rows</span><span class="p">[</span><span class="mi">1</span><span class="p">:]:</span>
+                <span class="n">total_massflow</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">total_massflow_no_coolant</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">stage_ids</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">blade_rows</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">row</span><span class="o">.</span><span class="n">stage_id</span> <span class="o">==</span> <span class="n">s</span> <span class="ow">and</span> <span class="n">row</span><span class="o">.</span><span class="n">row_type</span> <span class="o">==</span> <span class="n">RowType</span><span class="o">.</span><span class="n">Rotor</span><span class="p">:</span>
+                        <span class="n">massflow_stage</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">sign</span><span class="o">*</span><span class="n">row</span><span class="o">.</span><span class="n">total_massflow_no_coolant</span><span class="p">)</span>
+                        <span class="n">sign</span><span class="o">*=-</span><span class="mi">1</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">stage_ids</span><span class="p">)</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">massflow_stage</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">massflow_stage</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="n">sign</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">x0</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">total_massflow</span><span class="p">)</span><span class="o">*</span><span class="mi">2</span> <span class="c1"># + abs(sum(massflow_stage))  # Equation 28</span>
+        
+        <span class="c1"># Break apart the rows to stages</span>
+        <span class="n">outlet_P</span><span class="o">=</span><span class="nb">list</span><span class="p">();</span> <span class="n">outlet_P_guess</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+        
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">blade_rows</span><span class="p">)</span><span class="o">-</span><span class="mi">2</span><span class="p">):</span>
+            <span class="n">outlet_P</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">blade_rows</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">inlet_to_outlet_pratio</span><span class="p">)</span>
+            <span class="n">outlet_P_guess</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">blade_rows</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">inlet_to_outlet_pratio</span><span class="p">))</span>
+        
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">outlet_P</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">res1</span> <span class="o">=</span> <span class="n">minimize_scalar</span><span class="p">(</span><span class="n">fun</span><span class="o">=</span><span class="n">balance_massflows</span><span class="p">,</span><span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">blade_rows</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span><span class="bp">self</span><span class="o">.</span><span class="n">blade_rows</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">P0</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">blade_rows</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">P</span><span class="p">),</span> 
+                        <span class="n">bounds</span><span class="o">=</span><span class="n">outlet_P</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">tol</span><span class="o">=</span><span class="mf">0.001</span><span class="p">,</span><span class="n">options</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;disp&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">})</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="n">res1</span><span class="o">.</span><span class="n">x</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="n">fmin_slsqp</span><span class="p">(</span><span class="n">func</span><span class="o">=</span><span class="n">balance_massflows</span><span class="p">,</span><span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">blade_rows</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span><span class="bp">self</span><span class="o">.</span><span class="n">blade_rows</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">P0</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">blade_rows</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">P</span><span class="p">),</span> 
+                        <span class="n">bounds</span><span class="o">=</span><span class="n">outlet_P</span><span class="p">,</span> <span class="n">x0</span><span class="o">=</span><span class="n">outlet_P_guess</span><span class="p">,</span><span class="n">epsilon</span><span class="o">=</span><span class="mf">0.001</span><span class="p">,</span><span class="nb">iter</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span> <span class="c1"># ,tol=0.001,options={&#39;disp&#39;: True})</span>
+        
+        <span class="c1"># Adjust the inlet: Set the massflow</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">blade_rows</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">massflow</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">num_streamlines</span><span class="p">)</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">blade_rows</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">total_massflow_no_coolant</span>
+        <span class="n">inlet_calc</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">blade_rows</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="c1"># adjust the inlet to match massflow </span>
+        <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">):</span>
+            <span class="n">adjust_streamlines</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">blade_rows</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span><span class="bp">self</span><span class="o">.</span><span class="n">passage</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">blade_rows</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">transfer_quantities</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">blade_rows</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">blade_rows</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">P</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">blade_rows</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">get_static_pressure</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">blade_rows</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">percent_hub_shroud</span><span class="p">)</span>
+            <span class="n">err</span> <span class="o">=</span> <span class="n">balance_massflows</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">blade_rows</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span><span class="bp">self</span><span class="o">.</span><span class="n">blade_rows</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">P0</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">blade_rows</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">P</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">err</span><span class="o">&gt;</span><span class="mf">5E-2</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Massflow is not convergenced error:</span><span class="si">{</span><span class="n">err</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span> 
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Massflow converged to less than 0.05kg/s error:</span><span class="si">{</span><span class="n">err</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    
+<div class="viewcode-block" id="TurbineSpool.export_properties">
+<a class="viewcode-back" href="../../modules/turbinespool.html#turbodesign.turbinespool.TurbineSpool.export_properties">[docs]</a>
+    <span class="k">def</span> <span class="nf">export_properties</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">filename</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="s2">&quot;turbine_spool.json&quot;</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Export the spool object to json </span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            filename (str, optional): name of export file. Defaults to &quot;spool.json&quot;.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">blade_rows</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+        <span class="n">degree_of_reaction</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span> 
+        <span class="n">total_total_efficiency</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span> 
+        <span class="n">total_static_efficiency</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+        <span class="n">stage_loading</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span> 
+        <span class="n">euler_power</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span> 
+        
+        <span class="n">x_streamline</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">num_streamlines</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">blade_rows</span><span class="p">)))</span>
+        <span class="n">r_streamline</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">num_streamlines</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">blade_rows</span><span class="p">)))</span>
+        <span class="n">massflow</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">indx</span><span class="p">,</span><span class="n">row</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">blade_rows</span><span class="p">):</span>
+            <span class="n">blade_rows</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">to_dict</span><span class="p">())</span> <span class="c1"># Appending data </span>
+            <span class="k">if</span> <span class="n">row</span><span class="o">.</span><span class="n">row_type</span> <span class="o">==</span> <span class="n">RowType</span><span class="o">.</span><span class="n">Rotor</span><span class="p">:</span>
+                <span class="c1"># Calculation for these are specific to Turbines </span>
+                <span class="n">degree_of_reaction</span><span class="o">.</span><span class="n">append</span><span class="p">(((</span><span class="bp">self</span><span class="o">.</span><span class="n">blade_rows</span><span class="p">[</span><span class="n">indx</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">P</span><span class="o">-</span> <span class="n">row</span><span class="o">.</span><span class="n">P</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">blade_rows</span><span class="p">[</span><span class="n">indx</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">P</span><span class="o">-</span><span class="n">row</span><span class="o">.</span><span class="n">P</span><span class="p">))</span><span class="o">.</span><span class="n">mean</span><span class="p">())</span>
+                
+                <span class="n">total_total_efficiency</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">eta_total</span><span class="p">)</span>
+                <span class="n">total_static_efficiency</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">eta_static</span><span class="p">)</span>
+
+                <span class="n">stage_loading</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">stage_loading</span><span class="p">)</span>
+                <span class="n">euler_power</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">euler_power</span><span class="p">)</span>
+            
+            <span class="k">if</span> <span class="n">row</span><span class="o">.</span><span class="n">row_type</span><span class="o">!=</span><span class="n">RowType</span><span class="o">.</span><span class="n">Inlet</span> <span class="ow">and</span> <span class="n">row</span><span class="o">.</span><span class="n">row_type</span><span class="o">!=</span><span class="n">RowType</span><span class="o">.</span><span class="n">Outlet</span><span class="p">:</span>
+                <span class="n">massflow</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">massflow</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+            
+            <span class="k">for</span> <span class="n">j</span><span class="p">,</span><span class="n">p</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">percent_hub_shroud</span><span class="p">):</span>
+                <span class="n">t</span><span class="p">,</span><span class="n">x</span><span class="p">,</span><span class="n">r</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">passage</span><span class="o">.</span><span class="n">get_streamline</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+                <span class="n">x_streamline</span><span class="p">[</span><span class="n">j</span><span class="p">,</span><span class="n">indx</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">interp1d</span><span class="p">(</span><span class="n">t</span><span class="p">,</span><span class="n">x</span><span class="p">)(</span><span class="n">row</span><span class="o">.</span><span class="n">axial_location</span><span class="p">))</span>
+                <span class="n">r_streamline</span><span class="p">[</span><span class="n">j</span><span class="p">,</span><span class="n">indx</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">interp1d</span><span class="p">(</span><span class="n">t</span><span class="p">,</span><span class="n">r</span><span class="p">)(</span><span class="n">row</span><span class="o">.</span><span class="n">axial_location</span><span class="p">))</span>
+                
+        <span class="n">data</span> <span class="o">=</span> <span class="p">{</span>            
+            <span class="s2">&quot;blade_rows&quot;</span><span class="p">:</span> <span class="n">blade_rows</span><span class="p">,</span>
+            <span class="s2">&quot;massflow&quot;</span><span class="p">:</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">massflow</span><span class="p">),</span>
+            <span class="s2">&quot;rpm&quot;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">rpm</span><span class="p">,</span>
+            <span class="s2">&quot;r_streamline&quot;</span><span class="p">:</span><span class="n">r_streamline</span><span class="o">.</span><span class="n">tolist</span><span class="p">(),</span>
+            <span class="s2">&quot;x_streamline&quot;</span><span class="p">:</span><span class="n">x_streamline</span><span class="o">.</span><span class="n">tolist</span><span class="p">(),</span>
+            <span class="s2">&quot;rhub&quot;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">passage</span><span class="o">.</span><span class="n">rhub_pts</span><span class="o">.</span><span class="n">tolist</span><span class="p">(),</span>
+            <span class="s2">&quot;rshroud&quot;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">passage</span><span class="o">.</span><span class="n">rshroud_pts</span><span class="o">.</span><span class="n">tolist</span><span class="p">(),</span>
+            <span class="s2">&quot;xhub&quot;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">passage</span><span class="o">.</span><span class="n">xhub_pts</span><span class="o">.</span><span class="n">tolist</span><span class="p">(),</span>
+            <span class="s2">&quot;xshroud&quot;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">passage</span><span class="o">.</span><span class="n">xshroud_pts</span><span class="o">.</span><span class="n">tolist</span><span class="p">(),</span>
+            <span class="s2">&quot;num_streamlines&quot;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">num_streamlines</span><span class="p">,</span>
+            <span class="s2">&quot;total-total_efficiency&quot;</span><span class="p">:</span><span class="n">total_total_efficiency</span><span class="p">,</span>
+            <span class="s2">&quot;total-static_efficiency&quot;</span><span class="p">:</span><span class="n">total_static_efficiency</span><span class="p">,</span>
+            <span class="s2">&quot;stage_loading&quot;</span><span class="p">:</span><span class="n">stage_loading</span><span class="p">,</span>
+            <span class="s2">&quot;degree_of_reaction&quot;</span><span class="p">:</span><span class="n">degree_of_reaction</span>
+        <span class="p">}</span>
+        <span class="c1"># Dump all the Python objects into a single JSON file.</span>
+        <span class="k">class</span> <span class="nc">NumpyEncoder</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">JSONEncoder</span><span class="p">):</span>
+            <span class="k">def</span> <span class="nf">default</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">):</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+                    <span class="k">return</span> <span class="n">obj</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+                <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">default</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span><span class="bp">cls</span><span class="o">=</span><span class="n">NumpyEncoder</span><span class="p">)</span></div>
+</div>
+
+
+
+<span class="k">def</span> <span class="nf">calculate_massflows</span><span class="p">(</span><span class="n">blade_rows</span><span class="p">:</span><span class="n">List</span><span class="p">[</span><span class="n">BladeRow</span><span class="p">],</span><span class="n">calculate_vm</span><span class="p">:</span><span class="nb">bool</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Calculates the massflow </span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        blade_rows (List[BladeRow]): _description_</span>
+<span class="sd">        passage (Passage): _description_</span>
+<span class="sd">        calculate_vm (bool, optional): _description_. Defaults to False.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">blade_rows</span><span class="p">)):</span>
+            <span class="n">row</span> <span class="o">=</span> <span class="n">blade_rows</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="c1"># Upstream Row</span>
+            <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">upstream</span> <span class="o">=</span> <span class="n">blade_rows</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">upstream</span> <span class="o">=</span> <span class="n">blade_rows</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">i</span><span class="o">&lt;</span><span class="nb">len</span><span class="p">(</span><span class="n">blade_rows</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+                <span class="n">downstream</span> <span class="o">=</span> <span class="n">blade_rows</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">downstream</span> <span class="o">=</span> <span class="kc">None</span> 
+            
+                <span class="c1"># Pressure loss = shift in entropy which affects the total pressure of the row</span>
+            <span class="k">if</span> <span class="n">row</span><span class="o">.</span><span class="n">row_type</span> <span class="o">==</span> <span class="n">RowType</span><span class="o">.</span><span class="n">Inlet</span><span class="p">:</span>
+                <span class="n">row</span><span class="o">.</span><span class="n">Yp</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">row</span><span class="o">.</span><span class="n">loss_function</span><span class="o">.</span><span class="n">loss_type</span> <span class="o">==</span> <span class="n">LossType</span><span class="o">.</span><span class="n">Pressure</span><span class="p">:</span>
+                    <span class="n">row</span><span class="o">.</span><span class="n">Yp</span> <span class="o">=</span> <span class="n">row</span><span class="o">.</span><span class="n">loss_function</span><span class="p">(</span><span class="n">row</span><span class="p">,</span><span class="n">upstream</span><span class="p">)</span>
+                    <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="p">):</span>
+                        <span class="k">if</span> <span class="n">row</span><span class="o">.</span><span class="n">row_type</span> <span class="o">==</span> <span class="n">RowType</span><span class="o">.</span><span class="n">Rotor</span><span class="p">:</span>
+                            <span class="n">rotor_calc</span><span class="p">(</span><span class="n">row</span><span class="p">,</span><span class="n">upstream</span><span class="p">,</span><span class="n">calculate_vm</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                            <span class="c1"># Finds Equilibrium between Vm, P0, T0</span>
+                            <span class="n">row</span> <span class="o">=</span> <span class="n">radeq</span><span class="p">(</span><span class="n">row</span><span class="p">,</span><span class="n">upstream</span><span class="p">)</span> 
+                            <span class="n">row</span> <span class="o">=</span> <span class="n">compute_gas_constants</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>
+                            <span class="n">rotor_calc</span><span class="p">(</span><span class="n">row</span><span class="p">,</span><span class="n">upstream</span><span class="p">,</span><span class="n">calculate_vm</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+                        <span class="k">elif</span> <span class="n">row</span><span class="o">.</span><span class="n">row_type</span> <span class="o">==</span> <span class="n">RowType</span><span class="o">.</span><span class="n">Stator</span><span class="p">:</span>
+                            <span class="n">stator_calc</span><span class="p">(</span><span class="n">row</span><span class="p">,</span><span class="n">upstream</span><span class="p">,</span><span class="n">downstream</span><span class="p">,</span><span class="n">calculate_vm</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                            <span class="c1"># Finds Equilibrium between Vm, P0, T0</span>
+                            <span class="n">row</span> <span class="o">=</span> <span class="n">radeq</span><span class="p">(</span><span class="n">row</span><span class="p">,</span><span class="n">upstream</span><span class="p">)</span>
+                            <span class="n">row</span> <span class="o">=</span> <span class="n">compute_gas_constants</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>
+                            <span class="n">stator_calc</span><span class="p">(</span><span class="n">row</span><span class="p">,</span><span class="n">upstream</span><span class="p">,</span><span class="n">downstream</span><span class="p">,</span><span class="n">calculate_vm</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+                        <span class="n">row</span> <span class="o">=</span> <span class="n">compute_gas_constants</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>
+                        <span class="n">compute_massflow</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>
+                        <span class="n">compute_power</span><span class="p">(</span><span class="n">row</span><span class="p">,</span><span class="n">upstream</span><span class="p">)</span>
+                        
+                <span class="k">elif</span> <span class="n">row</span><span class="o">.</span><span class="n">loss_function</span><span class="o">.</span><span class="n">loss_type</span> <span class="o">==</span> <span class="n">LossType</span><span class="o">.</span><span class="n">Enthalpy</span><span class="p">:</span> 
+                    <span class="k">if</span> <span class="n">row</span><span class="o">.</span><span class="n">row_type</span> <span class="o">==</span> <span class="n">RowType</span><span class="o">.</span><span class="n">Rotor</span><span class="p">:</span>
+                        <span class="n">row</span><span class="o">.</span><span class="n">Yp</span> <span class="o">=</span> <span class="mi">0</span>
+                        <span class="n">rotor_calc</span><span class="p">(</span><span class="n">row</span><span class="p">,</span><span class="n">upstream</span><span class="p">,</span><span class="n">calculate_vm</span><span class="o">=</span><span class="n">calculate_vm</span><span class="p">)</span>
+                        <span class="n">eta_total</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">loss_function</span><span class="p">(</span><span class="n">row</span><span class="p">,</span><span class="n">upstream</span><span class="p">))</span>
+                        <span class="k">def</span> <span class="nf">find_yp</span><span class="p">(</span><span class="n">Yp</span><span class="p">,</span><span class="n">row</span><span class="p">,</span><span class="n">upstream</span><span class="p">):</span>
+                            <span class="n">row</span><span class="o">.</span><span class="n">Yp</span> <span class="o">=</span> <span class="n">Yp</span>
+                            <span class="n">rotor_calc</span><span class="p">(</span><span class="n">row</span><span class="p">,</span><span class="n">upstream</span><span class="p">,</span><span class="n">calculate_vm</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                            <span class="n">row</span> <span class="o">=</span> <span class="n">radeq</span><span class="p">(</span><span class="n">row</span><span class="p">,</span><span class="n">upstream</span><span class="p">)</span>
+                            <span class="n">row</span> <span class="o">=</span> <span class="n">compute_gas_constants</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>
+                            <span class="n">rotor_calc</span><span class="p">(</span><span class="n">row</span><span class="p">,</span><span class="n">upstream</span><span class="p">,</span><span class="n">calculate_vm</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+                            <span class="k">return</span> <span class="nb">abs</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">eta_total</span> <span class="o">-</span> <span class="n">eta_total</span><span class="p">)</span>
+                        
+                        <span class="n">res</span> <span class="o">=</span> <span class="n">minimize_scalar</span><span class="p">(</span><span class="n">find_yp</span><span class="p">,</span><span class="n">bounds</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mf">0.6</span><span class="p">],</span><span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">row</span><span class="p">,</span><span class="n">upstream</span><span class="p">))</span>
+                        <span class="n">row</span><span class="o">.</span><span class="n">Yp</span> <span class="o">=</span> <span class="n">res</span><span class="o">.</span><span class="n">x</span>
+                    <span class="k">elif</span> <span class="n">row</span><span class="o">.</span><span class="n">row_type</span> <span class="o">==</span> <span class="n">RowType</span><span class="o">.</span><span class="n">Stator</span><span class="p">:</span>
+                        <span class="n">row</span><span class="o">.</span><span class="n">Yp</span> <span class="o">=</span> <span class="mi">0</span>
+                        <span class="n">stator_calc</span><span class="p">(</span><span class="n">row</span><span class="p">,</span><span class="n">upstream</span><span class="p">,</span><span class="n">downstream</span><span class="p">,</span><span class="n">calculate_vm</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                        <span class="n">row</span> <span class="o">=</span> <span class="n">radeq</span><span class="p">(</span><span class="n">row</span><span class="p">,</span><span class="n">upstream</span><span class="p">)</span> 
+                        <span class="n">row</span> <span class="o">=</span> <span class="n">compute_gas_constants</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>
+                        <span class="n">stator_calc</span><span class="p">(</span><span class="n">row</span><span class="p">,</span><span class="n">upstream</span><span class="p">,</span><span class="n">downstream</span><span class="p">,</span><span class="n">calculate_vm</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+                    <span class="n">row</span> <span class="o">=</span> <span class="n">compute_gas_constants</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>
+                    <span class="n">compute_massflow</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>
+                    <span class="n">compute_power</span><span class="p">(</span><span class="n">row</span><span class="p">,</span><span class="n">upstream</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">massflow_loss_function</span><span class="p">(</span><span class="n">exit_angle</span><span class="p">:</span><span class="nb">float</span><span class="p">,</span><span class="n">index</span><span class="p">:</span><span class="nb">int</span><span class="p">,</span><span class="n">row</span><span class="p">:</span><span class="n">BladeRow</span><span class="p">,</span><span class="n">upstream</span><span class="p">:</span><span class="n">BladeRow</span><span class="p">,</span><span class="n">downstream</span><span class="p">:</span><span class="n">BladeRow</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Finds the blade exit angles that balance the massflow throughout the stage </span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        exit_angle (float): exit flow angle of the rotor row </span>
+<span class="sd">        index (int): streamline index for the current row </span>
+<span class="sd">        row (BladeRow): current blade row</span>
+<span class="sd">        upstream (BladeRow): upstream blade row</span>
+<span class="sd">        downstream (BladeRow): downstream blade row </span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        float: massflow loss </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Pressure loss = shift in entropy which affects the total pressure of the row</span>
+    <span class="k">if</span> <span class="n">row</span><span class="o">.</span><span class="n">row_type</span> <span class="o">==</span> <span class="n">RowType</span><span class="o">.</span><span class="n">Inlet</span><span class="p">:</span>
+        <span class="n">row</span><span class="o">.</span><span class="n">Yp</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">row</span><span class="o">.</span><span class="n">loss_function</span><span class="o">.</span><span class="n">loss_type</span> <span class="o">==</span> <span class="n">LossType</span><span class="o">.</span><span class="n">Pressure</span><span class="p">:</span>
+            <span class="n">row</span><span class="o">.</span><span class="n">Yp</span> <span class="o">=</span> <span class="n">row</span><span class="o">.</span><span class="n">loss_function</span><span class="p">(</span><span class="n">row</span><span class="p">,</span><span class="n">upstream</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">row</span><span class="o">.</span><span class="n">row_type</span> <span class="o">==</span> <span class="n">RowType</span><span class="o">.</span><span class="n">Rotor</span><span class="p">:</span>
+                <span class="n">row</span><span class="o">.</span><span class="n">beta2</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">exit_angle</span><span class="p">)</span>
+                <span class="n">rotor_calc</span><span class="p">(</span><span class="n">row</span><span class="p">,</span><span class="n">upstream</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">row</span><span class="o">.</span><span class="n">row_type</span> <span class="o">==</span> <span class="n">RowType</span><span class="o">.</span><span class="n">Stator</span><span class="p">:</span>
+                <span class="n">row</span><span class="o">.</span><span class="n">alpha2</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">exit_angle</span><span class="p">)</span>
+                <span class="n">stator_calc</span><span class="p">(</span><span class="n">row</span><span class="p">,</span><span class="n">upstream</span><span class="p">,</span><span class="n">downstream</span><span class="p">)</span>
+            <span class="n">upstream</span> <span class="o">=</span> <span class="n">compute_gas_constants</span><span class="p">(</span><span class="n">upstream</span><span class="p">)</span>
+            <span class="n">row</span> <span class="o">=</span> <span class="n">compute_gas_constants</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">row</span><span class="o">.</span><span class="n">loss_function</span><span class="o">.</span><span class="n">loss_type</span> <span class="o">==</span> <span class="n">LossType</span><span class="o">.</span><span class="n">Enthalpy</span><span class="p">:</span>
+            <span class="c1"># Search for pressure loss that results in the correct total temperature drop</span>
+            <span class="k">if</span> <span class="n">row</span><span class="o">.</span><span class="n">row_type</span> <span class="o">==</span> <span class="n">RowType</span><span class="o">.</span><span class="n">Rotor</span><span class="p">:</span>
+                <span class="n">row</span><span class="o">.</span><span class="n">Yp</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="n">row</span><span class="o">.</span><span class="n">beta2</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">exit_angle</span><span class="p">)</span>
+                <span class="n">rotor_calc</span><span class="p">(</span><span class="n">row</span><span class="p">,</span><span class="n">upstream</span><span class="p">)</span>
+                <span class="n">T0_drop</span> <span class="o">=</span> <span class="n">row</span><span class="o">.</span><span class="n">loss_function</span><span class="p">(</span><span class="n">row</span><span class="p">,</span><span class="n">upstream</span><span class="p">)</span>
+                <span class="n">T0_target</span> <span class="o">=</span> <span class="n">row</span><span class="o">.</span><span class="n">T0</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="o">-</span><span class="n">T0_drop</span>
+                <span class="k">def</span> <span class="nf">find_yp</span><span class="p">(</span><span class="n">Yp</span><span class="p">):</span>
+                    <span class="n">row</span><span class="o">.</span><span class="n">Yp</span> <span class="o">=</span> <span class="n">Yp</span>
+                    <span class="n">rotor_calc</span><span class="p">(</span><span class="n">row</span><span class="p">,</span><span class="n">upstream</span><span class="p">)</span>
+                    <span class="n">upstream</span> <span class="o">=</span> <span class="n">compute_gas_constants</span><span class="p">(</span><span class="n">upstream</span><span class="p">)</span>
+                    <span class="n">row</span> <span class="o">=</span> <span class="n">compute_gas_constants</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>
+                    <span class="k">return</span> <span class="nb">abs</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">T0</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span> <span class="o">-</span> <span class="n">T0_target</span><span class="p">)</span>
+                <span class="n">res</span> <span class="o">=</span> <span class="n">minimize_scalar</span><span class="p">(</span><span class="n">find_yp</span><span class="p">,</span><span class="n">bounds</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mf">0.6</span><span class="p">])</span>
+                <span class="n">row</span><span class="o">.</span><span class="n">Yp</span> <span class="o">=</span> <span class="n">res</span><span class="o">.</span><span class="n">x</span>
+            <span class="k">elif</span> <span class="n">row</span><span class="o">.</span><span class="n">row_type</span> <span class="o">==</span> <span class="n">RowType</span><span class="o">.</span><span class="n">Stator</span><span class="p">:</span>
+                <span class="n">row</span><span class="o">.</span><span class="n">Yp</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="n">row</span><span class="o">.</span><span class="n">alpha2</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">exit_angle</span><span class="p">)</span>
+                <span class="n">stator_calc</span><span class="p">(</span><span class="n">row</span><span class="p">,</span><span class="n">upstream</span><span class="p">,</span><span class="n">downstream</span><span class="p">)</span>
+                <span class="n">upstream</span> <span class="o">=</span> <span class="n">compute_gas_constants</span><span class="p">(</span><span class="n">upstream</span><span class="p">)</span>
+                <span class="n">row</span> <span class="o">=</span> <span class="n">compute_gas_constants</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>
+        
+
+    <span class="c1"># if use_radeq:</span>
+    <span class="c1">#     row = radeq(row,upstream) # Finds Equilibrium between Vm, P0, T0</span>
+    
+    <span class="n">compute_massflow</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>
+    <span class="n">compute_power</span><span class="p">(</span><span class="n">row</span><span class="p">,</span><span class="n">upstream</span><span class="p">)</span>
+    
+    <span class="k">if</span> <span class="n">row</span><span class="o">.</span><span class="n">row_type</span><span class="o">!=</span><span class="n">RowType</span><span class="o">.</span><span class="n">Inlet</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">row</span><span class="o">.</span><span class="n">row_type</span> <span class="o">==</span> <span class="n">RowType</span><span class="o">.</span><span class="n">Rotor</span><span class="p">:</span>
+            <span class="n">T3_is</span> <span class="o">=</span> <span class="n">upstream</span><span class="o">.</span><span class="n">T0</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="n">row</span><span class="o">.</span><span class="n">P0_P</span><span class="p">)</span><span class="o">**</span><span class="p">((</span><span class="n">row</span><span class="o">.</span><span class="n">gamma</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">/</span><span class="n">row</span><span class="o">.</span><span class="n">gamma</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">T3_is</span> <span class="o">=</span> <span class="n">upstream</span><span class="o">.</span><span class="n">T0</span> <span class="o">*</span> <span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">P0</span><span class="o">/</span><span class="n">row</span><span class="o">.</span><span class="n">P</span><span class="p">)</span><span class="o">**</span><span class="p">((</span><span class="n">row</span><span class="o">.</span><span class="n">gamma</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">/</span><span class="n">row</span><span class="o">.</span><span class="n">gamma</span><span class="p">)</span>
+        <span class="n">a</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">gamma</span><span class="o">*</span><span class="n">row</span><span class="o">.</span><span class="n">R</span><span class="o">*</span><span class="n">T3_is</span><span class="p">)</span>
+        <span class="n">T03_is</span> <span class="o">=</span> <span class="n">T3_is</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span><span class="o">+</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">gamma</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span><span class="o">*</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">Vm</span><span class="o">/</span><span class="n">a</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">row</span><span class="o">.</span><span class="n">eta_total</span> <span class="o">=</span> <span class="p">(</span><span class="n">upstream</span><span class="o">.</span><span class="n">T0</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span> <span class="o">-</span> <span class="n">row</span><span class="o">.</span><span class="n">T0</span><span class="o">.</span><span class="n">mean</span><span class="p">())</span><span class="o">/</span><span class="p">(</span><span class="n">upstream</span><span class="o">.</span><span class="n">T0</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="o">-</span><span class="n">T03_is</span><span class="o">.</span><span class="n">mean</span><span class="p">())</span>
+        
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">total_massflow</span><span class="o">*</span><span class="n">index</span><span class="o">/</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">massflow</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">-</span> <span class="n">row</span><span class="o">.</span><span class="n">massflow</span><span class="p">[</span><span class="n">index</span><span class="p">])</span>
+    
+<span class="k">def</span> <span class="nf">outlet_pressure</span><span class="p">(</span><span class="n">percents</span><span class="p">:</span><span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span><span class="n">inletP0</span><span class="p">:</span><span class="nb">float</span><span class="p">,</span><span class="n">outletP</span><span class="p">:</span><span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Given a list of percents from 0 to 1 for each row, output each row&#39;s outlet static pressure</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        percents (List[float]): List of floats as percents [[0 to 1],[0 to 1]]</span>
+<span class="sd">        inletP0 (float): Inlet Total Pressure </span>
+<span class="sd">        outletP (float): Outlet Static Pressure</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        npt.NDArray: Array of static pressures</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">maxP</span> <span class="o">=</span> <span class="n">inletP0</span>
+    <span class="n">minP</span> <span class="o">=</span> <span class="n">outletP</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">percents</span><span class="p">,</span> <span class="nb">float</span><span class="p">):</span>
+        <span class="n">Ps</span> <span class="o">=</span> <span class="p">[</span><span class="n">percents</span><span class="o">*</span><span class="p">(</span><span class="n">minP</span><span class="o">-</span><span class="n">maxP</span><span class="p">)</span><span class="o">+</span><span class="n">maxP</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">Ps</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">percents</span><span class="p">),</span><span class="mi">1</span><span class="p">));</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">percents</span><span class="p">:</span>
+            <span class="n">Ps</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">p</span><span class="o">*</span><span class="p">(</span><span class="n">minP</span><span class="o">-</span><span class="n">maxP</span><span class="p">)</span><span class="o">+</span><span class="n">maxP</span>
+            <span class="n">maxP</span> <span class="o">=</span> <span class="n">Ps</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="n">i</span><span class="o">+=</span><span class="mi">1</span>
+    <span class="k">return</span> <span class="n">Ps</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Paht Juangphanich.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

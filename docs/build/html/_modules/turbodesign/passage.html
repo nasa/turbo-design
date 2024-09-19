@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>turbodesign.passage &mdash; Turbo Design 1.0.6 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../_static/documentation_options.js?v=e2a723ec"></script>
+        <script src="../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html">
+            
+          </a>
+              <div class="version">
+                1.0.6
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">python API</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../modules/bladerow.html">BladeRow</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/bladerow.html#turbodesign.bladerow.BladeRow"><code class="docutils literal notranslate"><span class="pre">BladeRow</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/bladerow.html#turbodesign.bladerow.compute_gas_constants"><code class="docutils literal notranslate"><span class="pre">compute_gas_constants()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/bladerow.html#turbodesign.bladerow.interpolate_quantities"><code class="docutils literal notranslate"><span class="pre">interpolate_quantities()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/bladerow.html#turbodesign.bladerow.interpolate_streamline_radii"><code class="docutils literal notranslate"><span class="pre">interpolate_streamline_radii()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/bladerow.html#turbodesign.bladerow.sutherland"><code class="docutils literal notranslate"><span class="pre">sutherland()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules/coolant.html">Coolant</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/coolant.html#turbodesign.coolant.Coolant"><code class="docutils literal notranslate"><span class="pre">Coolant</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules/enums.html">Enums</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/enums.html#turbodesign.enums.LossType"><code class="docutils literal notranslate"><span class="pre">LossType</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/enums.html#turbodesign.enums.MassflowConstraint"><code class="docutils literal notranslate"><span class="pre">MassflowConstraint</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/enums.html#turbodesign.enums.PassageType"><code class="docutils literal notranslate"><span class="pre">PassageType</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/enums.html#turbodesign.enums.PowerType"><code class="docutils literal notranslate"><span class="pre">PowerType</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/enums.html#turbodesign.enums.RowType"><code class="docutils literal notranslate"><span class="pre">RowType</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules/inlet.html">Inlet</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/inlet.html#turbodesign.inlet.Inlet"><code class="docutils literal notranslate"><span class="pre">Inlet</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules/isentropic.html">Isentropic Equations</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/isentropic.html#turbodesign.isentropic.A_As"><code class="docutils literal notranslate"><span class="pre">A_As()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/isentropic.html#turbodesign.isentropic.FindMachP0P"><code class="docutils literal notranslate"><span class="pre">FindMachP0P()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/isentropic.html#turbodesign.isentropic.IsenP"><code class="docutils literal notranslate"><span class="pre">IsenP()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/isentropic.html#turbodesign.isentropic.IsenT"><code class="docutils literal notranslate"><span class="pre">IsenT()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/isentropic.html#turbodesign.isentropic.Massflow"><code class="docutils literal notranslate"><span class="pre">Massflow()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules/loss.html">Turbine Loss</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/loss.html#loss-type">Loss Type</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/loss.html#ainley-mathieson">Ainley Mathieson</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/loss.html#traupel">Traupel</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/loss.html#craig-cox">Craig Cox</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/loss.html#kacker-okapuu">Kacker Okapuu</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/loss.html#turbine-design-default">Turbine Design (Default)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/loss.html#fixed-pressure-loss">Fixed Pressure Loss</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/loss.html#fixed-efficiency-loss">Fixed Efficiency Loss</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules/lossinterp.html">Loss Interpolations</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/lossinterp.html#turbodesign.lossinterp.LossInterp"><code class="docutils literal notranslate"><span class="pre">LossInterp</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules/outlet.html">Outlet</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/outlet.html#turbodesign.outlet.Outlet"><code class="docutils literal notranslate"><span class="pre">Outlet</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules/passage.html">Passage</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/passage.html#turbodesign.passage.Passage"><code class="docutils literal notranslate"><span class="pre">Passage</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules/radeq.html">Radial Equilibrium</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/radeq.html#turbodesign.radeq.radeq"><code class="docutils literal notranslate"><span class="pre">radeq()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/radeq.html#turbodesign.radeq.radeq_normalized"><code class="docutils literal notranslate"><span class="pre">radeq_normalized()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules/rotor.html">Rotor</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/rotor.html#turbodesign.rotor.Rotor"><code class="docutils literal notranslate"><span class="pre">Rotor</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules/solve_radeq.html">Solve Radial Equilibrium</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/solve_radeq.html#turbodesign.solve_radeq.adjust_streamlines"><code class="docutils literal notranslate"><span class="pre">adjust_streamlines()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules/spool.html">Spool</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/spool.html#turbodesign.spool.Spool"><code class="docutils literal notranslate"><span class="pre">Spool</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules/td_math.html">Turbine Design Math</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/td_math.html#turbodesign.td_math.T0_coolant_weighted_average"><code class="docutils literal notranslate"><span class="pre">T0_coolant_weighted_average()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/td_math.html#turbodesign.td_math.compute_massflow"><code class="docutils literal notranslate"><span class="pre">compute_massflow()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/td_math.html#turbodesign.td_math.compute_power"><code class="docutils literal notranslate"><span class="pre">compute_power()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/td_math.html#turbodesign.td_math.compute_quantities"><code class="docutils literal notranslate"><span class="pre">compute_quantities()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/td_math.html#turbodesign.td_math.compute_quantities_power"><code class="docutils literal notranslate"><span class="pre">compute_quantities_power()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/td_math.html#turbodesign.td_math.inlet_calc"><code class="docutils literal notranslate"><span class="pre">inlet_calc()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/td_math.html#turbodesign.td_math.rotor_calc"><code class="docutils literal notranslate"><span class="pre">rotor_calc()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/td_math.html#turbodesign.td_math.stator_calc"><code class="docutils literal notranslate"><span class="pre">stator_calc()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules/turbinespool.html">Turbine Spool</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/turbinespool.html#turbodesign.turbinespool.TurbineSpool"><code class="docutils literal notranslate"><span class="pre">TurbineSpool</span></code></a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Turbo Design</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">turbodesign.passage</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for turbodesign.passage</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Tuple</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">numpy.typing</span> <span class="k">as</span> <span class="nn">npt</span>
+<span class="kn">from</span> <span class="nn">scipy.interpolate</span> <span class="kn">import</span> <span class="n">interp1d</span>
+<span class="kn">from</span> <span class="nn">pyturbo.helper</span> <span class="kn">import</span> <span class="n">line2D</span>
+<span class="kn">from</span> <span class="nn">.enums</span> <span class="kn">import</span> <span class="n">PassageType</span>
+<span class="kn">from</span> <span class="nn">scipy.optimize</span> <span class="kn">import</span> <span class="n">minimize_scalar</span>
+<span class="kn">from</span> <span class="nn">findiff</span> <span class="kn">import</span> <span class="n">FinDiff</span>
+<span class="kn">from</span> <span class="nn">pyturbo.helper</span> <span class="kn">import</span> <span class="n">convert_to_ndarray</span> 
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span> 
+
+<div class="viewcode-block" id="Passage">
+<a class="viewcode-back" href="../../modules/passage.html#turbodesign.passage.Passage">[docs]</a>
+<span class="k">class</span> <span class="nc">Passage</span><span class="p">:</span>
+    <span class="n">xhub</span><span class="p">:</span><span class="n">interp1d</span>
+    <span class="n">rhub</span><span class="p">:</span><span class="n">interp1d</span>
+    <span class="n">xhub_pts</span><span class="p">:</span><span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span>
+    <span class="n">rhub_pts</span><span class="p">:</span><span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span>
+    
+    <span class="n">xshroud</span><span class="p">:</span><span class="n">interp1d</span>
+    <span class="n">rshroud</span><span class="p">:</span><span class="n">interp1d</span>
+    <span class="n">xshroud_pts</span><span class="p">:</span><span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span>
+    <span class="n">rshroud_pts</span><span class="p">:</span><span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span>
+    
+    <span class="n">n</span><span class="p">:</span><span class="nb">int</span>
+    <span class="n">passageType</span><span class="p">:</span><span class="n">PassageType</span>
+
+    <span class="n">x_streamlines</span><span class="p">:</span><span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span>
+    <span class="n">r_streamlines</span><span class="p">:</span><span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span>
+    
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">xhub</span><span class="p">:</span><span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span><span class="n">rhub</span><span class="p">:</span><span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span>
+                 <span class="n">xshroud</span><span class="p">:</span><span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span><span class="n">rshroud</span><span class="p">:</span><span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span>
+                 <span class="n">passageType</span><span class="p">:</span><span class="n">PassageType</span><span class="o">=</span><span class="n">PassageType</span><span class="o">.</span><span class="n">Axial</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;_summary_</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            xhub (List[float]): xhub coordinates</span>
+<span class="sd">            rhub (List[float]): rhub coordinates </span>
+<span class="sd">            xshroud (List[float]): xshroud coordinates </span>
+<span class="sd">            rshroud (List[float]): rshroud coordinates </span>
+<span class="sd">            passageType (PassageType, optional): Axial or Centrifugal. Defaults to PassageType.Axial.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">xhub</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">xshroud</span><span class="p">),</span> <span class="s2">&quot;xHub and xShroud should be the same length&quot;</span>
+        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">rhub</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">rshroud</span><span class="p">),</span> <span class="s2">&quot;rHub and rShroud should be the same length&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">xhub</span><span class="p">)</span>
+        <span class="n">t_streamline</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">xhub</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">xhub</span> <span class="o">=</span> <span class="n">interp1d</span><span class="p">(</span><span class="n">t_streamline</span><span class="p">,</span><span class="n">xhub</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rhub</span> <span class="o">=</span> <span class="n">interp1d</span><span class="p">(</span><span class="n">t_streamline</span><span class="p">,</span><span class="n">rhub</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">xshroud</span> <span class="o">=</span> <span class="n">interp1d</span><span class="p">(</span><span class="n">t_streamline</span><span class="p">,</span><span class="n">xshroud</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rshroud</span> <span class="o">=</span> <span class="n">interp1d</span><span class="p">(</span><span class="n">t_streamline</span><span class="p">,</span><span class="n">rshroud</span><span class="p">)</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">xhub_pts</span> <span class="o">=</span> <span class="n">convert_to_ndarray</span><span class="p">(</span><span class="n">xhub</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rhub_pts</span> <span class="o">=</span> <span class="n">convert_to_ndarray</span><span class="p">(</span><span class="n">rhub</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">xshroud_pts</span> <span class="o">=</span> <span class="n">convert_to_ndarray</span><span class="p">(</span><span class="n">xshroud</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rshroud_pts</span> <span class="o">=</span> <span class="n">convert_to_ndarray</span><span class="p">(</span><span class="n">rshroud</span><span class="p">)</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">passageType</span> <span class="o">=</span> <span class="n">passageType</span>
+        
+<div class="viewcode-block" id="Passage.get_streamline">
+<a class="viewcode-back" href="../../modules/passage.html#turbodesign.passage.Passage.get_streamline">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_streamline</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">t_radial</span><span class="p">:</span><span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">,</span><span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">,</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Gets the streamline at a certain percent radius </span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            t_radial (float): _description_</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Tuple containing:</span>
+<span class="sd">            </span>
+<span class="sd">                t_streamline (npt.NDArray): Non dimensional length of the streamline</span>
+<span class="sd">                x_streamline (npt.NDArray): x-coordinate along the streamline</span>
+<span class="sd">                r_streamline (npt.NDArray): r-coordinate along the streamline</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">t_streamline</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">)</span>
+        <span class="c1"># first streamline is at the hub</span>
+        <span class="n">r_streamline</span> <span class="o">=</span> <span class="n">t_streamline</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span><span class="o">*</span><span class="mi">0</span>
+        <span class="n">x_streamline</span> <span class="o">=</span> <span class="n">t_streamline</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span><span class="o">*</span><span class="mi">0</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">t</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">t_streamline</span><span class="p">):</span>
+            <span class="n">xhub</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">xhub</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
+            <span class="n">rhub</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rhub</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
+            <span class="n">xshroud</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">xshroud</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
+            <span class="n">rshroud</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rshroud</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
+            <span class="n">x_streamline</span><span class="p">[</span><span class="n">i</span><span class="p">],</span><span class="n">r_streamline</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">line2D</span><span class="p">([</span><span class="n">xhub</span><span class="p">,</span><span class="n">rhub</span><span class="p">],[</span><span class="n">xshroud</span><span class="p">,</span><span class="n">rshroud</span><span class="p">])</span><span class="o">.</span><span class="n">get_point</span><span class="p">(</span><span class="n">t_radial</span><span class="p">)</span>
+        
+        <span class="k">return</span> <span class="n">t_streamline</span><span class="p">,</span><span class="n">x_streamline</span><span class="p">,</span><span class="n">r_streamline</span></div>
+
+
+<div class="viewcode-block" id="Passage.streamline_curvature">
+<a class="viewcode-back" href="../../modules/passage.html#turbodesign.passage.Passage.streamline_curvature">[docs]</a>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">streamline_curvature</span><span class="p">(</span><span class="n">x_streamline</span><span class="p">:</span><span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">,</span><span class="n">r_streamline</span><span class="p">:</span><span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">,</span><span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">,</span><span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Hub and casing values of streamline angles of inclination and curvature </span>
+
+<span class="sd">            x_streamline[axial,radial]</span>
+<span class="sd">            r_streamline[axial,radial]</span>
+<span class="sd">            </span>
+<span class="sd">        Args:</span>
+<span class="sd">            x_streamline (np.ndarray): Axial position as a matrix with shape [number of stations, number of x-positions]</span>
+<span class="sd">            r_streamline (np.ndarray): Annulus Radii of streamlines arranged with shape [number of stations, number of x-positions]</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Tuple: containing</span>
+
+<span class="sd">                *phi* (np.ndarray): Array containing angles of inclination for each radi at each station. Rows = radius, columns = station</span>
+<span class="sd">                *rm* (np.ndarray): Array containing the curvature for each station and streamline</span>
+<span class="sd">                *r* (np.ndarray): Annulus radius</span>
+
+<span class="sd">        References:</span>
+<span class="sd">            https://stackoverflow.com/questions/28269379/curve-curvature-in-numpy</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">phi</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="n">x_streamline</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+        <span class="n">rm</span> <span class="o">=</span> <span class="n">phi</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">r</span>  <span class="o">=</span> <span class="n">phi</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+            
+        <span class="n">d_dx</span> <span class="o">=</span> <span class="n">FinDiff</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">x_streamline</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">d2_dx2</span> <span class="o">=</span> <span class="n">FinDiff</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">x_streamline</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">dr_dx</span> <span class="o">=</span> <span class="n">d_dx</span><span class="p">(</span><span class="n">r_streamline</span><span class="p">)</span>
+        <span class="n">d2r_dx2</span> <span class="o">=</span> <span class="n">d2_dx2</span><span class="p">(</span><span class="n">r_streamline</span><span class="p">)</span>    
+            
+        <span class="n">radius_curvature</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">((</span><span class="mi">1</span><span class="o">+</span><span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="n">dr_dx</span><span class="p">,</span><span class="mi">2</span><span class="p">)),</span><span class="mf">1.5</span><span class="p">)</span>
+        <span class="n">radius_curvature</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">divide</span><span class="p">(</span><span class="n">radius_curvature</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">d2r_dx2</span><span class="p">))</span>
+        <span class="n">radius_curvature</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan_to_num</span><span class="p">(</span><span class="n">radius_curvature</span><span class="p">,</span><span class="n">nan</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        
+        <span class="n">rm</span> <span class="o">=</span> <span class="n">radius_curvature</span>     <span class="c1"># https://www.cuemath.com/radius-of-curvature-formula/ should be 1/curvature</span>
+        <span class="n">phi</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arctan</span><span class="p">(</span><span class="n">dr_dx</span><span class="p">)</span>
+        <span class="n">r</span> <span class="o">=</span> <span class="n">r_streamline</span>
+            
+        <span class="k">return</span> <span class="n">phi</span><span class="p">,</span> <span class="n">rm</span><span class="p">,</span> <span class="n">r</span></div>
+
+        
+<div class="viewcode-block" id="Passage.get_cutting_line">
+<a class="viewcode-back" href="../../modules/passage.html#turbodesign.passage.Passage.get_cutting_line">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_cutting_line</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">t_hub</span><span class="p">:</span><span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">line2D</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Gets the cutting line between hub and shroud </span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            t_hub (float): percentage along the axial direction </span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            (Tuple) containing:</span>
+<span class="sd">        </span>
+<span class="sd">                cut (line2D): line from hub to shroud</span>
+<span class="sd">                t_hub (float): t corresponding to xhub location</span>
+<span class="sd">                t_shroud (float): t corresponding to intersection of bisector of hub </span>
+<span class="sd">                                </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">xhub</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">xhub</span><span class="p">(</span><span class="n">t_hub</span><span class="p">)</span>
+        <span class="n">rhub</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rhub</span><span class="p">(</span><span class="n">t_hub</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="n">t_hub</span><span class="o">&gt;</span><span class="mi">0</span> <span class="ow">and</span> <span class="n">t_hub</span><span class="o">&lt;</span><span class="mi">1</span><span class="p">:</span>
+            <span class="n">dx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">xhub</span><span class="p">(</span><span class="n">t_hub</span><span class="o">+</span><span class="mf">0.0001</span><span class="p">)</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">xhub</span><span class="p">(</span><span class="n">t_hub</span><span class="o">-</span><span class="mf">0.0001</span><span class="p">)</span> 
+            <span class="n">dr</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rhub</span><span class="p">(</span><span class="n">t_hub</span><span class="o">+</span><span class="mf">0.0001</span><span class="p">)</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">rhub</span><span class="p">(</span><span class="n">t_hub</span><span class="o">-</span><span class="mf">0.0001</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">t_hub</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span>
+            <span class="n">dx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">xhub</span><span class="p">(</span><span class="n">t_hub</span><span class="p">)</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">xhub</span><span class="p">(</span><span class="n">t_hub</span><span class="o">-</span><span class="mf">0.0001</span><span class="p">)</span> 
+            <span class="n">dr</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rhub</span><span class="p">(</span><span class="n">t_hub</span><span class="p">)</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">rhub</span><span class="p">(</span><span class="n">t_hub</span><span class="o">-</span><span class="mf">0.0001</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">t_hub</span><span class="o">&lt;</span><span class="mi">1</span><span class="p">:</span>
+            <span class="n">dx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">xhub</span><span class="p">(</span><span class="n">t_hub</span><span class="o">+</span><span class="mf">0.0001</span><span class="p">)</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">xhub</span><span class="p">(</span><span class="n">t_hub</span><span class="p">)</span>
+            <span class="n">dr</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rhub</span><span class="p">(</span><span class="n">t_hub</span><span class="o">+</span><span class="mf">0.0001</span><span class="p">)</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">rhub</span><span class="p">(</span><span class="n">t_hub</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">passageType</span> <span class="o">==</span> <span class="n">PassageType</span><span class="o">.</span><span class="n">Centrifugal</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">dr</span><span class="p">)</span><span class="o">&gt;</span><span class="mf">1e-6</span><span class="p">:</span>
+                <span class="c1"># Draw a line perpendicular to the hub. </span>
+                <span class="c1"># Find the intersection point to the shroud. </span>
+                <span class="n">h</span> <span class="o">=</span> <span class="o">-</span><span class="n">dx</span><span class="o">/</span><span class="n">dr</span> <span class="c1"># Slope of perpendicular line</span>
+            
+                <span class="n">f</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">t</span><span class="p">:</span> <span class="n">h</span><span class="o">*</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">xshroud</span><span class="p">(</span><span class="n">t</span><span class="p">)</span> <span class="o">-</span> <span class="n">xhub</span><span class="p">)</span><span class="o">+</span><span class="n">rhub</span> <span class="c1"># line from hub to shroud </span>
+                <span class="n">fun</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">t</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">f</span><span class="p">(</span><span class="n">t</span><span class="p">)</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">rshroud</span><span class="p">(</span><span class="n">t</span><span class="p">))</span> <span class="c1"># find where it intersects</span>
+                <span class="n">res</span> <span class="o">=</span> <span class="n">minimize_scalar</span><span class="p">(</span><span class="n">fun</span><span class="p">,</span><span class="n">bounds</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">],</span><span class="n">tol</span><span class="o">=</span><span class="mf">1E-3</span><span class="p">)</span> 
+                <span class="n">t_shroud</span> <span class="o">=</span> <span class="n">res</span><span class="o">.</span><span class="n">x</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">t_shroud</span> <span class="o">=</span> <span class="n">t_hub</span> <span class="c1"># Vertical line </span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">t_shroud</span> <span class="o">=</span> <span class="n">t_hub</span>
+        
+        <span class="n">xshroud</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">xshroud</span><span class="p">(</span><span class="n">t_shroud</span><span class="p">)</span>
+        <span class="n">rshroud</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rshroud</span><span class="p">(</span><span class="n">t_shroud</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">line2D</span><span class="p">([</span><span class="n">xhub</span><span class="p">,</span><span class="n">rhub</span><span class="p">],[</span><span class="n">xshroud</span><span class="p">,</span><span class="n">rshroud</span><span class="p">]),</span> <span class="n">t_hub</span><span class="p">,</span> <span class="n">t_shroud</span></div>
+
+    
+        
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">hub_length</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;returns the computed length of the hub </span>
+<span class="sd">        Returns:</span>
+<span class="sd">            _type_: _description_</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">xhub_pts</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rhub_pts</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span>
+    
+<div class="viewcode-block" id="Passage.plot_cuts">
+<a class="viewcode-back" href="../../modules/passage.html#turbodesign.passage.Passage.plot_cuts">[docs]</a>
+    <span class="k">def</span> <span class="nf">plot_cuts</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">percent_axial</span><span class="p">:</span><span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span><span class="o">=</span><span class="p">[]):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;_summary_</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            percent_axial (List[float], optional): _description_. Defaults to [].</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        
+        <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">num</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span><span class="n">clear</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span><span class="n">dpi</span><span class="o">=</span><span class="mi">150</span><span class="p">,</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span><span class="mi">10</span><span class="p">))</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">xhub_pts</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">rhub_pts</span><span class="p">,</span><span class="n">label</span><span class="o">=</span><span class="s1">&#39;hub&#39;</span><span class="p">,</span><span class="n">linestyle</span><span class="o">=</span><span class="s1">&#39;solid&#39;</span><span class="p">,</span><span class="n">linewidth</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span><span class="n">color</span><span class="o">=</span><span class="s1">&#39;black&#39;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">xshroud_pts</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">rshroud_pts</span><span class="p">,</span><span class="n">label</span><span class="o">=</span><span class="s1">&#39;hub&#39;</span><span class="p">,</span><span class="n">linestyle</span><span class="o">=</span><span class="s1">&#39;solid&#39;</span><span class="p">,</span><span class="n">linewidth</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span><span class="n">color</span><span class="o">=</span><span class="s1">&#39;black&#39;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">percent_axial</span><span class="p">:</span>
+            <span class="n">cut</span><span class="p">,</span><span class="n">_</span><span class="p">,</span><span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_cutting_line</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+            <span class="n">x</span><span class="p">,</span><span class="n">r</span> <span class="o">=</span> <span class="n">cut</span><span class="o">.</span><span class="n">get_point</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">10</span><span class="p">))</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">r</span><span class="p">,</span><span class="n">label</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">p</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span><span class="n">linestyle</span><span class="o">=</span><span class="s1">&#39;dashed&#39;</span><span class="p">)</span>
+            
+        <span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">axis</span><span class="p">(</span><span class="s1">&#39;scaled&#39;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span></div>
+</div>
+
+        
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Paht Juangphanich.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

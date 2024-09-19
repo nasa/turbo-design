@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>turbodesign.spool &mdash; Turbo Design 1.0.6 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../_static/documentation_options.js?v=e2a723ec"></script>
+        <script src="../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html">
+            
+          </a>
+              <div class="version">
+                1.0.6
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">python API</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../modules/bladerow.html">BladeRow</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/bladerow.html#turbodesign.bladerow.BladeRow"><code class="docutils literal notranslate"><span class="pre">BladeRow</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/bladerow.html#turbodesign.bladerow.compute_gas_constants"><code class="docutils literal notranslate"><span class="pre">compute_gas_constants()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/bladerow.html#turbodesign.bladerow.interpolate_quantities"><code class="docutils literal notranslate"><span class="pre">interpolate_quantities()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/bladerow.html#turbodesign.bladerow.interpolate_streamline_radii"><code class="docutils literal notranslate"><span class="pre">interpolate_streamline_radii()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/bladerow.html#turbodesign.bladerow.sutherland"><code class="docutils literal notranslate"><span class="pre">sutherland()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules/coolant.html">Coolant</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/coolant.html#turbodesign.coolant.Coolant"><code class="docutils literal notranslate"><span class="pre">Coolant</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules/enums.html">Enums</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/enums.html#turbodesign.enums.LossType"><code class="docutils literal notranslate"><span class="pre">LossType</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/enums.html#turbodesign.enums.MassflowConstraint"><code class="docutils literal notranslate"><span class="pre">MassflowConstraint</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/enums.html#turbodesign.enums.PassageType"><code class="docutils literal notranslate"><span class="pre">PassageType</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/enums.html#turbodesign.enums.PowerType"><code class="docutils literal notranslate"><span class="pre">PowerType</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/enums.html#turbodesign.enums.RowType"><code class="docutils literal notranslate"><span class="pre">RowType</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules/inlet.html">Inlet</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/inlet.html#turbodesign.inlet.Inlet"><code class="docutils literal notranslate"><span class="pre">Inlet</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules/isentropic.html">Isentropic Equations</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/isentropic.html#turbodesign.isentropic.A_As"><code class="docutils literal notranslate"><span class="pre">A_As()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/isentropic.html#turbodesign.isentropic.FindMachP0P"><code class="docutils literal notranslate"><span class="pre">FindMachP0P()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/isentropic.html#turbodesign.isentropic.IsenP"><code class="docutils literal notranslate"><span class="pre">IsenP()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/isentropic.html#turbodesign.isentropic.IsenT"><code class="docutils literal notranslate"><span class="pre">IsenT()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/isentropic.html#turbodesign.isentropic.Massflow"><code class="docutils literal notranslate"><span class="pre">Massflow()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules/loss.html">Turbine Loss</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/loss.html#loss-type">Loss Type</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/loss.html#ainley-mathieson">Ainley Mathieson</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/loss.html#traupel">Traupel</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/loss.html#craig-cox">Craig Cox</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/loss.html#kacker-okapuu">Kacker Okapuu</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/loss.html#turbine-design-default">Turbine Design (Default)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/loss.html#fixed-pressure-loss">Fixed Pressure Loss</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/loss.html#fixed-efficiency-loss">Fixed Efficiency Loss</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules/lossinterp.html">Loss Interpolations</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/lossinterp.html#turbodesign.lossinterp.LossInterp"><code class="docutils literal notranslate"><span class="pre">LossInterp</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules/outlet.html">Outlet</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/outlet.html#turbodesign.outlet.Outlet"><code class="docutils literal notranslate"><span class="pre">Outlet</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules/passage.html">Passage</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/passage.html#turbodesign.passage.Passage"><code class="docutils literal notranslate"><span class="pre">Passage</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules/radeq.html">Radial Equilibrium</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/radeq.html#turbodesign.radeq.radeq"><code class="docutils literal notranslate"><span class="pre">radeq()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/radeq.html#turbodesign.radeq.radeq_normalized"><code class="docutils literal notranslate"><span class="pre">radeq_normalized()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules/rotor.html">Rotor</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/rotor.html#turbodesign.rotor.Rotor"><code class="docutils literal notranslate"><span class="pre">Rotor</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules/solve_radeq.html">Solve Radial Equilibrium</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/solve_radeq.html#turbodesign.solve_radeq.adjust_streamlines"><code class="docutils literal notranslate"><span class="pre">adjust_streamlines()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules/spool.html">Spool</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/spool.html#turbodesign.spool.Spool"><code class="docutils literal notranslate"><span class="pre">Spool</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules/td_math.html">Turbine Design Math</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/td_math.html#turbodesign.td_math.T0_coolant_weighted_average"><code class="docutils literal notranslate"><span class="pre">T0_coolant_weighted_average()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/td_math.html#turbodesign.td_math.compute_massflow"><code class="docutils literal notranslate"><span class="pre">compute_massflow()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/td_math.html#turbodesign.td_math.compute_power"><code class="docutils literal notranslate"><span class="pre">compute_power()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/td_math.html#turbodesign.td_math.compute_quantities"><code class="docutils literal notranslate"><span class="pre">compute_quantities()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/td_math.html#turbodesign.td_math.compute_quantities_power"><code class="docutils literal notranslate"><span class="pre">compute_quantities_power()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/td_math.html#turbodesign.td_math.inlet_calc"><code class="docutils literal notranslate"><span class="pre">inlet_calc()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/td_math.html#turbodesign.td_math.rotor_calc"><code class="docutils literal notranslate"><span class="pre">rotor_calc()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/td_math.html#turbodesign.td_math.stator_calc"><code class="docutils literal notranslate"><span class="pre">stator_calc()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules/turbinespool.html">Turbine Spool</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/turbinespool.html#turbodesign.turbinespool.TurbineSpool"><code class="docutils literal notranslate"><span class="pre">TurbineSpool</span></code></a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Turbo Design</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">turbodesign.spool</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for turbodesign.spool</h1><div class="highlight"><pre>
+<span></span><span class="c1"># type: ignore[arg-type, reportUnknownArgumentType]</span>
+<span class="kn">from</span> <span class="nn">dataclasses</span> <span class="kn">import</span> <span class="n">field</span>
+<span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Union</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">from</span> <span class="nn">.bladerow</span> <span class="kn">import</span> <span class="n">BladeRow</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">numpy.typing</span> <span class="k">as</span> <span class="nn">npt</span>
+<span class="kn">from</span> <span class="nn">.enums</span> <span class="kn">import</span> <span class="n">RowType</span><span class="p">,</span> <span class="n">MassflowConstraint</span>
+<span class="kn">from</span> <span class="nn">cantera.composite</span> <span class="kn">import</span> <span class="n">Solution</span>
+<span class="kn">from</span> <span class="nn">.loss.turbine</span> <span class="kn">import</span> <span class="n">TD2</span>
+<span class="kn">from</span> <span class="nn">pyturbo.helper</span> <span class="kn">import</span> <span class="n">line2D</span>
+<span class="kn">from</span> <span class="nn">scipy.interpolate</span> <span class="kn">import</span> <span class="n">interp1d</span>
+<span class="kn">from</span> <span class="nn">.passage</span> <span class="kn">import</span> <span class="n">Passage</span>
+<span class="kn">from</span> <span class="nn">.inlet</span> <span class="kn">import</span> <span class="n">Inlet</span>
+<span class="kn">from</span> <span class="nn">.outlet</span> <span class="kn">import</span> <span class="n">Outlet</span> 
+
+<div class="viewcode-block" id="Spool">
+<a class="viewcode-back" href="../../modules/spool.html#turbodesign.spool.Spool">[docs]</a>
+<span class="k">class</span> <span class="nc">Spool</span><span class="p">:</span>
+    <span class="n">blade_rows</span><span class="p">:</span><span class="n">List</span><span class="p">[</span><span class="n">BladeRow</span><span class="p">]</span><span class="o">=</span><span class="p">[]</span>
+    <span class="n">massflow</span><span class="p">:</span><span class="nb">float</span><span class="o">=</span><span class="mi">0</span>
+    <span class="n">rpm</span><span class="p">:</span><span class="nb">float</span> <span class="o">=</span> <span class="mi">0</span>
+    
+    <span class="n">passage</span><span class="p">:</span><span class="n">Passage</span>
+    <span class="n">t_streamline</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">10</span><span class="p">,)))</span>
+    <span class="n">num_streamlines</span><span class="p">:</span><span class="nb">int</span><span class="o">=</span><span class="mi">0</span>
+    
+    <span class="c1"># Fluid entering the spool</span>
+    <span class="n">_fluid</span><span class="p">:</span> <span class="n">Solution</span> <span class="o">=</span> <span class="n">Solution</span><span class="p">(</span><span class="s2">&quot;air.yaml&quot;</span><span class="p">)</span>
+
+    <span class="n">massflow_constraint</span><span class="p">:</span> <span class="n">MassflowConstraint</span>
+    
+    <span class="c1"># Inlet Conditions </span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">passage</span><span class="p">:</span><span class="n">Passage</span><span class="p">,</span>
+                 <span class="n">massflow</span><span class="p">:</span><span class="nb">float</span><span class="p">,</span><span class="n">rows</span><span class="o">=</span><span class="n">List</span><span class="p">[</span><span class="n">BladeRow</span><span class="p">],</span>
+                 <span class="n">num_streamlines</span><span class="p">:</span><span class="nb">int</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+                 <span class="n">fluid</span><span class="p">:</span><span class="n">Solution</span><span class="o">=</span><span class="n">Solution</span><span class="p">(</span><span class="s1">&#39;air.yaml&#39;</span><span class="p">),</span>
+                 <span class="n">rpm</span><span class="p">:</span><span class="nb">float</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span>
+                 <span class="n">massflow_constraint</span><span class="p">:</span><span class="n">MassflowConstraint</span><span class="o">=</span><span class="n">MassflowConstraint</span><span class="o">.</span><span class="n">MatchMassFlow</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initializes a Spool</span>
+
+
+<span class="sd">        Note:</span>
+<span class="sd">            When it comes to massflow, the exit angle of the blade rows along with the upstream total pressure is used to set the massflow through the spool. If turning is too high then massflow is limited and cannot. </span>
+<span class="sd">            This code gives you the option of setting a massflow and varying the exit angles to match that particular massflow. (MatchMassflow)</span>
+<span class="sd">            Or keeping the exit angle and modifying the inlet condition to set a specific massflow through the stage. (BalanceMassflow)</span>
+<span class="sd">            </span>
+<span class="sd">        Args:</span>
+<span class="sd">            passage (Passage): Passage defining hub and shroud</span>
+<span class="sd">            massflow (float): massflow at spool inlet </span>
+<span class="sd">            rows (List[BladeRow], optional): List of blade rows. Defaults to List[BladeRow].</span>
+<span class="sd">            num_streamlines (int, optional): number of streamlines. Defaults to 3.</span>
+<span class="sd">            gas (ct.Solution, optional): cantera gas solution. Defaults to ct.Solution(&#39;air.yaml&#39;).</span>
+<span class="sd">            rpm (float, optional): RPM for the entire spool Optional, you can also set rpm of the blade rows individually. Defaults to -1.</span>
+<span class="sd">            massflow_constraint (MassflowConstraint, optional): MatchMassflow - Matches the massflow defined in the spool. BalanceMassflow - Balances the massflow between BladeRows, matches the lowest massflow.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">passage</span> <span class="o">=</span> <span class="n">passage</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fluid</span> <span class="o">=</span> <span class="n">fluid</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">massflow</span> <span class="o">=</span> <span class="n">massflow</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">num_streamlines</span> <span class="o">=</span> <span class="n">num_streamlines</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">blade_rows</span> <span class="o">=</span> <span class="n">rows</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">massflow_constraint</span> <span class="o">=</span> <span class="n">massflow_constraint</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">rpm</span> <span class="o">=</span> <span class="n">rpm</span>
+        
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">blade_rows</span><span class="p">)):</span>
+<span class="w">            </span><span class="sd">&#39;&#39;&#39;Defining RPM in the bladerows</span>
+<span class="sd">                There&#39;s 2 ways of setting the RPM. </span>
+<span class="sd">                1. Conventional: Stator-Rotor-Stator-Rotor-etc. Set the RPM equally across all</span>
+<span class="sd">                2. Counter Rotation: We either use the RPM already persecribed for each blade row.</span>
+<span class="sd">            &#39;&#39;&#39;</span>    
+            <span class="k">if</span> <span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">blade_rows</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="o">!=</span> <span class="n">Inlet</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">blade_rows</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="o">!=</span> <span class="n">Outlet</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">blade_rows</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">fluid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fluid</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">blade_rows</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">rpm</span> <span class="o">=</span> <span class="n">rpm</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">blade_rows</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">axial_chord</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">blade_rows</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">axial_location</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">passage</span><span class="o">.</span><span class="n">hub_length</span>
+            
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">fluid</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fluid</span>
+
+    <span class="nd">@fluid</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">fluid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">newFluid</span><span class="p">:</span><span class="n">Solution</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Change the type of gas used in the spool</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            new_gas (ct.Solution.Solution): New gas mixture</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_fluid</span> <span class="o">=</span> <span class="n">newFluid</span>
+
+
+<div class="viewcode-block" id="Spool.set_blade_row_rpm">
+<a class="viewcode-back" href="../../modules/spool.html#turbodesign.spool.Spool.set_blade_row_rpm">[docs]</a>
+    <span class="k">def</span> <span class="nf">set_blade_row_rpm</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">index</span><span class="p">:</span><span class="nb">int</span><span class="p">,</span><span class="n">rpm</span><span class="p">:</span><span class="nb">float</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;sets the rpm of a particular blade row&quot;&quot;&quot;</span>    
+        <span class="bp">self</span><span class="o">.</span><span class="n">blade_rows</span><span class="p">[</span><span class="n">index</span><span class="p">]</span><span class="o">.</span><span class="n">rpm</span> <span class="o">=</span> <span class="n">rpm</span></div>
+
+        
+<div class="viewcode-block" id="Spool.set_blade_row_type">
+<a class="viewcode-back" href="../../modules/spool.html#turbodesign.spool.Spool.set_blade_row_type">[docs]</a>
+    <span class="k">def</span> <span class="nf">set_blade_row_type</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">blade_row_index</span><span class="p">:</span><span class="nb">int</span><span class="p">,</span><span class="n">rowType</span><span class="p">:</span><span class="n">RowType</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Sets a blade row to be a different type.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            blade_row_index (int): Index of blade row. Keep in mind Blade row 0 is inlet, -1 = outlet</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">blade_rows</span><span class="p">[</span><span class="n">blade_row_index</span><span class="p">]</span><span class="o">.</span><span class="n">row_type</span> <span class="o">=</span> <span class="n">rowType</span></div>
+
+
+<div class="viewcode-block" id="Spool.set_blade_row_exit_angles">
+<a class="viewcode-back" href="../../modules/spool.html#turbodesign.spool.Spool.set_blade_row_exit_angles">[docs]</a>
+    <span class="k">def</span> <span class="nf">set_blade_row_exit_angles</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">radius</span><span class="p">:</span><span class="n">Dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span><span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">]],</span><span class="n">beta</span><span class="p">:</span><span class="n">Dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span><span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">]],</span><span class="n">IsSupersonic</span><span class="p">:</span><span class="nb">bool</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Set the intended exit flow angles for the spool. </span>
+
+<span class="sd">            Useful if you already have a geometry that you want to simulate</span>
+<span class="sd">            </span>
+<span class="sd">            You can set the values for each blade row or simply the inlet and exit</span>
+<span class="sd"> </span>
+<span class="sd">        Args:</span>
+<span class="sd">            radius (np.ndarray): Matrix containing [[r1,r2,r3],[r1,r2,r3]] blade_rows x radial locations</span>
+<span class="sd">            beta (Dict[int,List[float]]): Metal Angle of the geometry, it is assumed that the fluid will leave at this angle.</span>
+<span class="sd">            IsSupersonic(bool): if solution is supersonic at spool exit</span>
+
+<span class="sd">        Example: </span>
+<span class="sd">            # Station 0 has angles of [73.1,74.2,75.4] </span>
+<span class="sd">            # Station 5 has angles of [69,69,69] </span>
+<span class="sd">            beta =  {0: [73.1,74.2,75.4], 5: [69,69,69]}</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">k</span><span class="p">,</span><span class="n">v</span> <span class="ow">in</span> <span class="n">radius</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>                                   
+            <span class="bp">self</span><span class="o">.</span><span class="n">blade_rows</span><span class="p">[</span><span class="n">k</span><span class="p">]</span><span class="o">.</span><span class="n">radii_geom</span> <span class="o">=</span> <span class="n">v</span> 
+        <span class="k">for</span> <span class="n">k</span><span class="p">,</span><span class="n">v</span> <span class="ow">in</span> <span class="n">beta</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>                                   
+            <span class="bp">self</span><span class="o">.</span><span class="n">blade_rows</span><span class="p">[</span><span class="n">k</span><span class="p">]</span><span class="o">.</span><span class="n">beta_geom</span> <span class="o">=</span> <span class="n">v</span> 
+            <span class="bp">self</span><span class="o">.</span><span class="n">blade_rows</span><span class="p">[</span><span class="n">k</span><span class="p">]</span><span class="o">.</span><span class="n">beta_fixed</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">for</span> <span class="n">br</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">blade_rows</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">IsSupersonic</span><span class="p">:</span>
+                <span class="n">br</span><span class="o">.</span><span class="n">solution_type</span> <span class="o">=</span> <span class="n">SolutionType</span><span class="o">.</span><span class="n">subsonic</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">br</span><span class="o">.</span><span class="n">solution_type</span> <span class="o">=</span> <span class="n">SolutionType</span><span class="o">.</span><span class="n">supersonic</span></div>
+
+        
+    
+<div class="viewcode-block" id="Spool.initialize_streamlines">
+<a class="viewcode-back" href="../../modules/spool.html#turbodesign.spool.Spool.initialize_streamlines">[docs]</a>
+    <span class="k">def</span> <span class="nf">initialize_streamlines</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize streamline and compute the curvature. </span>
+<span class="sd">            This function is called once</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+             
+        <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">blade_rows</span><span class="p">:</span> 
+            <span class="n">row</span><span class="o">.</span><span class="n">phi</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">num_streamlines</span><span class="p">,))</span>
+            <span class="n">row</span><span class="o">.</span><span class="n">rm</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">num_streamlines</span><span class="p">,))</span>
+            <span class="n">row</span><span class="o">.</span><span class="n">r</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">num_streamlines</span><span class="p">,))</span>
+            
+            <span class="n">t_radial</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">num_streamlines</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">calculate_streamline_curvature</span><span class="p">(</span><span class="n">row</span><span class="p">,</span><span class="n">t_radial</span><span class="p">)</span>
+                
+            <span class="c1"># Set the loss function if it&#39;s not set</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">loss_function</span> <span class="o">==</span> <span class="kc">None</span><span class="p">):</span>  
+                <span class="n">row</span><span class="o">.</span><span class="n">loss_function</span> <span class="o">=</span> <span class="n">TD2</span><span class="p">()</span></div>
+
+            
+<div class="viewcode-block" id="Spool.calculate_streamline_curvature">
+<a class="viewcode-back" href="../../modules/spool.html#turbodesign.spool.Spool.calculate_streamline_curvature">[docs]</a>
+    <span class="k">def</span> <span class="nf">calculate_streamline_curvature</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">row</span><span class="p">:</span><span class="n">BladeRow</span><span class="p">,</span><span class="n">t_radial</span><span class="p">:</span><span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span><span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">]):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Called to calculate new streamline curvature</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            row (BladeRow): blade row</span>
+<span class="sd">            t_radial (Union[List[float],npt.NDArray]): normalized streamline radial locations</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">tr</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">t_radial</span><span class="p">):</span>
+            <span class="n">t_streamline</span><span class="p">,</span> <span class="n">x_streamline</span><span class="p">,</span> <span class="n">r_streamline</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">passage</span><span class="o">.</span><span class="n">get_streamline</span><span class="p">(</span><span class="n">tr</span><span class="p">)</span>                
+            <span class="n">phi</span><span class="p">,</span> <span class="n">rm</span><span class="p">,</span> <span class="n">r</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">passage</span><span class="o">.</span><span class="n">streamline_curvature</span><span class="p">(</span><span class="n">x_streamline</span><span class="p">,</span><span class="n">r_streamline</span><span class="p">)</span>
+            <span class="n">row</span><span class="o">.</span><span class="n">phi</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">interp1d</span><span class="p">(</span><span class="n">t_streamline</span><span class="p">,</span><span class="n">phi</span><span class="p">)(</span><span class="n">row</span><span class="o">.</span><span class="n">axial_location</span><span class="p">))</span>
+            <span class="n">row</span><span class="o">.</span><span class="n">rm</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">interp1d</span><span class="p">(</span><span class="n">t_streamline</span><span class="p">,</span><span class="n">rm</span><span class="p">)(</span><span class="n">row</span><span class="o">.</span><span class="n">axial_location</span><span class="p">))</span>
+            <span class="n">row</span><span class="o">.</span><span class="n">r</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">interp1d</span><span class="p">(</span><span class="n">t_streamline</span><span class="p">,</span><span class="n">r</span><span class="p">)(</span><span class="n">row</span><span class="o">.</span><span class="n">axial_location</span><span class="p">))</span></div>
+
+          
+    <span class="k">def</span> <span class="nf">solve</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s1">&#39;Solve is not implemented&#39;</span><span class="p">)</span>
+
+    
+<div class="viewcode-block" id="Spool.plot">
+<a class="viewcode-back" href="../../modules/spool.html#turbodesign.spool.Spool.plot">[docs]</a>
+    <span class="k">def</span> <span class="nf">plot</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Plots the hub, shroud, and all the streamlines</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">num</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span><span class="n">clear</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span><span class="n">dpi</span><span class="o">=</span><span class="mi">150</span><span class="p">,</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span><span class="mi">10</span><span class="p">))</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">passage</span><span class="o">.</span><span class="n">xhub_pts</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">passage</span><span class="o">.</span><span class="n">rhub_pts</span><span class="p">,</span><span class="n">label</span><span class="o">=</span><span class="s1">&#39;hub&#39;</span><span class="p">,</span><span class="n">linestyle</span><span class="o">=</span><span class="s1">&#39;solid&#39;</span><span class="p">,</span><span class="n">linewidth</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span><span class="n">color</span><span class="o">=</span><span class="s1">&#39;black&#39;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">passage</span><span class="o">.</span><span class="n">xshroud_pts</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">passage</span><span class="o">.</span><span class="n">rshroud_pts</span><span class="p">,</span><span class="n">label</span><span class="o">=</span><span class="s1">&#39;shroud&#39;</span><span class="p">,</span><span class="n">linestyle</span><span class="o">=</span><span class="s1">&#39;solid&#39;</span><span class="p">,</span><span class="n">linewidth</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span><span class="n">color</span><span class="o">=</span><span class="s1">&#39;black&#39;</span><span class="p">)</span>
+        
+        <span class="n">hub_length</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">passage</span><span class="o">.</span><span class="n">xhub_pts</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">passage</span><span class="o">.</span><span class="n">rhub_pts</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span>
+        <span class="c1"># Populate the streamlines </span>
+        <span class="n">x_streamline</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">num_streamlines</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">blade_rows</span><span class="p">)))</span>
+        <span class="n">r_streamline</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">num_streamlines</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">blade_rows</span><span class="p">)))</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">blade_rows</span><span class="p">)):</span>
+            <span class="n">x_streamline</span><span class="p">[:,</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">blade_rows</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">x</span>
+            <span class="n">r_streamline</span><span class="p">[:,</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">blade_rows</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">r</span>
+        
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">blade_rows</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span> <span class="c1"># plot dashed lines for each steamline</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x_streamline</span><span class="p">[:,</span><span class="n">i</span><span class="p">],</span><span class="n">r_streamline</span><span class="p">[:,</span><span class="n">i</span><span class="p">],</span><span class="s1">&#39;--b&#39;</span><span class="p">,</span><span class="n">linewidth</span><span class="o">=</span><span class="mf">1.5</span><span class="p">)</span>
+        
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">blade_rows</span><span class="p">)):</span>
+            
+            <span class="n">row</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">blade_rows</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">x</span><span class="p">,</span><span class="n">row</span><span class="o">.</span><span class="n">r</span><span class="p">,</span><span class="n">linestyle</span><span class="o">=</span><span class="s1">&#39;dashed&#39;</span><span class="p">,</span><span class="n">linewidth</span><span class="o">=</span><span class="mf">1.5</span><span class="p">,</span><span class="n">color</span><span class="o">=</span><span class="s1">&#39;blue&#39;</span><span class="p">,</span><span class="n">alpha</span><span class="o">=</span><span class="mf">0.4</span><span class="p">)</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x_streamline</span><span class="p">[:,</span><span class="n">i</span><span class="p">],</span><span class="n">r_streamline</span><span class="p">[:,</span><span class="n">i</span><span class="p">],</span><span class="s1">&#39;or&#39;</span><span class="p">)</span>
+            
+            <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span> 
+                <span class="k">pass</span> <span class="c1"># Inlet </span>
+            <span class="k">else</span><span class="p">:</span>  <span class="c1"># i&gt;0</span>
+                <span class="n">upstream</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">blade_rows</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">upstream</span><span class="o">.</span><span class="n">row_type</span><span class="o">==</span> <span class="n">RowType</span><span class="o">.</span><span class="n">Inlet</span><span class="p">:</span>
+                    <span class="n">cut_line1</span><span class="p">,</span><span class="n">_</span><span class="p">,</span><span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">passage</span><span class="o">.</span><span class="n">get_cutting_line</span><span class="p">((</span><span class="n">row</span><span class="o">.</span><span class="n">axial_location</span><span class="o">*</span><span class="n">hub_length</span> <span class="o">+</span><span class="p">(</span><span class="mf">0.5</span><span class="o">*</span><span class="n">row</span><span class="o">.</span><span class="n">blade_to_blade_gap</span><span class="o">*</span><span class="n">row</span><span class="o">.</span><span class="n">axial_chord</span><span class="p">)</span> <span class="o">-</span> <span class="n">row</span><span class="o">.</span><span class="n">axial_chord</span><span class="p">)</span><span class="o">/</span><span class="n">hub_length</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">cut_line1</span><span class="p">,</span><span class="n">_</span><span class="p">,</span><span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">passage</span><span class="o">.</span><span class="n">get_cutting_line</span><span class="p">((</span><span class="n">upstream</span><span class="o">.</span><span class="n">axial_location</span><span class="o">*</span><span class="n">hub_length</span><span class="p">)</span><span class="o">/</span><span class="n">hub_length</span><span class="p">)</span>
+                <span class="n">cut_line2</span><span class="p">,</span><span class="n">_</span><span class="p">,</span><span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">passage</span><span class="o">.</span><span class="n">get_cutting_line</span><span class="p">((</span><span class="n">row</span><span class="o">.</span><span class="n">axial_location</span><span class="o">*</span><span class="n">hub_length</span><span class="o">-</span><span class="p">(</span><span class="mf">0.5</span><span class="o">*</span><span class="n">row</span><span class="o">.</span><span class="n">blade_to_blade_gap</span><span class="o">*</span><span class="n">row</span><span class="o">.</span><span class="n">axial_chord</span><span class="p">))</span><span class="o">/</span><span class="n">hub_length</span><span class="p">)</span>
+                
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">blade_rows</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">row_type</span> <span class="o">==</span> <span class="n">RowType</span><span class="o">.</span><span class="n">Stator</span><span class="p">:</span>
+                <span class="n">x1</span><span class="p">,</span><span class="n">r1</span> <span class="o">=</span> <span class="n">cut_line1</span><span class="o">.</span><span class="n">get_point</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">10</span><span class="p">))</span>
+                <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x1</span><span class="p">,</span><span class="n">r1</span><span class="p">,</span><span class="s1">&#39;m&#39;</span><span class="p">)</span>
+                <span class="n">x2</span><span class="p">,</span><span class="n">r2</span> <span class="o">=</span> <span class="n">cut_line2</span><span class="o">.</span><span class="n">get_point</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">10</span><span class="p">))</span>
+                <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x2</span><span class="p">,</span><span class="n">r2</span><span class="p">,</span><span class="s1">&#39;m&#39;</span><span class="p">)</span>
+                <span class="n">x_text</span> <span class="o">=</span> <span class="p">(</span><span class="n">x1</span><span class="o">+</span><span class="n">x2</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span><span class="p">;</span> <span class="n">r_text</span> <span class="o">=</span> <span class="p">(</span><span class="n">r1</span><span class="o">+</span><span class="n">r2</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span>
+                <span class="n">plt</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">x_text</span><span class="o">.</span><span class="n">mean</span><span class="p">(),</span><span class="n">r_text</span><span class="o">.</span><span class="n">mean</span><span class="p">(),</span><span class="s2">&quot;Stator&quot;</span><span class="p">,</span><span class="n">fontdict</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;fontsize&quot;</span><span class="p">:</span><span class="s2">&quot;xx-large&quot;</span><span class="p">})</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">blade_rows</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">row_type</span> <span class="o">==</span> <span class="n">RowType</span><span class="o">.</span><span class="n">Rotor</span><span class="p">:</span>
+                <span class="n">x1</span><span class="p">,</span><span class="n">r1</span> <span class="o">=</span> <span class="n">cut_line1</span><span class="o">.</span><span class="n">get_point</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">10</span><span class="p">))</span>
+                <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x1</span><span class="p">,</span><span class="n">r1</span><span class="p">,</span><span class="n">color</span><span class="o">=</span><span class="s1">&#39;brown&#39;</span><span class="p">)</span>
+                <span class="n">x2</span><span class="p">,</span><span class="n">r2</span> <span class="o">=</span> <span class="n">cut_line2</span><span class="o">.</span><span class="n">get_point</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">10</span><span class="p">))</span>
+                <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x2</span><span class="p">,</span><span class="n">r2</span><span class="p">,</span><span class="n">color</span><span class="o">=</span><span class="s1">&#39;brown&#39;</span><span class="p">)</span>
+                <span class="n">x_text</span> <span class="o">=</span> <span class="p">(</span><span class="n">x1</span><span class="o">+</span><span class="n">x2</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span><span class="p">;</span> <span class="n">r_text</span> <span class="o">=</span> <span class="p">(</span><span class="n">r1</span><span class="o">+</span><span class="n">r2</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span>
+                <span class="n">plt</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">x_text</span><span class="o">.</span><span class="n">mean</span><span class="p">(),</span><span class="n">r_text</span><span class="o">.</span><span class="n">mean</span><span class="p">(),</span><span class="s2">&quot;Rotor&quot;</span><span class="p">,</span><span class="n">fontdict</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;fontsize&quot;</span><span class="p">:</span><span class="s2">&quot;xx-large&quot;</span><span class="p">})</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">axis</span><span class="p">(</span><span class="s1">&#39;scaled&#39;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Meridional.png&quot;</span><span class="p">,</span><span class="n">transparent</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span><span class="n">dpi</span><span class="o">=</span><span class="mi">150</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span></div>
+
+        
+<div class="viewcode-block" id="Spool.plot_velocity_triangles">
+<a class="viewcode-back" href="../../modules/spool.html#turbodesign.spool.Spool.plot_velocity_triangles">[docs]</a>
+    <span class="k">def</span> <span class="nf">plot_velocity_triangles</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Plots the velocity triangles for each blade row</span>
+<span class="sd">            Made for turbines </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">prop</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">arrowstyle</span><span class="o">=</span><span class="s2">&quot;-|&gt;,head_width=0.4,head_length=0.8&quot;</span><span class="p">,</span>
+            <span class="n">shrinkA</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span><span class="n">shrinkB</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        
+        
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_streamlines</span><span class="p">):</span>
+            <span class="n">x_start</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">y_max</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">y_min</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">num</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span><span class="n">clear</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">blade_rows</span><span class="p">)):</span>
+                <span class="n">row</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">blade_rows</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+                <span class="n">x_end</span> <span class="o">=</span> <span class="n">x_start</span> <span class="o">+</span> <span class="n">row</span><span class="o">.</span><span class="n">Vx</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+                <span class="n">dx</span> <span class="o">=</span> <span class="n">x_end</span> <span class="o">-</span> <span class="n">x_start</span>
+                
+                <span class="n">Vt</span> <span class="o">=</span> <span class="n">row</span><span class="o">.</span><span class="n">Vt</span><span class="p">[</span><span class="n">j</span><span class="p">]</span>
+                <span class="n">Wt</span> <span class="o">=</span> <span class="n">row</span><span class="o">.</span><span class="n">Wt</span><span class="p">[</span><span class="n">j</span><span class="p">]</span>
+                <span class="n">U</span> <span class="o">=</span> <span class="n">row</span><span class="o">.</span><span class="n">U</span><span class="p">[</span><span class="n">j</span><span class="p">]</span>
+
+                <span class="n">y_max</span> <span class="o">=</span> <span class="p">(</span><span class="n">Vt</span> <span class="k">if</span> <span class="n">Vt</span><span class="o">&gt;</span><span class="n">y_max</span> <span class="k">else</span> <span class="n">y_max</span><span class="p">)</span>
+                <span class="n">y_max</span> <span class="o">=</span> <span class="p">(</span><span class="n">Wt</span> <span class="k">if</span> <span class="n">Wt</span><span class="o">&gt;</span><span class="n">y_max</span> <span class="k">else</span> <span class="n">y_max</span><span class="p">)</span>
+                
+                <span class="n">y_min</span> <span class="o">=</span> <span class="p">(</span><span class="n">Vt</span> <span class="k">if</span> <span class="n">Vt</span><span class="o">&lt;</span><span class="n">y_min</span> <span class="k">else</span> <span class="n">y_min</span><span class="p">)</span>
+                <span class="n">y_min</span> <span class="o">=</span> <span class="p">(</span><span class="n">Wt</span> <span class="k">if</span> <span class="n">Wt</span><span class="o">&lt;</span><span class="n">y_min</span> <span class="k">else</span> <span class="n">y_min</span><span class="p">)</span>
+                
+                <span class="c1"># V </span>
+                <span class="n">plt</span><span class="o">.</span><span class="n">annotate</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">xy</span><span class="o">=</span><span class="p">(</span><span class="n">x_end</span><span class="p">,</span><span class="n">Vt</span><span class="p">),</span> <span class="n">xytext</span><span class="o">=</span><span class="p">(</span><span class="n">x_start</span><span class="p">,</span><span class="mi">0</span><span class="p">),</span> <span class="n">arrowprops</span><span class="o">=</span><span class="n">prop</span><span class="p">)</span>
+                <span class="n">plt</span><span class="o">.</span><span class="n">text</span><span class="p">((</span><span class="n">x_start</span><span class="o">+</span><span class="n">x_end</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span><span class="n">Vt</span><span class="o">/</span><span class="mi">2</span><span class="o">*</span><span class="mf">1.1</span><span class="p">,</span><span class="s2">&quot;V&quot;</span><span class="p">,</span><span class="n">fontdict</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;fontsize&quot;</span><span class="p">:</span><span class="s2">&quot;xx-large&quot;</span><span class="p">})</span>
+                
+                <span class="c1"># W</span>
+                <span class="n">plt</span><span class="o">.</span><span class="n">annotate</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">xy</span><span class="o">=</span><span class="p">(</span><span class="n">x_end</span><span class="p">,</span><span class="n">Wt</span><span class="p">),</span> <span class="n">xytext</span><span class="o">=</span><span class="p">(</span><span class="n">x_start</span><span class="p">,</span><span class="mi">0</span><span class="p">),</span> <span class="n">arrowprops</span><span class="o">=</span><span class="n">prop</span><span class="p">)</span>
+                <span class="n">plt</span><span class="o">.</span><span class="n">text</span><span class="p">((</span><span class="n">x_start</span><span class="o">+</span><span class="n">x_end</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span><span class="n">Wt</span><span class="o">/</span><span class="mi">2</span><span class="o">*</span><span class="mf">1.1</span><span class="p">,</span><span class="s2">&quot;W&quot;</span><span class="p">,</span><span class="n">fontdict</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;fontsize&quot;</span><span class="p">:</span><span class="s2">&quot;xx-large&quot;</span><span class="p">})</span>
+                
+                <span class="k">if</span> <span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">Vt</span><span class="p">[</span><span class="n">j</span><span class="p">])</span> <span class="o">&gt;</span> <span class="nb">abs</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">Wt</span><span class="p">[</span><span class="n">j</span><span class="p">])):</span>
+                    <span class="c1"># Shift Vt to right just a bit so we can see it</span>
+                    <span class="n">plt</span><span class="o">.</span><span class="n">annotate</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">xy</span><span class="o">=</span><span class="p">(</span><span class="n">x_end</span><span class="p">,</span><span class="n">Wt</span><span class="p">),</span> <span class="n">xytext</span><span class="o">=</span><span class="p">(</span><span class="n">x_end</span><span class="p">,</span><span class="mi">0</span><span class="p">),</span> <span class="n">arrowprops</span><span class="o">=</span><span class="n">prop</span><span class="p">)</span> <span class="c1"># Wt</span>
+                    <span class="n">plt</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">x_end</span><span class="o">+</span><span class="n">dx</span><span class="o">*</span><span class="mf">0.1</span><span class="p">,</span><span class="n">Wt</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span><span class="s2">&quot;Wt&quot;</span><span class="p">,</span><span class="n">fontdict</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;fontsize&quot;</span><span class="p">:</span><span class="s2">&quot;xx-large&quot;</span><span class="p">})</span>
+
+                    <span class="n">plt</span><span class="o">.</span><span class="n">annotate</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">xy</span><span class="o">=</span><span class="p">(</span><span class="n">x_end</span><span class="p">,</span><span class="n">U</span><span class="o">+</span><span class="n">Wt</span><span class="p">),</span> <span class="n">xytext</span><span class="o">=</span><span class="p">(</span><span class="n">x_end</span><span class="p">,</span><span class="n">Wt</span><span class="p">),</span> <span class="n">arrowprops</span><span class="o">=</span><span class="n">prop</span><span class="p">)</span> <span class="c1"># U</span>
+                    <span class="n">plt</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">x_end</span><span class="o">+</span><span class="n">dx</span><span class="o">*</span><span class="mf">0.1</span><span class="p">,(</span><span class="n">Wt</span><span class="o">+</span><span class="n">U</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span><span class="s2">&quot;U&quot;</span><span class="p">,</span><span class="n">fontdict</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;fontsize&quot;</span><span class="p">:</span><span class="s2">&quot;xx-large&quot;</span><span class="p">})</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="c1"># Shift Wt to right just a bit so we can see it</span>
+                    <span class="n">plt</span><span class="o">.</span><span class="n">annotate</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">xy</span><span class="o">=</span><span class="p">(</span><span class="n">x_end</span><span class="p">,</span><span class="n">Vt</span><span class="p">),</span> <span class="n">xytext</span><span class="o">=</span><span class="p">(</span><span class="n">x_end</span><span class="p">,</span><span class="mi">0</span><span class="p">),</span> <span class="n">arrowprops</span><span class="o">=</span><span class="n">prop</span><span class="p">)</span> <span class="c1"># Vt</span>
+                    <span class="n">plt</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">x_end</span><span class="o">+</span><span class="n">dx</span><span class="o">*</span><span class="mf">0.1</span><span class="p">,</span><span class="n">Vt</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span><span class="s2">&quot;Vt&quot;</span><span class="p">,</span><span class="n">fontdict</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;fontsize&quot;</span><span class="p">:</span><span class="s2">&quot;xx-large&quot;</span><span class="p">})</span>
+
+                    <span class="n">plt</span><span class="o">.</span><span class="n">annotate</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">xy</span><span class="o">=</span><span class="p">(</span><span class="n">x_end</span><span class="p">,</span><span class="n">Wt</span><span class="o">+</span><span class="n">U</span><span class="p">),</span> <span class="n">xytext</span><span class="o">=</span><span class="p">(</span><span class="n">x_end</span><span class="p">,</span><span class="n">Wt</span><span class="p">),</span> <span class="n">arrowprops</span><span class="o">=</span><span class="n">prop</span><span class="p">)</span> <span class="c1"># U</span>
+                    <span class="n">plt</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">x_end</span><span class="o">+</span><span class="n">dx</span><span class="o">*</span><span class="mf">0.1</span><span class="p">,</span><span class="n">Wt</span><span class="o">+</span><span class="n">U</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span><span class="s2">&quot;U&quot;</span><span class="p">,</span><span class="n">fontdict</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;fontsize&quot;</span><span class="p">:</span><span class="s2">&quot;xx-large&quot;</span><span class="p">})</span>
+
+                <span class="n">plt</span><span class="o">.</span><span class="n">text</span><span class="p">((</span><span class="n">x_start</span><span class="o">+</span><span class="n">x_end</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span><span class="o">-</span><span class="n">y_max</span><span class="o">*</span><span class="mf">0.95</span><span class="p">,</span><span class="n">row</span><span class="o">.</span><span class="n">row_type</span><span class="o">.</span><span class="n">name</span><span class="p">,</span><span class="n">fontdict</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;fontsize&quot;</span><span class="p">:</span><span class="s2">&quot;xx-large&quot;</span><span class="p">})</span>
+                <span class="n">x_start</span> <span class="o">+=</span> <span class="n">row</span><span class="o">.</span><span class="n">Vx</span><span class="p">[</span><span class="n">j</span><span class="p">]</span>
+                <span class="n">plt</span><span class="o">.</span><span class="n">axis</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span><span class="n">x_end</span><span class="o">+</span><span class="n">dx</span><span class="p">,</span> <span class="n">y_min</span><span class="p">,</span> <span class="n">y_max</span><span class="p">])</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Velocity Triangles for Streamline </span><span class="si">{</span><span class="n">j</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;streamline_</span><span class="si">{</span><span class="n">j</span><span class="si">:</span><span class="s2">04d</span><span class="si">}</span><span class="s2">.png&quot;</span><span class="p">,</span><span class="n">transparent</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span><span class="n">dpi</span><span class="o">=</span><span class="mi">150</span><span class="p">)</span></div>
+</div>
+
+    
+
+
+   
+    
+<span class="k">def</span> <span class="nf">JSON_to_Spool</span><span class="p">(</span><span class="n">filename</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="s2">&quot;spool.json&quot;</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Reads a JSON file with the properties </span>
+<span class="sd">    #! Need to instantiate and return spool. Fluid isn&#39;t loaded fyi </span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        filename (str, optional): json filename with properties . Defaults to &quot;spool.json&quot;.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Paht Juangphanich.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
