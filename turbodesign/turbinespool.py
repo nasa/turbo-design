@@ -215,7 +215,7 @@ class TurbineSpool(Spool):
             return np.std(total_massflow)*2 # + abs(sum(massflow_stage))  # Equation 28
         
         # Break apart the rows to stages
-        outlet_P=list(); outlet_P_guess = list()
+        outlet_P=list(); outlet_P_guess = list() # Outlet P is the bounds, outlet_p_guess is the guessed values 
         
         for i in range(1,len(self.blade_rows)-2):
             outlet_P.append(self.blade_rows[i].inlet_to_outlet_pratio)
