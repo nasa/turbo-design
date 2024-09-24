@@ -57,8 +57,8 @@ def compute_massflow(row:BladeRow) -> None:
     massflow = row.percent_hub_shroud*0
     total_area = 0 
     for j in range(1,len(row.percent_hub_shroud)):
-        Vm = row.Vm[j]
-        rho = row.rho[j]
+        Vm = (row.Vm[j]+row.Vm[j-1])/2
+        rho = (row.rho[j]+row.rho[j-1])/2
         if np.abs((row.x[j]-row.x[j-1]))<1E-12: # Axial Machines
             total_area += np.pi*(row.r[j]**2-row.r[j-1]**2)
             massflow[j] = Vm * rho * np.pi* (row.r[j]**2-row.r[j-1]**2) + massflow[j-1]

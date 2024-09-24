@@ -4,14 +4,12 @@
     In this example the blade exit angles are fixed and only degree of reaction changes between the stage to match the massflow
 '''
 #%% Import Library
-import sys
 from typing import List
-sys.path.insert(0,'../../')
-from td3 import PassageType
-from td3 import TurbineSpool, Inlet, RowType, BladeRow, Passage, Outlet
-from td3.enums import MassflowConstraint
-from td3.coolant import Coolant
-from td3.loss.turbine import FixedPressureLoss
+from turbodesign import PassageType
+from turbodesign import TurbineSpool, Inlet, RowType, BladeRow, Passage, Outlet
+from turbodesign.enums import MassflowConstraint
+from turbodesign.coolant import Coolant
+from turbodesign.loss.turbine import FixedPressureLoss
 import numpy as np 
 from cantera import Solution
 import pickle, math

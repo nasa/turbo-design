@@ -6,13 +6,11 @@
     In this example the blade exit angles are fixed and only degree of reaction changes between the stage to match the massflow
 '''
 #%% Import Library
-import sys
-sys.path.insert(0,'../../')
-from td3 import PassageType
-from td3 import TurbineSpool, Inlet, RowType, BladeRow, Passage, Outlet
-from td3.enums import MassflowConstraint
-from td3.coolant import Coolant
-from td3.loss.turbine import FixedPressureLoss
+from turbodesign import PassageType
+from turbodesign import TurbineSpool, Inlet, RowType, BladeRow, Passage, Outlet
+from turbodesign.enums import MassflowConstraint
+from turbodesign.coolant import Coolant
+from turbodesign.loss.turbine import FixedPressureLoss
 import numpy as np 
 from cantera import Solution
 
@@ -54,7 +52,7 @@ inlet = Inlet(M=0.2,
                  fluid=fluid, 
                  percent_radii=0.5,
                  axial_location=0)
-outlet = Outlet(P=P0/4.45,percent_radii=0.5,num_streamlines=3)
+outlet = Outlet(P=P0/4.45,percent_radii=0.5,num_streamlines=5)
 
 #%% Define Blade Rows 
 # Axial location is a percentage along the hub where row exit is defined
@@ -78,10 +76,10 @@ stator2.coolant = Coolant(fluid, T0=T0*0.555556, P0= P0 * 6894.76, massflow_perc
 rotor2.coolant = Coolant(fluid, T0*0.555556, P0 * 6894.76,massflow_percentage=0)
 
 # Add in turning angles
-stator1.beta2_metal = [72,72,72]        # Angle, hub,mean,tip
-rotor1.beta2_metal = [-72,-72,-72] 
-stator2.beta2_metal = [70,70,70]
-rotor2.beta2_metal = [-65,-65,-65]
+stator1.beta2_metal = [72,72,72,72,72]        # Angle, hub,mean,tip
+rotor1.beta2_metal = [-72,-72,-72,-72,-72] 
+stator2.beta2_metal = [70,70,70,70,70]
+rotor2.beta2_metal = [-65,-65,-65,-65,-65]
 
 # These are all guessed values 
 stator1.loss_model = FixedPressureLoss(0.15)
@@ -93,7 +91,7 @@ rotor2.loss_model = FixedPressureLoss(0.18)
 #%% Initialize the Spool
 spool = TurbineSpool(passage=passage,
             rpm=Design_RPM, 
-            num_streamlines=3, 
+            num_streamlines=5, 
             massflow=massflow, 
             rows=[inlet,stator1,rotor1,stator2,rotor2,outlet])
 spool.fluid = fluid
