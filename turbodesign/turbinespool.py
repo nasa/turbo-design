@@ -240,7 +240,7 @@ class TurbineSpool(Spool):
                     for i in range(1,len(blade_rows)-1):
                         for j in range(self.num_streamlines):
                             blade_rows[i].P[j] = P[i][j]*x0[(i-1)*self.num_streamlines+j]    # x0 size = num_streamlines -1 
-                            
+                    
                 calculate_massflows(blade_rows,True)
                 print(x0)
                 return calculate_error(blade_rows)
@@ -279,30 +279,30 @@ class TurbineSpool(Spool):
         err = calculate_error(self.blade_rows[:-1])
         print(f"Massflow convergenced error:{err}")
             
-        finetune = True
-        if finetune:        
-            print('Finetune static pressure between stages')
-            self.blade_rows[-1].transfer_quantities(self.blade_rows[-2])
-            self.blade_rows[-1].P = self.blade_rows[-1].get_static_pressure(self.blade_rows[-1].percent_hub_shroud)
-            P = [row.P for row in self.blade_rows] # Average static pressures
-            bounds = []; guess = []
-            for i in range(1,len(self.blade_rows)-1): # set the bounds 
-                for j in range(self.num_streamlines):
-                    bounds.append([0.8,1.2]) # vary by +- 20%
-                    guess.append(1)
+        # finetune = True
+        # if finetune:        
+        #     print('Finetune static pressure between stages')
+        #     self.blade_rows[-1].transfer_quantities(self.blade_rows[-2])
+        #     self.blade_rows[-1].P = self.blade_rows[-1].get_static_pressure(self.blade_rows[-1].percent_hub_shroud)
+        #     P = [row.P for row in self.blade_rows] # Average static pressures
+        #     bounds = []; guess = []
+        #     for i in range(1,len(self.blade_rows)-1): # set the bounds 
+        #         for j in range(self.num_streamlines):
+        #             bounds.append([0.8,1.2]) # vary by +- 20%
+        #             guess.append(1)
             
-            x = fmin_slsqp(func=balance_massflows,args=(self.blade_rows[:-1],self.blade_rows[0].P0,P,False), 
-                        bounds=bounds, x0=guess,epsilon=0.001,iter=200)
-            P = [row.P for row in self.blade_rows] # Average static pressures
+        #     x = fmin_slsqp(func=balance_massflows,args=(self.blade_rows[:-1],self.blade_rows[0].P0,P,False), 
+        #                 bounds=bounds, x0=guess,epsilon=0.001,iter=200)
+        #     P = [row.P for row in self.blade_rows] # Average static pressures
             
-            for _ in range(2):
-                adjust_streamlines(self.blade_rows[:-1],self.passage)
-                self.blade_rows[-1].transfer_quantities(self.blade_rows[-2])
-                self.blade_rows[-1].P = self.blade_rows[-1].get_static_pressure(self.blade_rows[-1].percent_hub_shroud)
-                balance_massflows(x,self.blade_rows[:-1],self.blade_rows[0].P0,P,False)
+        #     for _ in range(2):
+        #         adjust_streamlines(self.blade_rows[:-1],self.passage)
+        #         self.blade_rows[-1].transfer_quantities(self.blade_rows[-2])
+        #         self.blade_rows[-1].P = self.blade_rows[-1].get_static_pressure(self.blade_rows[-1].percent_hub_shroud)
+        #         balance_massflows(x,self.blade_rows[:-1],self.blade_rows[0].P0,P,False)
                 
-            err = calculate_error(self.blade_rows[:-1])
-            print(f"Massflow convergenced error after finetuning:{err}")
+        #     err = calculate_error(self.blade_rows[:-1])
+        #     print(f"Massflow convergenced error after finetuning:{err}")
             
     
     def export_properties(self,filename:str="turbine_spool.json"):
