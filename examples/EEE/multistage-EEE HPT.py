@@ -61,8 +61,8 @@ def plot_profile(blade):
     plt.axis('scaled')
     plt.show()
     
-hub_shroud = pickle.load(open('hub_shroud.pkl','rb'))       # Units are in in inches
-stator_rotor = pickle.load(open('stator_rotor.pkl','rb'))   
+hub_shroud = pickle.load(open('examples/EEE/hub_shroud.pkl','rb'))       # Units are in in inches
+stator_rotor = pickle.load(open('examples/EEE/stator_rotor.pkl','rb'))   
 
 hub = hub_shroud['Hub']*0.0254; shroud = hub_shroud['Shroud']*0.0254
 hub2 = shroud*0
@@ -92,34 +92,37 @@ passage = Passage(hub2[:,0],hub2[:,1],
                   shroud[:,0],shroud[:,1],
                   passageType=PassageType.Axial)
 
-# #%% Design Conditions 
-Design_RPM = 13119
+# #%% Design Conditions from Table I "EEE_HPT_report.pdf"
+Design_RPM = 12680
 massflow = 69.1 # kg/s
-P0 = 3163392     # Pascal 
-T0 = 1810      # Kelvin
-
+P0 = 60E5    # Pascal 
+T0 = 1588      # Kelvin 
+Me = 0.421
+PT4_PT42 = 4.933
+PT42 = P0/PT4_PT42
+Pexit = PT42/(1+(1.4-1)/2*Me**2)**(1.4/0.4)
 # Fluid
 fluid = Solution('air.yaml')
 fluid.TP = T0, P0 # Use pascal for cantera
 print(f"Coefficient of Pressure [J/Kg] {fluid.cp:0.4f}")
 
 #%% Defining the Inlet
+hub_len = max(hub[:,0])-min(hub[:,0])
 inlet = Inlet(M=0.1, 
                  P0=[P0],
                  T0=[T0], 
                  beta=[0], 
                  fluid=fluid, 
                  percent_radii=0.5,
-                 axial_location=0)
-outlet = Outlet(P=829869.3,percent_radii=0.5,num_streamlines=3)
+                 axial_location=(min(stator1[0][:,0]) - min(hub[:,0]))/hub_len)
+outlet = Outlet(P=Pexit,percent_radii=0.5,num_streamlines=3)
 
-hub_len = max(hub[:,0])-min(hub[:,0])
 #%% Define Blade Rows 
 # Axial location is a percentage along the hub where row exit is defined
-stator1 = BladeRow(row_type=RowType.Stator,axial_location=(min(stator1[0][:,0]) - min(hub[:,0]))/hub_len, stage_id=0)
-rotor1 = BladeRow(row_type=RowType.Rotor, axial_location=(min(rotor1[0][:,0]) - min(hub[:,0]))/hub_len,stage_id=0)
-stator2 = BladeRow(row_type=RowType.Stator,axial_location=(min(stator2[0][:,0]) - min(hub[:,0]))/hub_len,stage_id=1)
-rotor2 = BladeRow(row_type=RowType.Rotor, axial_location=(min(rotor2[0][:,0]) - min(hub[:,0]))/hub_len,stage_id=1)
+stator1 = BladeRow(row_type=RowType.Stator,axial_location=(max(stator1[0][:,0]) - min(hub[:,0]))/hub_len, stage_id=0)
+rotor1 = BladeRow(row_type=RowType.Rotor, axial_location=(max(rotor1[0][:,0]) - min(hub[:,0]))/hub_len,stage_id=0)
+stator2 = BladeRow(row_type=RowType.Stator,axial_location=(max(stator2[0][:,0]) - min(hub[:,0]))/hub_len,stage_id=1)
+rotor2 = BladeRow(row_type=RowType.Rotor, axial_location=(max(rotor2[0][:,0]) - min(hub[:,0]))/hub_len,stage_id=1)
 
 stator1.axial_chord = stator1_cax # Set an axial chord
 rotor1.axial_chord = rotor1_cax
@@ -132,14 +135,14 @@ rotor1.coolant = Coolant(fluid, T0*0.555556, P0=P0,massflow_percentage=0)
 stator2.coolant = Coolant(fluid, T0=T0*0.555556, P0=P0,massflow_percentage=0) 
 rotor2.coolant = Coolant(fluid, T0*0.555556, P0=P0,massflow_percentage=0)
 
-# Add in turning angles
-stator1.beta2_metal = [72.2,72.2,72.2]        # Angle, hub,mean,tip
-rotor1.beta2_metal = [-63.4,-63.4,-63.4] 
-stator2.beta2_metal = [68.5,68.5,68.5]
-rotor2.beta2_metal = [-63.5,-63.5,-63.5]
+# Add in turning angles comes from "HPT_EEE_report.pdf" table III
+stator1.beta2_metal = [75.4, 74.2, 73.1]        # Angle, hub,mean,tip
+rotor1.beta2_metal = [-64.4,-66.9,-65.6] 
+stator2.beta2_metal = [69,69,69]
+rotor2.beta2_metal = [-59.8,-59.8,-59.9]
 
 # These are all guessed values 
-stator1.loss_model = FixedPressureLoss(0.06)
+stator1.loss_model = FixedPressureLoss(0.03)
 rotor1.loss_model = FixedPressureLoss(0.06)
 stator2.loss_model = FixedPressureLoss(0.08)
 rotor2.loss_model = FixedPressureLoss(0.09)
@@ -160,7 +163,7 @@ spool.fluid = fluid
 spool.massflow_constraint = MassflowConstraint.BalanceMassFlow # Fixes the exit angle and changes degree of reaction
 # spool.plot_geometry()
 spool.solve() # This also initializes streamlines
-spool.export_properties("EEE-HPT.json")
+spool.export_properties("examples/EEE/EEE-HPT.json")
 spool.plot()
 spool.plot_velocity_triangles()
 print('check')

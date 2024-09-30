@@ -340,7 +340,13 @@ class TurbineSpool(Spool):
                 t,x,r = self.passage.get_streamline(p)
                 x_streamline[j,indx] = float(interp1d(t,x)(row.axial_location))
                 r_streamline[j,indx] = float(interp1d(t,r)(row.axial_location))
-                
+        
+        Pratio_Total_Total = np.mean(self.blade_rows[0].P0 / self.blade_rows[-2].P0)
+        Pratio_Total_Static = np.mean(self.blade_rows[0].P0 / self.blade_rows[-2].P)
+        FlowFunction = np.mean(massflow)*np.sqrt(self.blade_rows[0].T0)*self.blade_rows[0].P0/1000 # kg sqrt(K)/(sec kPa)
+        CorrectedSpeed = self.rpm * np.pi/30 / np.sqrt(self.blade_rows[0].T0.mean())   # rad/s * 1/sqrt(K)
+        EnergyFunction = (self.blade_rows[0].T0 - self.blade_rows[-2].T0) * 0.5* (self.blade_rows[0].Cp + self.blade_rows[-2].Cp) / self.blade_rows[0].T0 # J/(KgK)
+        EnergyFunction = np.mean(EnergyFunction)
         data = {            
             "blade_rows": blade_rows,
             "massflow":np.mean(massflow),
@@ -355,7 +361,12 @@ class TurbineSpool(Spool):
             "total-total_efficiency":total_total_efficiency,
             "total-static_efficiency":total_static_efficiency,
             "stage_loading":stage_loading,
-            "degree_of_reaction":degree_of_reaction
+            "degree_of_reaction":degree_of_reaction,
+            "Pratio_Total_Total":Pratio_Total_Total,
+            "Pratio_Total_Static":Pratio_Total_Static,
+            "FlowFunction":FlowFunction,
+            "CorrectedSpeed":CorrectedSpeed,
+            "EnergyFunction":EnergyFunction
         }
         # Dump all the Python objects into a single JSON file.
         class NumpyEncoder(json.JSONEncoder):
