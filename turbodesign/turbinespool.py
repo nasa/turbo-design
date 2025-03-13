@@ -206,7 +206,9 @@ class TurbineSpool(Spool):
                             sign*=-1
                 if len(stage_ids) % 2 == 1:
                     massflow_stage.append(massflow_stage[-1]*sign)
-                
+            deviation = np.std(total_massflow)*2
+            if deviation>1.0:
+                print("high massflow deviation detected")
             return np.std(total_massflow)*2 # + abs(sum(massflow_stage))  # Equation 28
             
         # Balance the massflow between Stages
@@ -534,11 +536,11 @@ def outlet_pressure(percents:List[float],inletP0:float,outletP:float) -> npt.NDA
     maxP = inletP0
     minP = outletP
     if isinstance(percents, float):
-        Ps = [percents*(minP-maxP)+maxP]
+        Ps = [percents*(maxP-minP)+minP]
     else:
         Ps = np.zeros(shape=(len(percents),1)); i = 0
         for p in percents:
-            Ps[i] = p*(minP-maxP)+maxP
+            Ps[i] = p*(maxP - minP) + minP
             maxP = Ps[i]
             i+=1
     return Ps
