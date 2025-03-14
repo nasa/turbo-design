@@ -117,7 +117,7 @@ class BladeRow:
     _te_s:float = 0.08
     _tip_clearance:float = 0 # Clearance as a percentage of span or blade height
 
-    _inlet_to_outlet_pratio = [0.06,0.7]
+    _inlet_to_outlet_pratio = [0.06,0.95]
         
     @property
     def inlet_to_outlet_pratio(self) -> Tuple[float,float]:
@@ -432,7 +432,10 @@ class BladeRow:
             val (float): new trailing edge to pitch ratio
         """
         self._te_s = val
-        
+    
+    def __repr__(self):
+        return f"{self.row_type.name:0.2f}' P0:{np.mean(self.P0):0.2f} T0:{np.mean(self.T0):0.2f} P:{np.mean(self.P):0.2f} massflow:{self.total_massflow_no_coolant}:0.3f"
+    
     def to_dict(self):
         
         data = {

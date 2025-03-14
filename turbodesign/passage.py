@@ -115,7 +115,7 @@ class Passage:
         d2r_dx2 = d2_dx2(r_streamline[indices[0]:indices[-1]])    
             
         radius_curvature[indices[0]:indices[-1]] = np.power((1+np.power(dr_dx,2)),1.5)
-        radius_curvature = np.divide(radius_curvature, np.abs(d2r_dx2))
+        radius_curvature[indices[0]:indices[-1]] = np.divide(radius_curvature[indices[0]:indices[-1]], np.abs(d2r_dx2))
         radius_curvature = np.nan_to_num(radius_curvature,nan=0)
         
         def vertical_line_phi(start:int,end:int):
@@ -123,17 +123,17 @@ class Passage:
             for i in range(start,end):     
                 dx = x_streamline[i] - x_streamline[i-1]
                 dr = r_streamline[i] - r_streamline[i-1]
-                if (dr < 0) & (np.abs(dx) < numpy.finfo(float).eps):
+                if (dr < 0) & (np.abs(dx) < np.finfo(float).eps):
                     phi[i-1] = -np.pi/2
-                elif (dr > 0) & (np.abs(dx) < numpy.finfo(float).eps):
+                elif (dr > 0) & (np.abs(dx) < np.finfo(float).eps):
                     phi[i-1] = np.pi/2
-                radius_curvature[i] = np.inf
+                radius_curvature[i-1] = 1000000 # Initialize to high number, used in radeq. 
                 
         vertical_line_phi(1,indices[0])
         vertical_line_phi(indices[1],len(x_streamline))
         
         rm = radius_curvature     # https://www.cuemath.com/radius-of-curvature-formula/ should be 1/curvature
-        phi[indices[0]:indices[1]] = np.arctan(dr_dx)
+        phi[indices[0]:indices[-1]] = np.arctan(dr_dx)
         r = r_streamline
             
         return phi, rm, r

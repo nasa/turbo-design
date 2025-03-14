@@ -52,12 +52,12 @@ def radeq(row:BladeRow,upstream:BladeRow) -> BladeRow:
         gamma = row.gamma
 
         # Solve the Radial Equlibrium 
-        Vt = Vm*np.cos(phi)*np.tan(alpha)
+        Vt = Vm*np.tan(alpha)
         Vr = Vm*np.sin(phi)
         # Estimations 
         dVm_dr = float(interp1d(row_radius, np.gradient(row.Vm, row_radius))(r))
-        dVt_dr = dVm_dr*np.cos(phi)*np.tan(alpha)
-        dVr_dr = 0 #dVm_dr*np.sin(phi)
+        dVt_dr = dVm_dr*np.tan(alpha)
+        dVr_dr = dVm_dr*np.sin(phi)
 
         # Upstream 
         dT0up_dr = float(interp1d(upstream.percent_hub_shroud, np.gradient(upstream.T0,up_radius))((r-row_radius[0])/(row_radius[-1]-row_radius[0]))) # use percentage to get the T0 upstream value
@@ -74,7 +74,9 @@ def radeq(row:BladeRow,upstream:BladeRow) -> BladeRow:
         # if row.loss_function.LossType == LossType.Pressure: # type: ignore
         #     dP0_dr = dP0up_dr-row.Yp*(dP0up_dr - dP_dr)     # Eqn 9
 
-        C = Vm**2*(1+np.cos(phi)**2 * np.tan(alpha)**2)/(2*Cp*T0)
+        C = Vm**2*(1+np.tan(alpha)**2)/(2*Cp*T0)
+        if (C>1) & ((gamma/(gamma-1))<2):
+            raise Exception("Invalid value of C {C}, change reduce alpha or Vm")
         B = (1-C)**(gamma/(gamma-1))      
         A = P0 * gamma/(gamma-1) * (1-C)**(1/(gamma-1))
         dVm_dr = 1/(2*Vm*A) * (rho*(Vt/r - Vm**2/rm * np.cos(phi) - Vr*dVr_dr) - dP0_dr*B) + 1/(2*T0) *dT0_dr  # Eqn 6
