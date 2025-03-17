@@ -294,7 +294,7 @@ def rotor_calc(row:BladeRow,upstream:BladeRow,calculate_vm:bool=True):
     upstream.U = upstream.rpm*np.pi/30 * upstream_radius # rad/s 
     upstream.Wt = upstream.Vt - upstream.U
     upstream.W = np.sqrt(upstream.Vx**2 + upstream.Wt**2 + upstream.Vr**2)
-    upstream.beta2 = np.arctan2(upstream.Wt,upstream.Vx)
+    upstream.beta2 = np.arctan2(upstream.Wt,upstream.Vm)
     upstream.T0R = upstream.T+upstream.W**2/(2*upstream.Cp)
     upstream.P0R = upstream.P * (upstream.T0R/upstream.T)**((upstream.gamma)/(upstream.gamma-1))      
     upstream.M_rel = upstream.W/np.sqrt(upstream.gamma*upstream.R*upstream.T)
@@ -326,7 +326,7 @@ def rotor_calc(row:BladeRow,upstream:BladeRow,calculate_vm:bool=True):
         row.Vm = np.sqrt(row.Vx**2+row.Vr**2)
         row.T0 = row.T + row.V**2/(2*row.Cp)
         row.P0 = row.P*(row.T0/row.T)**(row.gamma/(row.gamma-1))
-        row.alpha2 = np.arctan2(row.Vt,row.Vx)
+        row.alpha2 = np.arctan2(row.Vt,row.Vm)
     else: # We know Vm, P0, T0
         row.Vr = row.Vm*np.sin(row.phi)
         row.Vx = row.Vm*np.cos(row.phi)
@@ -336,7 +336,7 @@ def rotor_calc(row:BladeRow,upstream:BladeRow,calculate_vm:bool=True):
         row.U = row.omega * row.r 
         row.Vt = row.Wt+row.U
         
-        row.alpha2 = np.arctan2(row.Vt,row.Vx)
+        row.alpha2 = np.arctan2(row.Vt,row.Vm)
         row.V = np.sqrt(row.Vx**2 + row.Vr**2 + row.Vt**2)
         
         row.M = row.V/np.sqrt(row.gamma*row.R*row.T)
