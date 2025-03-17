@@ -300,7 +300,8 @@ def rotor_calc(row:BladeRow,upstream:BladeRow,calculate_vm:bool=True):
     upstream.M_rel = upstream.W/np.sqrt(upstream.gamma*upstream.R*upstream.T)
     
     upstream_rothalpy = upstream.T0R*upstream.Cp - 0.5*upstream.U**2 # H01R - 1/2 U1^2 
-
+    if np.any(upstream_rothalpy < 0):
+        print('U is too high, reduce RPM or radius')
     # Rotor Exit Calculations
     row.beta1 = upstream.beta2
     #row.Yp # Evaluated earlier 
