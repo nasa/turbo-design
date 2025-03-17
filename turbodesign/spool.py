@@ -251,7 +251,7 @@ class Spool:
             plt.figure(num=1,clear=True)
             for i in range(1,len(self.blade_rows)-1): # Don't plot inlet or outlet 
                 row = self.blade_rows[i]
-                x_end = x_start + row.Vx.mean()
+                x_end = x_start + row.Vm.mean()
                 dx = x_end - x_start
                 
                 Vt = row.Vt[j]
@@ -287,9 +287,15 @@ class Spool:
                     plt.annotate("", xy=(x_end,Wt+U), xytext=(x_end,Wt), arrowprops=prop) # U
                     plt.text(x_end+dx*0.1,Wt+U/2,"U",fontdict={"fontsize":"xx-large"})
 
-                plt.text((x_start+x_end)/2,-y_max*0.95,row.row_type.name,fontdict={"fontsize":"xx-large"})
-                x_start += row.Vx[j]
+                if -np.sign(Vt)>0:
+                    y = y_min 
+                else:
+                    y = y_max
+                plt.text((x_start+x_end)/2,-np.sign(Vt)*y*0.95,row.row_type.name,fontdict={"fontsize":"xx-large"})
+                x_start += row.Vm[j]
                 plt.axis([0,x_end+dx, y_min, y_max])
+            plt.ylabel("Tangental Velocity [m/s]")
+            plt.xlabel("Vm [m/s]")
             plt.title(f"Velocity Triangles for Streamline {j}")
             plt.savefig(f"streamline_{j:04d}.png",transparent=False,dpi=150)
     

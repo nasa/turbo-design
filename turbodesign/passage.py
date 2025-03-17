@@ -139,7 +139,7 @@ class Passage:
         return phi, rm, r
         
     def get_cutting_line(self, t_hub:float) -> line2D:
-        """Gets the cutting line between hub and shroud 
+        """Gets the cutting line perpendicular to hub and shroud 
 
         Args:
             t_hub (float): percentage along the axial direction 
@@ -184,6 +184,27 @@ class Passage:
         rshroud = self.rshroud(t_shroud)
         return line2D([xhub,rhub],[xshroud,rshroud]), t_hub, t_shroud
     
+    def get_xr_slice(self,t_span:float,axial_location:float):
+        """Returns the xr coordinates of a streamline, a line that is parallel to both hub and shroud
+            
+        Args:
+            t_span (float): _description_
+            axial_location (float): _description_
+
+        Returns:
+            np.NDArray: _description_
+        """
+        t_hub = np.linspace(0,axial_location,100)
+        
+        shroud_pts_cyl = np.vstack([self.xshroud(t_hub),self.rshroud(t_hub)]).transpose()
+        hub_pts_cyl = np.vstack([self.xhub(t_hub),self.rhub(t_hub)]).transpose()
+        n = len(t_hub)
+            
+        xr = np.zeros((n,2))
+        for j in range(n):
+            l = line2D(hub_pts_cyl[j,:],shroud_pts_cyl[j,:])
+            xr[j,0],xr[j,1] = l.get_point(t_span)
+        return xr
         
     @property
     def hub_length(self):
