@@ -255,21 +255,18 @@ def stator_calc(row:BladeRow,upstream:BladeRow,downstream:BladeRow=None,calculat
         row.T0 = upstream.T0 - T0_coolant_weighted_average(row)
         row.T = row.T0/T0_T
         row.V = row.M*np.sqrt(row.gamma*row.R*row.T)
-        VV = row.V*np.cos(row.phi)
-        row.Vx = VV*np.cos(row.alpha2)
-        row.Vt = VV*np.sin(row.alpha2)
+        row.Vx = row.Vm*np.cos(row.phi)
         row.Vr = row.V*np.sin(row.phi)
         row.Vm = np.sqrt(row.Vx**2+row.Vr**2)
-    else: # We know Vm, P0, T0
+        row.Vt = row.Vm*np.tan(row.alpha2)
+    else: # We know Vm, P0, T0, P
         row.Vx = row.Vm*np.cos(row.phi)
         row.Vr = row.Vm*np.sin(row.phi)
-        row.Vt = row.Vm*np.cos(row.phi)*np.tan(row.alpha2)
+        row.Vt = row.Vm*np.tan(row.alpha2)
         row.V = np.sqrt(row.Vx**2 + row.Vr**2 + row.Vt**2)
-        for _ in range(3): # Mach is a function of T and T is a function of Mach
-            row.M = row.V/np.sqrt(row.gamma*row.R*row.T)
-            T0_T = (1+(row.gamma-1)/2 * row.M**2)
-            row.P = row.P0 *(1/T0_T)**(row.gamma/(row.gamma-1))
-            row.T = row.T0 * (1/T0_T)
+        
+        row.T = row.P/(row.R*row.rho)   # We know P, this is a guess
+        row.M = row.V/np.sqrt(row.gamma*row.R*row.T)
         
     if upstream.row_type == RowType.Rotor:
         row.alpha1 = upstream.alpha2 # Upstream rotor absolute frame flow angle
@@ -297,13 +294,14 @@ def rotor_calc(row:BladeRow,upstream:BladeRow,calculate_vm:bool=True):
     upstream.U = upstream.rpm*np.pi/30 * upstream_radius # rad/s 
     upstream.Wt = upstream.Vt - upstream.U
     upstream.W = np.sqrt(upstream.Vx**2 + upstream.Wt**2 + upstream.Vr**2)
-    upstream.beta2 = np.arctan2(upstream.Wt,upstream.Vx)
+    upstream.beta2 = np.arctan2(upstream.Wt,upstream.Vm)
     upstream.T0R = upstream.T+upstream.W**2/(2*upstream.Cp)
     upstream.P0R = upstream.P * (upstream.T0R/upstream.T)**((upstream.gamma)/(upstream.gamma-1))      
     upstream.M_rel = upstream.W/np.sqrt(upstream.gamma*upstream.R*upstream.T)
     
     upstream_rothalpy = upstream.T0R*upstream.Cp - 0.5*upstream.U**2 # H01R - 1/2 U1^2 
-
+    if np.any(upstream_rothalpy < 0):
+        print('U is too high, reduce RPM or radius')
     # Rotor Exit Calculations
     row.beta1 = upstream.beta2
     #row.Yp # Evaluated earlier 
@@ -320,26 +318,26 @@ def rotor_calc(row:BladeRow,upstream:BladeRow,calculate_vm:bool=True):
             # Need to adjust T
             print(f'nan detected: check flow path. Turbine inlet cut should be horizontal')
         row.Vr = row.W*np.sin(row.phi)
-        row.Wt = np.sqrt(row.W**2 - row.Vr**2) * np.sin(row.beta2)
+        row.Vm = row.W*np.cos(row.beta2)
+        row.Wt = row.W*np.sin(row.beta2)
+        row.Vx = row.Vm*np.cos(row.phi)
         row.Vt = row.Wt + row.U 
-        ww = row.W*np.cos(row.phi)
-        row.Vx = ww*np.cos(row.beta2)
         row.V = np.sqrt(row.Vr**2+row.Vt**2+row.Vx**2)
         row.M = row.V/np.sqrt(row.gamma*row.R*row.T)
         row.Vm = np.sqrt(row.Vx**2+row.Vr**2)
         row.T0 = row.T + row.V**2/(2*row.Cp)
         row.P0 = row.P*(row.T0/row.T)**(row.gamma/(row.gamma-1))
-        row.alpha2 = np.arctan2(row.Vt,row.Vx)
+        row.alpha2 = np.arctan2(row.Vt,row.Vm)
     else: # We know Vm, P0, T0
         row.Vr = row.Vm*np.sin(row.phi)
         row.Vx = row.Vm*np.cos(row.phi)
         
         row.W = np.sqrt(2*row.Cp*(row.T0R-row.T))
-        row.Wt = np.sqrt(row.W**2 - row.Vr**2) * np.sin(row.beta2) 
+        row.Wt = row.W*np.sin(row.beta2)
         row.U = row.omega * row.r 
         row.Vt = row.Wt+row.U
         
-        row.alpha2 = np.arctan2(row.Vt,row.Vx)
+        row.alpha2 = np.arctan2(row.Vt,row.Vm)
         row.V = np.sqrt(row.Vx**2 + row.Vr**2 + row.Vt**2)
         
         row.M = row.V/np.sqrt(row.gamma*row.R*row.T)
@@ -366,7 +364,7 @@ def inlet_calc(row:BladeRow):
     row.P = row.P0 
     row.rho = row.P/(row.T*row.R)
     total_area = 0 
-    for _ in range(5): # Lets converge the Mach and Total and Static pressures
+    for iter in range(5): # Lets converge the Mach and Total and Static pressures
         for j in range(1,len(row.percent_hub_shroud)):
             rho = row.rho[j]
             tube_massflow = row.massflow[j]-row.massflow[j-1]
@@ -380,6 +378,11 @@ def inlet_calc(row:BladeRow):
                 area[j] = 2*np.pi*C*(S/2*dx**2+row.r[j-1]*dx)
                 total_area += area[j]
                 row.Vm[j] = tube_massflow/(rho*area[j])
+        avg_mach = np.mean(row.M)
+        if np.mean(row.M)>0.5:
+            print(f"High inlet mach can lead to errors iter:{iter} Mach:{avg_mach}")
+        if np.mean(row.M)<0.01:
+            print(f"Unusually slow flow:{iter} Mach:{avg_mach}")
         row.Vm[0] = 1/(len(row.Vm)-1)*row.Vm[1:].sum() # Initialize the value at the hub to not upset the mean
         row.Vr = row.Vm*np.sin(row.phi)
         row.Vt = row.Vm*np.cos(row.phi)*np.tan(row.alpha2)

@@ -104,26 +104,42 @@ class Passage:
 
         """
         phi = np.zeros(shape=x_streamline.shape)
-        rm = phi.copy()
-        r  = phi.copy()
+        r  = np.zeros(shape=x_streamline.shape)
+        radius_curvature = np.zeros(shape=x_streamline.shape)
+        # Have to make sure there isn't a divide by zero which could happen if there is a vertical line somewhere
+        indices = np.where(np.abs(np.diff(x_streamline))>np.finfo(float).eps)[0]
+    
+        d_dx = FinDiff(0,x_streamline[indices[0]:indices[-1]],1)
+        d2_dx2 = FinDiff(0,x_streamline[indices[0]:indices[-1]],2)
+        dr_dx = d_dx(r_streamline[indices[0]:indices[-1]])
+        d2r_dx2 = d2_dx2(r_streamline[indices[0]:indices[-1]])    
             
-        d_dx = FinDiff(0,x_streamline,1)
-        d2_dx2 = FinDiff(0,x_streamline,2)
-        dr_dx = d_dx(r_streamline)
-        d2r_dx2 = d2_dx2(r_streamline)    
-            
-        radius_curvature = np.power((1+np.power(dr_dx,2)),1.5)
-        radius_curvature = np.divide(radius_curvature, np.abs(d2r_dx2))
+        radius_curvature[indices[0]:indices[-1]] = np.power((1+np.power(dr_dx,2)),1.5)
+        radius_curvature[indices[0]:indices[-1]] = np.divide(radius_curvature[indices[0]:indices[-1]], np.abs(d2r_dx2))
         radius_curvature = np.nan_to_num(radius_curvature,nan=0)
         
+        def vertical_line_phi(start:int,end:int):
+            # Lets get the phi and slope for the vertical parts 
+            for i in range(start,end):     
+                dx = x_streamline[i] - x_streamline[i-1]
+                dr = r_streamline[i] - r_streamline[i-1]
+                if (dr < 0) & (np.abs(dx) < np.finfo(float).eps):
+                    phi[i-1] = -np.pi/2
+                elif (dr > 0) & (np.abs(dx) < np.finfo(float).eps):
+                    phi[i-1] = np.pi/2
+                radius_curvature[i-1] = 1000000 # Initialize to high number, used in radeq. 
+                
+        vertical_line_phi(1,indices[0])
+        vertical_line_phi(indices[1],len(x_streamline))
+        
         rm = radius_curvature     # https://www.cuemath.com/radius-of-curvature-formula/ should be 1/curvature
-        phi = np.arctan(dr_dx)
+        phi[indices[0]:indices[-1]] = np.arctan(dr_dx)
         r = r_streamline
             
         return phi, rm, r
         
     def get_cutting_line(self, t_hub:float) -> line2D:
-        """Gets the cutting line between hub and shroud 
+        """Gets the cutting line perpendicular to hub and shroud 
 
         Args:
             t_hub (float): percentage along the axial direction 
@@ -168,6 +184,27 @@ class Passage:
         rshroud = self.rshroud(t_shroud)
         return line2D([xhub,rhub],[xshroud,rshroud]), t_hub, t_shroud
     
+    def get_xr_slice(self,t_span:float,axial_location:float):
+        """Returns the xr coordinates of a streamline, a line that is parallel to both hub and shroud
+            
+        Args:
+            t_span (float): _description_
+            axial_location (float): _description_
+
+        Returns:
+            np.NDArray: _description_
+        """
+        t_hub = np.linspace(0,axial_location,100)
+        
+        shroud_pts_cyl = np.vstack([self.xshroud(t_hub),self.rshroud(t_hub)]).transpose()
+        hub_pts_cyl = np.vstack([self.xhub(t_hub),self.rhub(t_hub)]).transpose()
+        n = len(t_hub)
+            
+        xr = np.zeros((n,2))
+        for j in range(n):
+            l = line2D(hub_pts_cyl[j,:],shroud_pts_cyl[j,:])
+            xr[j,0],xr[j,1] = l.get_point(t_span)
+        return xr
         
     @property
     def hub_length(self):

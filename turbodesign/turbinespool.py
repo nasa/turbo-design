@@ -206,7 +206,9 @@ class TurbineSpool(Spool):
                             sign*=-1
                 if len(stage_ids) % 2 == 1:
                     massflow_stage.append(massflow_stage[-1]*sign)
-                
+            deviation = np.std(total_massflow)*2
+            if deviation>1.0:
+                print("high massflow deviation detected")
             return np.std(total_massflow)*2 # + abs(sum(massflow_stage))  # Equation 28
             
         # Balance the massflow between Stages
@@ -229,27 +231,27 @@ class TurbineSpool(Spool):
             Returns:
                 _type_: _description_
             """
-            try:
-                if balance_mean_pressure:
-                    for j in range(self.num_streamlines):                
-                        Ps_range = outlet_pressure(x0,P0[j],P[j])
-                        for i in range(1,len(blade_rows)-1):
-                            blade_rows[i].P[j] = Ps_range[i-1]
-                    blade_rows[-1].P = P
-                else:
+            # try:
+            if balance_mean_pressure:
+                for j in range(self.num_streamlines):                
+                    Ps_range = outlet_pressure(x0,P0[j],P[j])
                     for i in range(1,len(blade_rows)-1):
-                        for j in range(self.num_streamlines):
-                            blade_rows[i].P[j] = P[j]*x0[(i-1)*self.num_streamlines+j]    # x0 size = num_streamlines -1 
-                    
-                calculate_massflows(blade_rows,True)
-                print(x0)
-                return calculate_error(blade_rows)
-            except:
+                        blade_rows[i].P[j] = Ps_range[i-1]
+                blade_rows[-1].P = P
+            else:
                 for i in range(1,len(blade_rows)-1):
                     for j in range(self.num_streamlines):
-                        blade_rows[i].P[j] = P[j]
-                calculate_massflows(blade_rows,True)
-                return 10
+                        blade_rows[i].P[j] = P[j]*x0[(i-1)*self.num_streamlines+j]    # x0 size = num_streamlines -1 
+                
+            calculate_massflows(blade_rows,True)
+            print(x0)
+            return calculate_error(blade_rows)
+            # except:
+            #     for i in range(1,len(blade_rows)-1):
+            #         for j in range(self.num_streamlines):
+            #             blade_rows[i].P[j] = P[j]
+            #     calculate_massflows(blade_rows,True)
+            #     return 10
         # Break apart the rows to stages
         outlet_P=list(); outlet_P_guess = list() # Outlet P is the bounds, outlet_p_guess is the guessed values 
         
@@ -534,11 +536,11 @@ def outlet_pressure(percents:List[float],inletP0:float,outletP:float) -> npt.NDA
     maxP = inletP0
     minP = outletP
     if isinstance(percents, float):
-        Ps = [percents*(minP-maxP)+maxP]
+        Ps = [percents*(maxP-minP)+minP]
     else:
         Ps = np.zeros(shape=(len(percents),1)); i = 0
         for p in percents:
-            Ps[i] = p*(minP-maxP)+maxP
+            Ps[i] = p*(maxP - minP) + minP
             maxP = Ps[i]
             i+=1
     return Ps
