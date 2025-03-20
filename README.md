@@ -1,6 +1,13 @@
 # Turbo Design 3 
 This tool is a streamline turbomachinery design tool solving the radial equilibrium equations. It can be used for designing compressors and turbines. The designs can have counter rotating stages, different working fluids, and cooling. The intent of this tool is to enable added flexibility in which loss models are used. Because it's a python, it can connect with custom machine learning based loss models.
 
+# Data Stucture and Velocity Triangles
+Below is an example of a velocity triangle for a Turbine. Work is computed using `Work = U*(Vt1-Vt2)`; Note: `Power = massflow * Work \[Watts\]`. For a turbine you want to have a huge Tangential velocity exiting the stator and a minimal tangental velocity leaving the rotor in order to extract the most work as possible.
+
+Turbodesign keeps track of the all flow properties leaving the stator and leaving the rotor. The word "leaving" and "all" are key. The picture below shows the velocity triangles and each semi-transparent block shows the data that is contained in each `BladeRow` class. BladeRow for stator has rowtype of stator so it knows it's the data leaving the stator. It also keeps track the peripherial velocity `U` that the flow will see as it leaves the stator. 
+
+![velocity_triangles_rotor](references/turbine_velocity_triangles.jpg)
+
 # Getting Loss Models working
 Loss models need to be built. I have stored set of models on github as .pkl files. They should automatically download but depending on your python version, the pickle binaries may have issues reading. 
 
