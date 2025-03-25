@@ -97,6 +97,8 @@ class BladeRow:
     phi:npt.NDArray = field(default_factory=lambda: np.array([0]))                      # Inclination angle x,r plane. AY td2.f
     rm: npt.NDArray = field(default_factory=lambda: np.array([0]))                      # Curvature
     incli_curve_radii: npt.NDArray = field(default_factory=lambda: np.array([0]))       # radius at which curvature was evaluated
+    mprime:npt.NDArray = field(default_factory=lambda: np.array([0]))                   # Mprime distance
+    axial_chord:float = 0
     
     Yp: float = 0                   # Pressure loss
     power:float = 0                 # Watts 
@@ -104,7 +106,8 @@ class BladeRow:
     P0_P:float = 0                  # Total to Static Pressure Ratio 
     Power_Type:PowerType
     euler_power:float = 0
-
+    Reynolds:float = 0
+    
     # Used for loss calculations
     _blade_to_blade_gap:float = 0.025 # Gap between blade in terms of percent chord.
     
@@ -118,7 +121,7 @@ class BladeRow:
     _tip_clearance:float = 0 # Clearance as a percentage of span or blade height
 
     _inlet_to_outlet_pratio = [0.06,0.95]
-        
+    
     @property
     def inlet_to_outlet_pratio(self) -> Tuple[float,float]:
         """This is what is varied by the optimization. 
@@ -474,6 +477,7 @@ class BladeRow:
             "P":self.P.tolist(),
             "T":self.T.tolist(),
             "rho":self.rho.tolist(),
+            "mu":self.mu,
             "Yp":self.Yp,
             "Power":self.power,
             "P0_P": self.P0_P,
@@ -482,7 +486,10 @@ class BladeRow:
             "euler_power":self.euler_power,
             "axial_chord":self.axial_chord,
             "aspect_ratio":self.aspect_ratio,
-            "area": self.area
+            "area": self.area,
+            "mprime":self.mprime[-1],
+            "Reynolds":self.Reynolds,
+            "axial_chord":self.axial_chord
         }
 
         return data

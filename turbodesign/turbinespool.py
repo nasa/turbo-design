@@ -8,7 +8,7 @@ from .passage import Passage
 from scipy.interpolate import interp1d
 import numpy as np
 import numpy.typing as npt
-from .td_math import inlet_calc,rotor_calc, stator_calc, compute_massflow, compute_power, compute_gas_constants
+from .td_math import inlet_calc,rotor_calc, stator_calc, compute_massflow, compute_power, compute_gas_constants, compute_reynolds
 from .solve_radeq import adjust_streamlines, radeq
 from scipy.optimize import minimize_scalar, minimize, fmin_slsqp
 from .inlet import Inlet
@@ -136,7 +136,7 @@ class TurbineSpool(Spool):
             self.__match_massflow()
         elif self.massflow_constraint == MassflowConstraint.BalanceMassFlow:
             self.__balance_massflow()
-    
+
     
     def __match_massflow(self):
         """ Matches the massflow between streamtubes by changing exit angles. Doesn't use radial equilibrium.
@@ -171,10 +171,11 @@ class TurbineSpool(Spool):
                             row.alpha2[0] = 1/(len(row.alpha2)-1)*row.alpha2[1:].sum()
                     upstream = compute_gas_constants(upstream)
                     row = compute_gas_constants(row)
-                    
+                
                     
             # Step 3: Adjust streamlines to evenly divide massflow
             adjust_streamlines(self.blade_rows,self.passage)
+        compute_reynolds(self.blade_rows,self.passage)
             
     def __balance_massflow(self):
         """ Balances the massflow between rows. Use radial equilibrium.
@@ -284,7 +285,10 @@ class TurbineSpool(Spool):
             self.blade_rows[-1].P = self.blade_rows[-1].get_static_pressure(self.blade_rows[-1].percent_hub_shroud)
         err = calculate_error(self.blade_rows[:-1])
         print(f"Massflow convergenced error:{err}")
-            
+        
+        # calculate Reynolds number
+        compute_reynolds(self.blade_rows,self.passage)
+        
         # finetune = True
         # if finetune:        
         #     print('Finetune static pressure between stages')
@@ -453,7 +457,7 @@ def calculate_massflows(blade_rows:List[BladeRow],calculate_vm:bool=False):
                     row = compute_gas_constants(row)
                     compute_massflow(row)
                     compute_power(row,upstream)
-
+    
 def massflow_loss_function(exit_angle:float,index:int,row:BladeRow,upstream:BladeRow,downstream:BladeRow=None):
     """Finds the blade exit angles that balance the massflow throughout the stage 
 
