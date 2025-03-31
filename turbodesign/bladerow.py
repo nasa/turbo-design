@@ -488,6 +488,10 @@ class BladeRow:
             "aspect_ratio":self.aspect_ratio,
             "num_blades":self.num_blades,
             "area": self.area,
+            "radius":self.r.tolist(),
+            "x":self.x.tolist(),
+            "dx":self.x[-1]-self.x[0],
+            "dr":self.r[-1]-self.r[0],
             "mprime":self.mprime[-1],
             "Reynolds":self.Reynolds,
             "axial_chord":self.axial_chord

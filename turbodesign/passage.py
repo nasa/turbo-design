@@ -1,22 +1,22 @@
 from typing import List, Tuple
 import numpy as np
 import numpy.typing as npt
-from scipy.interpolate import interp1d
+from scipy.interpolate import PchipInterpolator
 from pyturbo.helper import line2D
 from .enums import PassageType
 from scipy.optimize import minimize_scalar
 from findiff import FinDiff
-from pyturbo.helper import convert_to_ndarray 
+from pyturbo.helper import convert_to_ndarray,xr_to_mprime
 import matplotlib.pyplot as plt 
 
 class Passage:
-    xhub:interp1d
-    rhub:interp1d
+    xhub:PchipInterpolator
+    rhub:PchipInterpolator
     xhub_pts:npt.NDArray
     rhub_pts:npt.NDArray
     
-    xshroud:interp1d
-    rshroud:interp1d
+    xshroud:PchipInterpolator
+    rshroud:PchipInterpolator
     xshroud_pts:npt.NDArray
     rshroud_pts:npt.NDArray
     
@@ -25,6 +25,7 @@ class Passage:
 
     x_streamlines:npt.NDArray
     r_streamlines:npt.NDArray
+    hub_arc_len:float 
     
     def __init__(self,xhub:List[float],rhub:List[float],
                  xshroud:List[float],rshroud:List[float],
@@ -41,12 +42,15 @@ class Passage:
         assert len(xhub) == len(xshroud), "xHub and xShroud should be the same length"
         assert len(rhub) == len(rshroud), "rHub and rShroud should be the same length"
 
+        hub_arc_len = xr_to_mprime(np.vstack([xhub,rhub]).transpose())[1]
+        self.hub_arc_len = hub_arc_len[-1]
+        
+        self.xhub = PchipInterpolator(hub_arc_len/hub_arc_len[-1],xhub)         # Get the xhub,rhub in terms of the hub arc len
+        self.rhub = PchipInterpolator(hub_arc_len/hub_arc_len[-1],rhub)
+        self.xshroud = PchipInterpolator(hub_arc_len/hub_arc_len[-1],xshroud)
+        self.rshroud = PchipInterpolator(hub_arc_len/hub_arc_len[-1],rshroud)
+        
         self.n = len(xhub)
-        t_streamline = np.linspace(0,1,len(xhub))
-        self.xhub = interp1d(t_streamline,xhub)
-        self.rhub = interp1d(t_streamline,rhub)
-        self.xshroud = interp1d(t_streamline,xshroud)
-        self.rshroud = interp1d(t_streamline,rshroud)
         
         self.xhub_pts = convert_to_ndarray(xhub)
         self.rhub_pts = convert_to_ndarray(rhub)
@@ -148,7 +152,7 @@ class Passage:
             (Tuple) containing:
         
                 cut (line2D): line from hub to shroud
-                t_hub (float): t corresponding to xhub location
+                t_hub (float): Percentage along hub arc length
                 t_shroud (float): t corresponding to intersection of bisector of hub 
                                 
         """
@@ -195,6 +199,7 @@ class Passage:
             np.NDArray: _description_
         """
         t_hub = np.linspace(axial_location[0],axial_location[1],100)
+        t_hub = convert_to_ndarray(t_hub)*self.hub_length
         
         shroud_pts_cyl = np.vstack([self.xshroud(t_hub),self.rshroud(t_hub)]).transpose()
         hub_pts_cyl = np.vstack([self.xhub(t_hub),self.rhub(t_hub)]).transpose()
