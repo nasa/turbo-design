@@ -5,6 +5,7 @@ import numpy.typing as npt
 from .bladerow import BladeRow, compute_gas_constants
 from .enums import RowType, LossType
 from scipy.integrate import trapezoid
+from .passage import Passage
 
 def T0_coolant_weighted_average(row:BladeRow) -> float:
     """Calculate the new weighted Total Temperature array considering coolant
@@ -78,6 +79,36 @@ def compute_massflow(row:BladeRow) -> None:
     row.calculated_massflow = massflow[-1]
     row.area = total_area
 
+def compute_reynolds(rows:List[BladeRow],passage:Passage):
+    """Calculates the Reynolds Number 
+
+    Args:
+        rows (List[BladeRow]): Blade row to calculate the Reynolds number
+        passage (Passage): Passage 
+    """
+    
+    for i in range(1,len(rows)):
+        row = rows[i]
+        xr = passage.get_xr_slice(0.5,[rows[i-1].axial_location,row.axial_location])
+        dx = np.diff(xr[:,0])
+        dr = np.diff(xr[:,1])
+        c = np.sum(np.sqrt(dx**2+dr**2))
+        mp = [2/(xr[i,1]+xr[i-1,1])*np.sqrt(dr[i-1]**2 + dx[i-1]**2) for i in range(1,len(xr[:,1]))]
+        mp = np.hstack([[0],np.cumsum(mp)])
+        
+        if row.row_type == RowType.Rotor:
+            V = row.W.mean()
+        else:
+            V = row.V.mean()
+        rho = row.rho.mean()
+        mu = row.mu
+        row.Reynolds = c*V*rho/mu
+        row.mprime = mp
+        row.axial_chord = max(c,1E-12) # Axial chord
+        # row.num_blades = int(2*np.pi*row.r.mean() / row.pitch_to_chord * row.axial_chord)
+
+
+    
 def compute_power(row:BladeRow,upstream:BladeRow) -> None:
     """Calculates the power
 
@@ -164,61 +195,11 @@ def compute_quantities(row:BladeRow,upstream:BladeRow):
         else:
             row.P0 = upstream.P0
         row.T0 = upstream.T0 - T0_coolant_weighted_average(row)
-        row.T = row.T0 * (1+(row.gamma-1)/2*row.M**2)
+        row.T = row.T0 / (1+(row.gamma-1)/2*row.M**2)
         row.P = row.P0 * (row.T/row.T0)**((row.gamma)/(row.gamma-1))
         row.T0R = row.T + row.W**2 / (2*row.Cp)
         row.P0R = row.P*(row.T0R/row.T)**((row.gamma)/(row.gamma-1))
    
-def compute_quantities_power(row:BladeRow,upstream:BladeRow):
-    """Calculation of all quantites after radial equilibrium has been solved assuming we know the power at the exit
-        
-    Note:
-        Radial Equilibrium gives P0, T0, Vm. This code assumes the loss either enthalpy or pressure loss has already been calculated 
-
-        compute_velocity has been called so we know W, Wt, V, Vt, U, M, M_rel
-
-        Static Pressure and Temperature should come from Total Temperature and Pressure + Velocity 
-
-    Args:
-        row (BladeRow): current blade row. All quantities are at exit
-        upstream (BladeRow): upstream blade row. All quantities are at exit
-
-    """
-    if row.row_type == RowType.Rotor:
-        Cp_avg = (row.Cp+upstream.Cp)/2
-        row.T0R = upstream.T0R - T0_coolant_weighted_average(row) - (upstream.U**2-row.U**2)/(2*Cp_avg)
-
-        # Factor in T0R_drop. Convert T0R drop to absolute terms
-        T_drop = (upstream.T0R - row.T0R) - row.W**2/(2*row.Cp) # row.T0R contains the drop
-        T0_drop = T_drop*(1+(row.gamma-1)/2*row.M**2)
-
-        # Adjust Total Temperature to match power
-        T0 = upstream.T0 - row.power/row.eta_total/(row.total_massflow*row.Cp) + T0_drop
-
-        if row.loss_function == LossType.Pressure: 
-            row.P0R = upstream.P0R - row.Yp*(upstream.P0R-row.P)
-            row.T0 = T0
-            row.T = row.T0/(1+(row.gamma-1)/2*row.M**2) 
-            row.P = row.P0R*(row.T/row.T0R)**(row.gamma/(row.gamma-1))
-            
-        elif row.loss_function == LossType.Enthalpy:                
-            row.P0 = row.P*(T0/row.T)**(row.gamma/(row.gamma-1))
-            row.T = T0 - row.W**2/(2*row.Cp) + T_drop
-            row.T0 = T0
-            row.P = row.P0*(row.T0/row.T)**(row.gamma/(row.gamma-1))
-            row.P0R = row.P * (row.T0R/row.T)**((row.gamma)/(row.gamma-1))
-
-    elif row.row_type == RowType.Stator:        
-        row.T0 = upstream.T0 - T0_coolant_weighted_average(row)
-        if row.loss_function == LossType.Pressure:
-            row.P0 = upstream.P0 - row.Yp*(upstream.P0-row.P)
-        else:
-            row.P0 = upstream.P0
-        row.T = row.T0 * (1+(row.gamma-1)/2*row.M**2)
-        row.P = row.P0 * (row.T/row.T0)**((row.gamma)/(row.gamma-1))
-        row.T0R = row.T + row.W**2 / (2*row.Cp)
-        row.P0R = row.P*(row.T0R/row.T)**((row.gamma)/(row.gamma-1))
-
 def stator_calc(row:BladeRow,upstream:BladeRow,downstream:BladeRow=None,calculate_vm:bool=True):
     """Given P0, T0, P, alpha2 of stator calculate all other quantities
 

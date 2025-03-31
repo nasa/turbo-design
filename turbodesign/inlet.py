@@ -54,7 +54,8 @@ class Inlet(BladeRow):
         self.beta2_metal = [0]
         self.P0_fun = interp1d(self.percent_hub_shroud,P0)
         self.T0_fun = interp1d(self.percent_hub_shroud,T0)
-        
+        self.mprime = [0]
+
         
     def initialize_velocity(self,passage:Passage,num_streamlines:int):
         """Initialize velocity calculations. Assumes streamlines and inclination angles have been calculated 
@@ -67,7 +68,6 @@ class Inlet(BladeRow):
 
         cutline,_,_ = passage.get_cutting_line(self.axial_location)
         self.x,self.r = cutline.get_point(np.linspace(0,1,num_streamlines))
-        
         for _ in range(10):
             T0_T = (1+(self.gamma-1)/2 * self.M**2)
 
@@ -115,7 +115,7 @@ class Inlet(BladeRow):
                 Area += 2*np.pi*C*(S/2*dx**2+self.r[j-1]*dx)
                 
         self.calculated_massflow = self.rho.mean()*self.Vm.mean() * Area
-    
+
 
     def get_total_pressure(self,percent_hub_shroud:Union[float,npt.NDArray]):
         """Returns the static pressure at a certain percent hub_shroud
