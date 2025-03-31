@@ -486,6 +486,7 @@ class BladeRow:
             "euler_power":self.euler_power,
             "axial_chord":self.axial_chord,
             "aspect_ratio":self.aspect_ratio,
+            "num_blades":self.num_blades,
             "area": self.area,
             "mprime":self.mprime[-1],
             "Reynolds":self.Reynolds,

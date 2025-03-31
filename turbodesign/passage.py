@@ -184,7 +184,7 @@ class Passage:
         rshroud = self.rshroud(t_shroud)
         return line2D([xhub,rhub],[xshroud,rshroud]), t_hub, t_shroud
     
-    def get_xr_slice(self,t_span:float,axial_location:float):
+    def get_xr_slice(self,t_span:float,axial_location:Tuple[float,float]):
         """Returns the xr coordinates of a streamline, a line that is parallel to both hub and shroud
             
         Args:
@@ -194,7 +194,7 @@ class Passage:
         Returns:
             np.NDArray: _description_
         """
-        t_hub = np.linspace(0,axial_location,100)
+        t_hub = np.linspace(axial_location[0],axial_location[1],100)
         
         shroud_pts_cyl = np.vstack([self.xshroud(t_hub),self.rshroud(t_hub)]).transpose()
         hub_pts_cyl = np.vstack([self.xhub(t_hub),self.rhub(t_hub)]).transpose()
@@ -228,7 +228,9 @@ class Passage:
             cut,_,_ = self.get_cutting_line(p)
             x,r = cut.get_point(np.linspace(0,1,10))
             plt.plot(x,r,label=f'{p}',linestyle='dashed')
-            
+        
+        
+        plt.ylim([-self.rshroud_pts.max()*0.1, self.rshroud_pts.max()])
         plt.legend()
         plt.axis('scaled')
         plt.show()

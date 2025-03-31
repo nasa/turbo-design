@@ -86,8 +86,10 @@ def compute_reynolds(rows:List[BladeRow],passage:Passage):
         rows (List[BladeRow]): Blade row to calculate the Reynolds number
         passage (Passage): Passage 
     """
-    for row in rows:
-        xr = passage.get_xr_slice(0.5,row.axial_location)
+    
+    for i in range(1,len(rows)):
+        row = rows[i]
+        xr = passage.get_xr_slice(0.5,[rows[i-1].axial_location,row.axial_location])
         dx = np.diff(xr[:,0])
         dr = np.diff(xr[:,1])
         c = np.sum(np.sqrt(dx**2+dr**2))
@@ -102,7 +104,8 @@ def compute_reynolds(rows:List[BladeRow],passage:Passage):
         mu = row.mu
         row.Reynolds = c*V*rho/mu
         row.mprime = mp
-        row.axial_chord = c
+        row.axial_chord = max(c,1E-12) # Axial chord
+        # row.num_blades = int(2*np.pi*row.r.mean() / row.pitch_to_chord * row.axial_chord)
 
 
     
@@ -192,7 +195,7 @@ def compute_quantities(row:BladeRow,upstream:BladeRow):
         else:
             row.P0 = upstream.P0
         row.T0 = upstream.T0 - T0_coolant_weighted_average(row)
-        row.T = row.T0 * (1+(row.gamma-1)/2*row.M**2)
+        row.T = row.T0 / (1+(row.gamma-1)/2*row.M**2)
         row.P = row.P0 * (row.T/row.T0)**((row.gamma)/(row.gamma-1))
         row.T0R = row.T + row.W**2 / (2*row.Cp)
         row.P0R = row.P*(row.T0R/row.T)**((row.gamma)/(row.gamma-1))
