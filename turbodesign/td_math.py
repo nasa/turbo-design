@@ -128,7 +128,7 @@ def compute_power(row:BladeRow,upstream:BladeRow) -> None:
         row.T_is = row.T0R*(row.P/upstream.P0R)**((row.gamma-1)/row.gamma)
         row.T0_is = row.T_is*(1+(row.gamma-1)/2*row.M**2)
         row.power = row.massflow[-1] * row.Cp * (upstream.T0.mean() - row.T0.mean())
-        row.eta_static = row.power/ (row.massflow[-1]*row.Cp*(upstream.T0.mean()-row.T0_is.mean()))
+        row.eta_static = row.power/ (row.massflow[-1]*row.Cp*(upstream.T0.mean()-row.T_is.mean()))
         row.eta_total = row.power / (row.massflow[-1]*row.Cp * (upstream.T0.mean()-row.T0_is.mean()))
         row.stage_loading = row.Cp*(upstream.T0.mean() - row.T0.mean())/row.U.mean()**2
         row.euler_power = row.massflow[-1]* (upstream.U*upstream.Vt - row.U*row.Vt).mean()
