@@ -26,7 +26,6 @@ class BladeRow:
     Cp: float = 1019            # Cp J/(Kg*K)
     Cv: float = 1019/1.14       # Cv J/(Kg*K)
     _coolant:Coolant = None     # type: ignore # Coolant Fluid
-    fluid: composite.Solution = Solution("air.yaml")
     mu:float = 0 
     
     total_massflow:float = 0    # Massflow spool + all upstream cooling flow [kg/s]
@@ -609,21 +608,24 @@ def interpolate_quantities(q:npt.NDArray,r:npt.NDArray,r2:npt.NDArray):
     else:
         return interp1d(r,q,kind='linear')(r2)
     
-def compute_gas_constants(row:BladeRow):
-    """Calculates all the gas constants for a row. 
-        This should be done if T or P change 
+def compute_gas_constants(row:BladeRow,fluid:Solution=None) -> None:
+    """Updates the Cp, Gamma, and density for a blade row. If fluid is not specified then only density and viscosity is updated. 
+    
+    Args:
+        row (BladeRow): _description_
+        fluid (Solution, optional): _description_. Defaults to None.
+
+    Returns:
+        (BladeRow): updated row
     """
-    Tm = row.T.mean()
-    Pm = row.P.mean()
-    row.fluid.TP = Tm,Pm
-    row.Cp = row.fluid.cp
-    row.Cv = row.fluid.cv
-    row.R = row.Cp-row.Cv
-    row.gamma = row.Cp/row.Cv
-    row.mu = sutherland(Tm) # type: ignore
-    row.rho[:] = row.fluid.density
-    # i = 0 
-    # for T,P in zip(row.T,row.P):
-    #     row.rho[i] = P/(T*row.R)
-    #     i+=1
-    return row
+    if fluid:
+        Tm = row.T.mean()
+        Pm = row.P.mean()
+        fluid.TP = Tm,Pm
+        row.Cp = row.fluid.cp
+        row.Cv = row.fluid.cv
+        row.R = row.Cp-row.Cv
+        row.gamma = row.Cp/row.Cv
+    # Use Ideal Gas 
+    row.rho = row.P/(row.T*row.R)
+    row.mu = sutherland(row.T) # type: ignore

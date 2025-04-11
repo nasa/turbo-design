@@ -6,6 +6,7 @@ from .bladerow import BladeRow, compute_gas_constants
 from .enums import RowType, LossType
 from scipy.integrate import trapezoid
 from .passage import Passage
+from .isentropic import IsenP
 
 def T0_coolant_weighted_average(row:BladeRow) -> float:
     """Calculate the new weighted Total Temperature array considering coolant
@@ -17,11 +18,12 @@ def T0_coolant_weighted_average(row:BladeRow) -> float:
     Returns:
         float: Total Temperature drop
     """
-    row.coolant.fluid.TP = row.coolant.T0, row.coolant.P0
+    
     massflow = row.massflow
     total_massflow_no_coolant = row.total_massflow_no_coolant
     Cp = row.Cp
-    Cpc = row.coolant.fluid.cp
+    
+    Cpc = row.coolant.Cp
     T0c = row.coolant.T0
     massflow_coolant = row.coolant.massflow_percentage*total_massflow_no_coolant*row.massflow[1:]/row.massflow[-1] 
     if massflow_coolant.mean()>0:
@@ -35,8 +37,9 @@ def T0_coolant_weighted_average(row:BladeRow) -> float:
         else:
             T0R = row.T0R
             T0R_new = T0R.copy()
+            Cp = row.Cp
             T0R_new[1:] = (massflow[1:]*Cp*T0R[1:] + massflow_coolant*Cpc*T0c) \
-                        /(massflow[1:]*row.fluid.cp + massflow_coolant*Cpc)
+                        /(massflow[1:]*Cp + massflow_coolant*Cpc)
             T0R_new[0] = T0R_new[1]
             
             T = T0R_new - row.W**2/(2*Cp)   # Dont change the velocity triangle but adjust the static temperature 
@@ -232,13 +235,13 @@ def stator_calc(row:BladeRow,upstream:BladeRow,downstream:BladeRow=None,calculat
     if calculate_vm:
         row.M = ((row.P0/row.P)**((row.gamma-1)/row.gamma) - 1) * 2/(row.gamma-1)
         row.M = np.sqrt(row.M)
-        T0_T = (1+(row.gamma-1)/2 * row.M.mean()**2)
+        T0_T = (1+(row.gamma-1)/2 * row.M**2)
         row.T0 = upstream.T0 - T0_coolant_weighted_average(row)
         row.T = row.T0/T0_T
         row.V = row.M*np.sqrt(row.gamma*row.R*row.T)
+        row.Vm = row.V*np.cos(row.alpha2)
         row.Vx = row.Vm*np.cos(row.phi)
-        row.Vr = row.V*np.sin(row.phi)
-        row.Vm = np.sqrt(row.Vx**2+row.Vr**2)
+        row.Vr = row.Vm*np.sin(row.phi)
         row.Vt = row.Vm*np.tan(row.alpha2)
     else: # We know Vm, P0, T0, P
         row.Vx = row.Vm*np.cos(row.phi)
@@ -297,7 +300,7 @@ def rotor_calc(row:BladeRow,upstream:BladeRow,calculate_vm:bool=True):
         row.W = np.sqrt(2*row.Cp*(row.T0R-row.T)) #! nan popups here a lot for radial machines 
         if np.isnan(np.sum(row.W)):
             # Need to adjust T
-            print(f'nan detected: check flow path. Turbine inlet cut should be horizontal')
+            raise ValueError(f'nan detected: check flow path. Turbine inlet cut should be horizontal')
         row.Vr = row.W*np.sin(row.phi)
         row.Vm = row.W*np.cos(row.beta2)
         row.Wt = row.W*np.sin(row.beta2)
@@ -339,12 +342,13 @@ def inlet_calc(row:BladeRow):
     Args:
         row (BladeRow): _description_
     """
+    
     area = row.Vm.copy()*0
     # Estimate the density
     row.T = row.T0
-    row.P = row.P0 
+    row.P = row.P0
     row.rho = row.P/(row.T*row.R)
-    total_area = 0 
+    total_area = 0
     for iter in range(5): # Lets converge the Mach and Total and Static pressures
         for j in range(1,len(row.percent_hub_shroud)):
             rho = row.rho[j]
@@ -361,9 +365,9 @@ def inlet_calc(row:BladeRow):
                 row.Vm[j] = tube_massflow/(rho*area[j])
         avg_mach = np.mean(row.M)
         if np.mean(row.M)>0.5:
-            print(f"High inlet mach can lead to errors iter:{iter} Mach:{avg_mach}")
+            raise ValueError(f"High inlet mach can lead to errors iter:{iter} Mach:{avg_mach}")
         if np.mean(row.M)<0.01:
-            print(f"Unusually slow flow:{iter} Mach:{avg_mach}")
+            raise ValueError(f"Unusually slow flow:{iter} Mach:{avg_mach}")
         row.Vm[0] = 1/(len(row.Vm)-1)*row.Vm[1:].sum() # Initialize the value at the hub to not upset the mean
         row.Vr = row.Vm*np.sin(row.phi)
         row.Vt = row.Vm*np.cos(row.phi)*np.tan(row.alpha2)

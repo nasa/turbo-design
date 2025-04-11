@@ -10,17 +10,18 @@ import numpy as np
 import numpy.typing as npt
 from .td_math import inlet_calc,rotor_calc, stator_calc, compute_massflow, compute_power, compute_gas_constants, compute_reynolds
 from .solve_radeq import adjust_streamlines, radeq
-from scipy.optimize import minimize_scalar, minimize, fmin_slsqp
+from scipy.optimize import minimize_scalar, differential_evolution, fmin_slsqp
 from .inlet import Inlet
 from .outlet import Outlet
 
 class TurbineSpool(Spool):
+    
     def __init__(self,passage:Passage,
                  massflow:float,rows:List[BladeRow],
                  num_streamlines:int=3,
                  fluid:Solution=Solution('air.yaml'),
                  rpm:float=-1,
-                massflow_constraint:MassflowConstraint=MassflowConstraint.MatchMassFlow):
+                 massflow_constraint:MassflowConstraint=MassflowConstraint.MatchMassFlow):
         """Initializes a Turbine Spool
 
         Args:
@@ -45,21 +46,22 @@ class TurbineSpool(Spool):
         # Inlet
         W0 = self.massflow
         inlet = self.blade_rows[0]
-        if self.blade_rows[0].row_type == RowType.Inlet:
-            self.blade_rows[0].massflow = np.linspace(0,1,self.num_streamlines)*W0
-            self.blade_rows[0].total_massflow = W0 
-            self.blade_rows[0].total_massflow_no_coolant = W0 
+        if self.fluid:
+            inlet.initialize_fluid(self.fluid)
+        else:
+            inlet.initialize_fluid(R=self.blade_rows[1].R,
+                                    gamma=self.blade_rows[1].gamma,
+                                    Cp=self.blade_rows[1].Cp)
+        
+            inlet.total_massflow = W0 
+            inlet.total_massflow_no_coolant = W0
+            inlet.massflow = np.linspace(0,1,self.num_streamlines)*W0
             
-            interpolate_streamline_radii(self.blade_rows[0],self.passage,self.num_streamlines)
+            inlet.initialize_velocity(self.passage,self.num_streamlines)    
+            interpolate_streamline_radii(inlet,self.passage,self.num_streamlines)
 
-            # Set the gas to total values for now             
-            self.blade_rows[0].fluid.TP = self.blade_rows[0].T0.mean(), self.blade_rows[0].P0.mean()
-            self.blade_rows[0].Cp = self.blade_rows[0].fluid.cp
-            self.blade_rows[0].Cv = self.blade_rows[0].fluid.cv
-            self.blade_rows[0].R = self.blade_rows[0].Cp-self.blade_rows[0].Cv
-            self.blade_rows[0].gamma = self.blade_rows[0].Cp/self.blade_rows[0].Cv
-            self.blade_rows[0].rho[:] = self.blade_rows[0].fluid.density
-            inlet_calc(self.blade_rows[0])
+            compute_gas_constants(inlet,self.fluid)
+            inlet_calc(inlet)
         
         for row in self.blade_rows:
             interpolate_streamline_radii(row,self.passage,self.num_streamlines)
@@ -83,10 +85,10 @@ class TurbineSpool(Spool):
             
             row = self.blade_rows[i]
             if (row.coolant is not None):
-                T0c = self.blade_rows[i].coolant.fluid.T
-                P0c = self.blade_rows[i].coolant.fluid.P
+                T0c = self.blade_rows[i].coolant.T0
+                P0c = self.blade_rows[i].coolant.P0
                 W0c = self.blade_rows[i].coolant.massflow_percentage * self.massflow
-                Cpc = self.blade_rows[i].coolant.fluid.cp
+                Cpc = self.blade_rows[i].coolant.Cp
             else:
                 T0c = 100
                 P0c = 0
@@ -133,9 +135,9 @@ class TurbineSpool(Spool):
         self.initialize_quantities()
         
         if self.massflow_constraint ==MassflowConstraint.MatchMassFlow:
-            self.__match_massflow()
+            self.__match_massflow()  # Matches massflow by changing turning angle
         elif self.massflow_constraint == MassflowConstraint.BalanceMassFlow:
-            self.__balance_massflow()
+            self.__balance_massflow()   # Balances massflow by changing row exit static pressure
 
     
     def __match_massflow(self):
@@ -169,8 +171,8 @@ class TurbineSpool(Spool):
                         elif row.row_type == RowType.Stator:
                             row.alpha2[j] = np.radians(res.x)
                             row.alpha2[0] = 1/(len(row.alpha2)-1)*row.alpha2[1:].sum()
-                    upstream = compute_gas_constants(upstream)
-                    row = compute_gas_constants(row)
+                    compute_gas_constants(upstream,self.fluid)
+                    compute_gas_constants(row,self.fluid)
                 
                     
             # Step 3: Adjust streamlines to evenly divide massflow
@@ -198,7 +200,7 @@ class TurbineSpool(Spool):
             stage_ids = list(set([row.stage_id for row in self.blade_rows if row.stage_id>=0]))
             for row in blade_rows[1:]:
                 total_massflow.append(row.total_massflow_no_coolant)
-                    
+                
                 sign = 1
                 for s in stage_ids:
                     for row in blade_rows:
@@ -232,9 +234,10 @@ class TurbineSpool(Spool):
             Returns:
                 _type_: _description_
             """
+            blade_rows_backup = copy.deepcopy(blade_rows)
             # try:
             if balance_mean_pressure:
-                for j in range(self.num_streamlines):                
+                for j in range(self.num_streamlines):
                     Ps_range = outlet_pressure(x0,P0[j],P[j])
                     for i in range(1,len(blade_rows)-1):
                         blade_rows[i].P[j] = Ps_range[i-1]
@@ -243,10 +246,14 @@ class TurbineSpool(Spool):
                 for i in range(1,len(blade_rows)-1):
                     for j in range(self.num_streamlines):
                         blade_rows[i].P[j] = P[j]*x0[(i-1)*self.num_streamlines+j]    # x0 size = num_streamlines -1 
-                
-            calculate_massflows(blade_rows,True)
-            print(x0)
-            return calculate_error(blade_rows)
+            try:  
+                calculate_massflows(blade_rows,True)
+                print(x0)
+                return calculate_error(blade_rows)
+            except:
+                blade_rows = blade_rows_backup
+                return np.inf # Return a high error
+            
             # except:
             #     for i in range(1,len(blade_rows)-1):
             #         for j in range(self.num_streamlines):
@@ -262,9 +269,10 @@ class TurbineSpool(Spool):
         
         print('Find average P in between stages')
         if len(outlet_P) == 1:
-            res = minimize_scalar(fun=balance_massflows,args=(self.blade_rows[:-1],self.blade_rows[0].P0,self.blade_rows[-1].P), 
-                        bounds=outlet_P[0],tol=0.0001,options={'disp': True})
-            x = res.x
+            x = balance_massflows(0.658,self.blade_rows[:-1],self.blade_rows[0].P0,self.blade_rows[-1].P)
+            # res = minimize_scalar(fun=balance_massflows,args=(self.blade_rows[:-1],self.blade_rows[0].P0,self.blade_rows[-1].P),bounds=outlet_P[0],tol=0.0001,options={'disp': True},method='bounded')
+            # x = res.x
+            print(x)
         else:
             x = fmin_slsqp(func=balance_massflows,args=(self.blade_rows[:-1],self.blade_rows[0].P0,self.blade_rows[-1].P), 
                         bounds=outlet_P, x0=outlet_P_guess,epsilon=0.001,iter=100) # ,tol=0.001,options={'disp': True})
@@ -389,7 +397,7 @@ class TurbineSpool(Spool):
             json.dump(data, f, indent=4,cls=NumpyEncoder)
 
 
-def calculate_massflows(blade_rows:List[BladeRow],calculate_vm:bool=False):
+def calculate_massflows(blade_rows:List[BladeRow],calculate_vm:bool=False,fluid:Solution=None):
     """Calculates the massflow 
 
     Args:
@@ -421,15 +429,15 @@ def calculate_massflows(blade_rows:List[BladeRow],calculate_vm:bool=False):
                             rotor_calc(row,upstream,calculate_vm=True)
                             # Finds Equilibrium between Vm, P0, T0
                             row = radeq(row,upstream) 
-                            row = compute_gas_constants(row)
+                            compute_gas_constants(row,fluid)
                             rotor_calc(row,upstream,calculate_vm=False)
                         elif row.row_type == RowType.Stator:
                             stator_calc(row,upstream,downstream,calculate_vm=True)
                             # Finds Equilibrium between Vm, P0, T0
                             row = radeq(row,upstream)
-                            row = compute_gas_constants(row)
+                            compute_gas_constants(row,fluid)
                             stator_calc(row,upstream,downstream,calculate_vm=False)
-                        row = compute_gas_constants(row)
+                        compute_gas_constants(row,fluid)
                         compute_massflow(row)
                         compute_power(row,upstream)
                         
@@ -442,7 +450,7 @@ def calculate_massflows(blade_rows:List[BladeRow],calculate_vm:bool=False):
                             row.Yp = Yp
                             rotor_calc(row,upstream,calculate_vm=True)
                             row = radeq(row,upstream)
-                            row = compute_gas_constants(row)
+                            compute_gas_constants(row,fluid)
                             rotor_calc(row,upstream,calculate_vm=False)
                             return abs(row.eta_total - eta_total)
                         
@@ -452,13 +460,13 @@ def calculate_massflows(blade_rows:List[BladeRow],calculate_vm:bool=False):
                         row.Yp = 0
                         stator_calc(row,upstream,downstream,calculate_vm=True)
                         row = radeq(row,upstream) 
-                        row = compute_gas_constants(row)
+                        row = compute_gas_constants(row,fluid)
                         stator_calc(row,upstream,downstream,calculate_vm=False)
-                    row = compute_gas_constants(row)
+                    row = compute_gas_constants(row,fluid)
                     compute_massflow(row)
                     compute_power(row,upstream)
     
-def massflow_loss_function(exit_angle:float,index:int,row:BladeRow,upstream:BladeRow,downstream:BladeRow=None):
+def massflow_loss_function(exit_angle:float,index:int,row:BladeRow,upstream:BladeRow,downstream:BladeRow=None,fluid:Solution=None):
     """Finds the blade exit angles that balance the massflow throughout the stage 
 
     Args:
@@ -483,8 +491,8 @@ def massflow_loss_function(exit_angle:float,index:int,row:BladeRow,upstream:Blad
             elif row.row_type == RowType.Stator:
                 row.alpha2[index] = np.radians(exit_angle)
                 stator_calc(row,upstream,downstream)
-            upstream = compute_gas_constants(upstream)
-            row = compute_gas_constants(row)
+            upstream = compute_gas_constants(upstream,fluid)
+            row = compute_gas_constants(row,fluid)
         elif row.loss_function.loss_type == LossType.Enthalpy:
             # Search for pressure loss that results in the correct total temperature drop
             if row.row_type == RowType.Rotor:
@@ -496,8 +504,8 @@ def massflow_loss_function(exit_angle:float,index:int,row:BladeRow,upstream:Blad
                 def find_yp(Yp):
                     row.Yp = Yp
                     rotor_calc(row,upstream)
-                    upstream = compute_gas_constants(upstream)
-                    row = compute_gas_constants(row)
+                    upstream = compute_gas_constants(upstream,fluid)
+                    row = compute_gas_constants(row,fluid)
                     return abs(row.T0.mean() - T0_target)
                 res = minimize_scalar(find_yp,bounds=[0,0.6])
                 row.Yp = res.x
@@ -505,8 +513,8 @@ def massflow_loss_function(exit_angle:float,index:int,row:BladeRow,upstream:Blad
                 row.Yp = 0
                 row.alpha2[index] = np.radians(exit_angle)
                 stator_calc(row,upstream,downstream)
-                upstream = compute_gas_constants(upstream)
-                row = compute_gas_constants(row)
+                upstream = compute_gas_constants(upstream,fluid)
+                row = compute_gas_constants(row,fluid)
         
 
     # if use_radeq:

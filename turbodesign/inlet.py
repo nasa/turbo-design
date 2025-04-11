@@ -16,50 +16,78 @@ class Inlet(BladeRow):
         (BladeRow): Defines the properties of the blade row
     """
     fun: interp1d
-    def __init__(self,M:float,T0:Union[float,List[float]],P0:Union[float,List[float]],percent_radii:Union[float,List[float]],fluid:Solution,axial_location:float=0,beta:Union[float,List[float]]=[0]):
+    
+    def __init__(self,M:float,T0:Union[float,List[float]],
+                 P0:Union[float,List[float]],
+                 axial_location:float=0,
+                 beta:Union[float,List[float]]=[0],
+                 percent_radii:Union[float,List[float]]=[0.5]):
         """Initializes the inlet station. 
             Uses the beta and exit mach number to predict a value for Vm
 
         Args:
             M (float): Mach number at the inlet plane
-            beta (Union[float,List[float]]): exit relative flow angle
             T0 (Union[float,List[float]]): Total Temperature Array
             P0 (Union[float,List[float]]): Total Pressure Array
             percent_radii (Union[float,List[float]]): Radius where total pressure and temperature are defined
-            fluid (ct.Solution): Cantera mixture
             axial_location (float): Axial Location as a percentage of hub length
             beta (Union[float,List[float]], optional): Inlet flow angle in relative direction. Defaults to [].
+
         """
         super().__init__(row_type=RowType.Inlet,axial_location=axial_location,stage_id=-1)
-        self.loss_function = None
         self.beta1 = convert_to_ndarray(beta)
         self.M = convert_to_ndarray(M)
         self.T0 = convert_to_ndarray(T0)
         self.P0 = convert_to_ndarray(P0)
         self.percent_hub_shroud = convert_to_ndarray(percent_radii)
+        
+    
+    def initialize_fluid(self,fluid:Solution=None,R:float=287.15,gamma:float=1.4,Cp:float=1024):
+        """Initialize the inlet using the fluid. This function should be called by a class that inherits from spool
+
+        Args:
+            fluid (Solution, optional): Cantera fluid object. Defaults to None.
+            R (float, optional): Ideal Gas Constant. Defaults to 287.15 J/(Kg K) for air
+            gamma (float, optional): _description_. Defaults to 1.4.
+            Cp (float, optional): _description_. Defaults to 1024 J/(Kg K).
+        
+        """
+        self.loss_function = None
+        
         # if it's inlet alpha and beta are the same, relative flow angle = absolute. 
-        self.beta2 = np.radians(convert_to_ndarray(beta))
-        self.alpha1 = np.radians(convert_to_ndarray(beta))
-        fluid.TP = self.T0.mean(),self.P0.mean()
-        self.gamma = fluid.cp/fluid.cv
+        self.beta2 = np.radians(convert_to_ndarray(self.beta1))
+        self.alpha1 = np.radians(convert_to_ndarray(self.beta1))
         
-        self.T = self.T0 * 1/(1 + (self.gamma-1) * self.M**2)
-        self.P = self.P0 * 1/(1 + (self.gamma-1) * self.M**2)**(self.gamma/(self.gamma-1))
-        fluid.TP = self.T.mean(),self.P.mean()
-        self.rho = convert_to_ndarray([fluid.density])
-        self.fluid = fluid
+        if fluid:
+            fluid.TP = self.T0.mean(),self.P0.mean()
+            self.gamma = fluid.cp/fluid.cv
+            self.T = self.T0 * 1/(1 + (self.gamma-1) * self.M**2)
+            self.P = self.P0 * 1/(1 + (self.gamma-1) * self.M**2)**(self.gamma/(self.gamma-1))
+            fluid.TP = self.T.mean(),self.P.mean()
+            self.rho = convert_to_ndarray([fluid.density])
+        else:
+            self.Cp = Cp
+            self.gamma = gamma
+            self.R = R
+            self.T = self.T0 * 1/(1 + (self.gamma-1) * self.M**2)
+            self.P = self.P0 * 1/(1 + (self.gamma-1) * self.M**2)**(self.gamma/(self.gamma-1))
+            self.rho = self.P/(self.R*self.T)
+
         self.rpm = 0
-        
         self.beta1_metal = [0] 
         self.beta2_metal = [0]
-        self.P0_fun = interp1d(self.percent_hub_shroud,P0)
-        self.T0_fun = interp1d(self.percent_hub_shroud,T0)
+        self.P0_fun = interp1d(self.percent_hub_shroud,self.P0)
+        self.T0_fun = interp1d(self.percent_hub_shroud,self.T0)
         self.mprime = [0]
-
         
     def initialize_velocity(self,passage:Passage,num_streamlines:int):
         """Initialize velocity calculations. Assumes streamlines and inclination angles have been calculated 
-     
+            Call this before performing calculations
+            
+        Args:
+            passage (Passage): Passage object
+            num_streamlines (int): number of streamlines
+        
         """
         # Perform Calculations on Velocity 
         Vm_prev = 0; Vm_err = 0 
@@ -84,7 +112,7 @@ class Inlet(BladeRow):
             self.V = np.sqrt(self.Vm**2 + self.Vt**2)        
             self.Vr = self.Vm * np.sin(self.phi) 
             
-            self = compute_gas_constants(self)
+            compute_gas_constants(self)
             rho_mean = self.rho.mean()
             for i in range(len(self.massflow)-1):    
                 tube_massflow = self.massflow[i+1]-self.massflow[i]
