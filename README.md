@@ -56,3 +56,11 @@ Need to add Koch & Smith, Wright & Miller
 | Paht Juangphanich | Turbo Design 3 | - | paht.juangphanich@nasa.gov |
 | Andress William | TD2 | Summer 2021 | bill.andress@gmail.com |
 
+# Complaints about NASA IT
+If GitHub Pages doesn’t deploy properly, the issue is likely related to NASA IT support. I’ve repeatedly filed internal tickets requesting help in resolving this problem, but they are often marked as resolved without any communication or follow-up. When a ticket is filed, an email is sent containing only a long ticket number, with no description of the issue. Later, IT may contact me referencing just that number (e.g., “11192345”), and I’m expected to recall what the issue was — which is not practical (Issue #1).
+
+Another challenge is that there’s no accessible history of submitted tickets — unlike, for example, Amazon, where you can easily view your past orders. This lack of transparency makes it difficult to track progress or follow up effectively (Issue #2).
+
+Unfortunately, NASA IT is currently dysfunctional. There’s no unified knowledge base, and many systems seem to be developed by different external vendors, with little to no integration or coordination. It doesn’t appear that any testing is done to ensure these systems communicate with one another. As a result, the burden of identifying and troubleshooting systemic issues often falls on individual researchers. Despite more than a year of digital transformation meetings, there still seems to be no coherent vision for how systems should interoperate or how to empower researchers to work more efficiently — either with each other or with the public.
+
+I sincerely apologize to users of this tool and any NASA software I support. I truly want to provide a better experience. But please understand — I don’t have a team. It’s just me, Paht, maintaining and developing the code, and fixing the bugs.

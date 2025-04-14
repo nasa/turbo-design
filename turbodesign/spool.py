@@ -1,7 +1,7 @@
 # type: ignore[arg-type, reportUnknownArgumentType]
 from dataclasses import field
 import json
-from typing import Dict, List, Union
+from typing import Dict, List, Union, Optional
 import matplotlib.pyplot as plt
 from .bladerow import BladeRow
 import numpy as np
@@ -76,7 +76,7 @@ class Spool:
             
 
     @property
-    def fluid(self):
+    def fluid(self) -> Optional[Solution]:
         return self._fluid
 
     @fluid.setter
@@ -164,8 +164,9 @@ class Spool:
             self.calculate_streamline_curvature(row,t_radial)
                 
             # Set the loss function if it's not set
-            if (row.loss_function == None):  
-                row.loss_function = TD2()
+            if (type(row)!= Inlet and type(row) != Outlet):  
+                if row.loss_function == None:
+                    row.loss_function = TD2()
             
     def calculate_streamline_curvature(self,row:BladeRow,t_radial:Union[List[float],npt.NDArray]):
         """Called to calculate new streamline curvature
