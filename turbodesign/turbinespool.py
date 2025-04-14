@@ -269,9 +269,9 @@ class TurbineSpool(Spool):
         
         print('Find average P in between stages')
         if len(outlet_P) == 1:
-            x = balance_massflows(0.658,self.blade_rows[:-1],self.blade_rows[0].P0,self.blade_rows[-1].P)
-            # res = minimize_scalar(fun=balance_massflows,args=(self.blade_rows[:-1],self.blade_rows[0].P0,self.blade_rows[-1].P),bounds=outlet_P[0],tol=0.0001,options={'disp': True},method='bounded')
-            # x = res.x
+            # x = balance_massflows(0.658,self.blade_rows[:-1],self.blade_rows[0].P0,self.blade_rows[-1].P)
+            res = minimize_scalar(fun=balance_massflows,args=(self.blade_rows[:-1],self.blade_rows[0].P0,self.blade_rows[-1].P),bounds=outlet_P[0],tol=0.0001,options={'disp': True},method='bounded')
+            x = res.x
             print(x)
         else:
             x = fmin_slsqp(func=balance_massflows,args=(self.blade_rows[:-1],self.blade_rows[0].P0,self.blade_rows[-1].P), 
@@ -280,6 +280,8 @@ class TurbineSpool(Spool):
         
         # Adjust the inlet: Set the massflow
         self.blade_rows[0].massflow = np.linspace(0,1,self.num_streamlines)*self.blade_rows[1].total_massflow_no_coolant
+        self.blade_rows[0].total_massflow_no_coolant = np.linspace(0,1,self.num_streamlines)*self.blade_rows[1].total_massflow_no_coolant
+        self.blade_rows[0].total_massflow = np.linspace(0,1,self.num_streamlines)*self.blade_rows[1].total_massflow_no_coolant
         inlet_calc(self.blade_rows[0]) # adjust the inlet to match massflow 
         
         if self.adjust_streamlines:
