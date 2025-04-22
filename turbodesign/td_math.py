@@ -80,6 +80,7 @@ def compute_massflow(row:BladeRow) -> None:
         massflow += massflow_fraction*row.coolant.massflow_percentage*row.total_massflow_no_coolant    # Take into account the coolant massflow
     row.massflow = massflow
     row.calculated_massflow = massflow[-1]
+    row.total_massflow = massflow[-1]
     row.area = total_area
 
 def compute_reynolds(rows:List[BladeRow],passage:Passage):
@@ -128,13 +129,14 @@ def compute_power(row:BladeRow,upstream:BladeRow) -> None:
         row.T_is = 0 
         row.T0_is = 0
     else:
-        row.T_is = row.T0R*(row.P/upstream.P0R)**((row.gamma-1)/row.gamma)
-        row.T0_is = row.T_is*(1+(row.gamma-1)/2*row.M**2)
+        P0_P = (upstream.P0/row.P).mean()
+        row.T_is = upstream.T0 * (1/P0_P)**((row.gamma-1)/row.gamma)
+        a = np.sqrt(row.gamma*row.R*row.T_is)
+        row.T0_is = row.T_is * (1+(row.gamma-1)/2*(row.V/a)**2)
+        
         row.power = row.massflow[-1] * row.Cp * (upstream.T0.mean() - row.T0.mean())
         row.eta_static = row.power/ (row.massflow[-1]*row.Cp*(upstream.T0.mean()-row.T_is.mean()))
-        
-        eta_total = (upstream.T0.mean() - row.T0.mean()) / (upstream.T0.mean() - row.T0_is.mean())
-        row.eta_total = eta_total # row.power / (row.massflow[-1]*row.Cp * (upstream.T0.mean()-row.T0_is.mean()))
+        row.eta_total = (upstream.T0.mean() - row.T0.mean()) / (upstream.T0.mean() - row.T0_is.mean())
         row.stage_loading = row.Cp*(upstream.T0.mean() - row.T0.mean())/row.U.mean()**2
         row.euler_power = row.massflow[-1]* (upstream.U*upstream.Vt - row.U*row.Vt).mean()
     
@@ -332,11 +334,6 @@ def rotor_calc(row:BladeRow,upstream:BladeRow,calculate_vm:bool=True):
     
     row.M_rel = row.W/np.sqrt(row.gamma*row.R*row.T)
     row.T0 = row.T+row.V**2/(2*row.Cp)
-    
-    T3_is = upstream.T0 * (1/row.P0_P)**((row.gamma-1)/row.gamma)
-    a = np.sqrt(row.gamma*row.R*T3_is)
-    T03_is = T3_is * (1+(row.gamma-1)/2*(row.V/a)**2)
-    row.eta_total = (upstream.T0.mean() - row.T0.mean())/(upstream.T0.mean()-T03_is.mean())
 
 def inlet_calc(row:BladeRow):
     """Calculates the conditions for the Inlet 

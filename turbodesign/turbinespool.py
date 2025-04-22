@@ -526,12 +526,12 @@ def massflow_loss_function(exit_angle:float,index:int,row:BladeRow,upstream:Blad
     compute_power(row,upstream)
     
     if row.row_type!=RowType.Inlet:
-        if row.row_type == RowType.Rotor:
-            T3_is = upstream.T0 * (1/row.P0_P)**((row.gamma-1)/row.gamma)
-        else:
-            T3_is = upstream.T0 * (row.P0/row.P)**((row.gamma-1)/row.gamma)
+        # if row.row_type == RowType.Rotor:
+        T3_is = upstream.T0 * (1/row.P0_P)**((row.gamma-1)/row.gamma)
+        # else:
+        #     T3_is = upstream.T0 * (row.P0/row.P)**((row.gamma-1)/row.gamma)
         a = np.sqrt(row.gamma*row.R*T3_is)
-        T03_is = T3_is * (1+(row.gamma-1)/2*(row.Vm/a)**2)
+        T03_is = T3_is * (1+(row.gamma-1)/2*(row.V/a)**2)
         row.eta_total = (upstream.T0.mean() - row.T0.mean())/(upstream.T0.mean()-T03_is.mean())
         
     return np.abs(row.total_massflow*index/(len(row.massflow)-1) - row.massflow[index])
