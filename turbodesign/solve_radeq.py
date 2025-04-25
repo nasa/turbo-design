@@ -18,7 +18,8 @@ def adjust_streamlines(blade_rows:List[BladeRow],passage:Passage):
         passage (Passage): passage object describing the hub and shroud 
 
     """
-    for _,row in enumerate(blade_rows):
+    for row_index,row in enumerate(blade_rows):
+        print(f"Adjusting Streamlines to balance massflow Row: {row_index}")
         massflow_fraction =  np.linspace(0,1,len(row.percent_hub_shroud))
         row.total_massflow = row.massflow[-1]
         ideal_massflow_fraction = row.massflow[-1] * massflow_fraction

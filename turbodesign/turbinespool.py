@@ -280,7 +280,7 @@ class TurbineSpool(Spool):
         
         # Adjust the inlet: Set the massflow
         self.blade_rows[0].massflow = np.linspace(0,1,self.num_streamlines)*self.blade_rows[1].total_massflow_no_coolant
-        self.blade_rows[0].total_massflow_no_coolant = np.linspace(0,1,self.num_streamlines)*self.blade_rows[1].total_massflow_no_coolant
+        self.blade_rows[0].total_massflow_no_coolant = self.blade_rows[1].total_massflow_no_coolant
         self.blade_rows[0].total_massflow = np.linspace(0,1,self.num_streamlines)*self.blade_rows[1].total_massflow_no_coolant
         inlet_calc(self.blade_rows[0]) # adjust the inlet to match massflow 
         

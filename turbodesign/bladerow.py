@@ -436,7 +436,7 @@ class BladeRow:
         self._te_s = val
     
     def __repr__(self):
-        return f"{self.row_type.name}' P0:{np.mean(self.P0):0.2f} T0:{np.mean(self.T0):0.2f} P:{np.mean(self.P):0.2f} massflow:{self.total_massflow_no_coolant}:0.3f"
+        return f"{self.row_type.name} P0:{np.mean(self.P0):0.2f} T0:{np.mean(self.T0):0.2f} P:{np.mean(self.P):0.2f} massflow:{np.mean(self.total_massflow_no_coolant):0.3f}"
     
     def to_dict(self):
         

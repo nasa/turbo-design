@@ -35,9 +35,9 @@ passage = Passage(xhub,rhub,
                  passageType=PassageType.Axial)
 #%% Design Conditions 
 Design_RPM = 7500
-massflow = 22 # kg/s
+massflow = 22    # kg/s, Initial guess
 P0 = 1000000     # Pascal 
-T0 = 1300      # Kelvin
+T0 = 1300        # Kelvin
 
 # Fluid
 fluid = Solution('air.yaml')
@@ -48,8 +48,7 @@ print(f"Coefficient of Pressure [J/Kg] {fluid.cp:0.4f}")
 inlet = Inlet(M=0.2, 
                  P0=[P0],
                  T0=[T0], 
-                 beta=[0], 
-                 fluid=fluid, 
+                 beta=[0],
                  percent_radii=0.5,
                  axial_location=0)
 outlet = Outlet(P=P0/4.45,percent_radii=0.5,num_streamlines=5)
@@ -69,11 +68,11 @@ rotor2.axial_chord = cax
 stator1.stage_id = 0; rotor1.stage_id = 0
 stator2.stage_id = 1; rotor2.stage_id = 1
 
-# Coolant Definition: Use Kelvin and Pascal
-stator1.coolant = Coolant(fluid, T0=T0*0.555556, P0= P0 * 6894.76, massflow_percentage=0) 
-rotor1.coolant = Coolant(fluid, T0*0.555556, P0 * 6894.76,massflow_percentage=0)
-stator2.coolant = Coolant(fluid, T0=T0*0.555556, P0= P0 * 6894.76, massflow_percentage=0) 
-rotor2.coolant = Coolant(fluid, T0*0.555556, P0 * 6894.76,massflow_percentage=0)
+# Coolant Definition: Use Kelvin and Pascal. Coolant only needs P0, T0, massflow, and Cp
+stator1.coolant = Coolant(T0=T0*0.555556, P0= P0 * 6894.76, massflow_percentage=0,Cp=fluid.cp) 
+rotor1.coolant = Coolant(T0*0.555556, P0 * 6894.76,massflow_percentage=0,Cp=fluid.cp)
+stator2.coolant = Coolant(T0=T0*0.555556, P0= P0 * 6894.76, massflow_percentage=0,Cp=fluid.cp) 
+rotor2.coolant = Coolant(T0*0.555556, P0 * 6894.76,massflow_percentage=0,Cp=fluid.cp)
 
 # Add in turning angles
 stator1.beta2_metal = [72,72,72,72,72]        # Angle, hub,mean,tip
@@ -93,8 +92,8 @@ spool = TurbineSpool(passage=passage,
             rpm=Design_RPM, 
             num_streamlines=5, 
             massflow=massflow, 
+            fluid=fluid,
             rows=[inlet,stator1,rotor1,stator2,rotor2,outlet])
-spool.fluid = fluid
 spool.massflow_constraint = MassflowConstraint.BalanceMassFlow # Fixes the exit angle and changes degree of reaction
 # spool.plot_geometry()
 spool.solve() # This also initializes streamlines
