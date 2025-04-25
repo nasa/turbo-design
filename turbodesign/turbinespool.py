@@ -269,9 +269,9 @@ class TurbineSpool(Spool):
         
         print('Find average P in between stages')
         if len(outlet_P) == 1:
-            x = balance_massflows(0.658,self.blade_rows[:-1],self.blade_rows[0].P0,self.blade_rows[-1].P)
-            # res = minimize_scalar(fun=balance_massflows,args=(self.blade_rows[:-1],self.blade_rows[0].P0,self.blade_rows[-1].P),bounds=outlet_P[0],tol=0.0001,options={'disp': True},method='bounded')
-            # x = res.x
+            # x = balance_massflows(0.658,self.blade_rows[:-1],self.blade_rows[0].P0,self.blade_rows[-1].P)
+            res = minimize_scalar(fun=balance_massflows,args=(self.blade_rows[:-1],self.blade_rows[0].P0,self.blade_rows[-1].P),bounds=outlet_P[0],tol=0.0001,options={'disp': True},method='bounded')
+            x = res.x
             print(x)
         else:
             x = fmin_slsqp(func=balance_massflows,args=(self.blade_rows[:-1],self.blade_rows[0].P0,self.blade_rows[-1].P), 
@@ -280,6 +280,8 @@ class TurbineSpool(Spool):
         
         # Adjust the inlet: Set the massflow
         self.blade_rows[0].massflow = np.linspace(0,1,self.num_streamlines)*self.blade_rows[1].total_massflow_no_coolant
+        self.blade_rows[0].total_massflow_no_coolant = self.blade_rows[1].total_massflow_no_coolant
+        self.blade_rows[0].total_massflow = np.linspace(0,1,self.num_streamlines)*self.blade_rows[1].total_massflow_no_coolant
         inlet_calc(self.blade_rows[0]) # adjust the inlet to match massflow 
         
         if self.adjust_streamlines:
@@ -524,12 +526,12 @@ def massflow_loss_function(exit_angle:float,index:int,row:BladeRow,upstream:Blad
     compute_power(row,upstream)
     
     if row.row_type!=RowType.Inlet:
-        if row.row_type == RowType.Rotor:
-            T3_is = upstream.T0 * (1/row.P0_P)**((row.gamma-1)/row.gamma)
-        else:
-            T3_is = upstream.T0 * (row.P0/row.P)**((row.gamma-1)/row.gamma)
+        # if row.row_type == RowType.Rotor:
+        T3_is = upstream.T0 * (1/row.P0_P)**((row.gamma-1)/row.gamma)
+        # else:
+        #     T3_is = upstream.T0 * (row.P0/row.P)**((row.gamma-1)/row.gamma)
         a = np.sqrt(row.gamma*row.R*T3_is)
-        T03_is = T3_is * (1+(row.gamma-1)/2*(row.Vm/a)**2)
+        T03_is = T3_is * (1+(row.gamma-1)/2*(row.V/a)**2)
         row.eta_total = (upstream.T0.mean() - row.T0.mean())/(upstream.T0.mean()-T03_is.mean())
         
     return np.abs(row.total_massflow*index/(len(row.massflow)-1) - row.massflow[index])

@@ -79,7 +79,12 @@ def radeq(row:BladeRow,upstream:BladeRow) -> BladeRow:
             raise Exception("Invalid value of C {C}, change reduce alpha or Vm")
         B = (1-C)**(gamma/(gamma-1))      
         A = P0 * gamma/(gamma-1) * (1-C)**(1/(gamma-1))
-        dVm_dr = 1/(2*Vm*A) * (rho*(Vt/r - Vm**2/rm * np.cos(phi) - Vr*dVr_dr) - dP0_dr*B) + 1/(2*T0) *dT0_dr  # Eqn 6
+        
+        epsilon = 1e-10  # or another small threshold
+        if abs(rm) > epsilon:
+            dVm_dr = 1/(2*Vm*A) * (rho*(Vt/r - Vm**2/rm * np.cos(phi) - Vr*dVr_dr) - dP0_dr*B) + 1/(2*T0) *dT0_dr  # Eqn 6
+        else:
+            dVm_dr = 1/(2*Vm*A) * (rho*(Vt/r - Vr*dVr_dr) - dP0_dr*B) + 1/(2*T0) *dT0_dr  # Eqn 6
         
         ydot = np.array([dP0_dr,dT0_dr,dVm_dr])
 

@@ -141,6 +141,30 @@ class Passage:
         r = r_streamline
             
         return phi, rm, r
+    
+    def get_area(self,t_hub:float) -> float:
+        """Get Area
+
+        Args:
+            t_hub (float): Percent arc length along the hub 
+
+        Returns:
+            float: Area
+        """
+        n = 100
+        line = self.get_cutting_line(t_hub)[0]
+        x,r = line.get_point(np.linspace(0,1,n))
+        total_area = 0 
+        for j in range(1,n):
+            if np.abs((x[-1]-x[0]))<1E-12: # Axial Machines
+                total_area += np.pi*(r[j]**2-r[j-1]**2)
+            else:   # Radial Machines
+                dx = x[j]-x[j-1]
+                S = (r[j]-r[j-1])
+                C = np.sqrt(1+((r[j]-r[j-1])/dx)**2)
+                area = 2*np.pi*C*(S/2*dx**2+r[j-1]*dx)
+                total_area += area
+        return total_area
         
     def get_cutting_line(self, t_hub:float) -> line2D:
         """Gets the cutting line perpendicular to hub and shroud 

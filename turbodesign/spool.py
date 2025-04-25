@@ -70,7 +70,6 @@ class Spool:
                 2. Counter Rotation: We either use the RPM already persecribed for each blade row.
             '''    
             if (type(self.blade_rows[i]) != Inlet) and (type(self.blade_rows[i]) != Outlet):
-                self.blade_rows[i].fluid = self.fluid
                 self.blade_rows[i].rpm = rpm
                 self.blade_rows[i].axial_chord = self.blade_rows[i].axial_location * self.passage.hub_length
             
