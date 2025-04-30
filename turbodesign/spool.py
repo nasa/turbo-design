@@ -34,7 +34,7 @@ class Spool:
     def __init__(self,passage:Passage,
                  massflow:float,rows=List[BladeRow],
                  num_streamlines:int=3,
-                 fluid:Solution=Solution('air.yaml'),
+                 fluid:Solution=None,
                  rpm:float=-1,
                  massflow_constraint:MassflowConstraint=MassflowConstraint.MatchMassFlow):
         """Initializes a Spool
@@ -50,7 +50,7 @@ class Spool:
             massflow (float): massflow at spool inlet 
             rows (List[BladeRow], optional): List of blade rows. Defaults to List[BladeRow].
             num_streamlines (int, optional): number of streamlines. Defaults to 3.
-            gas (ct.Solution, optional): cantera gas solution. Defaults to ct.Solution('air.yaml').
+            fluid (ct.Solution, optional): cantera gas solution. Defaults to None, fluid is set by bladerow cp
             rpm (float, optional): RPM for the entire spool Optional, you can also set rpm of the blade rows individually. Defaults to -1.
             massflow_constraint (MassflowConstraint, optional): MatchMassflow - Matches the massflow defined in the spool. BalanceMassflow - Balances the massflow between BladeRows, matches the lowest massflow.
         """
@@ -71,7 +71,7 @@ class Spool:
             '''    
             if (type(self.blade_rows[i]) != Inlet) and (type(self.blade_rows[i]) != Outlet):
                 self.blade_rows[i].rpm = rpm
-                self.blade_rows[i].axial_chord = self.blade_rows[i].axial_location * self.passage.hub_length
+                self.blade_rows[i].axial_chord = self.blade_rows[i].location * self.passage.hub_length
             
 
     @property
@@ -158,10 +158,11 @@ class Spool:
             row.phi = np.zeros((self.num_streamlines,))
             row.rm = np.zeros((self.num_streamlines,))
             row.r = np.zeros((self.num_streamlines,))
+            row.m = np.zeros((self.num_streamlines,))
             
             t_radial = np.linspace(0,1,self.num_streamlines)
             self.calculate_streamline_curvature(row,t_radial)
-                
+            
             # Set the loss function if it's not set
             if (type(row)!= Inlet and type(row) != Outlet):  
                 if row.loss_function == None:
@@ -177,9 +178,10 @@ class Spool:
         for i,tr in enumerate(t_radial):
             t_streamline, x_streamline, r_streamline = self.passage.get_streamline(tr)                
             phi, rm, r = self.passage.streamline_curvature(x_streamline,r_streamline)
-            row.phi[i] = float(interp1d(t_streamline,phi)(row.axial_location))
-            row.rm[i] = float(interp1d(t_streamline,rm)(row.axial_location))
-            row.r[i] = float(interp1d(t_streamline,r)(row.axial_location))
+            row.phi[i] = float(interp1d(t_streamline,phi)(row.location))
+            row.rm[i] = float(interp1d(t_streamline,rm)(row.location))
+            row.r[i] = float(interp1d(t_streamline,r)(row.location))
+            row.m[i] = float(interp1d(t_streamline,self.passage.get_m(tr,resolution=len(t_streamline)))(row.location))
           
     def solve(self):
         raise NotImplementedError('Solve is not implemented')
@@ -214,10 +216,10 @@ class Spool:
             else:  # i>0
                 upstream = self.blade_rows[i-1]
                 if upstream.row_type== RowType.Inlet:
-                    cut_line1,_,_ = self.passage.get_cutting_line((row.axial_location*hub_length +(0.5*row.blade_to_blade_gap*row.axial_chord) - row.axial_chord)/hub_length)
+                    cut_line1,_,_ = self.passage.get_cutting_line((row.location*hub_length +(0.5*row.blade_to_blade_gap*row.axial_chord) - row.axial_chord)/hub_length)
                 else:
-                    cut_line1,_,_ = self.passage.get_cutting_line((upstream.axial_location*hub_length)/hub_length)
-                cut_line2,_,_ = self.passage.get_cutting_line((row.axial_location*hub_length-(0.5*row.blade_to_blade_gap*row.axial_chord))/hub_length)
+                    cut_line1,_,_ = self.passage.get_cutting_line((upstream.location*hub_length)/hub_length)
+                cut_line2,_,_ = self.passage.get_cutting_line((row.location*hub_length-(0.5*row.blade_to_blade_gap*row.axial_chord))/hub_length)
                 
             if self.blade_rows[i].row_type == RowType.Stator:
                 x1,r1 = cut_line1.get_point(np.linspace(0,1,10))

@@ -50,15 +50,15 @@ inlet = Inlet(M=0.2,
                  T0=[T0], 
                  beta=[0],
                  percent_radii=0.5,
-                 axial_location=0)
+                 meridional_location=0)
 outlet = Outlet(P=P0/4.45,percent_radii=0.5,num_streamlines=5)
 
 #%% Define Blade Rows 
 # Axial location is a percentage along the hub where row exit is defined
-stator1 = BladeRow(row_type=RowType.Stator,axial_location=2*cax/axial_len)
-rotor1 = BladeRow(row_type=RowType.Rotor, axial_location=3*cax/axial_len)
-stator2 = BladeRow(row_type=RowType.Stator,axial_location=4*cax/axial_len)
-rotor2 = BladeRow(row_type=RowType.Rotor, axial_location=5*cax/axial_len)
+stator1 = BladeRow(row_type=RowType.Stator,meridional_location=2*cax/axial_len)
+rotor1 = BladeRow(row_type=RowType.Rotor, meridional_location=3*cax/axial_len)
+stator2 = BladeRow(row_type=RowType.Stator,meridional_location=4*cax/axial_len)
+rotor2 = BladeRow(row_type=RowType.Rotor, meridional_location=5*cax/axial_len)
 
 stator1.axial_chord = cax # Set an axial chord
 rotor1.axial_chord = cax

@@ -49,11 +49,11 @@ inlet = Inlet(M=0.2,
                  beta=[0], 
                  fluid=fluid, 
                  percent_radii=0.5, 
-                 axial_location=0)
+                 meridional_location=0)
 outlet = Outlet(P=P0/3.96,percent_radii=0.5,num_streamlines=3)
 
-stator1 = BladeRow(row_type=RowType.Stator,axial_location=2*cax/axial_len)
-rotor1 = BladeRow(row_type=RowType.Rotor,axial_location=3*cax/axial_len)
+stator1 = BladeRow(row_type=RowType.Stator,meridional_location=2*cax/axial_len)
+rotor1 = BladeRow(row_type=RowType.Rotor,meridional_location=3*cax/axial_len)
 
 stator1.axial_chord = cax # Set an axial chord. Used for plotting
 rotor1.axial_chord = cax

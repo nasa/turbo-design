@@ -100,15 +100,15 @@ inlet = Inlet(M=0.1,
                  beta=[0], 
                  fluid=fluid, 
                  percent_radii=0.5,
-                 axial_location=0)
+                 meridional_location=0)
 outlet = Outlet(P=P,percent_radii=0.5,num_streamlines=3)
 
 #%% Define Blade Rows 
 # Axial location is a percentage along the hub where row exit is defined
-stator0 = BladeRow(row_type=RowType.Stator, axial_location=0.0)
-# rotor30 = BladeRow(row_type=RowType.Rotor, axial_location=0.30)
-# rotor50 = BladeRow(row_type=RowType.Rotor, axial_location=0.50)
-rotor100 = BladeRow(row_type=RowType.Rotor, axial_location=1.00)
+stator0 = BladeRow(row_type=RowType.Stator, meridional_location=0.0)
+# rotor30 = BladeRow(row_type=RowType.Rotor, meridional_location=0.30)
+# rotor50 = BladeRow(row_type=RowType.Rotor, meridional_location=0.50)
+rotor100 = BladeRow(row_type=RowType.Rotor, meridional_location=1.00)
 
 # Coolant Definition: Use Kelvin and Pascal
 stator0.coolant = Coolant(fluid, T0=T0*0.555556,P0=5E5,massflow_percentage=0) 

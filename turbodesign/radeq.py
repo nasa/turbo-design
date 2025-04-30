@@ -1,11 +1,12 @@
-from scipy.interpolate import interp1d
+from scipy.interpolate import interp1d,PchipInterpolator
 from scipy.integrate import odeint
-import numpy as np 
+import numpy as np  
+import numdifftools as nd 
 from .bladerow import BladeRow
 from .enums import RowType
 
 
-def radeq(row:BladeRow,upstream:BladeRow) -> BladeRow:
+def radeq(row:BladeRow,upstream:BladeRow,downstream:BladeRow=None) -> BladeRow:
     """Solves the radial equilibrium equation for axial machines and returns the convergence. 
 
     Note:
@@ -14,7 +15,8 @@ def radeq(row:BladeRow,upstream:BladeRow) -> BladeRow:
     Args:
         row (BladeRow): Current row
         upstream (BladeRow): Previous row
-
+        downstream (BladeRow): Next row
+        
     Returns:
         BladeRow: current row with T0, P0, and Vm calculated
     """
@@ -57,8 +59,24 @@ def radeq(row:BladeRow,upstream:BladeRow) -> BladeRow:
         # Estimations 
         dVm_dr = float(interp1d(row_radius, np.gradient(row.Vm, row_radius))(r))
         dVt_dr = dVm_dr*np.tan(alpha)
-        dVr_dr = dVm_dr*np.sin(phi)
-
+        # dVr_dr = dVm_dr*np.sin(phi)
+        
+        up_Vm = interp1d(row_radius, upstream.Vm)(r)
+        down_Vm = interp1d(row_radius, downstream.Vm)(r)
+        up_m = interp1d(row_radius, upstream.m)(r)
+        
+        # Get a rough guess of dVm/dm
+        if downstream!=None:
+            down_m = interp1d(row_radius, downstream.m)(r)
+            row_m = interp1d(row_radius, row.m)(r)
+            if down_m != row_m:
+                func_Vm_m = interp1d([up_m, row_m, down_m],[up_Vm, Vm, down_Vm])
+            else:
+                func_Vm_m = interp1d([up_m, row_m],[up_Vm, Vm])    
+        else:
+            func_Vm_m = interp1d([up_m, row_m],[up_Vm, Vm])    
+        dVm_dm = nd.Derivative(func_Vm_m,order=1)(row_m)
+        
         # Upstream 
         dT0up_dr = float(interp1d(upstream.percent_hub_shroud, np.gradient(upstream.T0,up_radius))((r-row_radius[0])/(row_radius[-1]-row_radius[0]))) # use percentage to get the T0 upstream value
         dP0up_dr = float(interp1d(upstream.percent_hub_shroud, np.gradient(upstream.P0,up_radius))((r-row_radius[0])/(row_radius[-1]-row_radius[0]))) # use percentage to get the T0 upstream value
@@ -82,9 +100,9 @@ def radeq(row:BladeRow,upstream:BladeRow) -> BladeRow:
         
         epsilon = 1e-10  # or another small threshold
         if abs(rm) > epsilon:
-            dVm_dr = 1/(2*Vm*A) * (rho*(Vt/r - Vm**2/rm * np.cos(phi) - Vr*dVr_dr) - dP0_dr*B) + 1/(2*T0) *dT0_dr  # Eqn 6
+            dVm_dr = 1/(2*Vm*A) * (rho*(Vt**2/r - Vm**2/rm * np.cos(phi) - Vr*dVm_dm) - dP0_dr*B) + 1/(2*T0) *dT0_dr  # Eqn 6
         else:
-            dVm_dr = 1/(2*Vm*A) * (rho*(Vt/r - Vr*dVr_dr) - dP0_dr*B) + 1/(2*T0) *dT0_dr  # Eqn 6
+            dVm_dr = 1/(2*Vm*A) * (rho*(Vt**2/r - Vr*dVm_dm) - dP0_dr*B) + 1/(2*T0) *dT0_dr  # Eqn 6
         
         ydot = np.array([dP0_dr,dT0_dr,dVm_dr])
 

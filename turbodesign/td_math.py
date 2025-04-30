@@ -93,7 +93,7 @@ def compute_reynolds(rows:List[BladeRow],passage:Passage):
     
     for i in range(1,len(rows)):
         row = rows[i]
-        xr = passage.get_xr_slice(0.5,[rows[i-1].axial_location,row.axial_location])
+        xr = passage.get_xr_slice(0.5,[rows[i-1].location,row.percent_hub])
         dx = np.diff(xr[:,0])
         dr = np.diff(xr[:,1])
         c = np.sum(np.sqrt(dx**2+dr**2))
@@ -111,8 +111,6 @@ def compute_reynolds(rows:List[BladeRow],passage:Passage):
         row.axial_chord = max(c,1E-12) # Axial chord
         # row.num_blades = int(2*np.pi*row.r.mean() / row.pitch_to_chord * row.axial_chord)
 
-
-    
 def compute_power(row:BladeRow,upstream:BladeRow) -> None:
     """Calculates the power
 
@@ -232,8 +230,9 @@ def stator_calc(row:BladeRow,upstream:BladeRow,downstream:BladeRow=None,calculat
     
     # Static Pressure is assumed 
     row.P0 = upstream.P0 - row.Yp*(upstream.P0-row.P)
-    row.P0_P = row.P0/downstream.P
+    
     if downstream is not None:
+        row.P0_P = row.P0/downstream.P
         row.rp = (row.P-downstream.P)/(upstream.P0-downstream.P)
         
     if calculate_vm:

@@ -1,7 +1,7 @@
 from typing import List, Tuple
 import numpy as np
 import numpy.typing as npt
-from scipy.interpolate import PchipInterpolator
+from scipy.interpolate import PchipInterpolator, interp1d
 from pyturbo.helper import line2D
 from .enums import PassageType
 from scipy.optimize import minimize_scalar
@@ -141,7 +141,7 @@ class Passage:
         r = r_streamline
             
         return phi, rm, r
-    
+        
     def get_area(self,t_hub:float) -> float:
         """Get Area
 
@@ -166,7 +166,7 @@ class Passage:
                 total_area += area
         return total_area
         
-    def get_cutting_line(self, t_hub:float) -> line2D:
+    def get_cutting_line(self, t_hub:float) -> Tuple[line2D,float,float]:
         """Gets the cutting line perpendicular to hub and shroud 
 
         Args:
@@ -212,17 +212,18 @@ class Passage:
         rshroud = self.rshroud(t_shroud)
         return line2D([xhub,rhub],[xshroud,rshroud]), t_hub, t_shroud
     
-    def get_xr_slice(self,t_span:float,axial_location:Tuple[float,float]):
+    def get_xr_slice(self,t_span:float,percent_hub:Tuple[float,float],resolution:int=100):
         """Returns the xr coordinates of a streamline, a line that is parallel to both hub and shroud
             
         Args:
             t_span (float): _description_
-            axial_location (float): _description_
+            meridional_location (float): _description_
+            resolution (int): number of points to resolve 
 
         Returns:
             np.NDArray: _description_
         """
-        t_hub = np.linspace(axial_location[0],axial_location[1],100)
+        t_hub = np.linspace(percent_hub[0],percent_hub[1],resolution)
         t_hub = convert_to_ndarray(t_hub)*self.hub_length
         
         shroud_pts_cyl = np.vstack([self.xshroud(t_hub),self.rshroud(t_hub)]).transpose()
@@ -233,8 +234,39 @@ class Passage:
         for j in range(n):
             l = line2D(hub_pts_cyl[j,:],shroud_pts_cyl[j,:])
             xr[j,0],xr[j,1] = l.get_point(t_span)
+            
         return xr
-        
+    
+    def get_m(self,t_span:float,resolution:int=100) -> npt.NDArray:
+        """Meridional cooridnates
+
+        Args:
+            t_span (float): _description_
+            resolution (int, optional): _description_. Defaults to 100.
+
+        Returns:
+            npt.NDArray: _description_
+        """
+        xr = self.get_xr_slice(t_span,(0,1),resolution)
+        dx = np.diff(xr[:,0])
+        dr = np.diff(xr[:,1])
+        m = np.concat([[0],np.cumsum(np.sqrt(dx**2 + dr**2))])
+        return m
+    
+    def get_dm(self,t_span:float,location:float,resolution:int=1000) -> float:
+        """return the derivative in the meridional direction at a particular point
+
+        Args:
+            t_span (float): percent span 
+            location (float): hub location of the blade
+            resolution (int, optional): number of points to represent the hub curve. Defaults to 1000.
+
+        Returns:
+            (float) : returns the derivative 
+        """
+        m = self.get_m(t_span,resolution)
+        return PchipInterpolator(np.linspace(0,1,resolution),np.diff(m))(location)
+    
     @property
     def hub_length(self):
         """returns the computed length of the hub 

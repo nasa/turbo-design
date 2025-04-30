@@ -34,10 +34,11 @@ class BladeRow:
     # ----------------------------------
 
     # Streamline Properties 
-    axial_location:float = 0 # Where blade row is defined along the hub. 
+    percent_hub:float = 0 # Where blade row is defined along the hub. 
     percent_hub_shroud: npt.NDArray = field(default_factory=lambda: np.array([0]))    # Percent streamline length from hub to shroud.
     x: npt.NDArray = field(default_factory=lambda: np.array([0]))       # x - coordinates (useful for computing axial chord)
     r: npt.NDArray = field(default_factory=lambda: np.array([0]))       # Radius - coordinates 
+    m: npt.NDArray = field(default_factory=lambda: np.array([0]))       # meridional 
     area:float = 0
     # Calculated massflow is the massflow computed after radial eq solver
     calculated_massflow: float = 0
@@ -120,6 +121,7 @@ class BladeRow:
     _tip_clearance:float = 0 # Clearance as a percentage of span or blade height
 
     _inlet_to_outlet_pratio = [0.06,0.95]
+    location:float = 0 # Percent along hub where bladerow is defined
     
     @property
     def inlet_to_outlet_pratio(self) -> Tuple[float,float]:
@@ -327,18 +329,18 @@ class BladeRow:
         """
         self._tip_clearance = val
         
-    def __init__(self,axial_location:float,row_type:RowType=RowType.Stator,stage_id:int = 0):
+    def __init__(self,location:float,row_type:RowType=RowType.Stator,stage_id:int = 0):
         """Initializes the blade row to be a particular type
 
         Args:
-            axial_location (float): Location of the blade row as a percentage of the total axial length
+            location (float): Location of the blade row as a percentage of hub length
             row_type (RowType): Specifies the Type. Defaults to RowType.Stator
             power (float, optional): power . Defaults to 0.
             P0_P (float, optional): Total to Static Pressure Ratio
             stage_id (int, optional): ID of the stage so if you have 9 stages, the id could be 9. It's used to separate the stages. Each stage will have it's own unique degree of reaction 
         """
         self.row_type = row_type
-        self.axial_location = axial_location 
+        self.location = location 
         self.Yp = 0 # Loss
         self.stage_id = stage_id
     
@@ -511,7 +513,7 @@ def interpolate_streamline_radii(row:BladeRow,passage:Passage,num_streamlines:in
     Returns:
         (BladeRow): new row object with quantities interpolated
     """
-    row.cutting_line,_,_ = passage.get_cutting_line(row.axial_location)
+    row.cutting_line,_,_ = passage.get_cutting_line(row.percent_hub)
     row.x,row.r = row.cutting_line.get_point(np.linspace(0,1,num_streamlines))
     streamline_percent_length = np.sqrt((row.r-row.r[0])**2+(row.x-row.x[0])**2)/row.cutting_line.length
     
@@ -622,8 +624,8 @@ def compute_gas_constants(row:BladeRow,fluid:Solution=None) -> None:
         Tm = row.T.mean()
         Pm = row.P.mean()
         fluid.TP = Tm,Pm
-        row.Cp = row.fluid.cp
-        row.Cv = row.fluid.cv
+        row.Cp = fluid.cp
+        row.Cv = fluid.cv
         row.R = row.Cp-row.Cv
         row.gamma = row.Cp/row.Cv
     # Use Ideal Gas 
