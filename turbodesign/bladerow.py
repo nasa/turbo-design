@@ -513,7 +513,7 @@ def interpolate_streamline_radii(row:BladeRow,passage:Passage,num_streamlines:in
     Returns:
         (BladeRow): new row object with quantities interpolated
     """
-    row.cutting_line,_,_ = passage.get_cutting_line(row.percent_hub)
+    row.cutting_line,_,_ = passage.get_cutting_line(row.location)
     row.x,row.r = row.cutting_line.get_point(np.linspace(0,1,num_streamlines))
     streamline_percent_length = np.sqrt((row.r-row.r[0])**2+(row.x-row.x[0])**2)/row.cutting_line.length
     

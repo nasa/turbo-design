@@ -12,7 +12,7 @@ from scipy.interpolate import interp1d
 class Outlet(BladeRow):
     P_fun:interp1d
     
-    def __init__(self,P:Union[float,List[float]],percent_radii:List[float],num_streamlines:int=3):
+    def __init__(self,P:Union[float,List[float]],percent_radii:List[float],num_streamlines:int=3,location:float=1):
         """Initialize the outlet
 
         Args:
@@ -26,6 +26,7 @@ class Outlet(BladeRow):
         self.P_fun = interp1d(self.percent_hub_shroud,self.P)
         self.row_type = RowType.Outlet
         self.loss_function = None
+        self.location = location
     
     
     def transfer_quantities(self,upstream:BladeRow):

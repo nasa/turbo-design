@@ -62,7 +62,10 @@ def radeq(row:BladeRow,upstream:BladeRow,downstream:BladeRow=None) -> BladeRow:
         # dVr_dr = dVm_dr*np.sin(phi)
         
         up_Vm = interp1d(row_radius, upstream.Vm)(r)
-        down_Vm = interp1d(row_radius, downstream.Vm)(r)
+        if downstream.row_type == RowType.Outlet:
+            down_Vm = Vm
+        else:
+            down_Vm = interp1d(row_radius, downstream.Vm)(r)
         up_m = interp1d(row_radius, upstream.m)(r)
         
         # Get a rough guess of dVm/dm
@@ -70,12 +73,12 @@ def radeq(row:BladeRow,upstream:BladeRow,downstream:BladeRow=None) -> BladeRow:
             down_m = interp1d(row_radius, downstream.m)(r)
             row_m = interp1d(row_radius, row.m)(r)
             if down_m != row_m:
-                func_Vm_m = interp1d([up_m, row_m, down_m],[up_Vm, Vm, down_Vm])
+                func_Vm_m = PchipInterpolator([up_m, row_m, down_m],[up_Vm, Vm, down_Vm])
             else:
-                func_Vm_m = interp1d([up_m, row_m],[up_Vm, Vm])    
+                func_Vm_m = PchipInterpolator([up_m, row_m],[up_Vm, Vm])    
         else:
-            func_Vm_m = interp1d([up_m, row_m],[up_Vm, Vm])    
-        dVm_dm = nd.Derivative(func_Vm_m,order=1)(row_m)
+            func_Vm_m = PchipInterpolator([up_m, row_m],[up_Vm, Vm])    
+        dVm_dm = func_Vm_m.derivative()(row_m)
         
         # Upstream 
         dT0up_dr = float(interp1d(upstream.percent_hub_shroud, np.gradient(upstream.T0,up_radius))((r-row_radius[0])/(row_radius[-1]-row_radius[0]))) # use percentage to get the T0 upstream value

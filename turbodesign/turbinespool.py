@@ -249,9 +249,9 @@ class TurbineSpool(Spool):
             if balance_mean_pressure:
                 for j in range(self.num_streamlines):
                     Ps_range = outlet_pressure(x0,P0[j],P[j])
-                    for i in range(1,len(blade_rows)-1):
+                    for i in range(1,len(blade_rows)-2):
                         blade_rows[i].P[j] = Ps_range[i-1]
-                blade_rows[-1].P = P
+                blade_rows[-2].P = P
             else:
                 for i in range(1,len(blade_rows)-1):
                     for j in range(self.num_streamlines):
@@ -280,12 +280,12 @@ class TurbineSpool(Spool):
         print('Find average P in between stages')
         if len(outlet_P) == 1:
             # x = balance_massflows(0.658,self.blade_rows[:-1],self.blade_rows[0].P0,self.blade_rows[-1].P)
-            res = minimize_scalar(fun=balance_massflows,args=(self.blade_rows[:-1],self.blade_rows[0].P0,self.blade_rows[-1].P),bounds=outlet_P[0],tol=0.0001,options={'disp': True},method='bounded')
+            res = minimize_scalar(fun=balance_massflows,args=(self.blade_rows,self.blade_rows[0].P0,self.blade_rows[-1].P),bounds=outlet_P[0],tol=0.0001,options={'disp': True},method='bounded')
             x = res.x
             print(x)
         else:
             x = fmin_slsqp(func=balance_massflows,args=(self.blade_rows,self.blade_rows[0].P0,self.blade_rows[-1].P), 
-                        bounds=outlet_P, x0=outlet_P_guess,epsilon=0.001,iter=100) # ,tol=0.001,options={'disp': True})
+                        bounds=outlet_P, x0=outlet_P_guess,epsilon=0.0001,iter=100) # ,tol=0.001,options={'disp': True})
             outlet_P_guess = x 
         
         # Adjust the inlet: Set the massflow
