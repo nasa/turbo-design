@@ -103,7 +103,7 @@ def radeq(row:BladeRow,upstream:BladeRow,downstream:BladeRow=None) -> BladeRow:
         
         epsilon = 1e-10  # or another small threshold
         if abs(rm) > epsilon:
-            dVm_dr = 1/(2*Vm*A) * (rho*(Vt**2/r - Vm**2/rm * np.cos(phi) - Vr*dVm_dm) - dP0_dr*B) + 1/(2*T0) *dT0_dr  # Eqn 6
+            dVm_dr = 1/(2*Vm*A) * (rho*(Vt**2/r + Vm**2/rm * np.cos(phi) - Vr*dVm_dm) - dP0_dr*B) + 1/(2*T0) *dT0_dr  # Eqn 6
         else:
             dVm_dr = 1/(2*Vm*A) * (rho*(Vt**2/r - Vr*dVm_dm) - dP0_dr*B) + 1/(2*T0) *dT0_dr  # Eqn 6
         

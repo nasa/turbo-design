@@ -1,0 +1,41 @@
+#!MC 1410
+$!AlterData 
+  Equation = '{W} = sqrt({RelativeVelocity-X[m/s]}**2+{RelativeVelocity-Y[m/s]}**2+{RelativeVelocity-Z[m/s]}**2)'
+$!AlterData 
+  Equation = '{V} = sqrt({AbsoluteVelocity-X[m/s]}**2+{AbsoluteVelocity-Y[m/s]}**2+{AbsoluteVelocity-Z[m/s]}**2)'
+$!AlterData 
+  Equation = '{a} = abs({W})/max({RelativeMachNumber},0.01)'
+$!AlterData 
+  Equation = '{R} = 287.15'
+$!AlterData 
+  Equation = '{gamma} = 1.38'
+$!AlterData 
+  Equation = '{Cp} = {R}/(1-1/{gamma})'
+$!AlterData 
+  Equation = '{P}={StaticPressure[kPa]}*1000'
+$!AlterData 
+  Equation = '{Xm}={X}/1000'
+$!AlterData 
+  Equation = '{Ym}={Y}/1000'
+$!AlterData 
+  Equation = '{Zm}={Z}/1000'
+$!AlterData 
+  Equation = '{RPM}=-50000'
+$!AlterData 
+  Equation = '{radius}=sqrt({Ym}**2+{Zm}**2)'
+$!AlterData 
+  Equation = '{U}={RPM}*pi/30*{radius}'
+$!AlterData 
+  Equation = '{Vr}=(1/{radius})*({Zm}*{RelativeVelocity-Z[m/s]} + {Ym}*{RelativeVelocity-Y[m/s]})'
+$!AlterData 
+  Equation = '{Vm}=sqrt({RelativeVelocity-X[m/s]}**2 + {Vr}**2)'
+$!AlterData 
+  Equation = '{theta}=atan2({Zm},{Ym})'
+$!AlterData 
+  Equation = '{Wt}=(1/{radius})*({Ym}*{RelativeVelocity-Z[m/s]}-{Zm}*{RelativeVelocity-Y[m/s]})'
+$!AlterData 
+  Equation = '{beta} = atan2({Wt},{Vm})*180/pi'
+$!AlterData 
+  Equation = '{Vt} = {Wt} + {U}'
+$!AlterData 
+  Equation = '{alpha} = atan2({Vt},{Vm})*180/pi'
