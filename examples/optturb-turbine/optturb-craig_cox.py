@@ -6,14 +6,14 @@
 #%% Import Library
 import sys
 sys.path.insert(0,'../../')
-from td3 import PassageType
-from td3 import TurbineSpool, Inlet, RowType, BladeRow, Passage, Outlet
-from td3.enums import MassflowConstraint
-from td3.coolant import Coolant
-from td3.loss.turbine import CraigCox
+from turbodesign import PassageType
+from turbodesign import TurbineSpool, Inlet, RowType, BladeRow, Passage, Outlet
+from turbodesign.enums import MassflowConstraint
+from turbodesign.coolant import Coolant
+from turbodesign.loss.turbine import CraigCox
 import numpy as np 
 from cantera import Solution
-
+from pyturbo.helper import bezier
 #%% Define the Passage 
 # Geometry from OptTurb
 rmean = 0.389
@@ -26,10 +26,16 @@ rhub = [rmean-H1/2,rmean-H1/2,rmean-H2/2,rmean-H3/2]
 rshroud = [rmean+H1/2,rmean+H1/2,rmean+H2/2,rmean+H3/2]
 xhub = np.array([-cax, 0.0, cax, 2*cax])
 xshroud = np.array([-cax, 0.0, cax, 2*cax])
+
+hub = bezier(xhub,rhub)
+shroud = bezier(xshroud,rshroud)
+
+hub_pts = hub.get_point(np.linspace(0,1,20))
+shroud_pts = shroud.get_point(np.linspace(0,1,20))
 axial_len = xhub[-1]-xhub[0]
 
-passage = Passage(xhub,rhub,
-                 xshroud,rshroud,
+passage = Passage(hub_pts[0],hub_pts[1],
+                 shroud_pts[0],shroud_pts[1],
                  passageType=PassageType.Axial)
 
 #%% Design Conditions 
@@ -47,7 +53,6 @@ inlet = Inlet(M=0.2,
                  P0=[P0], 
                  T0=[T0], 
                  beta=[0], 
-                 fluid=fluid, 
                  percent_radii=0.5, 
                  meridional_location=0)
 outlet = Outlet(P=P0/3.96,percent_radii=0.5,num_streamlines=3)

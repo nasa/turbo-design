@@ -122,10 +122,12 @@ class TurbineSpool(Spool):
             
             if row.row_type == RowType.Stator:
                 stator_calc(row,upstream,downstream)
+                compute_massflow(row)
             elif row.row_type == RowType.Rotor:
                 rotor_calc(row,upstream)
                 compute_massflow(row)
                 compute_power(row,upstream)        
+            
     
     def solve(self):
         """
@@ -163,7 +165,7 @@ class TurbineSpool(Spool):
                     bounds = [-80,0]
                 if row.row_type != RowType.Inlet:
                     for j in range(1,self.num_streamlines):
-                        res = minimize_scalar(massflow_loss_function, bounds=bounds,args=(j,row,upstream,downstream),tol=1E-2)
+                        res = minimize_scalar(massflow_loss_function, bounds=bounds,args=(j,row,upstream,downstream),tol=1E-3)
                         if row.row_type == RowType.Rotor:
                             row.beta2[j] = np.radians(res.x)
                              # Initialize the value at the hub to not upset the mean
@@ -256,20 +258,17 @@ class TurbineSpool(Spool):
                 for i in range(1,len(blade_rows)-1):
                     for j in range(self.num_streamlines):
                         blade_rows[i].P[j] = P[j]*x0[(i-1)*self.num_streamlines+j]    # x0 size = num_streamlines -1 
-            try:  
-                calculate_massflows(blade_rows,True,self.fluid)
-                print(x0)
-                return self.__massflow_std__(blade_rows)
-            except:
-                blade_rows = blade_rows_backup
-                return np.inf # Return a high error
+            # try:  
+            calculate_massflows(blade_rows,True,self.fluid)
+            print(x0)
+            return self.__massflow_std__(blade_rows)
+            # except Exception as e:
+            #     print(e)
+            # finally:
+            #     blade_rows = blade_rows_backup
+            #     return np.inf # Return a high error
             
-            # except:
-            #     for i in range(1,len(blade_rows)-1):
-            #         for j in range(self.num_streamlines):
-            #             blade_rows[i].P[j] = P[j]
-            #     calculate_massflows(blade_rows,True)
-            #     return 10
+
         # Break apart the rows to stages
         outlet_P=list(); outlet_P_guess = list() # Outlet P is the bounds, outlet_p_guess is the guessed values 
         
@@ -277,35 +276,34 @@ class TurbineSpool(Spool):
             outlet_P.append(self.blade_rows[i].inlet_to_outlet_pratio)
             outlet_P_guess.append(np.mean(self.blade_rows[i].inlet_to_outlet_pratio))
         
-        print('Find average P in between stages')
-        if len(outlet_P) == 1:
-            # x = balance_massflows(0.658,self.blade_rows[:-1],self.blade_rows[0].P0,self.blade_rows[-1].P)
-            res = minimize_scalar(fun=balance_massflows,args=(self.blade_rows,self.blade_rows[0].P0,self.blade_rows[-1].P),bounds=outlet_P[0],tol=0.0001,options={'disp': True},method='bounded')
-            x = res.x
-            print(x)
-        else:
-            x = fmin_slsqp(func=balance_massflows,args=(self.blade_rows,self.blade_rows[0].P0,self.blade_rows[-1].P), 
-                        bounds=outlet_P, x0=outlet_P_guess,epsilon=0.0001,iter=100) # ,tol=0.001,options={'disp': True})
-            outlet_P_guess = x 
+        print(f"Looping to converge massflow")
+        past_err = -100; loop_iter = 0; err = 0.001
+        while np.abs((err-past_err)/err)>0.05:
+            if len(outlet_P) == 1:
+                # x = balance_massflows(0.658,self.blade_rows[:-1],self.blade_rows[0].P0,self.blade_rows[-1].P)
+                res = minimize_scalar(fun=balance_massflows,args=(self.blade_rows,self.blade_rows[0].P0,self.blade_rows[-1].P),bounds=outlet_P[0],tol=0.001,options={'disp': True},method='bounded')
+                x = res.x
+                print(x)
+            else:
+                x = fmin_slsqp(func=balance_massflows,args=(self.blade_rows,self.blade_rows[0].P0,self.blade_rows[-1].P), 
+                            bounds=outlet_P, x0=outlet_P_guess,epsilon=0.001,iter=100) # ,tol=0.001,options={'disp': True})
+                outlet_P_guess = x 
         
-        # Adjust the inlet: Set the massflow
-        self.blade_rows[0].massflow = np.linspace(0,1,self.num_streamlines)*self.blade_rows[1].total_massflow_no_coolant
-        self.blade_rows[0].total_massflow_no_coolant = self.blade_rows[1].total_massflow_no_coolant
-        self.blade_rows[0].total_massflow = np.linspace(0,1,self.num_streamlines)*self.blade_rows[1].total_massflow_no_coolant
-        self.blade_rows[0].calculated_massflow = self.blade_rows[0].total_massflow_no_coolant
-        inlet_calc(self.blade_rows[0]) # adjust the inlet to match massflow 
+            # Adjust the inlet: Set the massflow
+            self.blade_rows[0].massflow = np.linspace(0,1,self.num_streamlines)*self.blade_rows[1].total_massflow_no_coolant
+            self.blade_rows[0].total_massflow_no_coolant = self.blade_rows[1].total_massflow_no_coolant
+            self.blade_rows[0].total_massflow = np.linspace(0,1,self.num_streamlines)*self.blade_rows[1].total_massflow_no_coolant
+            self.blade_rows[0].calculated_massflow = self.blade_rows[0].total_massflow_no_coolant
+            inlet_calc(self.blade_rows[0]) # adjust the inlet to match massflow 
         
-        if self.adjust_streamlines:
-            for _ in range(2):
+            if self.adjust_streamlines:
                 adjust_streamlines(self.blade_rows[:-1],self.passage)
-                self.blade_rows[-1].transfer_quantities(self.blade_rows[-2])
-                self.blade_rows[-1].P = self.blade_rows[-1].get_static_pressure(self.blade_rows[-1].percent_hub_shroud)
-                balance_massflows(x,self.blade_rows,self.blade_rows[0].P0,self.blade_rows[-1].P) 
-        else:
+                
             self.blade_rows[-1].transfer_quantities(self.blade_rows[-2])
             self.blade_rows[-1].P = self.blade_rows[-1].get_static_pressure(self.blade_rows[-1].percent_hub_shroud)
-        err = self.__massflow_std__(self.blade_rows)
-        print(f"Massflow convergenced error:{err}")
+            
+            err = self.__massflow_std__(self.blade_rows)
+            print(f"Loop {loop_iter} massflow convergenced error:{err}")
         
         # calculate Reynolds number
         compute_reynolds(self.blade_rows,self.passage)
@@ -422,7 +420,7 @@ def calculate_massflows(blade_rows:List[BladeRow],calculate_vm:bool=False,fluid:
                         elif row.row_type == RowType.Stator:
                             stator_calc(row,upstream,downstream,calculate_vm=True)
                             # Finds Equilibrium between Vm, P0, T0
-                            row = radeq(row,upstream)
+                            row = radeq(row,upstream,downstream)
                             compute_gas_constants(row,fluid)
                             stator_calc(row,upstream,downstream,calculate_vm=False)
                         compute_gas_constants(row,fluid)

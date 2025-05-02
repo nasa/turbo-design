@@ -260,6 +260,7 @@ def stator_calc(row:BladeRow,upstream:BladeRow,downstream:BladeRow=None,calculat
     row.beta1 = upstream.beta2
     row.rho = row.P/(row.R*row.T)
     row.U = row.omega*row.r
+    row.Wt = row.Vt-row.U
     row.P0_stator_inlet = upstream.P0
 
 def rotor_calc(row:BladeRow,upstream:BladeRow,calculate_vm:bool=True):
@@ -295,7 +296,7 @@ def rotor_calc(row:BladeRow,upstream:BladeRow,calculate_vm:bool=True):
     row.P0R = upstream.P0R - row.Yp*(upstream.P0R-row.P)
     
     # Total Relative Temperature stays constant through the rotor. Adjust for change in radius from rotor inlet to exit
-    row.T0R =upstream.T0R - T0_coolant_weighted_average(row) # (upstream_rothalpy + 0.5*row.U**2)/row.Cp - T0_coolant_weighted_average(row) 
+    row.T0R = (upstream_rothalpy + 0.5*row.U**2)/row.Cp - T0_coolant_weighted_average(row) 
     P0R_P = row.P0R / row.P
     T0R_T = P0R_P**((row.gamma-1)/row.gamma)
     row.T = (row.T0R/T0R_T)     # Exit static temperature

@@ -57,15 +57,15 @@ inlet = Inlet(M=0.02,
                  T0=[T0], 
                  beta=[0],
                  percent_radii=0.5,
-                 axial_location=0)
+                 location=0)
 
 outlet = Outlet(P=206.799*1000,percent_radii=0.5,num_streamlines=5)
 
 #%% Define Blade Rows 
 # Axial location is a percentage along the hub where row exit is defined
-stator1 = BladeRow(row_type=RowType.Stator,axial_location=cax1/axial_len)
-rotor1 = BladeRow(row_type=RowType.Rotor, axial_location=(cax1+cax2)/axial_len)
-stator2 = BladeRow(row_type=RowType.Stator,axial_location=1)
+stator1 = BladeRow(row_type=RowType.Stator,location=cax1/axial_len)
+rotor1 = BladeRow(row_type=RowType.Rotor, location=(cax1+cax2)/axial_len)
+stator2 = BladeRow(row_type=RowType.Stator,location=1)
 
 # stator1.gamma = 1.38
 # stator1.Cp = 1042.8
@@ -118,6 +118,6 @@ spool.massflow_constraint = MassflowConstraint.BalanceMassFlow # Fixes the exit 
 # spool.plot_geometry()
 spool.solve() # This also initializes streamlines
 spool.export_properties("3RowSteady.json")
-spool.plot()
+# spool.plot()
 spool.plot_velocity_triangles()
 print('check')

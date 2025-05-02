@@ -62,10 +62,13 @@ def radeq(row:BladeRow,upstream:BladeRow,downstream:BladeRow=None) -> BladeRow:
         # dVr_dr = dVm_dr*np.sin(phi)
         
         up_Vm = interp1d(row_radius, upstream.Vm)(r)
-        if downstream.row_type == RowType.Outlet:
-            down_Vm = Vm
+        if downstream:
+            if downstream.row_type == RowType.Outlet:
+                down_Vm = Vm
+            else:
+                down_Vm = interp1d(row_radius, downstream.Vm)(r)
         else:
-            down_Vm = interp1d(row_radius, downstream.Vm)(r)
+            down_Vm = Vm
         up_m = interp1d(row_radius, upstream.m)(r)
         
         # Get a rough guess of dVm/dm
@@ -103,9 +106,9 @@ def radeq(row:BladeRow,upstream:BladeRow,downstream:BladeRow=None) -> BladeRow:
         
         epsilon = 1e-10  # or another small threshold
         if abs(rm) > epsilon:
-            dVm_dr = 1/(2*Vm*A) * (rho*(Vt**2/r + Vm**2/rm * np.cos(phi) - Vr*dVm_dm) - dP0_dr*B) + 1/(2*T0) *dT0_dr  # Eqn 6
+            dVm_dr = Cp*T0/(Vm*A*(1+np.tan(alpha)**2)) * (rho*(Vt**2/r + Vm**2/rm * np.cos(phi) - Vr*dVm_dm) - B*dP0_dr) + Vm/(2*T0) *dT0_dr  # Eqn 6
         else:
-            dVm_dr = 1/(2*Vm*A) * (rho*(Vt**2/r - Vr*dVm_dm) - dP0_dr*B) + 1/(2*T0) *dT0_dr  # Eqn 6
+            dVm_dr = Cp*T0/(Vm*A*(1+np.tan(alpha)**2)) * (rho*(Vt**2/r - Vr*dVm_dm) - B*dP0_dr) + Vm/(2*T0) *dT0_dr  # Eqn 6
         
         ydot = np.array([dP0_dr,dT0_dr,dVm_dr])
 

@@ -24,7 +24,9 @@ https://colab.research.google.com/github/nasa/turbo-design/blob/main/examples/
 
 [OptTurb-multistage](https://colab.research.google.com/github/nasa/turbo-design/blob/main/examples/optturb-multistage/optturb-multistage.ipynb) Multi-stage example of OptTurb. This is based off a meanline spreadsheet model [OptTurb-MultiStage.xlsx](https://github.com/nasa/turbo-design/blob/main/examples/optturb-multistage/multistage-fixed_pressure_loss2.xlsx) 
 
-[OptTurb-radial](https://colab.research.google.com/github/nasa/turbo-design/blob/main/examples/optturb-radial-turbine/optturb-radialturbine.ipynb) Radial Turbine Example. This example is not based on a meanline spreadsheet since radius is constantly changing. It still needs to be tested. It uses radial equilibrium to balance the massflow. 
+[Radial Turbine](https://colab.research.google.com/github/nasa/turbo-design/blob/main/examples/radial-turbine/radial_turbine-1D.ipynb) Radial Turbine example comparison with CFD Solution. This is a NASA internally developed turbine. It is not optimal but it works.  
+
+[3 Row Steady](https://colab.research.google.com/github/nasa/turbo-design/blob/main/examples/3RowSteady-1D/3RowSteady.ipynb) 3 Row Steady comparison with a CFD Example from Aerodynamic Solutions.  
 
 ## Building Turbine Loss Models from Correlations
 The loss correlations below were estimated using Axial steam turbines. Correlation figures are extracted and surface fitted. Each of these tutorials shows how to create and save the correlation files. 
