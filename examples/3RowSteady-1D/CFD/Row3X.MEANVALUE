@@ -1,0 +1,36 @@
+DATE & TIME : 20250422  13:51:54
+ MEANVALUE-VERSION: 3.0
+ 
+ MEANLINE VALUE FOR THE CASE: 
+ Row3X                                                                           
+ AFTER         6000  NUMBER OF ITERATIONS
+ 
+   ROW    FLOW-UP     FLOW-DW       TT-UP       TT-DW       PT-UP       PT-DW       TR-UP       TR-DW       PR-UP       PR-DW     PT-LOSS  EFFICIENCY       PS-UP       PS-DW       SPEED    Mass-ADD      Tt-ADD  EFF-COOLED    BETA*-DW
+    #        KG/s        KG/s       Deg.K       Deg.K      KN/M^2      KN/M^2       Deg.K       Deg.K      KN/M^2      KN/M^2         %           %        KN/M^2      KN/M^2         RPM        KG/s       Deg.K         %          DEG
+    1      8.3733      8.3778    516.0057    516.0507    305.6938    297.1125    516.0057    516.0507    305.6938    297.1125      2.8385      0.0000    293.1172    206.7992      0.0000      0.0000      0.0000      0.0000     65.0801
+ 
+  OVERALL PERFORMANCE
+ 
+   ITS    FLOW-UP     FLOW-DW       TT-UP       TT-DW       PT-UP       PT-DW       PS-UP       PS-DW          TT          PT  Efficiency       PT-PS   EFF-PT/PS    Mass-ADD      Tt-ADD  EFF-COOLED       Ga-UP       Ga-DW      Omg-UP      Omg_DW
+    #        KG/s        KG/s       Deg.K       Deg.K      KN/M^2      KN/M^2      KN/M^2      KN/M^2       Ratio       Ratio         %         RATIO         %          KG/s       Deg.K         %  
+ 6000      8.3733      8.3778    516.0057    516.0507    305.6938    297.1125    293.1172    206.7992      1.0001      1.0289      0.0000      1.4782      0.0000      0.0000      0.0000      0.0000      1.3859      1.3902      0.6823      0.0950
+ 
+ 
+  *************************************************
+ 
+ 
+ LEADING AND TRAILING EDGE DATA FROM INTERPOLATION
+ 
+   ROW    FLOW-LE     FLOW-TE       TT-LE       TT-TE       PT-LE       PT-TE       TR-LE       TR-TE       PR-LE       PR-TE     PT-LOSS  EFFICIENCY       PS-LE       PS-TE       SPEED    Mass-ADD      Tt-ADD  EFF-COOLED    BETA*-DW
+    #        KG/s        KG/s       Deg.K       Deg.K      KN/M^2      KN/M^2       Deg.K       Deg.K      KN/M^2      KN/M^2         %           %        KN/M^2      KN/M^2         RPM        KG/s       Deg.K         %          DEG
+    1      8.3713      8.3639    516.0268    516.0189    305.5857    298.5057    516.0268    516.0189    305.5857    298.5057      2.3113      0.0000    292.0569    207.0100      0.0000      0.0000      0.0000      0.0000     65.4860
+ 
+ 
+  *************************************************
+ 
+    L     M-ABS    PT-ABS    TT-ABS     ALPHA*    PHI    Mass-Flow     Ps     Pt-rel     Cp       Ptloss      CX        CU        CW        WU       M-REL   Beta*       XHUB       RHUB      XTIP      RTIP 
+  Row             1
+    1  2.42992E-1  3.05694E+2  5.16006E+2 -1.95856E+1  1.31384E+0  8.37334E+0  2.93117E+2  3.05694E+2  9.05340E-1  0.0000E+00  1.03077E+2 -3.66844E+1  2.36406E+0 -3.66844E+1  2.42992E-1 -1.95856E+1  6.85072E+1  1.52400E+2  6.85113E+1  1.90500E+2
+    2  2.42621E-1  3.05586E+2  5.16027E+2 -1.95632E+1  6.62375E-1  8.37129E+0  2.92057E+2  3.05586E+2  9.05341E-1  5.04553E-2  1.02775E+2 -3.65245E+1  1.18819E+0 -3.65245E+1  2.42621E-1 -1.95632E+1  8.02703E+1  1.52400E+2  8.00246E+1  1.90500E+2
+    3  7.42448E-1  2.98506E+2  5.16019E+2  6.54860E+1 -2.01286E+0  8.36385E+0  2.07010E+2  2.98506E+2  9.05341E-1  2.36060E+0  1.32663E+2  2.91092E+2 -4.66250E+0  2.91092E+2  7.42448E-1  6.54860E+1  1.23168E+2  1.52400E+2  1.23369E+2  1.90500E+2
+    4  7.39763E-1  2.97112E+2  5.16051E+2  6.50801E+1  7.47040E-2  8.37779E+0  2.06799E+2  2.97112E+2  9.05342E-1  2.83854E+0  1.34566E+2  2.89633E+2  1.75451E-1  2.89633E+2  7.39763E-1  6.50801E+1  1.52400E+2  1.52400E+2  1.52400E+2  1.90500E+2

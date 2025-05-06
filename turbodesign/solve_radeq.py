@@ -27,13 +27,13 @@ def adjust_streamlines(blade_rows:List[BladeRow],passage:Passage):
         new_percent_streamline = interp1d(row.massflow,row.percent_hub_shroud)(ideal_massflow_fraction[1:-1])
         row.percent_hub_shroud[1:-1] = new_percent_streamline
 
-        cut_line, thub,_ = passage.get_cutting_line(row.axial_location)
+        cut_line, thub,_ = passage.get_cutting_line(row.percent_hub)
         row.x,row.r = cut_line.get_point(row.percent_hub_shroud)
         # Radii may have shifted, recompute Ay and rm
         for i,tr in enumerate(row.percent_hub_shroud):
             t_streamline, x_streamline, r_streamline = passage.get_streamline(tr)                
             phi, rm, r = passage.streamline_curvature(x_streamline,r_streamline)
-            row.phi[i] = float(interp1d(t_streamline,phi)(row.axial_location))
-            row.rm[i] = float(interp1d(t_streamline,rm)(row.axial_location))
-            row.r[i] = float(interp1d(t_streamline,r)(row.axial_location))
-            row.x[i] = float(interp1d(t_streamline,x_streamline)(row.axial_location))
+            row.phi[i] = float(interp1d(t_streamline,phi)(row.percent_hub))
+            row.rm[i] = float(interp1d(t_streamline,rm)(row.percent_hub))
+            row.r[i] = float(interp1d(t_streamline,r)(row.percent_hub))
+            row.x[i] = float(interp1d(t_streamline,x_streamline)(row.percent_hub))

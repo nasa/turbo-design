@@ -1,0 +1,39 @@
+generator: ck2yaml
+input-files: [XeHe.txt]
+cantera-version: 3.0.0
+date: Thu, 23 May 2024 13:03:55 -0400
+
+units: {length: cm, time: s, quantity: mol, activation-energy: cal/mol}
+
+phases:
+- name: gas
+  thermo: ideal-gas
+  elements: [He, Xe]
+  species: [He, Xe]
+  state: {T: 300.0, P: 1 atm}
+
+species:
+- name: He
+  composition: {He: 0.7172}
+  thermo:
+    model: NASA9
+    temperature-ranges: [200.0, 1000.0, 6000.0, 2.0e+04]
+    data:
+    - [0.0, 0.0, 2.5, 0.0, 0.0, 0.0, 0.0, -745.375, 0.928723974]
+    - [0.0, 0.0, 2.5, 0.0, 0.0, 0.0, 0.0, -745.375, 0.928723974]
+    - [3.39684542e+06, -2194.037652, 3.080231878, -8.06895755e-05, 6.25278491e-09,
+      -2.574990067e-13, 4.429960218e-18, 1.65051896e+04, -4.04881439]
+    note: Ref-Elm. Moore,1971. Moore,1970a. Gordon,1999. [g 5/97]
+- name: Xe
+  composition: {Xe: 0.2828}
+  thermo:
+    model: NASA9
+    temperature-ranges: [200.0, 1000.0, 6000.0, 2.0e+04]
+    data:
+    - [0.0, 0.0, 2.5, 0.0, 0.0, 0.0, 0.0, -745.375, 6.164454205]
+    - [4025.22668, -12.09507521, 2.514153347, -8.24810208e-06, 2.530232618e-09,
+      -3.89233323e-13, 2.360439138e-17, -668.580073, 6.063710715]
+    - [2.540397456e+08, -1.105373774e+05, 13.82644099, 1.500614606e-03,
+      -3.93535903e-07, 2.765790584e-11, -5.943990574e-16, 9.28544383e+05,
+      -110.9834556]
+    note: Ref-Elm. Moore,1971. Moore,1970a. Gordon,1999. [g 1/99]

@@ -1,0 +1,16 @@
+Inlet_P0 = 562891
+Inlet_T0 = 1237
+Outlet_P = 263724
+
+Design_RPM = -50000
+
+alpha2 = -62.2
+beta3 = 52.04
+massflow = 0.1
+
+radius=0.04
+hub_outlet_radius_scale=0.95
+shroud_inlet_offset=0.0045
+shroud_outlet_offset_ratio=3
+rhub_out=0.005
+x_stretch_factor=1

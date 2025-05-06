@@ -19,7 +19,7 @@ class Inlet(BladeRow):
     
     def __init__(self,M:float,T0:Union[float,List[float]],
                  P0:Union[float,List[float]],
-                 axial_location:float=0,
+                 location:float=0,
                  beta:Union[float,List[float]]=[0],
                  percent_radii:Union[float,List[float]]=[0.5]):
         """Initializes the inlet station. 
@@ -30,11 +30,11 @@ class Inlet(BladeRow):
             T0 (Union[float,List[float]]): Total Temperature Array
             P0 (Union[float,List[float]]): Total Pressure Array
             percent_radii (Union[float,List[float]]): Radius where total pressure and temperature are defined
-            axial_location (float): Axial Location as a percentage of hub length
+            location (float): Location as a percentage of hub length
             beta (Union[float,List[float]], optional): Inlet flow angle in relative direction. Defaults to [].
 
         """
-        super().__init__(row_type=RowType.Inlet,axial_location=axial_location,stage_id=-1)
+        super().__init__(row_type=RowType.Inlet,location=location,stage_id=-1)
         self.beta1 = convert_to_ndarray(beta)
         self.M = convert_to_ndarray(M)
         self.T0 = convert_to_ndarray(T0)
@@ -94,7 +94,7 @@ class Inlet(BladeRow):
         t,x,radius = passage.get_streamline(self.percent_hub_shroud)
         radius = radius[0]
 
-        cutline,_,_ = passage.get_cutting_line(self.axial_location)
+        cutline,_,_ = passage.get_cutting_line(self.location)
         self.x,self.r = cutline.get_point(np.linspace(0,1,num_streamlines))
         for _ in range(10):
             T0_T = (1+(self.gamma-1)/2 * self.M**2)

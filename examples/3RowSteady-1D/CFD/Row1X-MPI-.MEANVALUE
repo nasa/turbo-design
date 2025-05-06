@@ -1,0 +1,30 @@
+DATE & TIME : 20250422  13:51:54
+ MPI-MEANVALUE-VERSION 2.0
+ 
+ MEANLINE VALUE PER ROW FOR THE CASE 
+ Row1X                                                                           
+ AFTER         6000  NUMBER OF ITERATIONS
+ 
+   PASSAGE  FLOW-UP     FLOW-DW       TT-UP       TT-DW       PT-UP       PT-DW       TR-UP       TR-DW       PR-UP       PR-DW     PT-LOSS  EFFICIENCY       PS-UP       PS-DW       SPEED    Mass-ADD      Hx-ADD  EFF-COOLED     EFF_ACC
+      #        KG/s        KG/s       Deg.K       Deg.K      KN/M^2      KN/M^2       Deg.K       Deg.K      KN/M^2      KN/M^2         %           %        KN/M^2      KN/M^2         RPM        KG/S       KJ/S          %           %  
+      1      8.3674      8.3715    555.4404    555.4408    413.6997    409.8333    555.4404    555.4408    413.6997    409.8333      0.9347      0.0000    405.4777    341.8239      0.0000      0.0000      0.0000      0.0000 -7.11250E+5
+      2      8.3715      8.3733    555.4404    516.0063    409.8356    305.6982    533.5098    534.9872    355.6985    347.0687      2.6945     91.0192    341.6765    292.5883   9000.0010      0.0000      0.0000     91.0192     88.3092
+      3      8.3733      8.3778    516.0057    516.0507    305.6938    297.1125    516.0057    516.0507    305.6938    297.1125      2.8385      0.0000    293.1172    206.7992      0.0000      0.0000      0.0000      0.0000     80.9336
+ 
+  OVERALL PERFORMANCE
+ 
+     ITS    FLOW-UP     FLOW-DW       TT-UP       TT-DW       PT-UP       PT-DW       PS-UP       PS-DW          TT          PT  Efficiency       PT-PS   EFF-PT/PS    Mass-ADD      HX-ADD  EFF-COOLED       Ga-UP       Ga-DW       OmgIn  OMGOT
+      #        KG/s        KG/s       Deg.K       Deg.K      KN/M^2      KN/M^2      KN/M^2      KN/M^2       Ratio       Ratio         %         RATIO         %          KG/s        KJ/S         %  
+   6000      8.3674      8.3778    555.4404    516.0507    413.6997    297.1125    405.4777    206.7992      1.0785      1.3924     80.9336      2.0005     41.0580      0.0000      0.0000     80.7143      1.3813      1.3902     14.1798      1.2909
+ 
+ 
+  *************************************************
+ 
+ 
+ LEADING AND TRAILING EDGE DATA FROM INTERPOLATION
+ 
+     ROW    FLOW-LE     FLOW-TE       TT-LE       TT-TE       PT-LE       PT-TE       TR-LE       TR-TE       PR-LE       PR-TE     PT-LOSS  EFFICIENCY       PS-LE       PS-TE       SPEED        H-LE        H-TE  EFF-COOLED    GAMMA-IN    GAMMA-OT      CAVITY      NBLADE
+      #        KG/s        KG/s       Deg.K       Deg.K      KN/M^2      KN/M^2       Deg.K       Deg.K      KN/M^2      KN/M^2         %           %        KN/M^2      KN/M^2         RPM       KJ/KG       KJ/KG         %           -           -    FLOW(Kg/S)
+      1      8.3696      8.3690    555.4465    555.4440    413.5348    410.1046    555.4465    555.4440    413.5348    410.1046      0.8280      0.0000    404.2320    341.3223      0.0000    503.8747    503.8726      0.0000      1.3814      1.3840     -0.0000          20
+      2      8.3682      8.3695    555.4631    516.0492    409.4806    305.7141    533.6452    534.9931    355.6482    346.9888      2.6181     91.2443    340.6409    289.5617   9000.0010    503.8907    467.2009     91.2443      1.3840      1.3858     -0.0000          30
+      3      8.3713      8.3639    516.0268    516.0189    305.5857    298.5057    516.0268    516.0189    305.5857    298.5057      2.3113      0.0000    292.0569    207.0100      0.0000    467.1803    467.1729      0.0000      1.3859      1.3902     -0.0000          30

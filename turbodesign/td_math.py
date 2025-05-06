@@ -93,7 +93,7 @@ def compute_reynolds(rows:List[BladeRow],passage:Passage):
     
     for i in range(1,len(rows)):
         row = rows[i]
-        xr = passage.get_xr_slice(0.5,[rows[i-1].axial_location,row.axial_location])
+        xr = passage.get_xr_slice(0.5,[rows[i-1].location,row.percent_hub])
         dx = np.diff(xr[:,0])
         dr = np.diff(xr[:,1])
         c = np.sum(np.sqrt(dx**2+dr**2))
@@ -111,8 +111,6 @@ def compute_reynolds(rows:List[BladeRow],passage:Passage):
         row.axial_chord = max(c,1E-12) # Axial chord
         # row.num_blades = int(2*np.pi*row.r.mean() / row.pitch_to_chord * row.axial_chord)
 
-
-    
 def compute_power(row:BladeRow,upstream:BladeRow) -> None:
     """Calculates the power
 
@@ -232,8 +230,9 @@ def stator_calc(row:BladeRow,upstream:BladeRow,downstream:BladeRow=None,calculat
     
     # Static Pressure is assumed 
     row.P0 = upstream.P0 - row.Yp*(upstream.P0-row.P)
-    row.P0_P = row.P0/downstream.P
+    
     if downstream is not None:
+        row.P0_P = row.P0/downstream.P
         row.rp = (row.P-downstream.P)/(upstream.P0-downstream.P)
         
     if calculate_vm:
@@ -261,6 +260,7 @@ def stator_calc(row:BladeRow,upstream:BladeRow,downstream:BladeRow=None,calculat
     row.beta1 = upstream.beta2
     row.rho = row.P/(row.R*row.T)
     row.U = row.omega*row.r
+    row.Wt = row.Vt-row.U
     row.P0_stator_inlet = upstream.P0
 
 def rotor_calc(row:BladeRow,upstream:BladeRow,calculate_vm:bool=True):
@@ -296,7 +296,7 @@ def rotor_calc(row:BladeRow,upstream:BladeRow,calculate_vm:bool=True):
     row.P0R = upstream.P0R - row.Yp*(upstream.P0R-row.P)
     
     # Total Relative Temperature stays constant through the rotor. Adjust for change in radius from rotor inlet to exit
-    row.T0R =upstream.T0R - T0_coolant_weighted_average(row) # (upstream_rothalpy + 0.5*row.U**2)/row.Cp - T0_coolant_weighted_average(row) 
+    row.T0R = (upstream_rothalpy + 0.5*row.U**2)/row.Cp - T0_coolant_weighted_average(row) 
     P0R_P = row.P0R / row.P
     T0R_T = P0R_P**((row.gamma-1)/row.gamma)
     row.T = (row.T0R/T0R_T)     # Exit static temperature

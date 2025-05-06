@@ -114,15 +114,15 @@ inlet = Inlet(M=0.1,
                  beta=[0], 
                  fluid=fluid, 
                  percent_radii=0.5,
-                 axial_location=(min(stator1[0][:,0]) - min(hub[:,0]))/hub_len)
+                 meridional_location=(min(stator1[0][:,0]) - min(hub[:,0]))/hub_len)
 outlet = Outlet(P=Pexit,percent_radii=0.5,num_streamlines=3)
 
 #%% Define Blade Rows 
 # Axial location is a percentage along the hub where row exit is defined
-stator1 = BladeRow(row_type=RowType.Stator,axial_location=(max(stator1[0][:,0]) - min(hub[:,0]))/hub_len, stage_id=0)
-rotor1 = BladeRow(row_type=RowType.Rotor, axial_location=(max(rotor1[0][:,0]) - min(hub[:,0]))/hub_len,stage_id=0)
-stator2 = BladeRow(row_type=RowType.Stator,axial_location=(max(stator2[0][:,0]) - min(hub[:,0]))/hub_len,stage_id=1)
-rotor2 = BladeRow(row_type=RowType.Rotor, axial_location=(max(rotor2[0][:,0]) - min(hub[:,0]))/hub_len,stage_id=1)
+stator1 = BladeRow(row_type=RowType.Stator,meridional_location=(max(stator1[0][:,0]) - min(hub[:,0]))/hub_len, stage_id=0)
+rotor1 = BladeRow(row_type=RowType.Rotor, meridional_location=(max(rotor1[0][:,0]) - min(hub[:,0]))/hub_len,stage_id=0)
+stator2 = BladeRow(row_type=RowType.Stator,meridional_location=(max(stator2[0][:,0]) - min(hub[:,0]))/hub_len,stage_id=1)
+rotor2 = BladeRow(row_type=RowType.Rotor, meridional_location=(max(rotor2[0][:,0]) - min(hub[:,0]))/hub_len,stage_id=1)
 
 stator1.axial_chord = stator1_cax # Set an axial chord
 rotor1.axial_chord = rotor1_cax
