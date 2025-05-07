@@ -4,7 +4,7 @@ Outlet_P = 264000
 
 Design_RPM = -50000
 
-alpha2 = -71
+alpha2 = -62
 beta3 = 52.04
 massflow = 0.4
 
