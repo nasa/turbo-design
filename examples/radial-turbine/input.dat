@@ -1,12 +1,12 @@
-Inlet_P0 = 562891
-Inlet_T0 = 1237
-Outlet_P = 263724
+Inlet_P0 = 562000
+Inlet_T0 = 1238
+Outlet_P = 264000
 
 Design_RPM = -50000
 
-alpha2 = -62.2
+alpha2 = -71
 beta3 = 52.04
-massflow = 0.1
+massflow = 0.4
 
 radius=0.04
 hub_outlet_radius_scale=0.95
