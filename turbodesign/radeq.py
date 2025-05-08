@@ -140,13 +140,14 @@ def radeq(row:BladeRow,upstream:BladeRow,downstream:BladeRow=None) -> BladeRow:
     # mean_radius_to_hub = np.linspace(0,hub_radius-mean_radius,len(row_radius)*5)
     res2 = solve_ivp(ode_radeq_streamtube, t_span = [hub_radius-mean_radius,0], y0 = ics)
     
-    mid_to_tip_vals = res1.y
+    mid_to_tip_vals = res1.y.transpose()
     mid_to_tip_r = res1.t + mean_radius
-    mid_to_hub_vals = res2.y
+    mid_to_hub_vals = res2.y.transpose()
     mid_to_hub_r = res2.t + mean_radius
     mid_to_hub_vals = np.flipud(mid_to_hub_vals)
     hub_to_tip_vals = np.concatenate([mid_to_hub_vals[:-1,:],mid_to_tip_vals])
-    r = np.concatenate([np.flip(mid_to_hub_r)[:-1], mid_to_tip_r])
+    
+    r = np.concatenate([mid_to_hub_r[:-1], mid_to_tip_r])
     
     P0_new = interp1d(r,hub_to_tip_vals[:,0])(row_radius)
     T0_new = interp1d(r,hub_to_tip_vals[:,1])(row_radius)
