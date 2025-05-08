@@ -1,5 +1,5 @@
 from typing import List, Tuple
-from .radeq import radeq, radeq_normalized
+from .radeq import radeq
 from .enums import LossType, RowType, PowerType, MassflowConstraint
 from .bladerow import BladeRow
 from .td_math import compute_gas_constants

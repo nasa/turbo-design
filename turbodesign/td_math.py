@@ -296,7 +296,7 @@ def rotor_calc(row:BladeRow,upstream:BladeRow,calculate_vm:bool=True):
     row.P0R = upstream.P0R - row.Yp*(upstream.P0R-row.P)
     
     # Total Relative Temperature stays constant through the rotor. Adjust for change in radius from rotor inlet to exit
-    row.T0R = (upstream_rothalpy + 0.5*row.U**2)/row.Cp - T0_coolant_weighted_average(row) 
+    row.T0R = upstream.T0R # (upstream_rothalpy + 0.5*row.U**2)/row.Cp # - T0_coolant_weighted_average(row) 
     P0R_P = row.P0R / row.P
     T0R_T = P0R_P**((row.gamma-1)/row.gamma)
     row.T = (row.T0R/T0R_T)     # Exit static temperature
@@ -326,7 +326,7 @@ def rotor_calc(row:BladeRow,upstream:BladeRow,calculate_vm:bool=True):
         row.Vt = row.Wt+row.U
         
         row.alpha2 = np.arctan2(row.Vt,row.Vm)
-        row.V = np.sqrt(row.Vx**2 + row.Vr**2 + row.Vt**2)
+        row.V = np.sqrt(row.Vm**2*(1+np.tan(row.alpha2)**2))
         
         row.M = row.V/np.sqrt(row.gamma*row.R*row.T)
         T0_T = (1+(row.gamma-1)/2 * row.M**2)
@@ -369,7 +369,7 @@ def inlet_calc(row:BladeRow):
             raise ValueError(f"Unusually slow flow:{iter} Mach:{avg_mach}")
         row.Vm[0] = 1/(len(row.Vm)-1)*row.Vm[1:].sum() # Initialize the value at the hub to not upset the mean
         row.Vr = row.Vm*np.sin(row.phi)
-        row.Vt = row.Vm*np.cos(row.phi)*np.tan(row.alpha2)
+        row.Vt = row.Vm*np.tan(row.alpha2)
         row.V = np.sqrt(row.Vt**2+row.Vm**2)
         # Fine tune the Temperature and Pressure and density
         row.M = row.V/np.sqrt(row.gamma*row.R*row.T)

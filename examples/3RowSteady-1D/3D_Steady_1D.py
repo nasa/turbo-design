@@ -103,9 +103,9 @@ stator2.beta2_metal = [-65.1,-65.1,-65.1,-65.1,-65.1]   # Alpha3
 stator1.loss_model = FixedPressureLoss(0.048)
 rotor1.loss_model = FixedPressureLoss(0.108)
 stator2.loss_model = FixedPressureLoss(0.082)
-stator1.inlet_to_outlet_pratio = (0.1,0.95)
-rotor1.inlet_to_outlet_pratio = (0.1,0.95)
-stator2.inlet_to_outlet_pratio = (0.1,0.95)
+stator1.inlet_to_outlet_pratio = (0.01,0.9)
+rotor1.inlet_to_outlet_pratio = (0.01,0.9)
+stator2.inlet_to_outlet_pratio = (0.01,0.9)
 
 #%% Initialize the Spool
 spool = TurbineSpool(passage=passage,
