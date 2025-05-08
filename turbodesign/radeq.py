@@ -1,5 +1,5 @@
 from scipy.interpolate import interp1d,PchipInterpolator
-from scipy.integrate import odeint
+from scipy.integrate import solve_ivp
 import numpy as np  
 import numdifftools as nd 
 from .bladerow import BladeRow
@@ -34,7 +34,7 @@ def radeq(row:BladeRow,upstream:BladeRow,downstream:BladeRow=None) -> BladeRow:
         P0 = y[0]
         T0 = y[1]
         Vm = y[2]
-        
+        r = row.r.mean()+r
         if r>row_radius[-1]:
             return [0,0,0]
         elif r<row_radius[0]:
@@ -60,11 +60,9 @@ def radeq(row:BladeRow,upstream:BladeRow,downstream:BladeRow=None) -> BladeRow:
         Vt = Vm*np.tan(alpha)
         Vr = Vm*np.sin(phi)
         # Estimations 
-        dVm_dr = float(interp1d(row_radius, np.gradient(row.Vm, row_radius))(r))
-        dVt_dr = dVm_dr*np.tan(alpha)
-        # dVr_dr = dVm_dr*np.sin(phi)
-        
+        dVm_dr = float(interp1d(row_radius, np.gradient(row.Vm, row_radius))(r))        
         up_Vm = interp1d(row_radius, upstream.Vm)(r)
+        
         if downstream:
             if downstream.row_type == RowType.Outlet:
                 down_Vm = Vm
@@ -101,8 +99,8 @@ def radeq(row:BladeRow,upstream:BladeRow,downstream:BladeRow=None) -> BladeRow:
         B = (1-C)**(gamma/(gamma-1))
         A = -P0 * gamma/(gamma-1) * (1-C)**(1/(gamma-1)) * (1 + np.tan(alpha)**2)/(2*Cp)
         
-        eqn15_rhs = (-Vt**2/r - Vm**2/rm*np.sin(phi) + Vr*dVm_dm) # right hand side of equation 15
-        eqn15_rhs_simple = -Vt**2/r # right hand side of equation 15 simplified 
+        eqn15_rhs = Vt**2/r - Vm**2/rm*np.sin(phi) - Vr*dVm_dm # right hand side of equation 15
+        eqn15_rhs_simple = Vt**2/r # right hand side of equation 15 simplified for axial machines
         
         epsilon = 1e-10  # or another small threshold
         if abs(rm) > epsilon:
@@ -121,8 +119,8 @@ def radeq(row:BladeRow,upstream:BladeRow,downstream:BladeRow=None) -> BladeRow:
 
     # Estimate the Vt based on a given turning angle 
     mean_radius = row_radius.mean()
-    tip_radius = row_radius[-1]
-    hub_radius = row_radius[0]
+    tip_radius = row_radius.max()
+    hub_radius = row_radius.min()
 
     T0m = interp1d(row.percent_hub_shroud,T0)(0.5); 
     P0m = interp1d(row.percent_hub_shroud,P0)(0.5); Vmm = interp1d(row.percent_hub_shroud,Vm)(0.5)
@@ -136,19 +134,23 @@ def radeq(row:BladeRow,upstream:BladeRow,downstream:BladeRow=None) -> BladeRow:
     # T0_new = interp1d(hub_to_tip,res[:,1])(row_radius)
     # Vm_new = interp1d(hub_to_tip,res[:,2])(row_radius)
     
-    mean_radius_to_tip = np.linspace(mean_radius,tip_radius)
-    res1 = odeint(ode_radeq_streamtube, ics, mean_radius_to_tip, tfirst=True)
+    # mean_radius_to_tip = np.linspace(0,tip_radius-mean_radius,len(row_radius)*5)
+    res1 = solve_ivp(ode_radeq_streamtube, t_span =[0, tip_radius-mean_radius], y0 = ics)
     
-    mean_radius_to_hub = np.flip(np.linspace(hub_radius,mean_radius))
-    res2 = odeint(ode_radeq_streamtube, ics, mean_radius_to_hub, tfirst=True)
+    # mean_radius_to_hub = np.linspace(0,hub_radius-mean_radius,len(row_radius)*5)
+    res2 = solve_ivp(ode_radeq_streamtube, t_span = [hub_radius-mean_radius,0], y0 = ics)
     
-    res2 = np.flipud(res2)
-    res = np.concatenate([res2[:-1,:],res1])
-    r = np.concatenate([np.flip(mean_radius_to_hub)[:-1], mean_radius_to_tip])
+    mid_to_tip_vals = res1.y
+    mid_to_tip_r = res1.t + mean_radius
+    mid_to_hub_vals = res2.y
+    mid_to_hub_r = res2.t + mean_radius
+    mid_to_hub_vals = np.flipud(mid_to_hub_vals)
+    hub_to_tip_vals = np.concatenate([mid_to_hub_vals[:-1,:],mid_to_tip_vals])
+    r = np.concatenate([np.flip(mid_to_hub_r)[:-1], mid_to_tip_r])
     
-    P0_new = interp1d(r,res[:,0])(row_radius)
-    T0_new = interp1d(r,res[:,1])(row_radius)
-    Vm_new = interp1d(r,res[:,2])(row_radius)
+    P0_new = interp1d(r,hub_to_tip_vals[:,0])(row_radius)
+    T0_new = interp1d(r,hub_to_tip_vals[:,1])(row_radius)
+    Vm_new = interp1d(r,hub_to_tip_vals[:,2])(row_radius)
     
     row.P0 = P0_new
     row.T0 = T0_new
