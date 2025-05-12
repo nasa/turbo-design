@@ -176,12 +176,11 @@ def calculate_properties(station01:Dict[str,float],station02:Dict[str,float],IsR
     T3_is = station01['T0'] * (1/P0_P)**((gamma-1)/gamma)
    
     a = math.sqrt(gamma*R*station02['T'])
-    T03_is = T3_is * (1+(gamma-1)/2*(station02['V']/a)**2) # This is probably V not Vm
+    T03_is = T3_is * (1+(gamma-1)/2*station02['M']**2) # This is probably V not Vm
+    station02['total-total_power'] = (station01['T0'] - station02['T0'])*station02['massflow']
     station02['total-total_efficiency'] = (station01['T0'] - station02['T0'])/(station01['T0'] - T03_is)
-    
     station02['total-static_efficiency'] = (station01['T0'] - station02['T0'])/(station01['T0'] - T3_is)
     station02['torque_efficiency'] = station02['total_power_torque']/(n_blades*station02['massflow']*(station01['T0'] - T03_is))
-    
     station02['Total-Total_Power_kW_per_blade'] = station02['massflow'] * Cp * (station01['T0'] - station02['T0']) / 1000
     station02['Total-Total_Power_kW'] = n_blades*station02['Total-Total_Power_kW_per_blade']
     station02['Euler_Power_kW_per_blade'] = station02['massflow'] * (station01['U']*station01['Vt'] - station02['U']*station02['Vt'])/1000
@@ -269,7 +268,7 @@ def plot_velocity_triangles(station01:Dict[str,float],station02:Dict[str,float])
     
 
 # Read .FORCES File
-df = read_forces('radial-turbine.FORCES')
+df = read_forces('CFD/radial-turbine.FORCES')
 Torque = df['TQ-PF'].iloc[-1] + df['TQ-VF'].iloc[-1]
 Power_torque_def = Torque * rpm*math.pi/30
 Total_power_torque = Power_torque_def * n_blades # kW
@@ -279,7 +278,7 @@ tp.active_page().name='Untitled'
 tp.add_page()
 tp.new_layout()
 
-dataset = tp.data.load_tecplot_szl('tecplot/radial-turbine.szplt')
+dataset = tp.data.load_tecplot_szl('CFD/radial-turbine.szplt')
 tp.macro.execute_command('$!RedrawAll')
 tp.active_frame().plot().fieldmaps(0,1,2,3,4).surfaces.surfaces_to_plot=SurfacesToPlot.BoundaryFaces
 tp.active_frame().plot().show_mesh=True
@@ -295,7 +294,7 @@ variables_of_interest.extend(['U','W','V','Wt','Vt','Vm','U','Vr','M','M_rel'])
 variables_of_interest.extend(['beta','alpha'])
 
 ConvertFrame(dataset,cylindrical=False)
-outlet_zone_id = ExtractSlice(dataset,x=13/1000)
+outlet_zone_id = ExtractSlice(dataset,x=11/1000)
 outlet_data = {}
 for v in variables_of_interest:
     outlet_data[v] = GetValuesFromSlice(outlet_zone_id,dataset.variable_names.index(v)+1)

@@ -14,6 +14,7 @@ from .passage import Passage
     
 
 class BladeRow:
+    id:int = 0
     stage_id:int = 0
     row_type: RowType = RowType.Stator
     loss_function:LossBaseClass

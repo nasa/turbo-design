@@ -69,6 +69,7 @@ class Spool:
                 1. Conventional: Stator-Rotor-Stator-Rotor-etc. Set the RPM equally across all
                 2. Counter Rotation: We either use the RPM already persecribed for each blade row.
             '''    
+            self.blade_rows[i].id = i
             if (type(self.blade_rows[i]) != Inlet) and (type(self.blade_rows[i]) != Outlet):
                 self.blade_rows[i].rpm = rpm
                 self.blade_rows[i].axial_chord = self.blade_rows[i].location * self.passage.hub_length
