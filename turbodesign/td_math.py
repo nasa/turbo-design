@@ -132,7 +132,8 @@ def compute_power(row:BladeRow,upstream:BladeRow) -> None:
         a = np.sqrt(row.gamma*row.R*row.T_is)
         row.T0_is = row.T_is * (1+(row.gamma-1)/2*(row.V/a)**2)
         
-        row.power = row.massflow[-1] * row.Cp * (upstream.T0.mean() - row.T0.mean())
+        row.power = row.massflow[-1] * (row.Cp * (upstream.T0 - row.T0)).mean()
+        # row.power = sum(v * w for v, w in zip(row.power[1:], np.diff(row.massflow))) # Massflow weighted average 
         row.eta_static = row.power/ (row.massflow[-1]*row.Cp*(upstream.T0.mean()-row.T_is.mean()))
         row.eta_total = (upstream.T0.mean() - row.T0.mean()) / (upstream.T0.mean() - row.T0_is.mean())
         row.stage_loading = row.Cp*(upstream.T0.mean() - row.T0.mean())/row.U.mean()**2

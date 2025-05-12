@@ -94,12 +94,12 @@ def radeq(row:BladeRow,upstream:BladeRow,downstream:BladeRow=None) -> BladeRow:
         # dP0_dr = float(interp1d(row.percent_hub_shroud, np.gradient(row.P0,row_radius))((r-row_radius[0])/(row_radius[-1]-row_radius[0]))) 
         
         C = (1 + np.tan(alpha)**2) * Vm**2/(2*Cp*T0)
-        if (C>1) & ((gamma/(gamma-1))<2):
-            raise Exception("Invalid value of C {C}, change reduce alpha or Vm")
+        if (C>1):
+            raise Exception(f"Invalid value of C {C:0.2f} which causes Vm to be nan.\nChange reduce alpha/beta for {row.row_type} {row.id}")
         B = (1-C)**(gamma/(gamma-1))
         A = -P0 * gamma/(gamma-1) * (1-C)**(1/(gamma-1)) * (1 + np.tan(alpha)**2)/(2*Cp)
         
-        eqn15_rhs = Vt**2/r - Vm**2/rm*np.sin(phi) - Vr*dVm_dm # right hand side of equation 15
+        eqn15_rhs = Vt**2/r - Vm**2/rm*np.cos(phi) - Vr*dVm_dm # right hand side of equation 15
         eqn15_rhs_simple = Vt**2/r # right hand side of equation 15 simplified for axial machines
         
         epsilon = 1e-10  # or another small threshold
@@ -107,7 +107,6 @@ def radeq(row:BladeRow,upstream:BladeRow,downstream:BladeRow=None) -> BladeRow:
             dVm_dr = T0/(2*Vm*A) * (rho*eqn15_rhs - B*dP0_dr) + Vm/(2*T0) * dT0_dr # Eqn 21
         else:
             dVm_dr = T0/(2*Vm*A) * (rho*eqn15_rhs_simple - B*dP0_dr) + Vm/(2*T0) * dT0_dr  # Eqn 21, simple 
-        
         ydot = np.array([dP0_dr,dT0_dr,dVm_dr])
 
         return ydot
@@ -133,18 +132,22 @@ def radeq(row:BladeRow,upstream:BladeRow,downstream:BladeRow=None) -> BladeRow:
     # P0_new = interp1d(hub_to_tip,res[:,0])(row_radius)
     # T0_new = interp1d(hub_to_tip,res[:,1])(row_radius)
     # Vm_new = interp1d(hub_to_tip,res[:,2])(row_radius)
-    
+    r_eval = row.r - mean_radius 
     # mean_radius_to_tip = np.linspace(0,tip_radius-mean_radius,len(row_radius)*5)
-    res1 = solve_ivp(ode_radeq_streamtube, t_span =[0, tip_radius-mean_radius], y0 = ics)
+    res1 = solve_ivp(ode_radeq_streamtube, t_span =[0, tip_radius-mean_radius], y0 = ics,
+                     t_eval=np.linspace(0,tip_radius-mean_radius,len(row_radius)*2))
     
     # mean_radius_to_hub = np.linspace(0,hub_radius-mean_radius,len(row_radius)*5)
-    res2 = solve_ivp(ode_radeq_streamtube, t_span = [hub_radius-mean_radius,0], y0 = ics)
+    res2 = solve_ivp(ode_radeq_streamtube, t_span = [0,hub_radius-mean_radius], y0 = ics,
+                     t_eval=np.linspace(0,hub_radius-mean_radius,len(row_radius)*2))
     
     mid_to_tip_vals = res1.y.transpose()
     mid_to_tip_r = res1.t + mean_radius
     mid_to_hub_vals = res2.y.transpose()
     mid_to_hub_r = res2.t + mean_radius
     mid_to_hub_vals = np.flipud(mid_to_hub_vals)
+    mid_to_hub_r = np.flipud(mid_to_hub_r)
+    
     hub_to_tip_vals = np.concatenate([mid_to_hub_vals[:-1,:],mid_to_tip_vals])
     
     r = np.concatenate([mid_to_hub_r[:-1], mid_to_tip_r])
