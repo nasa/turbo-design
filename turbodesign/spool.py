@@ -32,7 +32,7 @@ class Spool:
     
     # Inlet Conditions 
     def __init__(self,passage:Passage,
-                 massflow:float,rows=List[BladeRow],
+                 massflow:float,rows:List[BladeRow],
                  num_streamlines:int=3,
                  fluid:Solution=None,
                  rpm:float=-1,

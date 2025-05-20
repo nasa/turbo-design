@@ -1,5 +1,5 @@
 from dataclasses import field, Field
-from typing import Any, Callable, List, Tuple, Union
+from typing import Any, Callable, List, Optional, Tuple, Union
 from .enums import RowType, PowerType
 import numpy as np 
 import numpy.typing as npt
@@ -99,10 +99,10 @@ class BladeRow:
     rm: npt.NDArray = field(default_factory=lambda: np.array([0]))                      # Curvature
     incli_curve_radii: npt.NDArray = field(default_factory=lambda: np.array([0]))       # radius at which curvature was evaluated
     mprime:npt.NDArray = field(default_factory=lambda: np.array([0]))                   # Mprime distance
-    axial_chord:float = 0
     
     Yp: float = 0                   # Pressure loss
     power:float = 0                 # Watts 
+    power_mean:float = 0
     power_distribution:npt.NDArray  # How power is divided by radius. Example: Equal distribution [0.33 0.33 0.33]. More at Tip [0.2,0.3,0.5]. More at Hub [0.6 0.5 ]
     P0_P:float = 0                  # Total to Static Pressure Ratio 
     Power_Type:PowerType
@@ -132,7 +132,7 @@ class BladeRow:
         Returns:
             List[float]: _description_
         """
-        return self._inlet_to_outlet_pratio
+        return self._inlet_to_outlet_pratio # type: ignore
     
     @inlet_to_outlet_pratio.setter
     def inlet_to_outlet_pratio(self,val:Tuple[float,float]=(0.06,0.7)):
@@ -355,7 +355,7 @@ class BladeRow:
         """
         self._beta1_metal = np.radians(convert_to_ndarray(beta1_metal))
         if len(percent) != len(beta1_metal):
-            percent = np.linspace(0,1,len(self._beta1_metal)).tolist()
+            percent = np.linspace(0,1,len(self._beta1_metal)).tolist() # type: ignore
         self.beta1_metal_radii = convert_to_ndarray(percent)
         self.beta1_fixed = True
         self.beta1 = self.beta1_metal.copy()
@@ -371,7 +371,7 @@ class BladeRow:
         """
         self._beta2_metal = np.radians(convert_to_ndarray(beta2_metal))
         if len(percent) != len(beta2_metal):
-            percent = np.linspace(0,1,len(self._beta2_metal)).tolist()
+            percent = np.linspace(0,1,len(self._beta2_metal)).tolist() # type: ignore
         self.beta2_metal_radii = convert_to_ndarray(percent)
         self.beta2_fixed = True
         self.beta2 = self._beta2_metal.copy()
@@ -418,7 +418,7 @@ class BladeRow:
             code to do something with machine learning
             return pressure loss
         """
-        self.loss_function = model
+        self.loss_function = model # type: ignore
     
     @property
     def te_pitch(self):
@@ -568,11 +568,11 @@ def interpolate_streamline_radii(row:BladeRow,passage:Passage,num_streamlines:in
     row.T_is = interpolate_quantities(row.T_is,row.percent_hub_shroud,streamline_percent_length)
     row.rho = interpolate_quantities(row.rho,row.percent_hub_shroud,streamline_percent_length)
 
-    if row.row_type == RowType.Inlet:
-        row.P0_fun = interp1d(row.percent_hub_shroud,row.P0) 
-        row.T0_fun = interp1d(row.percent_hub_shroud,row.T0) 
-    elif row.row_type == RowType.Outlet:
-        row.P_fun = interp1d(row.percent_hub_shroud,row.P) 
+    # if row.row_type == RowType.Inlet:
+    #     row.P0_fun = interp1d(row.percent_hub_shroud,row.P0) 
+    #     row.T0_fun = interp1d(row.percent_hub_shroud,row.T0) 
+    # elif row.row_type == RowType.Outlet:
+    #     row.P_fun = interp1d(row.percent_hub_shroud,row.P) 
 
     return row
 
@@ -611,7 +611,7 @@ def interpolate_quantities(q:npt.NDArray,r:npt.NDArray,r2:npt.NDArray):
     else:
         return interp1d(r,q,kind='linear')(r2)
     
-def compute_gas_constants(row:BladeRow,fluid:Solution=None) -> None:
+def compute_gas_constants(row:BladeRow,fluid:Optional[Solution]=None) -> None:
     """Updates the Cp, Gamma, and density for a blade row. If fluid is not specified then only density and viscosity is updated. 
     
     Args:

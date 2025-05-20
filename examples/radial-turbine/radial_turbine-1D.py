@@ -28,7 +28,7 @@ def build_endwalls(radius:float,
     b = bezier([0,0.1,0.8,1],[1, 1, hub_outlet_radius_scale, hub_outlet_radius_scale])
     _,ratio = b.get_point(np.linspace(0,1,1000))
     
-    hub = arc(xc=0,yc=0,radius=radius*ratio,alpha_start=180,alpha_stop=270)
+    hub = arc(xc=0,yc=0,radius=radius*ratio,alpha_start=180,alpha_stop=270) # type: ignore
     [xhub,rhub] = hub.get_point(np.linspace(0,1,1000))
     xhub*=x_stretch_factor
 
@@ -44,20 +44,20 @@ def build_endwalls(radius:float,
     
     hub_inlet_ext = np.array([[hub[0,0],hub[0,1]+radius*inlet_ext_percent],
                                 [hub[0,0],hub[0,1]]])
-    hub_inlet_ext_pts = np.array(line2D(hub_inlet_ext[0,:],hub_inlet_ext[1,:]).get_point(np.linspace(0,1,500))).transpose()
+    hub_inlet_ext_pts = np.array(line2D(hub_inlet_ext[0,:],hub_inlet_ext[1,:]).get_point(np.linspace(0,1,500))).transpose() # type: ignore
     
     shroud_inlet_ext = np.array([[shroud[0,0],shroud[0,1]+radius*inlet_ext_percent],
                                     [shroud[0,0],shroud[0,1]]])
-    shroud_inlet_ext_pts = np.array(line2D(shroud_inlet_ext[0,:],shroud_inlet_ext[1,:]).get_point(np.linspace(0,1,500))).transpose()
+    shroud_inlet_ext_pts = np.array(line2D(shroud_inlet_ext[0,:],shroud_inlet_ext[1,:]).get_point(np.linspace(0,1,500))).transpose() # type: ignore
     
     # Extend Outlet
     hub_outlet_ext = np.array([[hub[-1,0],hub[-1,1]],
                                 [hub[-1,0]+radius*outlet_ext_percent,hub[-1,1]]])
-    hub_outlet_ext_pts = np.array(line2D(hub_outlet_ext[0,:],hub_outlet_ext[1,:]).get_point(np.linspace(0,1,500))).transpose()
+    hub_outlet_ext_pts = np.array(line2D(hub_outlet_ext[0,:],hub_outlet_ext[1,:]).get_point(np.linspace(0,1,500))).transpose() # type: ignore
     
     shroud_outlet_ext = np.array([[shroud[-1,0],shroud[-1,1]],
                                     [shroud[-1,0]+radius*outlet_ext_percent,shroud[-1,1]]])
-    shroud_outlet_ext_pts = np.array(line2D(shroud_outlet_ext[0,:],shroud_outlet_ext[1,:]).get_point(np.linspace(0,1,500))).transpose()
+    shroud_outlet_ext_pts = np.array(line2D(shroud_outlet_ext[0,:],shroud_outlet_ext[1,:]).get_point(np.linspace(0,1,500))).transpose() # type: ignore
   
     return hub_inlet_ext_pts,hub,hub_outlet_ext_pts,shroud_inlet_ext_pts,shroud,shroud_outlet_ext_pts
 
@@ -136,7 +136,7 @@ RPM = -50000
 massflow = 0.1 # Guessed value for initialization 
 alpha2 = -51.5
 
-passage = Passage(hub[:,0],hub[:,1],shroud[:,0],shroud[:,1],passageType=PassageType.Centrifugal)
+passage = Passage(hub[:,0],hub[:,1],shroud[:,0],shroud[:,1],passageType=PassageType.Centrifugal) # type: ignore
 #%% Defining the Inlet
 inlet = Inlet(M=0.1,
                 P0=[P0],
@@ -145,7 +145,7 @@ inlet = Inlet(M=0.1,
                 percent_radii=0.5,
                 location=0)
 
-outlet = Outlet(P=P,percent_radii=0.5,num_streamlines=5)
+outlet = Outlet(P=P,percent_radii=[0.5],num_streamlines=5)
 
 stator = BladeRow(row_type=RowType.Stator, location=blade_position[0])
 stator.R = 287.15
@@ -163,10 +163,10 @@ rotor.coolant = Coolant(T0=T0*0.555556,P0=5E5,Cp=900,massflow_percentage=0)
 
 # Add in turning angles
 stator.beta2_metal = [alpha2,alpha2,alpha2,alpha2,alpha2] # Angle, hub,mean,tip
-stator.loss_model = FixedPressureLoss(0.0)
+stator.loss_model = FixedPressureLoss(0.0) # type: ignore
 
 rotor.beta2_metal = [45,47,52,57,60] # Angle, hub,mean,tip
-rotor.loss_model = FixedPressureLoss(0.15669278543371953) # <- From CFD.
+rotor.loss_model = FixedPressureLoss(0.15669278543371953) # type: ignore # <- From CFD.
 
 spool = TurbineSpool(passage=passage,
                 rpm=RPM, 
@@ -176,7 +176,7 @@ spool = TurbineSpool(passage=passage,
                 fluid=None)
 
 spool.adjust_streamlines = False
-spool.massflow_constraint = MassflowConstraint.BalanceMassFlow
+spool.massflow_constraint = MassflowConstraint.BalanceMassFlow # type: ignore
     
 spool.solve() # This also initializes streamlines
 spool.plot_velocity_triangles()
