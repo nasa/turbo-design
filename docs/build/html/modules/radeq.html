@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" data-content_root="../">
 <head>
@@ -5,19 +7,15 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Radial Equilibrium &mdash; Turbo Design 1.0.6 documentation</title>
-      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
-      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
 
   
-  <!--[if lt IE 9]>
-    <script src="../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
-  
-        <script src="../_static/jquery.js?v=5d32c60e"></script>
-        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../_static/documentation_options.js?v=e2a723ec"></script>
-        <script src="../_static/doctools.js?v=9a2dae69"></script>
-        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=e2a723ec"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -36,9 +34,6 @@
           <a href="../index.html">
             
           </a>
-              <div class="version">
-                1.0.6
-              </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
@@ -106,7 +101,6 @@
 </li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Radial Equilibrium</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#turbodesign.radeq.radeq"><code class="docutils literal notranslate"><span class="pre">radeq()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#turbodesign.radeq.radeq_normalized"><code class="docutils literal notranslate"><span class="pre">radeq_normalized()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="rotor.html">Rotor</a><ul>
@@ -126,7 +120,7 @@
 <li class="toctree-l2"><a class="reference internal" href="td_math.html#turbodesign.td_math.compute_massflow"><code class="docutils literal notranslate"><span class="pre">compute_massflow()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="td_math.html#turbodesign.td_math.compute_power"><code class="docutils literal notranslate"><span class="pre">compute_power()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="td_math.html#turbodesign.td_math.compute_quantities"><code class="docutils literal notranslate"><span class="pre">compute_quantities()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="td_math.html#turbodesign.td_math.compute_quantities_power"><code class="docutils literal notranslate"><span class="pre">compute_quantities_power()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="td_math.html#turbodesign.td_math.compute_reynolds"><code class="docutils literal notranslate"><span class="pre">compute_reynolds()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="td_math.html#turbodesign.td_math.inlet_calc"><code class="docutils literal notranslate"><span class="pre">inlet_calc()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="td_math.html#turbodesign.td_math.rotor_calc"><code class="docutils literal notranslate"><span class="pre">rotor_calc()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="td_math.html#turbodesign.td_math.stator_calc"><code class="docutils literal notranslate"><span class="pre">stator_calc()</span></code></a></li>
@@ -166,7 +160,7 @@
 <span id="radial-equilibrium"></span><h1>Radial Equilibrium<a class="headerlink" href="#module-turbodesign.radeq" title="Link to this heading"></a></h1>
 <dl class="py function">
 <dt class="sig sig-object py" id="turbodesign.radeq.radeq">
-<span class="sig-prename descclassname"><span class="pre">turbodesign.radeq.</span></span><span class="sig-name descname"><span class="pre">radeq</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">row</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="bladerow.html#turbodesign.bladerow.BladeRow" title="turbodesign.bladerow.BladeRow"><span class="pre">BladeRow</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">upstream</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="bladerow.html#turbodesign.bladerow.BladeRow" title="turbodesign.bladerow.BladeRow"><span class="pre">BladeRow</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="bladerow.html#turbodesign.bladerow.BladeRow" title="turbodesign.bladerow.BladeRow"><span class="pre">BladeRow</span></a></span></span><a class="reference internal" href="../_modules/turbodesign/radeq.html#radeq"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#turbodesign.radeq.radeq" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">turbodesign.radeq.</span></span><span class="sig-name descname"><span class="pre">radeq</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">row</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="bladerow.html#turbodesign.bladerow.BladeRow" title="turbodesign.bladerow.BladeRow"><span class="pre">BladeRow</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">upstream</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="bladerow.html#turbodesign.bladerow.BladeRow" title="turbodesign.bladerow.BladeRow"><span class="pre">BladeRow</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">downstream</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="bladerow.html#turbodesign.bladerow.BladeRow" title="turbodesign.bladerow.BladeRow"><span class="pre">BladeRow</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="bladerow.html#turbodesign.bladerow.BladeRow" title="turbodesign.bladerow.BladeRow"><span class="pre">BladeRow</span></a></span></span><a class="reference internal" href="../_modules/turbodesign/radeq.html#radeq"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#turbodesign.radeq.radeq" title="Link to this definition"></a></dt>
 <dd><p>Solves the radial equilibrium equation for axial machines and returns the convergence.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
@@ -177,30 +171,11 @@
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>row</strong> (<a class="reference internal" href="bladerow.html#turbodesign.bladerow.BladeRow" title="turbodesign.bladerow.BladeRow"><em>BladeRow</em></a>) – Current row</p></li>
 <li><p><strong>upstream</strong> (<a class="reference internal" href="bladerow.html#turbodesign.bladerow.BladeRow" title="turbodesign.bladerow.BladeRow"><em>BladeRow</em></a>) – Previous row</p></li>
+<li><p><strong>downstream</strong> (<a class="reference internal" href="bladerow.html#turbodesign.bladerow.BladeRow" title="turbodesign.bladerow.BladeRow"><em>BladeRow</em></a>) – Next row</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>current row with T0, P0, and Vm calculated</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference internal" href="bladerow.html#turbodesign.bladerow.BladeRow" title="turbodesign.bladerow.BladeRow">BladeRow</a></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="turbodesign.radeq.radeq_normalized">
-<span class="sig-prename descclassname"><span class="pre">turbodesign.radeq.</span></span><span class="sig-name descname"><span class="pre">radeq_normalized</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">row</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="bladerow.html#turbodesign.bladerow.BladeRow" title="turbodesign.bladerow.BladeRow"><span class="pre">BladeRow</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">upstream</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="bladerow.html#turbodesign.bladerow.BladeRow" title="turbodesign.bladerow.BladeRow"><span class="pre">BladeRow</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="bladerow.html#turbodesign.bladerow.BladeRow" title="turbodesign.bladerow.BladeRow"><span class="pre">BladeRow</span></a></span></span><a class="reference internal" href="../_modules/turbodesign/radeq.html#radeq_normalized"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#turbodesign.radeq.radeq_normalized" title="Link to this definition"></a></dt>
-<dd><p>Solves the radial equilibrium equation for axial or radial machines and returns the convergence.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>row</strong> (<a class="reference internal" href="bladerow.html#turbodesign.bladerow.BladeRow" title="turbodesign.bladerow.BladeRow"><em>BladeRow</em></a>) – Current row</p></li>
-<li><p><strong>upstream</strong> (<a class="reference internal" href="bladerow.html#turbodesign.bladerow.BladeRow" title="turbodesign.bladerow.BladeRow"><em>BladeRow</em></a>) – Previous row</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>current row with Vt, T0, P0, and Vm calculated</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference internal" href="bladerow.html#turbodesign.bladerow.BladeRow" title="turbodesign.bladerow.BladeRow">BladeRow</a></p>

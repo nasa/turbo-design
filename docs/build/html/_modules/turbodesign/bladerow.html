@@ -1,22 +1,20 @@
+
+
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" data-content_root="../../">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>turbodesign.bladerow &mdash; Turbo Design 1.0.6 documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
-      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
 
   
-  <!--[if lt IE 9]>
-    <script src="../../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
-  
-        <script src="../../_static/jquery.js?v=5d32c60e"></script>
-        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../../_static/documentation_options.js?v=e2a723ec"></script>
-        <script src="../../_static/doctools.js?v=9a2dae69"></script>
-        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=e2a723ec"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" /> 
@@ -33,9 +31,6 @@
           <a href="../../index.html">
             
           </a>
-              <div class="version">
-                1.0.6
-              </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
@@ -103,7 +98,6 @@
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../modules/radeq.html">Radial Equilibrium</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../modules/radeq.html#turbodesign.radeq.radeq"><code class="docutils literal notranslate"><span class="pre">radeq()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../modules/radeq.html#turbodesign.radeq.radeq_normalized"><code class="docutils literal notranslate"><span class="pre">radeq_normalized()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../modules/rotor.html">Rotor</a><ul>
@@ -123,7 +117,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../../modules/td_math.html#turbodesign.td_math.compute_massflow"><code class="docutils literal notranslate"><span class="pre">compute_massflow()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../modules/td_math.html#turbodesign.td_math.compute_power"><code class="docutils literal notranslate"><span class="pre">compute_power()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../modules/td_math.html#turbodesign.td_math.compute_quantities"><code class="docutils literal notranslate"><span class="pre">compute_quantities()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../modules/td_math.html#turbodesign.td_math.compute_quantities_power"><code class="docutils literal notranslate"><span class="pre">compute_quantities_power()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/td_math.html#turbodesign.td_math.compute_reynolds"><code class="docutils literal notranslate"><span class="pre">compute_reynolds()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../modules/td_math.html#turbodesign.td_math.inlet_calc"><code class="docutils literal notranslate"><span class="pre">inlet_calc()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../modules/td_math.html#turbodesign.td_math.rotor_calc"><code class="docutils literal notranslate"><span class="pre">rotor_calc()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../modules/td_math.html#turbodesign.td_math.stator_calc"><code class="docutils literal notranslate"><span class="pre">stator_calc()</span></code></a></li>
@@ -160,24 +154,25 @@
            <div itemprop="articleBody">
              
   <h1>Source code for turbodesign.bladerow</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">dataclasses</span> <span class="kn">import</span> <span class="n">field</span><span class="p">,</span> <span class="n">Field</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span>
-<span class="kn">from</span> <span class="nn">.enums</span> <span class="kn">import</span> <span class="n">RowType</span><span class="p">,</span> <span class="n">PowerType</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span> 
-<span class="kn">import</span> <span class="nn">numpy.typing</span> <span class="k">as</span> <span class="nn">npt</span>
-<span class="kn">from</span> <span class="nn">scipy.interpolate</span> <span class="kn">import</span> <span class="n">interp1d</span>
-<span class="kn">from</span> <span class="nn">.arrayfuncs</span> <span class="kn">import</span> <span class="n">convert_to_ndarray</span>
-<span class="kn">from</span> <span class="nn">cantera</span> <span class="kn">import</span> <span class="n">Solution</span><span class="p">,</span> <span class="n">composite</span>
-<span class="kn">from</span> <span class="nn">.coolant</span> <span class="kn">import</span> <span class="n">Coolant</span>
-<span class="kn">from</span> <span class="nn">pyturbo.helper</span> <span class="kn">import</span> <span class="n">line2D</span>
-<span class="kn">from</span> <span class="nn">pyturbo.aero.airfoil2D</span> <span class="kn">import</span> <span class="n">airfoil2D</span>
-<span class="kn">from</span> <span class="nn">.loss</span> <span class="kn">import</span> <span class="n">LossBaseClass</span>
-<span class="kn">from</span> <span class="nn">.passage</span> <span class="kn">import</span> <span class="n">Passage</span>
+<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">field</span><span class="p">,</span> <span class="n">Field</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.enums</span><span class="w"> </span><span class="kn">import</span> <span class="n">RowType</span><span class="p">,</span> <span class="n">PowerType</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span> 
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy.typing</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">npt</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">scipy.interpolate</span><span class="w"> </span><span class="kn">import</span> <span class="n">interp1d</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.arrayfuncs</span><span class="w"> </span><span class="kn">import</span> <span class="n">convert_to_ndarray</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">cantera</span><span class="w"> </span><span class="kn">import</span> <span class="n">Solution</span><span class="p">,</span> <span class="n">composite</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.coolant</span><span class="w"> </span><span class="kn">import</span> <span class="n">Coolant</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyturbo.helper</span><span class="w"> </span><span class="kn">import</span> <span class="n">line2D</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyturbo.aero.airfoil2D</span><span class="w"> </span><span class="kn">import</span> <span class="n">Airfoil2D</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.loss</span><span class="w"> </span><span class="kn">import</span> <span class="n">LossBaseClass</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.passage</span><span class="w"> </span><span class="kn">import</span> <span class="n">Passage</span>
     
 
 <div class="viewcode-block" id="BladeRow">
 <a class="viewcode-back" href="../../modules/bladerow.html#turbodesign.bladerow.BladeRow">[docs]</a>
-<span class="k">class</span> <span class="nc">BladeRow</span><span class="p">:</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">BladeRow</span><span class="p">:</span>
+    <span class="nb">id</span><span class="p">:</span><span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="n">stage_id</span><span class="p">:</span><span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="n">row_type</span><span class="p">:</span> <span class="n">RowType</span> <span class="o">=</span> <span class="n">RowType</span><span class="o">.</span><span class="n">Stator</span>
     <span class="n">loss_function</span><span class="p">:</span><span class="n">LossBaseClass</span>
@@ -190,7 +185,6 @@
     <span class="n">Cp</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">1019</span>            <span class="c1"># Cp J/(Kg*K)</span>
     <span class="n">Cv</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">1019</span><span class="o">/</span><span class="mf">1.14</span>       <span class="c1"># Cv J/(Kg*K)</span>
     <span class="n">_coolant</span><span class="p">:</span><span class="n">Coolant</span> <span class="o">=</span> <span class="kc">None</span>     <span class="c1"># type: ignore # Coolant Fluid</span>
-    <span class="n">fluid</span><span class="p">:</span> <span class="n">composite</span><span class="o">.</span><span class="n">Solution</span> <span class="o">=</span> <span class="n">Solution</span><span class="p">(</span><span class="s2">&quot;air.yaml&quot;</span><span class="p">)</span>
     <span class="n">mu</span><span class="p">:</span><span class="nb">float</span> <span class="o">=</span> <span class="mi">0</span> 
     
     <span class="n">total_massflow</span><span class="p">:</span><span class="nb">float</span> <span class="o">=</span> <span class="mi">0</span>    <span class="c1"># Massflow spool + all upstream cooling flow [kg/s]</span>
@@ -199,10 +193,11 @@
     <span class="c1"># ----------------------------------</span>
 
     <span class="c1"># Streamline Properties </span>
-    <span class="n">meridional_location</span><span class="p">:</span><span class="nb">float</span> <span class="o">=</span> <span class="mi">0</span> <span class="c1"># Where blade row is defined along the hub. </span>
+    <span class="n">percent_hub</span><span class="p">:</span><span class="nb">float</span> <span class="o">=</span> <span class="mi">0</span> <span class="c1"># Where blade row is defined along the hub. </span>
     <span class="n">percent_hub_shroud</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">]))</span>    <span class="c1"># Percent streamline length from hub to shroud.</span>
     <span class="n">x</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">]))</span>       <span class="c1"># x - coordinates (useful for computing axial chord)</span>
     <span class="n">r</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">]))</span>       <span class="c1"># Radius - coordinates </span>
+    <span class="n">m</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">]))</span>       <span class="c1"># meridional </span>
     <span class="n">area</span><span class="p">:</span><span class="nb">float</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="c1"># Calculated massflow is the massflow computed after radial eq solver</span>
     <span class="n">calculated_massflow</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">0</span>
@@ -261,6 +256,8 @@
     <span class="n">phi</span><span class="p">:</span><span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">]))</span>                      <span class="c1"># Inclination angle x,r plane. AY td2.f</span>
     <span class="n">rm</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">]))</span>                      <span class="c1"># Curvature</span>
     <span class="n">incli_curve_radii</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">]))</span>       <span class="c1"># radius at which curvature was evaluated</span>
+    <span class="n">mprime</span><span class="p">:</span><span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">]))</span>                   <span class="c1"># Mprime distance</span>
+    <span class="n">axial_chord</span><span class="p">:</span><span class="nb">float</span> <span class="o">=</span> <span class="mi">0</span>
     
     <span class="n">Yp</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">0</span>                   <span class="c1"># Pressure loss</span>
     <span class="n">power</span><span class="p">:</span><span class="nb">float</span> <span class="o">=</span> <span class="mi">0</span>                 <span class="c1"># Watts </span>
@@ -268,7 +265,8 @@
     <span class="n">P0_P</span><span class="p">:</span><span class="nb">float</span> <span class="o">=</span> <span class="mi">0</span>                  <span class="c1"># Total to Static Pressure Ratio </span>
     <span class="n">Power_Type</span><span class="p">:</span><span class="n">PowerType</span>
     <span class="n">euler_power</span><span class="p">:</span><span class="nb">float</span> <span class="o">=</span> <span class="mi">0</span>
-
+    <span class="n">Reynolds</span><span class="p">:</span><span class="nb">float</span> <span class="o">=</span> <span class="mi">0</span>
+    
     <span class="c1"># Used for loss calculations</span>
     <span class="n">_blade_to_blade_gap</span><span class="p">:</span><span class="nb">float</span> <span class="o">=</span> <span class="mf">0.025</span> <span class="c1"># Gap between blade in terms of percent chord.</span>
     
@@ -281,10 +279,11 @@
     <span class="n">_te_s</span><span class="p">:</span><span class="nb">float</span> <span class="o">=</span> <span class="mf">0.08</span>
     <span class="n">_tip_clearance</span><span class="p">:</span><span class="nb">float</span> <span class="o">=</span> <span class="mi">0</span> <span class="c1"># Clearance as a percentage of span or blade height</span>
 
-    <span class="n">_inlet_to_outlet_pratio</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.06</span><span class="p">,</span><span class="mf">0.7</span><span class="p">]</span>
-        
+    <span class="n">_inlet_to_outlet_pratio</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.06</span><span class="p">,</span><span class="mf">0.95</span><span class="p">]</span>
+    <span class="n">location</span><span class="p">:</span><span class="nb">float</span> <span class="o">=</span> <span class="mi">0</span> <span class="c1"># Percent along hub where bladerow is defined</span>
+    
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">inlet_to_outlet_pratio</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span><span class="nb">float</span><span class="p">]:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">inlet_to_outlet_pratio</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span><span class="nb">float</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;This is what is varied by the optimization. </span>
 <span class="sd">        The range is between [0 and 1] but you should </span>
 
@@ -294,7 +293,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_inlet_to_outlet_pratio</span>
     
     <span class="nd">@inlet_to_outlet_pratio</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">inlet_to_outlet_pratio</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">val</span><span class="p">:</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span><span class="nb">float</span><span class="p">]</span><span class="o">=</span><span class="p">(</span><span class="mf">0.06</span><span class="p">,</span><span class="mf">0.7</span><span class="p">)):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">inlet_to_outlet_pratio</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">val</span><span class="p">:</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span><span class="nb">float</span><span class="p">]</span><span class="o">=</span><span class="p">(</span><span class="mf">0.06</span><span class="p">,</span><span class="mf">0.7</span><span class="p">)):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Sets the inlet_to_outlet pratio of the blade row </span>
 
 <span class="sd">        Args:</span>
@@ -303,7 +302,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_inlet_to_outlet_pratio</span> <span class="o">=</span> <span class="n">val</span> 
         
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">blade_to_blade_gap</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">blade_to_blade_gap</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns the blade to blade gap value </span>
 
 <span class="sd">        Returns:</span>
@@ -312,7 +311,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_blade_to_blade_gap</span>
     
     <span class="nd">@blade_to_blade_gap</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">blade_to_blade_gap</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">val</span><span class="p">:</span><span class="nb">float</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">blade_to_blade_gap</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">val</span><span class="p">:</span><span class="nb">float</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Sets the blade to blade gap as a percent. This applies to the next row. So (row1) (row2) if (row1) gap is set to 0.25 then (row2) is offset by 0.25*row1.chord</span>
 
 <span class="sd">        Args:</span>
@@ -321,11 +320,11 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_blade_to_blade_gap</span> <span class="o">=</span> <span class="n">val</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">aspect_ratio</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">aspect_ratio</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_aspect_ratio</span>
     
     <span class="nd">@aspect_ratio</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">aspect_ratio</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">val</span><span class="p">:</span><span class="nb">float</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">aspect_ratio</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">val</span><span class="p">:</span><span class="nb">float</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Sets the aspect ratio</span>
 
 <span class="sd">        Aspect ratio is defined as the height/chord not height/(axial chord)</span>
@@ -336,7 +335,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_aspect_ratio</span> <span class="o">=</span> <span class="n">val</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">axial_chord</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">axial_chord</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns the mean axial chord defined in the x-direction </span>
 
 <span class="sd">        Returns:</span>
@@ -346,12 +345,12 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_axial_chord</span>
     
     <span class="nd">@axial_chord</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">axial_chord</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">val</span><span class="p">:</span><span class="nb">float</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">axial_chord</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">val</span><span class="p">:</span><span class="nb">float</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_axial_chord</span> <span class="o">=</span> <span class="n">val</span>
         
         
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">pitch_to_chord</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">pitch_to_chord</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Gets the pitch to chord ratio </span>
 
 <span class="sd">        Returns:</span>
@@ -360,7 +359,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pitch_to_chord</span>
     
     <span class="nd">@pitch_to_chord</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">pitch_to_chord</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">val</span><span class="p">:</span><span class="nb">float</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">pitch_to_chord</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">val</span><span class="p">:</span><span class="nb">float</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Set the pitch to chord ratio </span>
 
 <span class="sd">        Args:</span>
@@ -369,7 +368,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_pitch_to_chord</span> <span class="o">=</span> <span class="n">val</span>
     
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">solidity</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">solidity</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Inverse of pitch to chord ratio</span>
 
 <span class="sd">        Returns:</span>
@@ -378,7 +377,7 @@
         <span class="k">return</span> <span class="mi">1</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">_pitch_to_chord</span> 
     
     <span class="nd">@solidity</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">solidity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">val</span><span class="p">:</span><span class="nb">float</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">solidity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">val</span><span class="p">:</span><span class="nb">float</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Inverse of pitch to chord ratio</span>
 
 <span class="sd">        Args:</span>
@@ -390,15 +389,15 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_pitch_to_chord</span> <span class="o">=</span> <span class="mi">1</span><span class="o">/</span><span class="n">val</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">beta1_metal</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">beta1_metal</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">degrees</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_beta1_metal</span><span class="p">)</span>
     
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">beta2_metal</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">beta2_metal</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">degrees</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_beta2_metal</span><span class="p">)</span>
     
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">stagger</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">stagger</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Average stagger angle</span>
 
 <span class="sd">        Returns:</span>
@@ -407,7 +406,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stagger</span>
     
     <span class="nd">@stagger</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">stagger</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">val</span><span class="p">:</span><span class="nb">float</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">stagger</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">val</span><span class="p">:</span><span class="nb">float</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Set the stagger angle in degrees </span>
 
 <span class="sd">        Args:</span>
@@ -416,7 +415,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_stagger</span> <span class="o">=</span> <span class="n">val</span>
     
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">chord</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">chord</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Chord defined at mean radius</span>
 
 <span class="sd">        Returns:</span>
@@ -425,7 +424,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">axial_chord</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stagger</span><span class="p">))</span>
     
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">pitch</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">pitch</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns the pitch which is the distance from blade to blade</span>
 
 <span class="sd">        Returns:</span>
@@ -434,7 +433,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">pitch_to_chord</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">chord</span>
     
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">throat</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">throat</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Throat distance</span>
 
 <span class="sd">        Returns:</span>
@@ -446,7 +445,7 @@
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">pitch</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">2</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">beta2</span><span class="o">.</span><span class="n">mean</span><span class="p">())</span>
     
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">num_blades</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span><span class="nb">float</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">num_blades</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span><span class="nb">float</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;returns the number of blades </span>
 
 <span class="sd">        Returns:</span>
@@ -455,19 +454,19 @@
         <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">r</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">pitch</span><span class="p">)</span>
     
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">camber</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">camber</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Estimates the camber of the blade using a bezier curve. This is not as accurate because thickness is not defined on suction and pressure sides. </span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            float: camber length</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">row_type</span> <span class="o">==</span> <span class="n">RowType</span><span class="o">.</span><span class="n">Stator</span><span class="p">:</span>
-            <span class="n">a2d</span> <span class="o">=</span> <span class="n">airfoil2D</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">degrees</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">alpha1</span><span class="o">.</span><span class="n">mean</span><span class="p">()),</span>
+            <span class="n">a2d</span> <span class="o">=</span> <span class="n">Airfoil2D</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">degrees</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">alpha1</span><span class="o">.</span><span class="n">mean</span><span class="p">()),</span>
                         <span class="n">np</span><span class="o">.</span><span class="n">degrees</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">alpha2</span><span class="o">.</span><span class="n">mean</span><span class="p">()),</span>
                         <span class="bp">self</span><span class="o">.</span><span class="n">axial_chord</span><span class="p">,</span>
                         <span class="bp">self</span><span class="o">.</span><span class="n">stagger</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">a2d</span> <span class="o">=</span> <span class="n">airfoil2D</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">degrees</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">beta1</span><span class="o">.</span><span class="n">mean</span><span class="p">()),</span>
+            <span class="n">a2d</span> <span class="o">=</span> <span class="n">Airfoil2D</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">degrees</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">beta1</span><span class="o">.</span><span class="n">mean</span><span class="p">()),</span>
                         <span class="n">np</span><span class="o">.</span><span class="n">degrees</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">beta2</span><span class="o">.</span><span class="n">mean</span><span class="p">()),</span>
                         <span class="bp">self</span><span class="o">.</span><span class="n">axial_chord</span><span class="p">,</span>
                         <span class="bp">self</span><span class="o">.</span><span class="n">stagger</span><span class="p">)</span>
@@ -475,13 +474,13 @@
         <span class="k">return</span> <span class="n">a2d</span><span class="o">.</span><span class="n">camberBezier</span><span class="o">.</span><span class="n">get_curve_length</span><span class="p">()</span>
     
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">tip_clearance</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">tip_clearance</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Tip clearance as a percentage of annulus height</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tip_clearance</span>
     
     <span class="nd">@tip_clearance</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">tip_clearance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">val</span><span class="p">:</span><span class="nb">float</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">tip_clearance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">val</span><span class="p">:</span><span class="nb">float</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Sets the tip clearance</span>
 
 <span class="sd">        Args:</span>
@@ -489,23 +488,23 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_tip_clearance</span> <span class="o">=</span> <span class="n">val</span>
         
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">meridional_location</span><span class="p">:</span><span class="nb">float</span><span class="p">,</span><span class="n">row_type</span><span class="p">:</span><span class="n">RowType</span><span class="o">=</span><span class="n">RowType</span><span class="o">.</span><span class="n">Stator</span><span class="p">,</span><span class="n">stage_id</span><span class="p">:</span><span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">location</span><span class="p">:</span><span class="nb">float</span><span class="p">,</span><span class="n">row_type</span><span class="p">:</span><span class="n">RowType</span><span class="o">=</span><span class="n">RowType</span><span class="o">.</span><span class="n">Stator</span><span class="p">,</span><span class="n">stage_id</span><span class="p">:</span><span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Initializes the blade row to be a particular type</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            meridional_location (float): Location of the blade row as a percentage of the total axial length</span>
+<span class="sd">            location (float): Location of the blade row as a percentage of hub length</span>
 <span class="sd">            row_type (RowType): Specifies the Type. Defaults to RowType.Stator</span>
 <span class="sd">            power (float, optional): power . Defaults to 0.</span>
 <span class="sd">            P0_P (float, optional): Total to Static Pressure Ratio</span>
 <span class="sd">            stage_id (int, optional): ID of the stage so if you have 9 stages, the id could be 9. It&#39;s used to separate the stages. Each stage will have it&#39;s own unique degree of reaction </span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">row_type</span> <span class="o">=</span> <span class="n">row_type</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">meridional_location</span> <span class="o">=</span> <span class="n">meridional_location</span> 
+        <span class="bp">self</span><span class="o">.</span><span class="n">location</span> <span class="o">=</span> <span class="n">location</span> 
         <span class="bp">self</span><span class="o">.</span><span class="n">Yp</span> <span class="o">=</span> <span class="mi">0</span> <span class="c1"># Loss</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">stage_id</span> <span class="o">=</span> <span class="n">stage_id</span>
     
     <span class="nd">@beta1_metal</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">beta1_metal</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">beta1_metal</span><span class="p">:</span><span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span><span class="n">percent</span><span class="p">:</span><span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span><span class="o">=</span><span class="p">[]):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">beta1_metal</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">beta1_metal</span><span class="p">:</span><span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span><span class="n">percent</span><span class="p">:</span><span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span><span class="o">=</span><span class="p">[]):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Sets the leading edge metal angle for the blade</span>
 
 <span class="sd">        Args:</span>
@@ -520,7 +519,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">beta1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">beta1_metal</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
         
     <span class="nd">@beta2_metal</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">beta2_metal</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">beta2_metal</span><span class="p">:</span><span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span><span class="n">percent</span><span class="p">:</span><span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span><span class="o">=</span><span class="p">[]):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">beta2_metal</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">beta2_metal</span><span class="p">:</span><span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span><span class="n">percent</span><span class="p">:</span><span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span><span class="o">=</span><span class="p">[]):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Sets the trailing edge metal angle for the blade</span>
 
 <span class="sd">        Args:</span>
@@ -539,20 +538,20 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">alpha2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_beta2_metal</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
         
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">rpm</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">rpm</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rpm</span> 
     
     <span class="nd">@rpm</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">rpm</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">val</span><span class="p">:</span><span class="nb">float</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">rpm</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">val</span><span class="p">:</span><span class="nb">float</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_rpm</span> <span class="o">=</span> <span class="n">val</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">omega</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rpm</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">30</span> <span class="c1"># rev/min * 2pi rads/1 rev * 1 min/60 sec</span>
     
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">coolant</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">coolant</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_coolant</span>
     
     <span class="nd">@coolant</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">coolant</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">coolant</span><span class="p">:</span><span class="n">Coolant</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">coolant</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">coolant</span><span class="p">:</span><span class="n">Coolant</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Add a coolant to the end of the blade row</span>
 
 <span class="sd">        Args:</span>
@@ -561,11 +560,11 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_coolant</span> <span class="o">=</span> <span class="n">coolant</span>
     
     <span class="nd">@property</span>    
-    <span class="k">def</span> <span class="nf">loss_model</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">loss_model</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">loss_function</span>
     
     <span class="nd">@loss_model</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">loss_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">:</span><span class="n">Callable</span><span class="p">[[</span><span class="n">Any</span><span class="p">],</span> <span class="n">Any</span><span class="p">]):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">loss_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">:</span><span class="n">Callable</span><span class="p">[[</span><span class="n">Any</span><span class="p">],</span> <span class="n">Any</span><span class="p">]):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Add in custom loss model</span>
 
 <span class="sd">        Args:</span>
@@ -580,7 +579,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">loss_function</span> <span class="o">=</span> <span class="n">model</span>
     
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">te_pitch</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">te_pitch</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Trailing edge to pitch ratio </span>
 
 <span class="sd">        Returns:</span>
@@ -589,15 +588,18 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_te_s</span>
     
     <span class="nd">@te_pitch</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">te_pitch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">val</span><span class="p">:</span><span class="nb">float</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">te_pitch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">val</span><span class="p">:</span><span class="nb">float</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Set the trailing edge to pitch ratio. Typical values from 0.02 to 0.12</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            val (float): new trailing edge to pitch ratio</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_te_s</span> <span class="o">=</span> <span class="n">val</span>
-        
-    <span class="k">def</span> <span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    
+    <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">row_type</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> P0:</span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">P0</span><span class="p">)</span><span class="si">:</span><span class="s2">0.2f</span><span class="si">}</span><span class="s2"> T0:</span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">T0</span><span class="p">)</span><span class="si">:</span><span class="s2">0.2f</span><span class="si">}</span><span class="s2"> P:</span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">P</span><span class="p">)</span><span class="si">:</span><span class="s2">0.2f</span><span class="si">}</span><span class="s2"> massflow:</span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">total_massflow_no_coolant</span><span class="p">)</span><span class="si">:</span><span class="s2">0.3f</span><span class="si">}</span><span class="s2">&quot;</span>
+    
+    <span class="k">def</span><span class="w"> </span><span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         
         <span class="n">data</span> <span class="o">=</span> <span class="p">{</span>
             <span class="s2">&quot;StageID&quot;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">stage_id</span><span class="p">,</span>
@@ -621,10 +623,10 @@
             <span class="s2">&quot;Vx&quot;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">Vx</span><span class="o">.</span><span class="n">tolist</span><span class="p">(),</span>
             <span class="s2">&quot;Vr&quot;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">Vr</span><span class="o">.</span><span class="n">tolist</span><span class="p">(),</span>
             <span class="s2">&quot;Vt&quot;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">Vt</span><span class="o">.</span><span class="n">tolist</span><span class="p">(),</span>
+            <span class="s2">&quot;U&quot;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">U</span><span class="o">.</span><span class="n">tolist</span><span class="p">(),</span>
             <span class="s2">&quot;V&quot;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">V</span><span class="o">.</span><span class="n">tolist</span><span class="p">(),</span>
             <span class="s2">&quot;M&quot;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">M</span><span class="o">.</span><span class="n">tolist</span><span class="p">(),</span>
             <span class="s2">&quot;M_rel&quot;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">M_rel</span><span class="o">.</span><span class="n">tolist</span><span class="p">(),</span>
-            <span class="s2">&quot;U&quot;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">U</span><span class="o">.</span><span class="n">tolist</span><span class="p">(),</span>
             <span class="s2">&quot;W&quot;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">W</span><span class="o">.</span><span class="n">tolist</span><span class="p">(),</span>
             <span class="s2">&quot;Wt&quot;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">Wt</span><span class="o">.</span><span class="n">tolist</span><span class="p">(),</span>
             <span class="s2">&quot;omega&quot;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">omega</span><span class="p">,</span>
@@ -635,6 +637,7 @@
             <span class="s2">&quot;P&quot;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">P</span><span class="o">.</span><span class="n">tolist</span><span class="p">(),</span>
             <span class="s2">&quot;T&quot;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">T</span><span class="o">.</span><span class="n">tolist</span><span class="p">(),</span>
             <span class="s2">&quot;rho&quot;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">rho</span><span class="o">.</span><span class="n">tolist</span><span class="p">(),</span>
+            <span class="s2">&quot;mu&quot;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">mu</span><span class="p">,</span>
             <span class="s2">&quot;Yp&quot;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">Yp</span><span class="p">,</span>
             <span class="s2">&quot;Power&quot;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">power</span><span class="p">,</span>
             <span class="s2">&quot;P0_P&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">P0_P</span><span class="p">,</span>
@@ -643,7 +646,15 @@
             <span class="s2">&quot;euler_power&quot;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">euler_power</span><span class="p">,</span>
             <span class="s2">&quot;axial_chord&quot;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">axial_chord</span><span class="p">,</span>
             <span class="s2">&quot;aspect_ratio&quot;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">aspect_ratio</span><span class="p">,</span>
-            <span class="s2">&quot;area&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">area</span>
+            <span class="s2">&quot;num_blades&quot;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">num_blades</span><span class="p">,</span>
+            <span class="s2">&quot;area&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">area</span><span class="p">,</span>
+            <span class="s2">&quot;radius&quot;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">r</span><span class="o">.</span><span class="n">tolist</span><span class="p">(),</span>
+            <span class="s2">&quot;x&quot;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">tolist</span><span class="p">(),</span>
+            <span class="s2">&quot;dx&quot;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+            <span class="s2">&quot;dr&quot;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">r</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">r</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+            <span class="s2">&quot;mprime&quot;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">mprime</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span>
+            <span class="s2">&quot;Reynolds&quot;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">Reynolds</span><span class="p">,</span>
+            <span class="s2">&quot;axial_chord&quot;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">axial_chord</span>
         <span class="p">}</span>
 
         <span class="k">return</span> <span class="n">data</span></div>
@@ -652,7 +663,7 @@
 <span class="c1">#* Some functions related to blade row </span>
 <div class="viewcode-block" id="interpolate_streamline_radii">
 <a class="viewcode-back" href="../../modules/bladerow.html#turbodesign.bladerow.interpolate_streamline_radii">[docs]</a>
-<span class="k">def</span> <span class="nf">interpolate_streamline_radii</span><span class="p">(</span><span class="n">row</span><span class="p">:</span><span class="n">BladeRow</span><span class="p">,</span><span class="n">passage</span><span class="p">:</span><span class="n">Passage</span><span class="p">,</span><span class="n">num_streamlines</span><span class="p">:</span><span class="nb">int</span><span class="o">=</span><span class="mi">3</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">interpolate_streamline_radii</span><span class="p">(</span><span class="n">row</span><span class="p">:</span><span class="n">BladeRow</span><span class="p">,</span><span class="n">passage</span><span class="p">:</span><span class="n">Passage</span><span class="p">,</span><span class="n">num_streamlines</span><span class="p">:</span><span class="nb">int</span><span class="o">=</span><span class="mi">3</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Interpolate all quantities onto the streamline and allocates variables. </span>
 <span class="sd">    Run this after setting some initial conditions </span>
 
@@ -664,7 +675,7 @@
 <span class="sd">    Returns:</span>
 <span class="sd">        (BladeRow): new row object with quantities interpolated</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">row</span><span class="o">.</span><span class="n">cutting_line</span><span class="p">,</span><span class="n">_</span><span class="p">,</span><span class="n">_</span> <span class="o">=</span> <span class="n">passage</span><span class="o">.</span><span class="n">get_cutting_line</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">meridional_location</span><span class="p">)</span>
+    <span class="n">row</span><span class="o">.</span><span class="n">cutting_line</span><span class="p">,</span><span class="n">_</span><span class="p">,</span><span class="n">_</span> <span class="o">=</span> <span class="n">passage</span><span class="o">.</span><span class="n">get_cutting_line</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">location</span><span class="p">)</span>
     <span class="n">row</span><span class="o">.</span><span class="n">x</span><span class="p">,</span><span class="n">row</span><span class="o">.</span><span class="n">r</span> <span class="o">=</span> <span class="n">row</span><span class="o">.</span><span class="n">cutting_line</span><span class="o">.</span><span class="n">get_point</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="n">num_streamlines</span><span class="p">))</span>
     <span class="n">streamline_percent_length</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">((</span><span class="n">row</span><span class="o">.</span><span class="n">r</span><span class="o">-</span><span class="n">row</span><span class="o">.</span><span class="n">r</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">**</span><span class="mi">2</span><span class="o">+</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">x</span><span class="o">-</span><span class="n">row</span><span class="o">.</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">/</span><span class="n">row</span><span class="o">.</span><span class="n">cutting_line</span><span class="o">.</span><span class="n">length</span>
     
@@ -730,7 +741,7 @@
 
 <div class="viewcode-block" id="sutherland">
 <a class="viewcode-back" href="../../modules/bladerow.html#turbodesign.bladerow.sutherland">[docs]</a>
-<span class="k">def</span> <span class="nf">sutherland</span><span class="p">(</span><span class="n">T</span><span class="p">:</span><span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span><span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span><span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">]:</span>    
+<span class="k">def</span><span class="w"> </span><span class="nf">sutherland</span><span class="p">(</span><span class="n">T</span><span class="p">:</span><span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span><span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span><span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">]:</span>    
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Sutherland viscosity calculation used for reynolds number </span>
 
 <span class="sd">    Args:</span>
@@ -746,7 +757,7 @@
 
 <div class="viewcode-block" id="interpolate_quantities">
 <a class="viewcode-back" href="../../modules/bladerow.html#turbodesign.bladerow.interpolate_quantities">[docs]</a>
-<span class="k">def</span> <span class="nf">interpolate_quantities</span><span class="p">(</span><span class="n">q</span><span class="p">:</span><span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">,</span><span class="n">r</span><span class="p">:</span><span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">,</span><span class="n">r2</span><span class="p">:</span><span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">interpolate_quantities</span><span class="p">(</span><span class="n">q</span><span class="p">:</span><span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">,</span><span class="n">r</span><span class="p">:</span><span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">,</span><span class="n">r2</span><span class="p">:</span><span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Interpolates array q</span>
 
 <span class="sd">    Args:</span>
@@ -770,24 +781,27 @@
     
 <div class="viewcode-block" id="compute_gas_constants">
 <a class="viewcode-back" href="../../modules/bladerow.html#turbodesign.bladerow.compute_gas_constants">[docs]</a>
-<span class="k">def</span> <span class="nf">compute_gas_constants</span><span class="p">(</span><span class="n">row</span><span class="p">:</span><span class="n">BladeRow</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Calculates all the gas constants for a row. </span>
-<span class="sd">        This should be done if T or P change </span>
+<span class="k">def</span><span class="w"> </span><span class="nf">compute_gas_constants</span><span class="p">(</span><span class="n">row</span><span class="p">:</span><span class="n">BladeRow</span><span class="p">,</span><span class="n">fluid</span><span class="p">:</span><span class="n">Solution</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Updates the Cp, Gamma, and density for a blade row. If fluid is not specified then only density and viscosity is updated. </span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        row (BladeRow): _description_</span>
+<span class="sd">        fluid (Solution, optional): _description_. Defaults to None.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        (BladeRow): updated row</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">Tm</span> <span class="o">=</span> <span class="n">row</span><span class="o">.</span><span class="n">T</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
-    <span class="n">Pm</span> <span class="o">=</span> <span class="n">row</span><span class="o">.</span><span class="n">P</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
-    <span class="n">row</span><span class="o">.</span><span class="n">fluid</span><span class="o">.</span><span class="n">TP</span> <span class="o">=</span> <span class="n">Tm</span><span class="p">,</span><span class="n">Pm</span>
-    <span class="n">row</span><span class="o">.</span><span class="n">Cp</span> <span class="o">=</span> <span class="n">row</span><span class="o">.</span><span class="n">fluid</span><span class="o">.</span><span class="n">cp</span>
-    <span class="n">row</span><span class="o">.</span><span class="n">Cv</span> <span class="o">=</span> <span class="n">row</span><span class="o">.</span><span class="n">fluid</span><span class="o">.</span><span class="n">cv</span>
-    <span class="n">row</span><span class="o">.</span><span class="n">R</span> <span class="o">=</span> <span class="n">row</span><span class="o">.</span><span class="n">Cp</span><span class="o">-</span><span class="n">row</span><span class="o">.</span><span class="n">Cv</span>
-    <span class="n">row</span><span class="o">.</span><span class="n">gamma</span> <span class="o">=</span> <span class="n">row</span><span class="o">.</span><span class="n">Cp</span><span class="o">/</span><span class="n">row</span><span class="o">.</span><span class="n">Cv</span>
-    <span class="n">row</span><span class="o">.</span><span class="n">mu</span> <span class="o">=</span> <span class="n">sutherland</span><span class="p">(</span><span class="n">Tm</span><span class="p">)</span> <span class="c1"># type: ignore</span>
-    <span class="n">row</span><span class="o">.</span><span class="n">rho</span><span class="p">[:]</span> <span class="o">=</span> <span class="n">row</span><span class="o">.</span><span class="n">fluid</span><span class="o">.</span><span class="n">density</span>
-    <span class="c1"># i = 0 </span>
-    <span class="c1"># for T,P in zip(row.T,row.P):</span>
-    <span class="c1">#     row.rho[i] = P/(T*row.R)</span>
-    <span class="c1">#     i+=1</span>
-    <span class="k">return</span> <span class="n">row</span></div>
+    <span class="k">if</span> <span class="n">fluid</span><span class="p">:</span>
+        <span class="n">Tm</span> <span class="o">=</span> <span class="n">row</span><span class="o">.</span><span class="n">T</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+        <span class="n">Pm</span> <span class="o">=</span> <span class="n">row</span><span class="o">.</span><span class="n">P</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+        <span class="n">fluid</span><span class="o">.</span><span class="n">TP</span> <span class="o">=</span> <span class="n">Tm</span><span class="p">,</span><span class="n">Pm</span>
+        <span class="n">row</span><span class="o">.</span><span class="n">Cp</span> <span class="o">=</span> <span class="n">fluid</span><span class="o">.</span><span class="n">cp</span>
+        <span class="n">row</span><span class="o">.</span><span class="n">Cv</span> <span class="o">=</span> <span class="n">fluid</span><span class="o">.</span><span class="n">cv</span>
+        <span class="n">row</span><span class="o">.</span><span class="n">R</span> <span class="o">=</span> <span class="n">row</span><span class="o">.</span><span class="n">Cp</span><span class="o">-</span><span class="n">row</span><span class="o">.</span><span class="n">Cv</span>
+        <span class="n">row</span><span class="o">.</span><span class="n">gamma</span> <span class="o">=</span> <span class="n">row</span><span class="o">.</span><span class="n">Cp</span><span class="o">/</span><span class="n">row</span><span class="o">.</span><span class="n">Cv</span>
+    <span class="c1"># Use Ideal Gas </span>
+    <span class="n">row</span><span class="o">.</span><span class="n">rho</span> <span class="o">=</span> <span class="n">row</span><span class="o">.</span><span class="n">P</span><span class="o">/</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">T</span><span class="o">*</span><span class="n">row</span><span class="o">.</span><span class="n">R</span><span class="p">)</span>
+    <span class="n">row</span><span class="o">.</span><span class="n">mu</span> <span class="o">=</span> <span class="n">sutherland</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">T</span><span class="p">)</span> <span class="c1"># type: ignore</span></div>
 
 </pre></div>
 

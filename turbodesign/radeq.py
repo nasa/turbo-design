@@ -1,12 +1,12 @@
+from typing import Optional
 from scipy.interpolate import interp1d,PchipInterpolator
 from scipy.integrate import solve_ivp
 import numpy as np  
-import numdifftools as nd 
 from .bladerow import BladeRow
 from .enums import RowType
 import math 
 
-def radeq(row:BladeRow,upstream:BladeRow,downstream:BladeRow=None) -> BladeRow:
+def radeq(row:BladeRow,upstream:BladeRow,downstream:Optional[BladeRow]=None) -> BladeRow:
     """Solves the radial equilibrium equation for axial machines and returns the convergence. 
 
     Note:
@@ -81,8 +81,8 @@ def radeq(row:BladeRow,upstream:BladeRow,downstream:BladeRow=None) -> BladeRow:
             else:
                 func_Vm_m = PchipInterpolator([up_m, row_m],[up_Vm, Vm])    
         else:
-            func_Vm_m = PchipInterpolator([up_m, row_m],[up_Vm, Vm])    
-        dVm_dm = func_Vm_m.derivative()(row_m)
+            func_Vm_m = PchipInterpolator([up_m, row_m],[up_Vm, Vm])     # type: ignore
+        dVm_dm = func_Vm_m.derivative()(row_m) # type: ignore
         
         # Upstream 
         dT_dr = float(interp1d(row_radius, np.gradient(row.T,row_radius))(r))

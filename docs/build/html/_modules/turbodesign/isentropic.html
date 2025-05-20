@@ -1,22 +1,20 @@
+
+
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" data-content_root="../../">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>turbodesign.isentropic &mdash; Turbo Design 1.0.6 documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
-      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
 
   
-  <!--[if lt IE 9]>
-    <script src="../../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
-  
-        <script src="../../_static/jquery.js?v=5d32c60e"></script>
-        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../../_static/documentation_options.js?v=e2a723ec"></script>
-        <script src="../../_static/doctools.js?v=9a2dae69"></script>
-        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=e2a723ec"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" /> 
@@ -33,9 +31,6 @@
           <a href="../../index.html">
             
           </a>
-              <div class="version">
-                1.0.6
-              </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
@@ -103,7 +98,6 @@
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../modules/radeq.html">Radial Equilibrium</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../modules/radeq.html#turbodesign.radeq.radeq"><code class="docutils literal notranslate"><span class="pre">radeq()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../modules/radeq.html#turbodesign.radeq.radeq_normalized"><code class="docutils literal notranslate"><span class="pre">radeq_normalized()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../modules/rotor.html">Rotor</a><ul>
@@ -123,7 +117,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../../modules/td_math.html#turbodesign.td_math.compute_massflow"><code class="docutils literal notranslate"><span class="pre">compute_massflow()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../modules/td_math.html#turbodesign.td_math.compute_power"><code class="docutils literal notranslate"><span class="pre">compute_power()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../modules/td_math.html#turbodesign.td_math.compute_quantities"><code class="docutils literal notranslate"><span class="pre">compute_quantities()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../modules/td_math.html#turbodesign.td_math.compute_quantities_power"><code class="docutils literal notranslate"><span class="pre">compute_quantities_power()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/td_math.html#turbodesign.td_math.compute_reynolds"><code class="docutils literal notranslate"><span class="pre">compute_reynolds()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../modules/td_math.html#turbodesign.td_math.inlet_calc"><code class="docutils literal notranslate"><span class="pre">inlet_calc()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../modules/td_math.html#turbodesign.td_math.rotor_calc"><code class="docutils literal notranslate"><span class="pre">rotor_calc()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../modules/td_math.html#turbodesign.td_math.stator_calc"><code class="docutils literal notranslate"><span class="pre">stator_calc()</span></code></a></li>
@@ -160,13 +154,13 @@
            <div itemprop="articleBody">
              
   <h1>Source code for turbodesign.isentropic</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">math</span>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">math</span>
 
 
 <div class="viewcode-block" id="IsenP">
 <a class="viewcode-back" href="../../modules/isentropic.html#turbodesign.isentropic.IsenP">[docs]</a>
-<span class="k">def</span> <span class="nf">IsenP</span><span class="p">(</span><span class="n">M</span><span class="p">:</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span><span class="n">gamma</span><span class="p">:</span><span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">IsenP</span><span class="p">(</span><span class="n">M</span><span class="p">:</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span><span class="n">gamma</span><span class="p">:</span><span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Computes the ratio P0/Ps</span>
 
 <span class="sd">    Args:</span>
@@ -182,7 +176,7 @@
 
 <div class="viewcode-block" id="FindMachP0P">
 <a class="viewcode-back" href="../../modules/isentropic.html#turbodesign.isentropic.FindMachP0P">[docs]</a>
-<span class="k">def</span> <span class="nf">FindMachP0P</span><span class="p">(</span><span class="n">P0_P</span><span class="p">:</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span><span class="n">gamma</span><span class="p">:</span><span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">FindMachP0P</span><span class="p">(</span><span class="n">P0_P</span><span class="p">:</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span><span class="n">gamma</span><span class="p">:</span><span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Finds the mach number given a P0/P ratio</span>
 
 <span class="sd">    Args:</span>
@@ -203,7 +197,7 @@
 
 <div class="viewcode-block" id="IsenT">
 <a class="viewcode-back" href="../../modules/isentropic.html#turbodesign.isentropic.IsenT">[docs]</a>
-<span class="k">def</span> <span class="nf">IsenT</span><span class="p">(</span><span class="n">M</span><span class="p">:</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span><span class="n">gamma</span><span class="p">:</span><span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">IsenT</span><span class="p">(</span><span class="n">M</span><span class="p">:</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span><span class="n">gamma</span><span class="p">:</span><span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Computes T0/Ts</span>
 
 <span class="sd">    Args:</span>
@@ -219,7 +213,7 @@
 
 <div class="viewcode-block" id="A_As">
 <a class="viewcode-back" href="../../modules/isentropic.html#turbodesign.isentropic.A_As">[docs]</a>
-<span class="k">def</span> <span class="nf">A_As</span><span class="p">(</span><span class="n">M</span><span class="p">:</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span><span class="n">gamma</span><span class="p">:</span><span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">A_As</span><span class="p">(</span><span class="n">M</span><span class="p">:</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span><span class="n">gamma</span><span class="p">:</span><span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Computes the ratio of Area to Throat Area give a given mach number and gamma </span>
 
 <span class="sd">    Args:</span>
@@ -238,7 +232,7 @@
 
 <div class="viewcode-block" id="Massflow">
 <a class="viewcode-back" href="../../modules/isentropic.html#turbodesign.isentropic.Massflow">[docs]</a>
-<span class="k">def</span> <span class="nf">Massflow</span><span class="p">(</span><span class="n">P0</span><span class="p">:</span><span class="nb">float</span><span class="p">,</span><span class="n">T0</span><span class="p">:</span><span class="nb">float</span><span class="p">,</span><span class="n">A</span><span class="p">:</span><span class="nb">float</span><span class="p">,</span><span class="n">M</span><span class="p">:</span><span class="nb">float</span><span class="p">,</span><span class="n">gamma</span><span class="p">:</span><span class="nb">float</span><span class="p">,</span><span class="n">R</span><span class="p">:</span><span class="nb">float</span><span class="o">=</span><span class="mi">287</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">Massflow</span><span class="p">(</span><span class="n">P0</span><span class="p">:</span><span class="nb">float</span><span class="p">,</span><span class="n">T0</span><span class="p">:</span><span class="nb">float</span><span class="p">,</span><span class="n">A</span><span class="p">:</span><span class="nb">float</span><span class="p">,</span><span class="n">M</span><span class="p">:</span><span class="nb">float</span><span class="p">,</span><span class="n">gamma</span><span class="p">:</span><span class="nb">float</span><span class="p">,</span><span class="n">R</span><span class="p">:</span><span class="nb">float</span><span class="o">=</span><span class="mi">287</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Massflow rate calculation</span>
 <span class="sd">    </span>
 <span class="sd">    Args:</span>

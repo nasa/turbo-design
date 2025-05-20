@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" data-content_root="../">
 <head>
@@ -5,19 +7,15 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Turbine Spool &mdash; Turbo Design 1.0.6 documentation</title>
-      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
-      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
 
   
-  <!--[if lt IE 9]>
-    <script src="../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
-  
-        <script src="../_static/jquery.js?v=5d32c60e"></script>
-        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../_static/documentation_options.js?v=e2a723ec"></script>
-        <script src="../_static/doctools.js?v=9a2dae69"></script>
-        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=e2a723ec"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -35,9 +33,6 @@
           <a href="../index.html">
             
           </a>
-              <div class="version">
-                1.0.6
-              </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
@@ -105,7 +100,6 @@
 </li>
 <li class="toctree-l1"><a class="reference internal" href="radeq.html">Radial Equilibrium</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="radeq.html#turbodesign.radeq.radeq"><code class="docutils literal notranslate"><span class="pre">radeq()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="radeq.html#turbodesign.radeq.radeq_normalized"><code class="docutils literal notranslate"><span class="pre">radeq_normalized()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="rotor.html">Rotor</a><ul>
@@ -125,7 +119,7 @@
 <li class="toctree-l2"><a class="reference internal" href="td_math.html#turbodesign.td_math.compute_massflow"><code class="docutils literal notranslate"><span class="pre">compute_massflow()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="td_math.html#turbodesign.td_math.compute_power"><code class="docutils literal notranslate"><span class="pre">compute_power()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="td_math.html#turbodesign.td_math.compute_quantities"><code class="docutils literal notranslate"><span class="pre">compute_quantities()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="td_math.html#turbodesign.td_math.compute_quantities_power"><code class="docutils literal notranslate"><span class="pre">compute_quantities_power()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="td_math.html#turbodesign.td_math.compute_reynolds"><code class="docutils literal notranslate"><span class="pre">compute_reynolds()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="td_math.html#turbodesign.td_math.inlet_calc"><code class="docutils literal notranslate"><span class="pre">inlet_calc()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="td_math.html#turbodesign.td_math.rotor_calc"><code class="docutils literal notranslate"><span class="pre">rotor_calc()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="td_math.html#turbodesign.td_math.stator_calc"><code class="docutils literal notranslate"><span class="pre">stator_calc()</span></code></a></li>
@@ -165,8 +159,25 @@
 <h1>Turbine Spool<a class="headerlink" href="#turbine-spool" title="Link to this heading"></a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="turbodesign.turbinespool.TurbineSpool">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">turbodesign.turbinespool.</span></span><span class="sig-name descname"><span class="pre">TurbineSpool</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">passage:</span> <span class="pre">~turbodesign.passage.Passage,</span> <span class="pre">massflow:</span> <span class="pre">float,</span> <span class="pre">rows:</span> <span class="pre">~typing.List[~turbodesign.bladerow.BladeRow],</span> <span class="pre">num_streamlines:</span> <span class="pre">int</span> <span class="pre">=</span> <span class="pre">3,</span> <span class="pre">fluid:</span> <span class="pre">~cantera.composite.Solution</span> <span class="pre">=</span> <span class="pre">&lt;cantera.composite.Solution</span> <span class="pre">object&gt;,</span> <span class="pre">rpm:</span> <span class="pre">float</span> <span class="pre">=</span> <span class="pre">-1,</span> <span class="pre">massflow_constraint:</span> <span class="pre">~turbodesign.enums.MassflowConstraint</span> <span class="pre">=</span> <span class="pre">MassflowConstraint.MatchMassFlow</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/turbodesign/turbinespool.html#TurbineSpool"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#turbodesign.turbinespool.TurbineSpool" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">turbodesign.turbinespool.</span></span><span class="sig-name descname"><span class="pre">TurbineSpool</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">passage:</span> <span class="pre">~turbodesign.passage.Passage,</span> <span class="pre">massflow:</span> <span class="pre">float,</span> <span class="pre">rows:</span> <span class="pre">~typing.List[~turbodesign.bladerow.BladeRow],</span> <span class="pre">num_streamlines:</span> <span class="pre">int</span> <span class="pre">=</span> <span class="pre">3,</span> <span class="pre">fluid:</span> <span class="pre">~cantera.composite.Solution</span> <span class="pre">=</span> <span class="pre">&lt;cantera.composite.Solution</span> <span class="pre">object&gt;,</span> <span class="pre">rpm:</span> <span class="pre">float</span> <span class="pre">=</span> <span class="pre">-1,</span> <span class="pre">massflow_constraint:</span> <span class="pre">~turbodesign.enums.MassflowConstraint</span> <span class="pre">=</span> <span class="pre">MassflowConstraint.MatchMassFlow</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/turbodesign/turbinespool.html#TurbineSpool"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#turbodesign.turbinespool.TurbineSpool" title="Link to this definition"></a></dt>
 <dd><dl class="py method">
+<dt class="sig sig-object py" id="turbodesign.turbinespool.TurbineSpool.__massflow_std__">
+<em class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">__massflow_std__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">blade_rows</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="bladerow.html#turbodesign.bladerow.BladeRow" title="turbodesign.bladerow.BladeRow"><span class="pre">BladeRow</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/turbodesign/turbinespool.html#TurbineSpool.__massflow_std__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#turbodesign.turbinespool.TurbineSpool.__massflow_std__" title="Link to this definition"></a></dt>
+<dd><p>Returns the standard deviation of the massflow</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>blade_rows</strong> (<em>List</em><em>[</em><a class="reference internal" href="bladerow.html#turbodesign.bladerow.BladeRow" title="turbodesign.bladerow.BladeRow"><em>BladeRow</em></a><em>]</em>) – List of blade rows</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>_description_</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>_type_</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="turbodesign.turbinespool.TurbineSpool.export_properties">
 <span class="sig-name descname"><span class="pre">export_properties</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'turbine_spool.json'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/turbodesign/turbinespool.html#TurbineSpool.export_properties"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#turbodesign.turbinespool.TurbineSpool.export_properties" title="Link to this definition"></a></dt>
 <dd><p>Export the spool object to json</p>

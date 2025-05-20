@@ -1,22 +1,20 @@
+
+
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" data-content_root="./">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Index &mdash; Turbo Design 1.0.6 documentation</title>
-      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
-      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
 
   
-  <!--[if lt IE 9]>
-    <script src="_static/js/html5shiv.min.js"></script>
-  <![endif]-->
-  
-        <script src="_static/jquery.js?v=5d32c60e"></script>
-        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="_static/documentation_options.js?v=e2a723ec"></script>
-        <script src="_static/doctools.js?v=9a2dae69"></script>
-        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=e2a723ec"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="#" />
     <link rel="search" title="Search" href="search.html" /> 
@@ -33,9 +31,6 @@
           <a href="index.html">
             
           </a>
-              <div class="version">
-                1.0.6
-              </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
@@ -103,7 +98,6 @@
 </li>
 <li class="toctree-l1"><a class="reference internal" href="modules/radeq.html">Radial Equilibrium</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="modules/radeq.html#turbodesign.radeq.radeq"><code class="docutils literal notranslate"><span class="pre">radeq()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="modules/radeq.html#turbodesign.radeq.radeq_normalized"><code class="docutils literal notranslate"><span class="pre">radeq_normalized()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="modules/rotor.html">Rotor</a><ul>
@@ -123,7 +117,7 @@
 <li class="toctree-l2"><a class="reference internal" href="modules/td_math.html#turbodesign.td_math.compute_massflow"><code class="docutils literal notranslate"><span class="pre">compute_massflow()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="modules/td_math.html#turbodesign.td_math.compute_power"><code class="docutils literal notranslate"><span class="pre">compute_power()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="modules/td_math.html#turbodesign.td_math.compute_quantities"><code class="docutils literal notranslate"><span class="pre">compute_quantities()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="modules/td_math.html#turbodesign.td_math.compute_quantities_power"><code class="docutils literal notranslate"><span class="pre">compute_quantities_power()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="modules/td_math.html#turbodesign.td_math.compute_reynolds"><code class="docutils literal notranslate"><span class="pre">compute_reynolds()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="modules/td_math.html#turbodesign.td_math.inlet_calc"><code class="docutils literal notranslate"><span class="pre">inlet_calc()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="modules/td_math.html#turbodesign.td_math.rotor_calc"><code class="docutils literal notranslate"><span class="pre">rotor_calc()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="modules/td_math.html#turbodesign.td_math.stator_calc"><code class="docutils literal notranslate"><span class="pre">stator_calc()</span></code></a></li>
@@ -213,6 +207,8 @@
 </li>
       <li><a href="modules/coolant.html#turbodesign.coolant.Coolant.__hash__">__hash__ (turbodesign.coolant.Coolant attribute)</a>
 </li>
+      <li><a href="modules/turbinespool.html#turbodesign.turbinespool.TurbineSpool.__massflow_std__">__massflow_std__() (turbodesign.turbinespool.TurbineSpool static method)</a>
+</li>
   </ul></td>
 </tr></table>
 
@@ -221,10 +217,12 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="modules/isentropic.html#turbodesign.isentropic.A_As">A_As() (in module turbodesign.isentropic)</a>
 </li>
-      <li><a href="modules/solve_radeq.html#turbodesign.solve_radeq.adjust_streamlines">adjust_streamlines() (in module turbodesign.solve_radeq)</a>
+      <li><a href="modules/spool.html#turbodesign.spool.Spool.adjust_streamlines">adjust_streamlines (turbodesign.spool.Spool property)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="modules/solve_radeq.html#turbodesign.solve_radeq.adjust_streamlines">adjust_streamlines() (in module turbodesign.solve_radeq)</a>
+</li>
       <li><a href="modules/loss.html#turbodesign.loss.turbine.ainleymathieson.AinleyMathieson">AinleyMathieson (class in turbodesign.loss.turbine.ainleymathieson)</a>
 </li>
       <li><a href="modules/bladerow.html#turbodesign.bladerow.BladeRow.axial_chord">axial_chord (turbodesign.bladerow.BladeRow property)</a>
@@ -263,7 +261,7 @@
 </li>
       <li><a href="modules/td_math.html#turbodesign.td_math.compute_quantities">compute_quantities() (in module turbodesign.td_math)</a>
 </li>
-      <li><a href="modules/td_math.html#turbodesign.td_math.compute_quantities_power">compute_quantities_power() (in module turbodesign.td_math)</a>
+      <li><a href="modules/td_math.html#turbodesign.td_math.compute_reynolds">compute_reynolds() (in module turbodesign.td_math)</a>
 </li>
       <li><a href="modules/coolant.html#turbodesign.coolant.Coolant">Coolant (class in turbodesign.coolant)</a>
 </li>
@@ -297,17 +295,25 @@
 <h2 id="G">G</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="modules/passage.html#turbodesign.passage.Passage.get_area">get_area() (turbodesign.passage.Passage method)</a>
+</li>
       <li><a href="modules/passage.html#turbodesign.passage.Passage.get_cutting_line">get_cutting_line() (turbodesign.passage.Passage method)</a>
 </li>
-      <li><a href="modules/outlet.html#turbodesign.outlet.Outlet.get_static_pressure">get_static_pressure() (turbodesign.outlet.Outlet method)</a>
+      <li><a href="modules/passage.html#turbodesign.passage.Passage.get_dm">get_dm() (turbodesign.passage.Passage method)</a>
+</li>
+      <li><a href="modules/passage.html#turbodesign.passage.Passage.get_m">get_m() (turbodesign.passage.Passage method)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="modules/outlet.html#turbodesign.outlet.Outlet.get_static_pressure">get_static_pressure() (turbodesign.outlet.Outlet method)</a>
+</li>
       <li><a href="modules/passage.html#turbodesign.passage.Passage.get_streamline">get_streamline() (turbodesign.passage.Passage method)</a>
 </li>
       <li><a href="modules/inlet.html#turbodesign.inlet.Inlet.get_total_pressure">get_total_pressure() (turbodesign.inlet.Inlet method)</a>
 </li>
       <li><a href="modules/inlet.html#turbodesign.inlet.Inlet.get_total_temperature">get_total_temperature() (turbodesign.inlet.Inlet method)</a>
+</li>
+      <li><a href="modules/passage.html#turbodesign.passage.Passage.get_xr_slice">get_xr_slice() (turbodesign.passage.Passage method)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -323,6 +329,8 @@
 <h2 id="I">I</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="modules/inlet.html#turbodesign.inlet.Inlet.initialize_fluid">initialize_fluid() (turbodesign.inlet.Inlet method)</a>
+</li>
       <li><a href="modules/turbinespool.html#turbodesign.turbinespool.TurbineSpool.initialize_quantities">initialize_quantities() (turbodesign.turbinespool.TurbineSpool method)</a>
 </li>
       <li><a href="modules/rotor.html#turbodesign.rotor.Rotor.initialize_rotor_exit">initialize_rotor_exit() (turbodesign.rotor.Rotor method)</a>
@@ -448,12 +456,10 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="modules/radeq.html#turbodesign.radeq.radeq">radeq() (in module turbodesign.radeq)</a>
 </li>
-      <li><a href="modules/radeq.html#turbodesign.radeq.radeq_normalized">radeq_normalized() (in module turbodesign.radeq)</a>
+      <li><a href="modules/rotor.html#turbodesign.rotor.Rotor">Rotor (class in turbodesign.rotor)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="modules/rotor.html#turbodesign.rotor.Rotor">Rotor (class in turbodesign.rotor)</a>
-</li>
       <li><a href="modules/td_math.html#turbodesign.td_math.rotor_calc">rotor_calc() (in module turbodesign.td_math)</a>
 </li>
       <li><a href="modules/enums.html#turbodesign.enums.RowType">RowType (class in turbodesign.enums)</a>
