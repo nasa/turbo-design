@@ -3,7 +3,6 @@
 from dataclasses import dataclass, asdict
 from typing import List
 import numpy.typing as npt 
-from pyturbo.aero.centrif import CentrifBlade
 import numpy as np 
 import matplotlib.pyplot as plt 
 
@@ -74,8 +73,7 @@ class AGF_Setup:
     inlet:Inlet_bcs
     outlet:Outlet_bcs
     
-    blade:CentrifBlade
-    splitter:CentrifBlade
+
     clearance:Clearance 
     settings:Settings
     agf_template:str
@@ -112,29 +110,6 @@ class AGF_Setup:
         self.endwall = "".join(endwall)
         self.domain = domain
         self.settings.nht = hub.shape[0]
-    
-    def add_splitter(self,splitter:CentrifBlade,nsplitters:int):
-        self.splitter = splitter
-        # x,r,theta
-        nspts = splitter.ss_cart_pts.shape[0]; ird = splitter.ss_cyl_pts.shape[1]
-        
-        sections = []
-        section_indx = 1 
-        for i in range(splitter.ss_cyl_pts.shape[0]):
-            sections.append("*SPLITTER GEOMETRY	{section_indx}\n")
-            sections.append("*NSPTS,IRD,NBLADE,ITY,ETASPT\n")
-            sections.append(f"{nspts}	{ird}	{nsplitters}	5	11.25\n")
-            pts = np.hstack([splitter.ss_cyl_pts[i,:-1,:], np.flipud(splitter.ps_cyl_pts[i,:,:])])
-            n = pts.shape[0]
-            
-            sections.append("- SECTION - {section_indx}	{n}\n")
-            sections.append(">----RAD------XOFF------YOFF------ROTD----CONEANGLE----\n")
-            sections.append("0.0000	0.0000	0.0000	0.0000	0.0000\n")
-            for j in range(n):
-                x = pts[j,0]; th = pts[j,2]; r = pts[j,1]; rt =th*r
-                sections.append(f"{x}   {rt}   {r}\n")
-            section_indx+=1
-        self.sections = "".join(sections)
         
     def add_blade(self,ss:npt.NDArray,ps:npt.NDArray,IsDuct:bool=False):
         """Add the centrif blade geometry

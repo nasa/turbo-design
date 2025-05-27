@@ -3,10 +3,22 @@
 '''
 
 import pickle
+from typing import Tuple
 import numpy as np
 import matplotlib.pyplot as plt 
+import numpy.typing as npt
 
-def calculate_slope(pts):
+
+def split_ss_ps(pts:npt.NDArray, bPlot:bool=True) -> Tuple[npt.NDArray,npt.NDArray]:
+    """Split the blade points into suction side and pressure side
+    Args:
+        pts (npt.NDArray): array containing blade points in cartesian coordinates [npts,2]
+        bPlot (bool, optional): whether to plot the suction and pressure sides. Defaults to True.
+    Returns:
+        Tuple[npt.NDArray,npt.NDArray]: suction side and pressure side points
+    """
+    
+    
     dydx = np.gradient(pts[:,1], pts[:,0])
     
     le_indx1 = -1
@@ -65,17 +77,20 @@ def calculate_slope(pts):
     ss = new_pts[:di,:]
     ps = new_pts[di:,:]
     
-    plt.plot(ss[:,0],ss[:,1],ps[:,0],ps[:,1])
-    plt.axis('scaled')
-    plt.show()
-    return dydx 
+    if bPlot:
+        plt.figure(0,clear=True)
+        plt.plot(ss[:,0],ss[:,1],label='Suction Side')
+        plt.plot(ps[:,0],ps[:,1],label='Pressure Side')
+        plt.xlabel('x')
+        plt.ylabel('y')
+        plt.title('Blade Points')
+        plt.axis('scaled')
+    
+    
+    return ss, ps
 
-
-data = pickle.load(open('stator_rotor.pkl','rb'))
-dydx = calculate_slope(data['Stator1'][0])
-
-data['Rotor1']
-data['Stator2']
-data['Rotor2']
-print('check')
+if __name__ == "__main__":
+    data = pickle.load(open('stator_rotor.pkl','rb'))
+    ss,ps = split_ss_ps(data['Stator1'][0],bPlot=False)
+    print('check')
 

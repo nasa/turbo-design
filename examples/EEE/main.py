@@ -1,12 +1,12 @@
 import pyiges
-from pyiges import examples
 import numpy as np
 import matplotlib.pyplot as plt 
 import pickle
-from scipy.interpolate import BSpline, splrep, splev
 from agf import Inlet_bcs, Outlet_bcs, Settings, AGF_Setup, Clearance
 import subprocess
-
+import platform
+import os
+from get_ss_ps import split_ss_ps
 
 def Process_HubShroud_IGES():
     iges_case = pyiges.read('case.igs')
@@ -49,7 +49,8 @@ def Process_StatorRotor_IGES():
         points = np.array(curve.evalpts); n = points.shape[0]
         ss = points[:n,:]; ps = points[n:,:]
         stator_pts1.append({'ss':ss,'ps':ps})
-        np.savetxt(f'csv/stator1_{indx}.csv',stator_pts1[-1],fmt="%f",delimiter=',',header='x,rtheta,r')
+        os.makedirs('csv', exist_ok=True)
+        np.savetxt(f'csv/stator1_{indx}.csv',np.vstack([stator_pts1[-1]['ss'],stator_pts1[-1]['ps']]),fmt="%f",delimiter=',',header='x,rtheta,r')
         plt.plot(ss[:,0],ss[:,1],'.',label='ss')
         plt.plot(ps[:,0],ps[:,1],'.',label='ps')
         # plt.plot(stator_pts1[-1][:,0],stator_pts1[-1][:,1],'.')
@@ -64,10 +65,9 @@ def Process_StatorRotor_IGES():
     for i in range(2,7):
         curve = iges_rotor1.items[i].to_geomdl()
         curve.delta=curve_delta
-        points = np.array(curve.evalpts); n = points.shape[0]
-        ss = points[:n,:]; ps = points[n:,:]
-        rotor_pts1.append({'ss':ss,'ps':ps})
-        np.savetxt(f'csv/rotor1_{indx}.csv',rotor_pts1[-1],fmt="%f",delimiter=',',header='x,rtheta,r')
+        points = np.array(curve.evalpts); 
+        rotor_pts1.append(points)
+        np.savetxt(f'csv/rotor1_{indx}.csv',points,fmt="%f",delimiter=',',header='x,rtheta,r')
         plt.plot(rotor_pts1[-1][:,0],rotor_pts1[-1][:,1],'.')
         indx+=1
     plt.axis('scaled')
@@ -81,10 +81,9 @@ def Process_StatorRotor_IGES():
     for i in range(2,6):
         curve = iges_stator2.items[i].to_geomdl()
         curve.delta=curve_delta
-        points = np.array(curve.evalpts); n = points.shape[0]
-        ss = points[:n,:]; ps = points[n:,:]
+        points = np.array(curve.evalpts)
         stator_pts2.append(points)
-        np.savetxt(f'csv/stator2_{indx}.csv',stator_pts2[-1],fmt="%f",delimiter=',',header='x,rtheta,r')
+        np.savetxt(f'csv/stator2_{indx}.csv',points,fmt="%f",delimiter=',',header='x,rtheta,r')
         plt.plot(stator_pts2[-1][:,0],stator_pts2[-1][:,1],'.')
         indx+=1
     plt.axis('scaled')
@@ -97,10 +96,9 @@ def Process_StatorRotor_IGES():
     for i in range(2,7):
         curve = iges_rotor2.items[i].to_geomdl()
         curve.delta=curve_delta
-        points = np.array(curve.evalpts); n = points.shape[0]
-        ss = points[:n,:]; ps = points[n:,:]
+        points = np.array(curve.evalpts)
         rotor_pts2.append(points)        
-        np.savetxt(f'csv/rotor2_{indx}.csv',rotor_pts2[-1],fmt="%f",delimiter=',',header='x,rtheta,r')
+        np.savetxt(f'csv/rotor2_{indx}.csv',points,fmt="%f",delimiter=',',header='x,rtheta,r')
         plt.plot(rotor_pts2[-1][:,0],rotor_pts2[-1][:,1],'.')
         indx+=1
     plt.axis('scaled')
@@ -122,17 +120,19 @@ def BladeExitLocations():
     data['Rotor2']
     
 if __name__ == "__main__":
-    
-    Process_HubShroud_IGES()
-    Process_StatorRotor_IGES()
+    if platform.system() != "Darwin": # pyiges[full] does not work on MacOS        
+        Process_HubShroud_IGES()
+        Process_StatorRotor_IGES()
     
     blades = pickle.load(open('stator_rotor.pkl','rb'))
+    ss1,ps1 = split_ss_ps(blades['Stator1'])
+    ss2,ps2 = split_ss_ps(blades['Rotor1'])
+    ss3,ps3 = split_ss_ps(blades['Stator2'])
+    ss4,ps4 = split_ss_ps(blades['Rotor2'])
+
     hub_shroud = pickle.load(open('hub_shroud.pkl','rb'))
 
-    blades['Stator1']
-    blades['Rotor1']
-    blades['Stator2']
-    blades['Rotor2']
+    
     nblades = [46,76,48,70] # Vanes, Rotors, Vanes, Rotors
     
     T0 = 1588       # K
