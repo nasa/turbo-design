@@ -45,11 +45,11 @@ def plot(hub:npt.NDArray,shroud:npt.NDArray,blades:List[npt.NDArray]):
     fig = plt.figure()
     ax = fig.add_subplot(111, projection='3d')
 
-    ax.plot3D(hub[:,0],hub[:,1])
-    ax.plot3D(shroud[:,0],shroud[:,1])
+    ax.plot3D(hub[:,0],hub[:,1]) # type: ignore
+    ax.plot3D(shroud[:,0],shroud[:,1]) # type: ignore
     for blade in blades:
         for section in blade:
-            ax.plot3D(section[:,0],section[:,2],section[:,1])
+            ax.plot3D(section[:,0],section[:,2],section[:,1]) # type: ignore
     plt.axis('scaled')
     plt.show()
     
@@ -90,7 +90,7 @@ rotor2_cax = axial_chord(rotor2)
 # Geometry from OptTurb
 passage = Passage(hub2[:,0],hub2[:,1],
                   shroud[:,0],shroud[:,1],
-                  passageType=PassageType.Axial)
+                  passageType=PassageType.Axial) # type: ignore
 
 # #%% Design Conditions from Table I "EEE_HPT_report.pdf"
 Design_RPM = 12680
@@ -112,10 +112,10 @@ inlet = Inlet(M=0.1,
                  P0=[P0],
                  T0=[T0], 
                  beta=[0], 
-                 fluid=fluid, 
+                 fluid=fluid,  # type: ignore
                  percent_radii=0.5,
-                 meridional_location=(min(stator1[0][:,0]) - min(hub[:,0]))/hub_len)
-outlet = Outlet(P=Pexit,percent_radii=0.5,num_streamlines=3)
+                 meridional_location=(min(stator1[0][:,0]) - min(hub[:,0]))/hub_len) # type: ignore
+outlet = Outlet(P=Pexit,percent_radii=0.5,num_streamlines=3) # type: ignore
 
 #%% Define Blade Rows 
 # Axial location is a percentage along the hub where row exit is defined
