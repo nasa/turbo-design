@@ -42,82 +42,50 @@ def Process_StatorRotor_IGES():
     curve_delta=0.001
     # Stage 1 
     stator_pts1 = list(); indx = 1
-    plt.figure(num=2,clear=True)
     for i in range(2,7):
         curve = iges_stator1.items[i].to_geomdl()
         curve.delta=curve_delta
         points = np.array(curve.evalpts); n = points.shape[0]
-        ss = points[:n,:]; ps = points[n:,:]
-        stator_pts1.append({'ss':ss,'ps':ps})
+        stator_pts1.append(points)
         os.makedirs('csv', exist_ok=True)
-        np.savetxt(f'csv/stator1_{indx}.csv',np.vstack([stator_pts1[-1]['ss'],stator_pts1[-1]['ps']]),fmt="%f",delimiter=',',header='x,rtheta,r')
-        plt.plot(ss[:,0],ss[:,1],'.',label='ss')
-        plt.plot(ps[:,0],ps[:,1],'.',label='ps')
-        # plt.plot(stator_pts1[-1][:,0],stator_pts1[-1][:,1],'.')
+        np.savetxt(f'csv/stator1_{indx}.csv',points,fmt="%f",delimiter=',',header='x,rtheta,r')
         indx+=1
-    plt.axis('scaled')
-    plt.title('Stator')
-    plt.savefig('Stator1.png',transparent=None,dpi=150)
     
     # print an invidiual entity (boring)
     rotor_pts1 = list(); indx = 1
-    plt.figure(num=1,clear=True)
     for i in range(2,7):
         curve = iges_rotor1.items[i].to_geomdl()
         curve.delta=curve_delta
         points = np.array(curve.evalpts); 
         rotor_pts1.append(points)
         np.savetxt(f'csv/rotor1_{indx}.csv',points,fmt="%f",delimiter=',',header='x,rtheta,r')
-        plt.plot(rotor_pts1[-1][:,0],rotor_pts1[-1][:,1],'.')
         indx+=1
-    plt.axis('scaled')
-    plt.title('Rotor')
-    plt.savefig('Rotor1.png',transparent=None,dpi=150)
-    
 
     # Stage 2
     stator_pts2 = list(); indx = 1 
-    plt.figure(num=2,clear=True)
     for i in range(2,6):
         curve = iges_stator2.items[i].to_geomdl()
         curve.delta=curve_delta
         points = np.array(curve.evalpts)
         stator_pts2.append(points)
         np.savetxt(f'csv/stator2_{indx}.csv',points,fmt="%f",delimiter=',',header='x,rtheta,r')
-        plt.plot(stator_pts2[-1][:,0],stator_pts2[-1][:,1],'.')
         indx+=1
-    plt.axis('scaled')
-    plt.title('Stator')
-    plt.savefig('Stator2.png',transparent=None,dpi=150)
     
     # print an invidiual entity (boring)
     rotor_pts2 = list(); indx = 1
-    plt.figure(num=1,clear=True)
     for i in range(2,7):
         curve = iges_rotor2.items[i].to_geomdl()
         curve.delta=curve_delta
         points = np.array(curve.evalpts)
         rotor_pts2.append(points)        
         np.savetxt(f'csv/rotor2_{indx}.csv',points,fmt="%f",delimiter=',',header='x,rtheta,r')
-        plt.plot(rotor_pts2[-1][:,0],rotor_pts2[-1][:,1],'.')
         indx+=1
-    plt.axis('scaled')
-    plt.title('Rotor')
-    plt.savefig('Rotor2.png',transparent=None,dpi=150)
     
-    pickle.dump({
-                    'Stator1':stator_pts1,
-                    'Rotor1':rotor_pts1,
-                    'Stator2':stator_pts2,
-                    'Rotor2':rotor_pts2,
-                 },open('stator_rotor.pkl','wb'))
+    pickle.dump([stator_pts1,rotor_pts1,stator_pts2,rotor_pts2],open('stator_rotor.pkl','wb'))
 
 def BladeExitLocations():
     data = pickle.load(open('stator_rotor.pkl','rb'))
-    data['Stator1']
-    data['Rotor1']
-    data['Stator2']
-    data['Rotor2']
+
     
 if __name__ == "__main__":
     if platform.system() != "Darwin": # pyiges[full] does not work on MacOS        
@@ -125,10 +93,13 @@ if __name__ == "__main__":
         Process_StatorRotor_IGES()
     
     blades = pickle.load(open('stator_rotor.pkl','rb'))
-    ss1,ps1 = split_ss_ps(blades['Stator1'])
-    ss2,ps2 = split_ss_ps(blades['Rotor1'])
-    ss3,ps3 = split_ss_ps(blades['Stator2'])
-    ss4,ps4 = split_ss_ps(blades['Rotor2'])
+    processed_data = []
+    for blade in blades:
+        section_data = list() 
+        for section in blade:
+            ss, ps = split_ss_ps(section)
+            section_data.append({'ss':ss,'ps':ps})
+        processed_data.append(section_data)
 
     hub_shroud = pickle.load(open('hub_shroud.pkl','rb'))
 
@@ -181,4 +152,3 @@ if __name__ == "__main__":
             overall_files = list(glob.glob('*.OVERALL'))
             convergene_files = list(glob.glob('*.CONVERGENCE'))
             read_convergence(convergene_files[0])
-            import post_process
