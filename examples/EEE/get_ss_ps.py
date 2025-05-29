@@ -7,13 +7,14 @@ from typing import Tuple
 import numpy as np
 import matplotlib.pyplot as plt 
 import numpy.typing as npt
-from pyturbo.helper import pspline
+from pyturbo.helper import pspline, resample_by_curvature, order_points_nearest_neighbor
 
-def split_ss_ps(pts:npt.NDArray, bPlot:bool=True) -> Tuple[npt.NDArray,npt.NDArray]:
+def split_ss_ps(pts:npt.NDArray,npts:int=100) -> Tuple[npt.NDArray,npt.NDArray]:
     """Split the blade points into suction side and pressure side
     Args:
         pts (npt.NDArray): array containing blade points in cartesian coordinates [npts,2]
-        bPlot (bool, optional): whether to plot the suction and pressure sides. Defaults to True.
+        npts (int, optional): Number of points to return for suction and pressure sides 
+        
     Returns:
         Tuple[npt.NDArray,npt.NDArray]: suction side and pressure side points
     """
@@ -69,30 +70,31 @@ def split_ss_ps(pts:npt.NDArray, bPlot:bool=True) -> Tuple[npt.NDArray,npt.NDArr
         else:
             te_indx = te_indx1
 
-    # Build SS and PS from Indices
+     # Build SS and PS from Indices
     di = te_indx-le_indx
     new_pts = np.roll(pts,-le_indx,axis=0)
-    ss = new_pts[:di,:]
-    ps = new_pts[di:,:]
+    ss = new_pts[:di+1,:]
+    ps = new_pts[di-1:,:]
+    ss_unique = np.unique(ss,axis=0)
+    ps_unique = np.unique(ps,axis=0)
     
-    ss_u = np.unique(ss, axis=0)
-    ps_u = np.unique(ps, axis=0)
-    npts = 500
-    pts, _ = pspline(ss[:,0],ss[:,1]).get_point(np.linspace(0,1,npts))
-    ss = pts
-    pts, _ = pspline(ps[:,0],ps[:,1]).get_point(np.linspace(0,1,npts))
-    ps = pts 
-    if bPlot:
-        plot_blade(ss,ps,'test_blade')
+    ss_unique = ss_unique[order_points_nearest_neighbor(ss_unique)]
+    ps_unique = ps_unique[order_points_nearest_neighbor(ps_unique)]
+    ss = resample_by_curvature(ss_unique,npts)
+    ps = resample_by_curvature(ps_unique,npts)
+
+    # if bPlot:
+    # plot_blade(ss_unique,ps_unique,'test_blade')
+    # plot_blade(ss,ps,'test_blade2')
     
     return ss, ps
 
 def plot_blade(ss:npt.NDArray,ps:npt.NDArray,name:str):
     plt.figure(num=0,clear=True)
-    plt.plot(ss[:,0],ss[:,1],label='Suction Side')
-    plt.plot(ps[:,0],ps[:,1],label='Pressure Side')
-    plt.plot(ss[:,0],ss[:,1],label='Suction Side')
-    plt.plot(ps[:,0],ps[:,1],label='Pressure Side')
+    plt.plot(ss[:,0],ss[:,1],'.',label='Suction Side')
+    plt.plot(ps[:,0],ps[:,1],'.',label='Pressure Side')
+    plt.plot(ss[:,0],ss[:,1],'.',label='Suction Side')
+    plt.plot(ps[:,0],ps[:,1],'.',label='Pressure Side')
     plt.xlabel('x')
     plt.ylabel('y')
     plt.title(f'{name}')
@@ -101,6 +103,5 @@ def plot_blade(ss:npt.NDArray,ps:npt.NDArray,name:str):
     
 if __name__ == "__main__":
     data = pickle.load(open('stator_rotor.pkl','rb'))
-    ss,ps = split_ss_ps(data['Stator1'][0],bPlot=False)
+    ss,ps = split_ss_ps(data['Stator1'][0])
     print('check')
-

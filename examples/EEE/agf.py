@@ -95,14 +95,14 @@ class AGF_Setup:
             hub (npt.NDArray): shroud in x,r coordinates 
         """
         
-        domain = Domain(xhup=hub[0,0]*1000,rhup=hub[0,1]*1000,
-                        xtup=shroud[0,0]*1000,rtup=shroud[0,1]*1000,
-                        xhdw=hub[-1,0]*1000,rhdw=hub[-1,1]*1000,
-                        xtdw=shroud[-1,0]*1000,rtdw=shroud[-1,1]*1000)
+        domain = Domain(xhup=hub[0,0],rhup=hub[0,1],
+                        xtup=shroud[0,0],rtup=shroud[0,1],
+                        xhdw=hub[-1,0],rhdw=hub[-1,1],
+                        xtdw=shroud[-1,0],rtdw=shroud[-1,1])
         endwall = []
         for i in range(hub.shape[0]):
-            xl = hub[i,0]*1000; rl = hub[i,1]*1000
-            xu = shroud[i,0]*1000; ru = shroud[i,1]*1000
+            xl = hub[i,0]; rl = hub[i,1]
+            xu = shroud[i,0]; ru = shroud[i,1]
             if (i < hub.shape[0]-1):
                 endwall.append(f"{xl:.4f}   {rl:.4f}   {xu:.4f}   {ru:.4f}\n")
             else:
@@ -134,8 +134,8 @@ class AGF_Setup:
             sections.append(">----RAD------XOFF------YOFF------ROTD----CONEANGLE----\n")
             sections.append("0.0000	0.0000	0.0000	0.0000	0.0000\n")
             sections.append("x       rth       r\n")
-            x = np.hstack([ss[i,:,0],np.flipud(ps[i,1:-1,0])])*1000
-            r = np.hstack([ss[i,:,1],np.flipud(ps[i,1:-1,1])])*1000
+            x = np.hstack([ss[i,:,0],np.flipud(ps[i,1:-1,0])])
+            r = np.hstack([ss[i,:,1],np.flipud(ps[i,1:-1,1])])
             th = np.hstack([ss[i,:,2],np.flipud(ps[i,1:-1,2])])
             rth = r*th
             plt.plot(x,r,'.')            

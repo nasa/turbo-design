@@ -7,6 +7,8 @@ import subprocess
 import platform
 import os
 from get_ss_ps import split_ss_ps
+from pyturbo.helper import resample_by_curvature
+from plot_blade_rows import plot_xz
 
 def Process_HubShroud_IGES():
     iges_case = pyiges.read('case.igs')
@@ -95,42 +97,54 @@ if __name__ == "__main__":
     blades = pickle.load(open('stator_rotor.pkl','rb'))
     processed_data = []
     for blade in blades:
-        section_data = list() 
-        for section in blade:
-            ss, ps = split_ss_ps(section)
-            section_data.append({'ss':ss,'ps':ps})
-        processed_data.append(section_data)
+        nsections = len(blade)
+        n,m = blade[0].shape
+        ss = np.zeros(shape=(nsections,100,m))
+        ps = np.zeros(shape=(nsections,100,m))
+        for section_index in range(nsections):
+            ss_temp, ps_temp = split_ss_ps(blade[section_index],100)
+            # plot_blade(ss,ps,'test')
+            ss[section_index,:,:] = ss_temp
+            ps[section_index,:,:] = ps_temp
+        ss *= 25.4 # convert to mm
+        ps *= 25.4 # convert to mm
+        processed_data.append((ss, ps))
 
     hub_shroud = pickle.load(open('hub_shroud.pkl','rb'))
-
+    hub = resample_by_curvature(hub_shroud['Hub'],100) * 25.4
+    shroud = resample_by_curvature(hub_shroud['Shroud'],100) * 25.4
     
+    # Lets verify by plotting
+    plot_xz(hub,shroud,processed_data)
+    
+    # Output the AGF Files for ADS 
     nblades = [46,76,48,70] # Vanes, Rotors, Vanes, Rotors
-    
     T0 = 1588       # K
     P = 100         # kPa
     P0 = 4.933 * P  # kPa 
     CorrectedSpeed = 33.19 # rad/(sec * sqrt(K))
     RPM = CorrectedSpeed * np.sqrt(T0) * 30/np.pi
-    
+    RPM = [0,RPM,0,RPM]     # Stator - Rotor - Stator - Rotor
     inlet = Inlet_bcs(ptin=P0,ttin=1588,machin=0.05,alpin=0,phiin=0,pspan=50)
-    outlet = Outlet_bcs(rpm=RPM,gamma=1.4,
+    clearance = Clearance(tlecl=0.000,tmccl=0.000,ttecl=0.000,hlecl=0,hmccl=0,htecl=0)
+    
+    for i in range(len(processed_data)):
+        ss = processed_data[i][0]; ps = processed_data[i][1]
+        settings = Settings(ifang=10)
+        settings.nblades = nblades[i]
+        outlet = Outlet_bcs(rpm=RPM[i],gamma=1.3,
                         psout=P,twall=0,molwt=28.96)
-    
-    settings = Settings(ifang=10)
-    settings.nblades = nblades[0]
-    
-    clearance = Clearance(tlecl=0.005,tmccl=0.005,ttecl=0.005,hlecl=0,hmccl=0,htecl=0)
-    
-    agf = AGF_Setup(template_file='template.agf')
-    agf.add_inlet(inlet=inlet)
-    agf.add_outlet(outlet=outlet)
-    agf.add_clearance(clearance=clearance)
-    agf.add_settings(settings=settings)
-    
-    # cen.plot()
-    agf.add_passage(hub=hub_shroud['hub'], shroud=hub_shroud['shroud'])
-    # agf.add_blade(blades['Stator1'][])
-    agf.build(output_filename='radial_turbine.agf')
+        agf = AGF_Setup(template_file='template.agf',name="EEE-HPT")
+        agf.add_inlet(inlet=inlet)
+        agf.add_outlet(outlet=outlet)
+        agf.add_clearance(clearance=clearance)
+        agf.add_settings(settings=settings)
+        
+ 
+        # cen.plot()
+        agf.add_passage(hub=hub, shroud=shroud)
+        agf.add_blade(ss,ps)
+        agf.build(output_filename=f'blade{i}.agf')
     
     # Run Wand
     result = subprocess.run('./runwand.sh', shell=True, capture_output=True, text=True)
