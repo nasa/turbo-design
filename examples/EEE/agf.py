@@ -54,7 +54,7 @@ class Settings:
     iym:int = 0 # 0 = do not flip airfoil along x-axis
     tcls:int = 1 # 1 = has tip clearance
     hcls:int = 0 # 0 = no hub clearance
-    lete:int = 0 # do not modify leading edge or trailing edge
+    lete:int = 10 # do not modify leading edge or trailing edge
     isplit:int = 0 # no splitters 
     
     nht:int = 1 # Number of axial points defining the endwall
@@ -94,7 +94,6 @@ class AGF_Setup:
             hub (npt.NDArray): hub in x,r coordinates 
             hub (npt.NDArray): shroud in x,r coordinates 
         """
-        
         domain = Domain(xhup=hub[0,0],rhup=hub[0,1],
                         xtup=shroud[0,0],rtup=shroud[0,1],
                         xhdw=hub[-1,0],rhdw=hub[-1,1],
@@ -118,34 +117,31 @@ class AGF_Setup:
             ss (npt.NDArray): array containing suction side cartesian points [section,npts,(x,y,z)]
             ps (npt.NDArray): array containing pressure side cartesian points [section,npts,(x,y,z)]
         """
-        
         sections = []
         if IsDuct:
             self.settings.nspans = 0
         else:
             self.settings.nspans = ss.shape[0]
         section_indx = 1
-        plt.figure(1,clear=True)
-        for i in range(ss.shape[0]):     
-            n = ss[i,:,:].shape[0] + ps[i,:,:].shape[0]-2
+        
+        for i in range(ss.shape[0]):
+            x = np.hstack([ss[i,:,0],ps[i,1:-1,0]])
+            y = np.hstack([ss[i,:,1],ps[i,1:-1,1]])
+            z = np.hstack([ss[i,:,2],ps[i,1:-1,2]])
+            n = len(x) # number of points 
             self.settings.npts = n
+            r = np.sqrt(y**2+z**2)
+            th = np.arctan2(y,z)
+            rth = r*th 
             sections.append(f"*SECTION	{section_indx}\n")
             sections.append(f"- SECTION - {section_indx}	{n}\n")
             sections.append(">----RAD------XOFF------YOFF------ROTD----CONEANGLE----\n")
             sections.append("0.0000	0.0000	0.0000	0.0000	0.0000\n")
-            sections.append("x       rth       r\n")
-            x = np.hstack([ss[i,:,0],np.flipud(ps[i,1:-1,0])])
-            r = np.hstack([ss[i,:,1],np.flipud(ps[i,1:-1,1])])
-            th = np.hstack([ss[i,:,2],np.flipud(ps[i,1:-1,2])])
-            rth = r*th
-            plt.plot(x,r,'.')            
+            sections.append("x       rth        r\n")
             for j in range(len(x)):
-                sections.append(f"{x[j]:0.4f}    {rth[j]:0.4f}    {r[j]:0.4f}\n")
+                sections.append(f"{x[j]:0.6f}    {rth[j]:0.6f}    {r[j]:0.6f}\n")
             section_indx+=1
-        plt.ylabel('r')
-        plt.xlabel('x')
-        plt.axis('equal')
-        plt.savefig('profile-agf-export.jpg',dpi=150)
+        
         self.sections = "".join(sections)
         
     def add_clearance(self,clearance:Clearance):
@@ -217,3 +213,23 @@ def plot_airfoil_inputs(nsections:int,npts:int):
     ax.set_zlabel('z') # type: ignore
     plt.show()
     
+def plot_airfoil_inputs_2D(nsections:int,npts:int):
+    xthr = np.zeros(shape=(nsections,npts,3)) # section_num x theta r 
+    with open('AIRFOIL.INPUTS','r') as f:
+        [f.readline() for _ in range(4)] # skip first 4 lines 
+        for i in range(nsections):
+            for j in range(npts):
+                line = f.readline()
+                temp = [float(p) for p in line.split(' ') if p]
+                xthr[i,j,0] = temp[0]
+                xthr[i,j,1] = temp[1]
+                xthr[i,j,2] = temp[2]
+            [f.readline() for _ in range(2)] # skip 2 lines 
+
+    fig = plt.figure(num=1,clear=True)
+    for i in range(nsections):   # Plot the Blades  
+        plt.plot(xthr[i,:,0],xthr[i,:,1],'r',label=f'section {i}')  # type: ignore
+    plt.axis('equal')
+    plt.xlabel('x-axial')
+    plt.ylabel('y')
+    plt.show()

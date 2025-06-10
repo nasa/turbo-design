@@ -1,4 +1,4 @@
-from typing import List, Tuple
+from typing import List, Tuple, Union
 import numpy as np
 import numpy.typing as npt
 from scipy.interpolate import PchipInterpolator, interp1d
@@ -27,8 +27,8 @@ class Passage:
     r_streamlines:npt.NDArray
     hub_arc_len:float 
     
-    def __init__(self,xhub:List[float],rhub:List[float],
-                 xshroud:List[float],rshroud:List[float],
+    def __init__(self,xhub:Union[npt.NDArray,List[float]],rhub:Union[npt.NDArray,List[float]],
+                 xshroud:Union[npt.NDArray,List[float]],rshroud:Union[npt.NDArray,List[float]],
                  passageType:PassageType=PassageType.Axial):
         """_summary_
 
@@ -81,8 +81,7 @@ class Passage:
             rhub = self.rhub(t)
             xshroud = self.xshroud(t)
             rshroud = self.rshroud(t)
-            x_streamline[i],r_streamline[i] = line2D([xhub,rhub],[xshroud,rshroud]).get_point(t_radial)
-        
+            x_streamline[i] ,r_streamline[i] = line2D([xhub,rhub],[xshroud,rshroud]).get_point(t_radial)
         return t_streamline,x_streamline,r_streamline
 
     @staticmethod

@@ -58,6 +58,7 @@ class TurbineSpool(Spool):
         inlet.total_massflow_no_coolant = W0
         inlet.massflow = np.linspace(0,1,self.num_streamlines)*W0
         
+        inlet.initialize_inputs(self.num_streamlines)
         inlet.initialize_velocity(self.passage,self.num_streamlines)     # type: ignore
         interpolate_streamline_radii(inlet,self.passage,self.num_streamlines)
 

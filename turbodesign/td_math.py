@@ -353,7 +353,7 @@ def inlet_calc(row:BladeRow):
         for j in range(1,len(row.percent_hub_shroud)):
             rho = row.rho[j]
             tube_massflow = row.massflow[j]-row.massflow[j-1]
-            if np.abs((row.x[j]-row.x[j-1]))<1E-12: # Axial Machines  
+            if np.abs((row.x[j]-row.x[j-1]))<1E-6: # Axial Machines  
                 total_area += np.pi*(row.r[j]**2-row.r[j-1]**2)
                 row.Vm[j] = tube_massflow/(rho*np.pi*(row.r[j]**2-row.r[j-1]**2))
             else:   # Radial Machines
@@ -364,10 +364,6 @@ def inlet_calc(row:BladeRow):
                 total_area += area[j]
                 row.Vm[j] = tube_massflow/(rho*area[j])
         avg_mach = np.mean(row.M)
-        if np.mean(row.M)>0.5:
-            raise ValueError(f"High inlet mach can lead to errors iter:{iter} Mach:{avg_mach}")
-        if np.mean(row.M)<0.01:
-            raise ValueError(f"Unusually slow flow:{iter} Mach:{avg_mach}")
         row.Vm[0] = 1/(len(row.Vm)-1)*row.Vm[1:].sum() # Initialize the value at the hub to not upset the mean
         row.Vr = row.Vm*np.sin(row.phi)
         row.Vt = row.Vm*np.tan(row.alpha2)
@@ -377,3 +373,9 @@ def inlet_calc(row:BladeRow):
         row.T = row.T0 * 1/(1+(row.gamma-1)/2*row.M**2)
         row.P = row.P0 * (row.T/row.T0)**(row.gamma/(row.gamma-1))
         compute_gas_constants(row)
+        
+    if np.mean(row.M)>0.5:
+        raise ValueError(f"High inlet mach can lead to errors iter:{iter} Mach:{avg_mach}")
+    
+    if np.mean(row.M)<0.01:
+        print(f"Unusually slow flow:{iter} Mach:{avg_mach}")
