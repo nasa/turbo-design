@@ -1,4 +1,4 @@
-from typing import List, Tuple
+from typing import List, Optional, Tuple
 import numpy as np
 import math
 import numpy.typing as npt
@@ -93,7 +93,7 @@ def compute_reynolds(rows:List[BladeRow],passage:Passage):
     
     for i in range(1,len(rows)):
         row = rows[i]
-        xr = passage.get_xr_slice(0.5,[rows[i-1].location,row.percent_hub])
+        xr = passage.get_xr_slice(0.5,(rows[i-1].location,row.percent_hub))
         dx = np.diff(xr[:,0])
         dr = np.diff(xr[:,1])
         c = np.sum(np.sqrt(dx**2+dr**2))
@@ -124,8 +124,8 @@ def compute_power(row:BladeRow,upstream:BladeRow) -> None:
         row.eta_total = 0
         row.stage_loading = 0
         row.euler_power = 0
-        row.T_is = 0 
-        row.T0_is = 0
+        row.T_is = 0 * row.T0 
+        row.T0_is = 0 * row.T0 # Make it an array
     else:
         P0_P = (upstream.P0/row.P).mean()
         row.T_is = upstream.T0 * (1/P0_P)**((row.gamma-1)/row.gamma)
@@ -165,7 +165,7 @@ def compute_quantities(row:BladeRow,upstream:BladeRow):
             row.T = (row.P/row.P0R)**((row.gamma-1)/row.gamma) * row.T0R
             row.T0 = (1+(row.gamma-1)/2 * row.M**2) * row.T
             row.power_distribution = row.massflow * row.Cp * (upstream.T0 - row.T0)
-            row.power = np.trapz(row.power_distribution,row.r-row.r[0])
+            row.power = np.trapezoid(row.power_distribution,row.r-row.r[0])
             row.power_mean = row.massflow[-1] * row.Cp * (upstream.T0.mean()-row.T0.mean())
 
         elif row.loss_function.loss_type == LossType.Enthalpy:
@@ -175,7 +175,7 @@ def compute_quantities(row:BladeRow,upstream:BladeRow):
 
             def calculate_power(T0:npt.NDArray):
                 row.power_distribution = row.massflow * row.Cp * (upstream.T0 - T0)
-                row.power = np.trapz(row.power_distribution,row.r-row.r[0])
+                row.power = np.trapezoid(row.power_distribution,row.r-row.r[0])
                 row.power_mean = row.massflow[-1] * row.Cp * (upstream.T0.mean() - T0.mean())
 
                 # Factor in T0R_drop. Convert T0R drop to absolute terms
@@ -206,7 +206,7 @@ def compute_quantities(row:BladeRow,upstream:BladeRow):
         row.T0R = row.T + row.W**2 / (2*row.Cp)
         row.P0R = row.P*(row.T0R/row.T)**((row.gamma)/(row.gamma-1))
    
-def stator_calc(row:BladeRow,upstream:BladeRow,downstream:BladeRow=None,calculate_vm:bool=True):
+def stator_calc(row:BladeRow,upstream:BladeRow,downstream:Optional[BladeRow]=None,calculate_vm:bool=True):
     """Given P0, T0, P, alpha2 of stator calculate all other quantities
 
     Usage:
@@ -233,8 +233,8 @@ def stator_calc(row:BladeRow,upstream:BladeRow,downstream:BladeRow=None,calculat
     row.P0 = upstream.P0 - row.Yp*(upstream.P0-row.P)
     
     if downstream is not None:
-        row.P0_P = row.P0/downstream.P
-        row.rp = (row.P-downstream.P)/(upstream.P0-downstream.P)
+        row.P0_P = float((row.P0/downstream.P).mean())
+        row.rp = ((row.P-downstream.P)/(upstream.P0-downstream.P)).mean()
         
     if calculate_vm:
         row.M = ((row.P0/row.P)**((row.gamma-1)/row.gamma) - 1) * 2/(row.gamma-1)
@@ -276,7 +276,7 @@ def rotor_calc(row:BladeRow,upstream:BladeRow,calculate_vm:bool=True):
     # row.P = row.P0_stator_inlet*1/row.P0_P
     
     # Static Pressure is assumed
-    row.P0_P = row.P0_stator_inlet/row.P
+    row.P0_P = (row.P0_stator_inlet/row.P).mean()
     upstream_radius = upstream.r
     row.U = row.omega*row.r
     # Upstream Relative Frame Calculations 
@@ -353,7 +353,7 @@ def inlet_calc(row:BladeRow):
         for j in range(1,len(row.percent_hub_shroud)):
             rho = row.rho[j]
             tube_massflow = row.massflow[j]-row.massflow[j-1]
-            if np.abs((row.x[j]-row.x[j-1]))<1E-12: # Axial Machines  
+            if np.abs((row.x[j]-row.x[j-1]))<1E-6: # Axial Machines  
                 total_area += np.pi*(row.r[j]**2-row.r[j-1]**2)
                 row.Vm[j] = tube_massflow/(rho*np.pi*(row.r[j]**2-row.r[j-1]**2))
             else:   # Radial Machines
@@ -364,10 +364,6 @@ def inlet_calc(row:BladeRow):
                 total_area += area[j]
                 row.Vm[j] = tube_massflow/(rho*area[j])
         avg_mach = np.mean(row.M)
-        if np.mean(row.M)>0.5:
-            raise ValueError(f"High inlet mach can lead to errors iter:{iter} Mach:{avg_mach}")
-        if np.mean(row.M)<0.01:
-            raise ValueError(f"Unusually slow flow:{iter} Mach:{avg_mach}")
         row.Vm[0] = 1/(len(row.Vm)-1)*row.Vm[1:].sum() # Initialize the value at the hub to not upset the mean
         row.Vr = row.Vm*np.sin(row.phi)
         row.Vt = row.Vm*np.tan(row.alpha2)
@@ -377,3 +373,9 @@ def inlet_calc(row:BladeRow):
         row.T = row.T0 * 1/(1+(row.gamma-1)/2*row.M**2)
         row.P = row.P0 * (row.T/row.T0)**(row.gamma/(row.gamma-1))
         compute_gas_constants(row)
+        
+    if np.mean(row.M)>0.5:
+        raise ValueError(f"High inlet mach can lead to errors iter:{iter} Mach:{avg_mach}")
+    
+    if np.mean(row.M)<0.01:
+        print(f"Unusually slow flow:{iter} Mach:{avg_mach}")

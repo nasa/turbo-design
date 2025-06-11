@@ -12,7 +12,7 @@ from scipy.interpolate import interp1d
 class Outlet(BladeRow):
     P_fun:interp1d
     
-    def __init__(self,P:Union[float,List[float]],percent_radii:List[float],num_streamlines:int=3,location:float=1):
+    def __init__(self,P:Union[float,List[float]],percent_radii:Union[List[float],float],num_streamlines:int=3,location:float=1):
         """Initialize the outlet
 
         Args:
@@ -23,6 +23,7 @@ class Outlet(BladeRow):
         self.percent_hub_shroud = convert_to_ndarray(percent_radii)
         if len(self.percent_hub_shroud)==1:
             self.percent_hub_shroud = np.arange(0,1,num_streamlines)
+            self.P = self.P[0]+0*self.percent_hub_shroud*0
         self.P_fun = interp1d(self.percent_hub_shroud,self.P)
         self.row_type = RowType.Outlet
         self.loss_function = None

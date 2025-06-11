@@ -40,8 +40,16 @@ class Inlet(BladeRow):
         self.T0 = convert_to_ndarray(T0)
         self.P0 = convert_to_ndarray(P0)
         self.percent_hub_shroud = convert_to_ndarray(percent_radii)
+   
+    def initialize_inputs(self,num_streamlines:int=5):
+        self.M = interpolate_quantities(self.M, self.percent_hub_shroud, np.linspace(0,1,num_streamlines))
+        self.P0 = interpolate_quantities(self.P0,self.percent_hub_shroud, np.linspace(0,1,num_streamlines))
+        self.T0 = interpolate_quantities(self.T0,self.percent_hub_shroud, np.linspace(0,1,num_streamlines)) 
+        # if it's inlet alpha and beta are the same, relative flow angle = absolute. 
+        self.beta1 = interpolate_quantities(self.beta1,self.percent_hub_shroud, np.linspace(0,1,num_streamlines)) 
+        self.beta2 = np.radians(convert_to_ndarray(self.beta1))
+        self.alpha1 = np.radians(convert_to_ndarray(self.beta1))         
         
-    
     def initialize_fluid(self,fluid:Solution=None,R:float=287.15,gamma:float=1.4,Cp:float=1024):
         """Initialize the inlet using the fluid. This function should be called by a class that inherits from spool
 
@@ -53,10 +61,6 @@ class Inlet(BladeRow):
         
         """
         self.loss_function = None
-        
-        # if it's inlet alpha and beta are the same, relative flow angle = absolute. 
-        self.beta2 = np.radians(convert_to_ndarray(self.beta1))
-        self.alpha1 = np.radians(convert_to_ndarray(self.beta1))
         
         if fluid:
             fluid.TP = self.T0.mean(),self.P0.mean()
@@ -76,6 +80,10 @@ class Inlet(BladeRow):
         self.rpm = 0
         self.beta1_metal = [0] 
         self.beta2_metal = [0]
+        if len(self.percent_hub_shroud) == 1:
+            self.percent_hub_shroud = np.linspace(0,1,2)
+            self.P0 = self.percent_hub_shroud*0+self.P0[0]
+            self.T0 = self.percent_hub_shroud*0+self.T0[0]
         self.P0_fun = interp1d(self.percent_hub_shroud,self.P0)
         self.T0_fun = interp1d(self.percent_hub_shroud,self.T0)
         self.mprime = [0]
@@ -91,8 +99,6 @@ class Inlet(BladeRow):
         """
         # Perform Calculations on Velocity 
         Vm_prev = 0; Vm_err = 0 
-        t,x,radius = passage.get_streamline(self.percent_hub_shroud)
-        radius = radius[0]
 
         cutline,_,_ = passage.get_cutting_line(self.location)
         self.x,self.r = cutline.get_point(np.linspace(0,1,num_streamlines))
@@ -116,7 +122,7 @@ class Inlet(BladeRow):
             rho_mean = self.rho.mean()
             for i in range(len(self.massflow)-1):    
                 tube_massflow = self.massflow[i+1]-self.massflow[i]
-                if np.abs((self.x[i]-self.x[i-1]))<1E-12: # Axial Machines
+                if np.abs((self.x[-1]-self.x[0]))<1E-5: # Axial Machines
                     self.Vm[i+1] = tube_massflow/(rho_mean*np.pi*(self.r[i+1]**2-self.r[i]**2))
                 else:   # Radial Machines
                     dx = self.x[i]-self.x[i-1]

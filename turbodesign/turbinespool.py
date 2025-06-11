@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 from cantera.composite import Solution
 from .bladerow import BladeRow, interpolate_streamline_radii
 from .enums import RowType, MassflowConstraint, LossType, PassageType
@@ -20,9 +20,9 @@ class TurbineSpool(Spool):
     def __init__(self,passage:Passage,
                  massflow:float,rows:List[BladeRow],
                  num_streamlines:int=3,
-                 fluid:Solution=Solution('air.yaml'),
+                 fluid:Optional[Solution]=Solution('air.yaml'),
                  rpm:float=-1,
-                 massflow_constraint:MassflowConstraint=MassflowConstraint.MatchMassFlow):
+                 massflow_constraint:MassflowConstraint=MassflowConstraint.MatchMassFlow): # type: ignore
         """Initializes a Turbine Spool
 
         Args:
@@ -48,9 +48,9 @@ class TurbineSpool(Spool):
         W0 = self.massflow
         inlet = self.blade_rows[0]
         if self.fluid:
-            inlet.initialize_fluid(self.fluid)
+            inlet.initialize_fluid(self.fluid) # type: ignore
         else:
-            inlet.initialize_fluid(R=self.blade_rows[1].R,
+            inlet.initialize_fluid(R=self.blade_rows[1].R, # type: ignore
                                     gamma=self.blade_rows[1].gamma,
                                     Cp=self.blade_rows[1].Cp)
         
@@ -58,7 +58,8 @@ class TurbineSpool(Spool):
         inlet.total_massflow_no_coolant = W0
         inlet.massflow = np.linspace(0,1,self.num_streamlines)*W0
         
-        inlet.initialize_velocity(self.passage,self.num_streamlines)    
+        inlet.initialize_inputs(self.num_streamlines)
+        inlet.initialize_velocity(self.passage,self.num_streamlines)     # type: ignore
         interpolate_streamline_radii(inlet,self.passage,self.num_streamlines)
 
         compute_gas_constants(inlet,self.fluid)
@@ -69,10 +70,10 @@ class TurbineSpool(Spool):
 
         outlet = self.blade_rows[-1]
         for j in range(self.num_streamlines):
-            P0 = inlet.get_total_pressure(inlet.percent_hub_shroud[j])
+            P0 = inlet.get_total_pressure(inlet.percent_hub_shroud[j]) # type: ignore
             percents = np.zeros(shape=(len(self.blade_rows)-2)) + 0.3
             percents[-1] = 1
-            Ps_range = outlet_pressure(percents=percents,inletP0=inlet.P0[j],outletP=outlet.P[j])
+            Ps_range = outlet_pressure(percents=percents,inletP0=inlet.P0[j],outletP=outlet.P[j]) # type: ignore
             for i in range(1,len(self.blade_rows)-1):
                 self.blade_rows[i].P[j] = Ps_range[i-1]
             
@@ -122,7 +123,7 @@ class TurbineSpool(Spool):
             row.R = upstream.R
             
             if row.row_type == RowType.Stator:
-                stator_calc(row,upstream,downstream)
+                stator_calc(row,upstream,downstream) # type: ignore
                 compute_massflow(row)
             elif row.row_type == RowType.Rotor:
                 rotor_calc(row,upstream)
@@ -162,11 +163,11 @@ class TurbineSpool(Spool):
                 
                 if row.row_type == RowType.Stator:
                     bounds = [0,80]
-                elif row.row_type == RowType.Rotor:
+                else:# row.row_type == RowType.Rotor:
                     bounds = [-80,0]
                 if row.row_type != RowType.Inlet:
                     for j in range(1,self.num_streamlines):
-                        res = minimize_scalar(massflow_loss_function, bounds=bounds,args=(j,row,upstream,downstream),tol=1E-3)
+                        res = minimize_scalar(massflow_loss_function, bounds=bounds,args=(j,row,upstream,downstream),tol=1E-3) 
                         if row.row_type == RowType.Rotor:
                             row.beta2[j] = np.radians(res.x)
                              # Initialize the value at the hub to not upset the mean
@@ -228,7 +229,7 @@ class TurbineSpool(Spool):
        
             
         # Balance the massflow between Stages
-        def balance_massflows(x0:List[float],blade_rows:List[List[BladeRow]],P0:npt.NDArray,P:npt.NDArray,balance_mean_pressure:bool=True):
+        def balance_massflows(x0:List[float],blade_rows:List[BladeRow],P0:npt.NDArray,P:npt.NDArray,balance_mean_pressure:bool=True):
             """Balance Massflows. 
             
             Steps:
@@ -247,18 +248,18 @@ class TurbineSpool(Spool):
             Returns:
                 _type_: _description_
             """
-            blade_rows_backup = copy.deepcopy(blade_rows)
+            # blade_rows_backup = copy.deepcopy(blade_rows)
             # try:
             if balance_mean_pressure:
                 for j in range(self.num_streamlines):
                     Ps = outlet_pressure(x0,P0[j],P[j])
                     for i in range(1,len(blade_rows)-2):
-                        blade_rows[i].P[j] = float(Ps[i-1])
-                blade_rows[-2].P = P
+                        blade_rows[i].P[j] = float(Ps[i-1]) # type: ignore
+                blade_rows[-2].P = P # type: ignore
             else:
                 for i in range(1,len(blade_rows)-1):
                     for j in range(self.num_streamlines):
-                        blade_rows[i].P[j] = P[j]*x0[(i-1)*self.num_streamlines+j]    # x0 size = num_streamlines -1 
+                        blade_rows[i].P[j] = P[j]*x0[(i-1)*self.num_streamlines+j]    # type: ignore # x0 size = num_streamlines -1 
             # try:  
             calculate_massflows(blade_rows,True,self.fluid)
             print(x0)
@@ -293,14 +294,14 @@ class TurbineSpool(Spool):
             # Adjust the inlet: Set the massflow
             self.blade_rows[0].massflow = np.linspace(0,1,self.num_streamlines)*self.blade_rows[1].total_massflow_no_coolant
             self.blade_rows[0].total_massflow_no_coolant = self.blade_rows[1].total_massflow_no_coolant
-            self.blade_rows[0].total_massflow = np.linspace(0,1,self.num_streamlines)*self.blade_rows[1].total_massflow_no_coolant
+            self.blade_rows[0].total_massflow = self.blade_rows[1].total_massflow_no_coolant
             self.blade_rows[0].calculated_massflow = self.blade_rows[0].total_massflow_no_coolant
             inlet_calc(self.blade_rows[0]) # adjust the inlet to match massflow 
         
             if self.adjust_streamlines:
                 adjust_streamlines(self.blade_rows[:-1],self.passage)
                 
-            self.blade_rows[-1].transfer_quantities(self.blade_rows[-2])
+            self.blade_rows[-1].transfer_quantities(self.blade_rows[-2])    # This would be the outlet
             self.blade_rows[-1].P = self.blade_rows[-1].get_static_pressure(self.blade_rows[-1].percent_hub_shroud)
             
             past_err = err
@@ -388,7 +389,7 @@ class TurbineSpool(Spool):
             json.dump(data, f, indent=4,cls=NumpyEncoder)
 
 
-def calculate_massflows(blade_rows:List[BladeRow],calculate_vm:bool=False,fluid:Solution=None):
+def calculate_massflows(blade_rows:List[BladeRow],calculate_vm:bool=False,fluid:Optional[Solution]=None):
     """Calculates the massflow 
 
     Args:
