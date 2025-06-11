@@ -100,9 +100,9 @@ rotor1.beta2_metal = [62.7,62.7,62.7,62.7,62.7]         # Beta25
 stator2.beta2_metal = [-65.1,-65.1,-65.1,-65.1,-65.1]   # Alpha3
 
 # These are all guessed values 
-stator1.loss_model = FixedPressureLoss(0.048)
-rotor1.loss_model = FixedPressureLoss(0.108)
-stator2.loss_model = FixedPressureLoss(0.082)
+stator1.loss_model = FixedPressureLoss(0.048) # type: ignore
+rotor1.loss_model = FixedPressureLoss(0.108) # type: ignore
+stator2.loss_model = FixedPressureLoss(0.082) # type: ignore
 stator1.inlet_to_outlet_pratio = (0.01,0.9)
 rotor1.inlet_to_outlet_pratio = (0.01,0.9)
 stator2.inlet_to_outlet_pratio = (0.01,0.9)

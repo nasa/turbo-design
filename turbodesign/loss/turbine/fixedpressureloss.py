@@ -20,6 +20,6 @@ class FixedPressureLoss(LossBaseClass):
             row (BladeRow): downstream blade row
 
         Returns:
-            float: Pressure Loss 
+            float: Pressure Loss
         """
         return self.pressure_loss

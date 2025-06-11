@@ -80,6 +80,10 @@ class Inlet(BladeRow):
         self.rpm = 0
         self.beta1_metal = [0] 
         self.beta2_metal = [0]
+        if len(self.percent_hub_shroud) == 1:
+            self.percent_hub_shroud = np.linspace(0,1,2)
+            self.P0 = self.percent_hub_shroud*0+self.P0[0]
+            self.T0 = self.percent_hub_shroud*0+self.T0[0]
         self.P0_fun = interp1d(self.percent_hub_shroud,self.P0)
         self.T0_fun = interp1d(self.percent_hub_shroud,self.T0)
         self.mprime = [0]
