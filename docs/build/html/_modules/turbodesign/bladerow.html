@@ -155,7 +155,7 @@
              
   <h1>Source code for turbodesign.bladerow</h1><div class="highlight"><pre>
 <span></span><span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">field</span><span class="p">,</span> <span class="n">Field</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.enums</span><span class="w"> </span><span class="kn">import</span> <span class="n">RowType</span><span class="p">,</span> <span class="n">PowerType</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span> 
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy.typing</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">npt</span>
@@ -257,10 +257,10 @@
     <span class="n">rm</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">]))</span>                      <span class="c1"># Curvature</span>
     <span class="n">incli_curve_radii</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">]))</span>       <span class="c1"># radius at which curvature was evaluated</span>
     <span class="n">mprime</span><span class="p">:</span><span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">]))</span>                   <span class="c1"># Mprime distance</span>
-    <span class="n">axial_chord</span><span class="p">:</span><span class="nb">float</span> <span class="o">=</span> <span class="mi">0</span>
     
     <span class="n">Yp</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">0</span>                   <span class="c1"># Pressure loss</span>
     <span class="n">power</span><span class="p">:</span><span class="nb">float</span> <span class="o">=</span> <span class="mi">0</span>                 <span class="c1"># Watts </span>
+    <span class="n">power_mean</span><span class="p">:</span><span class="nb">float</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="n">power_distribution</span><span class="p">:</span><span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span>  <span class="c1"># How power is divided by radius. Example: Equal distribution [0.33 0.33 0.33]. More at Tip [0.2,0.3,0.5]. More at Hub [0.6 0.5 ]</span>
     <span class="n">P0_P</span><span class="p">:</span><span class="nb">float</span> <span class="o">=</span> <span class="mi">0</span>                  <span class="c1"># Total to Static Pressure Ratio </span>
     <span class="n">Power_Type</span><span class="p">:</span><span class="n">PowerType</span>
@@ -290,7 +290,7 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            List[float]: _description_</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_inlet_to_outlet_pratio</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_inlet_to_outlet_pratio</span> <span class="c1"># type: ignore</span>
     
     <span class="nd">@inlet_to_outlet_pratio</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">inlet_to_outlet_pratio</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">val</span><span class="p">:</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span><span class="nb">float</span><span class="p">]</span><span class="o">=</span><span class="p">(</span><span class="mf">0.06</span><span class="p">,</span><span class="mf">0.7</span><span class="p">)):</span>
@@ -513,7 +513,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_beta1_metal</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">convert_to_ndarray</span><span class="p">(</span><span class="n">beta1_metal</span><span class="p">))</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">percent</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">beta1_metal</span><span class="p">):</span>
-            <span class="n">percent</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_beta1_metal</span><span class="p">))</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+            <span class="n">percent</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_beta1_metal</span><span class="p">))</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span> <span class="c1"># type: ignore</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">beta1_metal_radii</span> <span class="o">=</span> <span class="n">convert_to_ndarray</span><span class="p">(</span><span class="n">percent</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">beta1_fixed</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">beta1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">beta1_metal</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
@@ -529,7 +529,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_beta2_metal</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">convert_to_ndarray</span><span class="p">(</span><span class="n">beta2_metal</span><span class="p">))</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">percent</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">beta2_metal</span><span class="p">):</span>
-            <span class="n">percent</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_beta2_metal</span><span class="p">))</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+            <span class="n">percent</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_beta2_metal</span><span class="p">))</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span> <span class="c1"># type: ignore</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">beta2_metal_radii</span> <span class="o">=</span> <span class="n">convert_to_ndarray</span><span class="p">(</span><span class="n">percent</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">beta2_fixed</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">beta2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_beta2_metal</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
@@ -576,7 +576,7 @@
 <span class="sd">            code to do something with machine learning</span>
 <span class="sd">            return pressure loss</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">loss_function</span> <span class="o">=</span> <span class="n">model</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">loss_function</span> <span class="o">=</span> <span class="n">model</span> <span class="c1"># type: ignore</span>
     
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">te_pitch</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -729,11 +729,11 @@
     <span class="n">row</span><span class="o">.</span><span class="n">T_is</span> <span class="o">=</span> <span class="n">interpolate_quantities</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">T_is</span><span class="p">,</span><span class="n">row</span><span class="o">.</span><span class="n">percent_hub_shroud</span><span class="p">,</span><span class="n">streamline_percent_length</span><span class="p">)</span>
     <span class="n">row</span><span class="o">.</span><span class="n">rho</span> <span class="o">=</span> <span class="n">interpolate_quantities</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">rho</span><span class="p">,</span><span class="n">row</span><span class="o">.</span><span class="n">percent_hub_shroud</span><span class="p">,</span><span class="n">streamline_percent_length</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="n">row</span><span class="o">.</span><span class="n">row_type</span> <span class="o">==</span> <span class="n">RowType</span><span class="o">.</span><span class="n">Inlet</span><span class="p">:</span>
-        <span class="n">row</span><span class="o">.</span><span class="n">P0_fun</span> <span class="o">=</span> <span class="n">interp1d</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">percent_hub_shroud</span><span class="p">,</span><span class="n">row</span><span class="o">.</span><span class="n">P0</span><span class="p">)</span> 
-        <span class="n">row</span><span class="o">.</span><span class="n">T0_fun</span> <span class="o">=</span> <span class="n">interp1d</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">percent_hub_shroud</span><span class="p">,</span><span class="n">row</span><span class="o">.</span><span class="n">T0</span><span class="p">)</span> 
-    <span class="k">elif</span> <span class="n">row</span><span class="o">.</span><span class="n">row_type</span> <span class="o">==</span> <span class="n">RowType</span><span class="o">.</span><span class="n">Outlet</span><span class="p">:</span>
-        <span class="n">row</span><span class="o">.</span><span class="n">P_fun</span> <span class="o">=</span> <span class="n">interp1d</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">percent_hub_shroud</span><span class="p">,</span><span class="n">row</span><span class="o">.</span><span class="n">P</span><span class="p">)</span> 
+    <span class="c1"># if row.row_type == RowType.Inlet:</span>
+    <span class="c1">#     row.P0_fun = interp1d(row.percent_hub_shroud,row.P0) </span>
+    <span class="c1">#     row.T0_fun = interp1d(row.percent_hub_shroud,row.T0) </span>
+    <span class="c1"># elif row.row_type == RowType.Outlet:</span>
+    <span class="c1">#     row.P_fun = interp1d(row.percent_hub_shroud,row.P) </span>
 
     <span class="k">return</span> <span class="n">row</span></div>
 
@@ -781,7 +781,7 @@
     
 <div class="viewcode-block" id="compute_gas_constants">
 <a class="viewcode-back" href="../../modules/bladerow.html#turbodesign.bladerow.compute_gas_constants">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">compute_gas_constants</span><span class="p">(</span><span class="n">row</span><span class="p">:</span><span class="n">BladeRow</span><span class="p">,</span><span class="n">fluid</span><span class="p">:</span><span class="n">Solution</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">compute_gas_constants</span><span class="p">(</span><span class="n">row</span><span class="p">:</span><span class="n">BladeRow</span><span class="p">,</span><span class="n">fluid</span><span class="p">:</span><span class="n">Optional</span><span class="p">[</span><span class="n">Solution</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Updates the Cp, Gamma, and density for a blade row. If fluid is not specified then only density and viscosity is updated. </span>
 <span class="sd">    </span>
 <span class="sd">    Args:</span>
