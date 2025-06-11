@@ -28,6 +28,9 @@ https://colab.research.google.com/github/nasa/turbo-design/blob/main/examples/
 
 [3 Row Steady](https://colab.research.google.com/github/nasa/turbo-design/blob/main/examples/3RowSteady-1D/3RowSteady.ipynb) 3 Row Steady comparison with a CFD Example from Aerodynamic Solutions.  
 
+[NASA EEE 2-Stage HPT](https://colab.research.google.com/github/nasa/turbo-design/blob/main/examples/EEE/eee_hpt.ipynb) GE Design of NASA EEE Engine with 2 stage HPT. 
+
+
 ## Building Turbine Loss Models from Correlations
 The loss correlations below were estimated using Axial steam turbines. Correlation figures are extracted and surface fitted. Each of these tutorials shows how to create and save the correlation files. 
 
