@@ -7,12 +7,11 @@
 '''
 #%% Import Library
 import sys
-sys.path.insert(0,'../../')
-from td3 import PassageType
-from td3 import TurbineSpool, Inlet, RowType, BladeRow, Passage,Outlet
-from td3.enums import MassflowConstraint
-from td3.coolant import Coolant
-from td3.loss.turbine import FixedPressureLoss
+from turbodesign import PassageType
+from turbodesign import TurbineSpool, Inlet, RowType, BladeRow, Passage,Outlet
+from turbodesign.enums import MassflowConstraint
+from turbodesign.coolant import Coolant
+from turbodesign.loss.turbine import FixedPressureLoss
 import numpy as np 
 from cantera import Solution
 
@@ -49,22 +48,21 @@ inlet = Inlet(M=0.2,
                  P0=[P0],
                  T0=[T0], 
                  beta=[0], 
-                 fluid=fluid, 
                  percent_radii=0.5,
-                 meridional_location=0)
+                 location=0)
 outlet = Outlet(P=P0/3.96,percent_radii=0.5,num_streamlines=3)
 
 #%% Define Blade Rows 
 # Axial location is a percentage along the hub where row exit is defined
-stator1 = BladeRow(row_type=RowType.Stator,meridional_location=2*cax/axial_len)
-rotor1 = BladeRow(row_type=RowType.Rotor, meridional_location=3*cax/axial_len)
+stator1 = BladeRow(row_type=RowType.Stator,location=2*cax/axial_len)
+rotor1 = BladeRow(row_type=RowType.Rotor, location=3*cax/axial_len)
 
 stator1.axial_chord = cax # Set an axial chord
 rotor1.axial_chord = cax
 
 # Coolant Definition: Use Kelvin and Pascal
-stator1.coolant = Coolant(fluid, T0=616*0.555556, P0= 50.6 * 6894.76, massflow_percentage=0) 
-rotor1.coolant = Coolant(fluid, 622*0.555556, 50.3 * 6894.76,massflow_percentage=0)
+stator1.coolant = Coolant(T0=616*0.555556, P0= 50.6 * 6894.76, massflow_percentage=0,Cp=fluid.cp) 
+rotor1.coolant = Coolant(T0=622*0.555556, P0=50.3 * 6894.76,massflow_percentage=0,Cp=fluid.cp)
 
 # Add in turning angles
 stator1.beta2_metal = [73,73,73] # Angle, hub,mean,tip

@@ -6,7 +6,8 @@ from pyturbo.helper import line2D
 from .enums import PassageType
 from scipy.optimize import minimize_scalar
 from findiff import FinDiff
-from pyturbo.helper import convert_to_ndarray,xr_to_mprime
+from pyturbo.helper import convert_to_ndarray, xr_to_mprime
+
 import matplotlib.pyplot as plt 
 
 class Passage:
@@ -50,10 +51,13 @@ class Passage:
         self.xshroud = PchipInterpolator(hub_arc_len/hub_arc_len[-1],xshroud)
         self.rshroud = PchipInterpolator(hub_arc_len/hub_arc_len[-1],rshroud)
         
-        self.n = len(xhub)
+        if len(xhub) < 10:
+            self.n = 10
+        else:
+            self.n = len(xhub)
         
-        self.xhub_pts = convert_to_ndarray(xhub)
-        self.rhub_pts = convert_to_ndarray(rhub)
+        self.xhub_pts = convert_to_ndarray(xhub) # type: ignore
+        self.rhub_pts = convert_to_ndarray(rhub) # type: ignore
         self.xshroud_pts = convert_to_ndarray(xshroud)
         self.rshroud_pts = convert_to_ndarray(rshroud)
         
@@ -114,6 +118,7 @@ class Passage:
     
         d_dx = FinDiff(0,x_streamline[indices[0]:indices[-1]],1)
         d2_dx2 = FinDiff(0,x_streamline[indices[0]:indices[-1]],2)
+        
         dr_dx = d_dx(r_streamline[indices[0]:indices[-1]])
         d2r_dx2 = d2_dx2(r_streamline[indices[0]:indices[-1]])    
             
