@@ -28,7 +28,7 @@ https://colab.research.google.com/github/nasa/turbo-design/blob/main/examples/
 
 [3 Row Steady](https://colab.research.google.com/github/nasa/turbo-design/blob/main/examples/3RowSteady-1D/3RowSteady.ipynb) 3 Row Steady comparison with a CFD Example from Aerodynamic Solutions.  
 
-[NASA EEE 2-Stage HPT](https://colab.research.google.com/github/nasa/turbo-design/blob/main/examples/EEE/eee_hpt.ipynb) GE Design of NASA EEE Engine with 2 stage HPT. 
+[NASA EEE 2-Stage HPT](https://colab.research.google.com/github/nasa/turbo-design/blob/main/examples/EEE/eee_hpt.ipynb) GE Design of NASA EEE Engine with 2 stage HPT. Full CFD results here https://data.nasa.gov/dataset/eee-2-stage-hpt-cfd-tecplot-results
 
 
 ## Building Turbine Loss Models from Correlations
