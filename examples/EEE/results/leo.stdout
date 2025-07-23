@@ -1,0 +1,192 @@
+
+A valid ADS license was successfully acquired.
+This license will expire in 227 days.
+ SIMULATION LICENSE AVAILABLE
+  
+ **************************************************************
+ *                                                            *
+ *        ----------      CODE Leo       ---------------      *
+ *        ---------- COPY RIGHT MATERIAL ---------------      *
+ *        -------- AERODYNAMIC SOLUTIONS INC -----------      *
+ *                                                            *
+ *                        CODE HISTORY                        *
+ *     ***** Release:  Code Leo version  11.24.08     ******  *
+ *                                                            *
+ **************************************************************
+DATE & TIME : 20250609  15:56:48
+ CASE TITLE  : 
+ EEE-HPT-1                                                                       
+ 
+ ITERATION NUMBER           =             0
+  
+ SECTOR NUMBER =             1
+    ---TURBULENT CASE WITH K-W MODEL---  
+    WITH FREESTREAM TURBULENCE =     9.9999998E-03
+  
+ IGRID =            1  - CYLINDRIAL COORIDNATES -
+        WITH RPM  =     12400.00    
+  
+  
+ **************************************************************
+ *                                                            *
+ *        ----------      CODE Leo       ---------------      *
+ *        ---------- COPY RIGHT MATERIAL ---------------      *
+ *        -------- AERODYNAMIC SOLUTIONS INC -----------      *
+ *                                                            *
+ *                        CODE HISTORY                        *
+ *     ***** Release:  Code Leo version  11.24.08     ******  *
+ *                                                            *
+ **************************************************************
+DATE & TIME : 20250609  15:56:48
+ CASE TITLE  : 
+ EEE-HPT-2                                                                       
+ 
+ ITERATION NUMBER           =             0
+  
+ SECTOR NUMBER =             1
+    ---TURBULENT CASE WITH K-W MODEL---  
+    WITH FREESTREAM TURBULENCE =     9.9999998E-03
+  
+ IGRID =            1  - CYLINDRIAL COORIDNATES -
+        WITH RPM  =     0.000000    
+  
+ RUN CASE TYPE      =        101001
+ 
+ MAX. MACH NUMBER AT INLET  =     1.708311    
+ MAX. TOTAL TEMP. AT INLET  =     1415.959     Deg K
+ MAX. TOTAL PRES. AT INLET  =     1143.941     KN/M^2
+ GAUGE PRESSURE VALUE       =     727.8182     KN/M^2
+ REF.  DENSITY: RREF        =     2.706043     Kg/M^3
+ REF. VELOCITY: UREF        =     153.4455     M/sec
+  
+ **************************************************************
+ *                                                            *
+ *        ----------      CODE Leo       ---------------      *
+ *        ---------- COPY RIGHT MATERIAL ---------------      *
+ *        -------- AERODYNAMIC SOLUTIONS INC -----------      *
+ *                                                            *
+ *                        CODE HISTORY                        *
+ *     ***** Release:  Code Leo version  11.24.08     ******  *
+ *                                                            *
+ **************************************************************
+DATE & TIME : 20250609  15:56:48
+ CASE TITLE  : 
+ EEE-HPT-3                                                                       
+ 
+ ITERATION NUMBER           =             0
+  
+ SECTOR NUMBER =             1
+    ---TURBULENT CASE WITH K-W MODEL---  
+    WITH FREESTREAM TURBULENCE =     9.9999998E-03
+  
+ IGRID =            1  - CYLINDRIAL COORIDNATES -
+        WITH RPM  =     12400.00    
+  
+ RUN CASE TYPE      =        101001
+ 
+ MAX. MACH NUMBER AT INLET  =     1.176639    
+ MAX. TOTAL TEMP. AT INLET  =     1421.228     Deg K
+ MAX. TOTAL PRES. AT INLET  =     1252.536     KN/M^2
+  
+ **************************************************************
+ *                                                            *
+ *        ----------      CODE Leo       ---------------      *
+ *        ---------- COPY RIGHT MATERIAL ---------------      *
+ *        -------- AERODYNAMIC SOLUTIONS INC -----------      *
+ *                                                            *
+ *                        CODE HISTORY                        *
+ *     ***** Release:  Code Leo version  11.24.08     ******  *
+ *                                                            *
+ **************************************************************
+DATE & TIME : 20250609  15:56:48
+ CASE TITLE  : 
+ EEE-HPT-0                                                                       
+ 
+ ITERATION NUMBER           =             0
+  
+ SECTOR NUMBER =             1
+    ---TURBULENT CASE WITH K-W MODEL---  
+    WITH FREESTREAM TURBULENCE =     9.9999998E-03
+  
+ IGRID =            1  - CYLINDRIAL COORIDNATES -
+        WITH RPM  =     0.000000    
+  
+ RUN CASE TYPE      =        101001
+ 
+ MAX. MACH NUMBER AT INLET  =    0.1994593    
+ MAX. TOTAL TEMP. AT INLET  =     1588.669     Deg K
+ MAX. TOTAL PRES. AT INLET  =     1258.689     KN/M^2
+ GAUGE PRESSURE VALUE       =     727.8182     KN/M^2
+ REF.  DENSITY: RREF        =     2.706043     Kg/M^3
+ REF. VELOCITY: UREF        =     153.4455     M/sec
+ 
+ REYNOLDS" NUMBER AT INLET  =     7836.927     /MM
+ SURFACE ROUGHNESS VALUE    =    2.5399998E-03  MM
+ GAUGE PRESSURE VALUE       =     727.8182     KN/M^2
+ REF.  DENSITY: RREF        =     2.706043     Kg/M^3
+ REF. VELOCITY: UREF        =     153.4455     M/sec
+ 
+ REYNOLDS" NUMBER AT INLET  =     13045.30     /MM
+ SURFACE ROUGHNESS VALUE    =    2.5399998E-03  MM
+ INLET TURBULENCE LEVEL     =     1.000000      %
+ RUN CASE TYPE      =        101001
+ 
+ MAX. MACH NUMBER AT INLET  =     2.318957    
+ MAX. TOTAL TEMP. AT INLET  =     1822.342     Deg K
+ MAX. TOTAL PRES. AT INLET  =     9839.490     KN/M^2
+ GAUGE PRESSURE VALUE       =     727.8182     KN/M^2
+ REF.  DENSITY: RREF        =     2.706043     Kg/M^3
+ REF. VELOCITY: UREF        =     153.4455     M/sec
+ 
+ REYNOLDS" NUMBER AT INLET  =     27772.21     /MM
+ SURFACE ROUGHNESS VALUE    =    2.5399998E-03  MM
+ INLET TURBULENCE LEVEL     =     1.000000      %
+ 
+ REYNOLDS" NUMBER AT INLET  =     18718.58     /MM
+ SURFACE ROUGHNESS VALUE    =    2.5399998E-03  MM
+ INLET TURBULENCE LEVEL     =     1.000000      %
+ INLET TURBULENCE LENGTH    =    0.2540000      CM
+ PRANDTL(KIN) NUMBER        =    0.7000000    
+ TURBULENT PRANDTL NUMBER   =    0.9000000    
+ WALL HEAT FLUX VALUE       =     0.000000     KCAL/M^2/H
+ INLET TURBULENCE LEVEL     =     1.000000      %
+ INLET TURBULENCE LENGTH    =    0.2540000      CM
+ PRANDTL(KIN) NUMBER        =    0.7000000    
+ TURBULENT PRANDTL NUMBER   =    0.9000000    
+ WALL HEAT FLUX VALUE       =     0.000000     KCAL/M^2/H
+ 
+  
+ 
+  
+ INLET TURBULENCE LENGTH    =    0.2540000      CM
+ PRANDTL(KIN) NUMBER        =    0.7000000    
+ TURBULENT PRANDTL NUMBER   =    0.9000000    
+ WALL HEAT FLUX VALUE       =     0.000000     KCAL/M^2/H
+ 
+  
+ INLET TURBULENCE LENGTH    =    0.2540000      CM
+ PRANDTL(KIN) NUMBER        =    0.7000000    
+ TURBULENT PRANDTL NUMBER   =    0.9000000    
+ WALL HEAT FLUX VALUE       =     0.000000     KCAL/M^2/H
+ 
+  
+
+A valid ADS license was successfully acquired.
+This license will expire in 227 days.
+ ELEMENT LIMIT
+            0
+
+A valid ADS license was successfully acquired.
+This license will expire in 227 days.
+ ELEMENT LIMIT
+            0
+
+A valid ADS license was successfully acquired.
+This license will expire in 227 days.
+ ELEMENT LIMIT
+            0
+
+A valid ADS license was successfully acquired.
+This license will expire in 227 days.
+ ELEMENT LIMIT
+            0

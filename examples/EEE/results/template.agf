@@ -1,0 +1,26 @@
+*TITLE
+[name]
+*NBLADE	NBNOD	NSPAN	ITY	IYM	TCLS	HCLS	LETE	ISPLIT
+[nblades]   [npts]   [nspans]   [ity]	 [iym]  [tcls]  [hcls]  [lete]  [isplit]
+*UNITS	NPROF	IFANG	HBL	TBL	TFREE	LFREE
+1	[nprof]	[ifang]	[hbl]	[tbl]	0.010	0.01
+*RPMS	GA	PSOT	TWAL	MOLWT
+[rpm]   [gamma]     [psout]    [twall]     [molwt]
+*PSPAN	MACHIN	PTIN	TTIN	ALPIN	PHIIN
+[pspan]	[machin]	[ptin]   [ttin]	[alpin]	[phiin]
+*XHUP	RHUP	XTUP	RTUP
+[xhup]   [rhup]	[xtup]	[rtup]
+*XHDW	RHDW	XTDW	RTDW
+[xhdw]   [rhdw]	[xtdw]	[rtdw]
+*XSHIFT	ROTATION	XSCALE	YSCALE	ZSCALE
+0	0	1	1	1
+*TLECL	TMCCL	TTECL
+[tlecl]  [tmccl]  [ttecl]
+*HLECL	HMCCL	HTECL
+[hlecl]  [hmccl]  [htecl]
+*NHT	XREF
+[nht]	0
+*ENDWALL
+> XL 	RL	XU	RU
+[endwall]
+[sections]
