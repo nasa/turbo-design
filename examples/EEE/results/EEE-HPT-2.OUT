@@ -1,0 +1,522 @@
+  
+START OF JOB WITH CODE Leo ON 2025 06/10 10:41:18
+  
+ PROCESS NUMBER=      3233142
+  
+ **************************************************************
+ *                                                            *
+ *        ----------      CODE Leo       ---------------      *
+ *        ---------- COPY RIGHT MATERIAL ---------------      *
+ *        -------- AERODYNAMIC SOLUTIONS INC -----------      *
+ *                                                            *
+ *                        CODE HISTORY                        *
+ *     ***** Release:  Code Leo version  11.24.08     ******  *
+ *                                                            *
+ **************************************************************
+ MP1TOX MP1TOXON  F
+ MP1TOX INEWC               0
+ MP1TOX NONBLOCK            0
+ MPSLAVEIX NGRP1TOX            1
+ 
+ MP1TOX MY BLK-ID      =           301  INTER-PROCESS BC    =             2
+ MP1TOX RECIEVES FROM                1  PROCESS(S) WITH BLKID# AS
+ MP1TOX BLK-ID         =           201  WITH DATA HAVING BC =             6
+ 
+ MP1TOX MY BLK-ID      =           301  INTER-PROCESS BC    =             2
+ MP1TOX SEND TO BLK-ID =           401  WITH DATA HAVING BC =             6
+ 
+ myid  =            2  n_p   =            4  IPID  =            3
+ 
+ IN SUBROUTINE DATAIN TO 
+ READ RESTART FILE NAME = 
+ EEE-HPT-2.REST                                                                                                                                                                                                                                                  
+ BOUNDARY CONDITION AND # OF NODES FOR SECTOR            1
+   4556 # OF NODES WTH BC TYPE =     9 NON-SLIP WALL WITH Velocities FROM INPUT          
+   4556 # OF NODES WTH BC TYPE =   109 NON-SLIP WALL WITH Velocities FROM INPUT          
+   3813 # OF NODES WTH BC TYPE =    14 PERIODIC WITH FACE 13                             
+   1353 # OF NODES WTH BC TYPE =     5 CASCADE UP-STREAM                                 
+   1353 # OF NODES WTH BC TYPE =     6 CASCADE DOWN-STREAM                               
+   3813 # OF NODES WTH BC TYPE =    13 PERIODIC FACE                                     
+   5248 # OF NODES WTH BC TYPE =    10 NON-SLIP WALL Velocities = 0.0                    
+ MPBCDIMENS JMX JMXXX1T           33           33
+ BOUNDARY CONDITION AND # OF NODES FOR SECTOR            1
+   4556 # OF NODES WITH BC TYPE =     9 NON-SLIP WALL WITH Velocities FROM INPUT          
+   4556 # OF NODES WITH BC TYPE =   109 NON-SLIP WALL WITH Velocities FROM INPUT          
+   3813 # OF NODES WITH BC TYPE =    14 PERIODIC WITH FACE 13                             
+   1353 # OF NODES WITH BC TYPE =    -2 UP-STREAM                                         
+   1353 # OF NODES WITH BC TYPE =     3 DOWN-STREAM                                       
+   3813 # OF NODES WITH BC TYPE =    13 PERIODIC FACE                                     
+   5248 # OF NODES WITH BC TYPE =    10 NON-SLIP WALL Velocities = 0.0                    
+  
+ LBBC MPBC(1,LBBC)             1            2 IP BC
+ LBBC MPBC(2,LBBC)             1            1 =0 SEND; =1 RECEIVE
+ LBBC MPBC(3,LBBC)            1           1 LOCATION IN MPBT ARRAY FOR SEND
+ LBBC MPBC(4,LBBC)             1            0 LOCATION IN MPBT FOR RECEIVE
+ LBBC MPBC(5,LBBC)             1            1 NGRP FOR RECEIVE
+ MPBT(1,LBEG)             1            2 PROCESS ID
+ MPBT(2,LBEG)             1            5 BCTY      
+ MPBT(3,LBEG)             1         1353 NNRV      
+ MPBT(4,LBEG)             1            6 BCRV      
+  
+ LBBC MPBC(1,LBBC)             2            2 IP BC
+ LBBC MPBC(2,LBBC)             2            0 =0 SEND; =1 RECEIVE
+ LBBC MPBC(3,LBBC)            2           1 LOCATION IN MPBT ARRAY FOR SEND
+ LBBC MPBC(4,LBBC)             2            2 LOCATION IN MPBT FOR RECEIVE
+ LBBC MPBC(5,LBBC)             2            1 NGRP FOR RECEIVE
+ MPBT(1,LBEG)             2            4 PROCESS ID
+ MPBT(2,LBEG)             2            6 BCTY      
+ MPBT(3,LBEG)             2         1353 NNRV      
+ MPBT(4,LBEG)             2            6 BCRV      
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+ IT=   200 CPU=     21.03(SEC)  OVERALL TIME=     21.05(SEC)  CPUeff=     99.88%  ITS/HR=    34198.
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+ IT=   400 CPU=     42.54(SEC)  OVERALL TIME=     42.57(SEC)  CPUeff=     99.94%  ITS/HR=    33828.
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+ IT=   600 CPU=     64.21(SEC)  OVERALL TIME=     64.23(SEC)  CPUeff=     99.96%  ITS/HR=    33628.
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+ IT=   800 CPU=     85.92(SEC)  OVERALL TIME=     85.94(SEC)  CPUeff=     99.97%  ITS/HR=    33510.
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+ IT=  1000 CPU=    107.64(SEC)  OVERALL TIME=    107.66(SEC)  CPUeff=     99.98%  ITS/HR=    33438.
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+ IT=  1200 CPU=    129.78(SEC)  OVERALL TIME=    129.80(SEC)  CPUeff=     99.98%  ITS/HR=    33282.
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+ IT=  1400 CPU=    151.48(SEC)  OVERALL TIME=    151.51(SEC)  CPUeff=     99.98%  ITS/HR=    33265.
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+ IT=  1600 CPU=    173.20(SEC)  OVERALL TIME=    173.22(SEC)  CPUeff=     99.99%  ITS/HR=    33252.
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+ IT=  1800 CPU=    194.91(SEC)  OVERALL TIME=    194.93(SEC)  CPUeff=     99.99%  ITS/HR=    33243.
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+ IT=  2000 CPU=    216.62(SEC)  OVERALL TIME=    216.64(SEC)  CPUeff=     99.99%  ITS/HR=    33235.
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+ IT=  2200 CPU=    238.87(SEC)  OVERALL TIME=    238.90(SEC)  CPUeff=     99.99%  ITS/HR=    33152.
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+ IT=  2400 CPU=    260.60(SEC)  OVERALL TIME=    260.62(SEC)  CPUeff=     99.99%  ITS/HR=    33151.
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+ IT=  2600 CPU=    282.31(SEC)  OVERALL TIME=    282.34(SEC)  CPUeff=     99.99%  ITS/HR=    33152.
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+ IT=  2800 CPU=    304.03(SEC)  OVERALL TIME=    304.05(SEC)  CPUeff=     99.99%  ITS/HR=    33152.
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+ IT=  3000 CPU=    325.75(SEC)  OVERALL TIME=    325.77(SEC)  CPUeff=     99.99%  ITS/HR=    33152.
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+ IT=  3200 CPU=    347.88(SEC)  OVERALL TIME=    347.90(SEC)  CPUeff=     99.99%  ITS/HR=    33113.
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+ IT=  3400 CPU=    369.59(SEC)  OVERALL TIME=    369.61(SEC)  CPUeff=     99.99%  ITS/HR=    33116.
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+ IT=  3600 CPU=    391.30(SEC)  OVERALL TIME=    391.33(SEC)  CPUeff=     99.99%  ITS/HR=    33118.
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+ IT=  3800 CPU=    413.01(SEC)  OVERALL TIME=    413.04(SEC)  CPUeff=     99.99%  ITS/HR=    33120.
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+ IT=  4000 CPU=    434.73(SEC)  OVERALL TIME=    434.76(SEC)  CPUeff=     99.99%  ITS/HR=    33122.
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+ IT=  4200 CPU=    456.94(SEC)  OVERALL TIME=    456.97(SEC)  CPUeff=     99.99%  ITS/HR=    33088.
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+ IT=  4400 CPU=    478.64(SEC)  OVERALL TIME=    478.67(SEC)  CPUeff=     99.99%  ITS/HR=    33092.
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+ IT=  4600 CPU=    500.35(SEC)  OVERALL TIME=    500.38(SEC)  CPUeff=     99.99%  ITS/HR=    33095.
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+ IT=  4800 CPU=    522.07(SEC)  OVERALL TIME=    522.10(SEC)  CPUeff=    100.00%  ITS/HR=    33097.
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+ IT=  5000 CPU=    543.78(SEC)  OVERALL TIME=    543.81(SEC)  CPUeff=    100.00%  ITS/HR=    33100.
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+ IT=  5200 CPU=    565.94(SEC)  OVERALL TIME=    565.96(SEC)  CPUeff=    100.00%  ITS/HR=    33076.
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+ IT=  5400 CPU=    587.65(SEC)  OVERALL TIME=    587.67(SEC)  CPUeff=    100.00%  ITS/HR=    33080.
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+ IT=  5600 CPU=    609.36(SEC)  OVERALL TIME=    609.39(SEC)  CPUeff=    100.00%  ITS/HR=    33082.
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+ IT=  5800 CPU=    631.07(SEC)  OVERALL TIME=    631.10(SEC)  CPUeff=    100.00%  ITS/HR=    33085.
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+ IT=  6000 CPU=    652.79(SEC)  OVERALL TIME=    652.81(SEC)  CPUeff=    100.00%  ITS/HR=    33088.
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+ IT=  6200 CPU=    674.91(SEC)  OVERALL TIME=    674.93(SEC)  CPUeff=    100.00%  ITS/HR=    33070.
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+ IT=  6400 CPU=    696.62(SEC)  OVERALL TIME=    696.64(SEC)  CPUeff=    100.00%  ITS/HR=    33073.
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+ IT=  6600 CPU=    718.32(SEC)  OVERALL TIME=    718.35(SEC)  CPUeff=    100.00%  ITS/HR=    33076.
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+ IT=  6800 CPU=    740.04(SEC)  OVERALL TIME=    740.07(SEC)  CPUeff=    100.00%  ITS/HR=    33078.
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+ IT=  7000 CPU=    761.74(SEC)  OVERALL TIME=    761.77(SEC)  CPUeff=    100.00%  ITS/HR=    33081.
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+ IT=  7200 CPU=    783.88(SEC)  OVERALL TIME=    783.90(SEC)  CPUeff=    100.00%  ITS/HR=    33065.
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+ IT=  7400 CPU=    805.59(SEC)  OVERALL TIME=    805.62(SEC)  CPUeff=    100.00%  ITS/HR=    33068.
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+ IT=  7600 CPU=    827.31(SEC)  OVERALL TIME=    827.33(SEC)  CPUeff=    100.00%  ITS/HR=    33070.
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+ IT=  7800 CPU=    849.02(SEC)  OVERALL TIME=    849.05(SEC)  CPUeff=    100.00%  ITS/HR=    33072.
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+ IT=  8000 CPU=    870.74(SEC)  OVERALL TIME=    870.77(SEC)  CPUeff=    100.00%  ITS/HR=    33074.
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+ IT=  8200 CPU=    892.91(SEC)  OVERALL TIME=    892.93(SEC)  CPUeff=    100.00%  ITS/HR=    33060.
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+ IT=  8400 CPU=    914.63(SEC)  OVERALL TIME=    914.65(SEC)  CPUeff=    100.00%  ITS/HR=    33062.
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+ IT=  8600 CPU=    936.35(SEC)  OVERALL TIME=    936.38(SEC)  CPUeff=    100.00%  ITS/HR=    33064.
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+ IT=  8800 CPU=    958.07(SEC)  OVERALL TIME=    958.10(SEC)  CPUeff=    100.00%  ITS/HR=    33065.
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+ IT=  9000 CPU=    979.79(SEC)  OVERALL TIME=    979.82(SEC)  CPUeff=    100.00%  ITS/HR=    33067.
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+ IT=  9200 CPU=   1001.98(SEC)  OVERALL TIME=   1002.01(SEC)  CPUeff=    100.00%  ITS/HR=    33054.
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+ IT=  9400 CPU=   1023.68(SEC)  OVERALL TIME=   1023.70(SEC)  CPUeff=    100.00%  ITS/HR=    33056.
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+ IT=  9600 CPU=   1045.39(SEC)  OVERALL TIME=   1045.42(SEC)  CPUeff=    100.00%  ITS/HR=    33059.
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+ IT=  9800 CPU=   1067.09(SEC)  OVERALL TIME=   1067.12(SEC)  CPUeff=    100.00%  ITS/HR=    33061.
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+ IT= 10000 CPU=   1088.80(SEC)  OVERALL TIME=   1088.83(SEC)  CPUeff=    100.00%  ITS/HR=    33063.
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+ IT= 10200 CPU=   1110.98(SEC)  OVERALL TIME=   1111.01(SEC)  CPUeff=    100.00%  ITS/HR=    33051.
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+ IT= 10400 CPU=   1132.70(SEC)  OVERALL TIME=   1132.73(SEC)  CPUeff=    100.00%  ITS/HR=    33053.
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+ IT= 10600 CPU=   1154.42(SEC)  OVERALL TIME=   1154.44(SEC)  CPUeff=    100.00%  ITS/HR=    33055.
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+ IT= 10800 CPU=   1176.13(SEC)  OVERALL TIME=   1176.15(SEC)  CPUeff=    100.00%  ITS/HR=    33057.
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+ IT= 11000 CPU=   1197.84(SEC)  OVERALL TIME=   1197.87(SEC)  CPUeff=    100.00%  ITS/HR=    33059.
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+ IT= 11200 CPU=   1220.03(SEC)  OVERALL TIME=   1220.06(SEC)  CPUeff=    100.00%  ITS/HR=    33048.
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+ IT= 11400 CPU=   1241.74(SEC)  OVERALL TIME=   1241.76(SEC)  CPUeff=    100.00%  ITS/HR=    33050.
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+ IT= 11600 CPU=   1263.45(SEC)  OVERALL TIME=   1263.47(SEC)  CPUeff=    100.00%  ITS/HR=    33052.
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+ IT= 11800 CPU=   1285.15(SEC)  OVERALL TIME=   1285.18(SEC)  CPUeff=    100.00%  ITS/HR=    33054.
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+ IT= 12000 CPU=   1306.86(SEC)  OVERALL TIME=   1306.89(SEC)  CPUeff=    100.00%  ITS/HR=    33056.
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+ IT= 12200 CPU=   1329.09(SEC)  OVERALL TIME=   1329.11(SEC)  CPUeff=    100.00%  ITS/HR=    33045.
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+ IT= 12400 CPU=   1350.80(SEC)  OVERALL TIME=   1350.83(SEC)  CPUeff=    100.00%  ITS/HR=    33046.
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+ IT= 12600 CPU=   1372.52(SEC)  OVERALL TIME=   1372.54(SEC)  CPUeff=    100.00%  ITS/HR=    33048.
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+ IT= 12800 CPU=   1394.24(SEC)  OVERALL TIME=   1394.27(SEC)  CPUeff=    100.00%  ITS/HR=    33050.
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+ IT= 13000 CPU=   1415.96(SEC)  OVERALL TIME=   1415.98(SEC)  CPUeff=    100.00%  ITS/HR=    33051.
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+ IT= 13200 CPU=   1438.20(SEC)  OVERALL TIME=   1438.23(SEC)  CPUeff=    100.00%  ITS/HR=    33041.
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+ IT= 13400 CPU=   1459.91(SEC)  OVERALL TIME=   1459.94(SEC)  CPUeff=    100.00%  ITS/HR=    33043.
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+ IT= 13600 CPU=   1481.63(SEC)  OVERALL TIME=   1481.65(SEC)  CPUeff=    100.00%  ITS/HR=    33044.
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+ IT= 13800 CPU=   1503.34(SEC)  OVERALL TIME=   1503.36(SEC)  CPUeff=    100.00%  ITS/HR=    33046.
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+ IT= 14000 CPU=   1525.05(SEC)  OVERALL TIME=   1525.07(SEC)  CPUeff=    100.00%  ITS/HR=    33048.
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+ IT= 14200 CPU=   1547.20(SEC)  OVERALL TIME=   1547.23(SEC)  CPUeff=    100.00%  ITS/HR=    33040.
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+ IT= 14400 CPU=   1568.92(SEC)  OVERALL TIME=   1568.94(SEC)  CPUeff=    100.00%  ITS/HR=    33041.
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+ IT= 14600 CPU=   1590.63(SEC)  OVERALL TIME=   1590.66(SEC)  CPUeff=    100.00%  ITS/HR=    33043.
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+ IT= 14800 CPU=   1612.35(SEC)  OVERALL TIME=   1612.37(SEC)  CPUeff=    100.00%  ITS/HR=    33044.
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+ IT= 15000 CPU=   1634.06(SEC)  OVERALL TIME=   1634.09(SEC)  CPUeff=    100.00%  ITS/HR=    33046.
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+ IT= 15200 CPU=   1656.29(SEC)  OVERALL TIME=   1656.31(SEC)  CPUeff=    100.00%  ITS/HR=    33037.
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+ IT= 15400 CPU=   1677.99(SEC)  OVERALL TIME=   1678.02(SEC)  CPUeff=    100.00%  ITS/HR=    33039.
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+ IT= 15600 CPU=   1699.70(SEC)  OVERALL TIME=   1699.73(SEC)  CPUeff=    100.00%  ITS/HR=    33041.
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+ IT= 15800 CPU=   1721.41(SEC)  OVERALL TIME=   1721.43(SEC)  CPUeff=    100.00%  ITS/HR=    33042.
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+ IT= 16000 CPU=   1743.12(SEC)  OVERALL TIME=   1743.14(SEC)  CPUeff=    100.00%  ITS/HR=    33044.
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+ IT= 16200 CPU=   1765.27(SEC)  OVERALL TIME=   1765.29(SEC)  CPUeff=    100.00%  ITS/HR=    33037.
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+ IT= 16400 CPU=   1786.99(SEC)  OVERALL TIME=   1787.02(SEC)  CPUeff=    100.00%  ITS/HR=    33038.
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+ IT= 16600 CPU=   1808.71(SEC)  OVERALL TIME=   1808.74(SEC)  CPUeff=    100.00%  ITS/HR=    33040.
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+ IT= 16800 CPU=   1830.44(SEC)  OVERALL TIME=   1830.46(SEC)  CPUeff=    100.00%  ITS/HR=    33041.
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+ IT= 17000 CPU=   1852.15(SEC)  OVERALL TIME=   1852.18(SEC)  CPUeff=    100.00%  ITS/HR=    33042.
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+ IT= 17200 CPU=   1874.33(SEC)  OVERALL TIME=   1874.35(SEC)  CPUeff=    100.00%  ITS/HR=    33035.
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+ IT= 17400 CPU=   1896.04(SEC)  OVERALL TIME=   1896.06(SEC)  CPUeff=    100.00%  ITS/HR=    33037.
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+ IT= 17600 CPU=   1917.76(SEC)  OVERALL TIME=   1917.79(SEC)  CPUeff=    100.00%  ITS/HR=    33038.
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+ IT= 17800 CPU=   1939.47(SEC)  OVERALL TIME=   1939.49(SEC)  CPUeff=    100.00%  ITS/HR=    33040.
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+ IT= 18000 CPU=   1961.18(SEC)  OVERALL TIME=   1961.21(SEC)  CPUeff=    100.00%  ITS/HR=    33041.
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+ IT= 18200 CPU=   1983.36(SEC)  OVERALL TIME=   1983.38(SEC)  CPUeff=    100.00%  ITS/HR=    33034.
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+ IT= 18400 CPU=   2005.07(SEC)  OVERALL TIME=   2005.10(SEC)  CPUeff=    100.00%  ITS/HR=    33036.
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+ IT= 18600 CPU=   2026.79(SEC)  OVERALL TIME=   2026.81(SEC)  CPUeff=    100.00%  ITS/HR=    33037.
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+ IT= 18800 CPU=   2048.51(SEC)  OVERALL TIME=   2048.53(SEC)  CPUeff=    100.00%  ITS/HR=    33038.
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+ IT= 19000 CPU=   2070.22(SEC)  OVERALL TIME=   2070.24(SEC)  CPUeff=    100.00%  ITS/HR=    33040.
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+ IT= 19200 CPU=   2092.35(SEC)  OVERALL TIME=   2092.37(SEC)  CPUeff=    100.00%  ITS/HR=    33034.
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+ IT= 19400 CPU=   2114.06(SEC)  OVERALL TIME=   2114.08(SEC)  CPUeff=    100.00%  ITS/HR=    33036.
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+ IT= 19600 CPU=   2135.77(SEC)  OVERALL TIME=   2135.79(SEC)  CPUeff=    100.00%  ITS/HR=    33037.
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+ IT= 19800 CPU=   2157.48(SEC)  OVERALL TIME=   2157.50(SEC)  CPUeff=    100.00%  ITS/HR=    33038.
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+ IT= 20000 CPU=   2179.20(SEC)  OVERALL TIME=   2179.22(SEC)  CPUeff=    100.00%  ITS/HR=    33039.
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+ IT= 20200 CPU=   2201.36(SEC)  OVERALL TIME=   2201.38(SEC)  CPUeff=    100.00%  ITS/HR=    33034.
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+ IT= 20400 CPU=   2223.06(SEC)  OVERALL TIME=   2223.09(SEC)  CPUeff=    100.00%  ITS/HR=    33035.
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+ IT= 20600 CPU=   2244.77(SEC)  OVERALL TIME=   2244.80(SEC)  CPUeff=    100.00%  ITS/HR=    33036.
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+ IT= 20800 CPU=   2266.49(SEC)  OVERALL TIME=   2266.51(SEC)  CPUeff=    100.00%  ITS/HR=    33038.
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+ IT= 21000 CPU=   2288.20(SEC)  OVERALL TIME=   2288.22(SEC)  CPUeff=    100.00%  ITS/HR=    33039.
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+ IT= 21200 CPU=   2310.55(SEC)  OVERALL TIME=   2310.57(SEC)  CPUeff=    100.00%  ITS/HR=    33031.
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+ IT= 21400 CPU=   2332.27(SEC)  OVERALL TIME=   2332.30(SEC)  CPUeff=    100.00%  ITS/HR=    33032.
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+ IT= 21600 CPU=   2354.00(SEC)  OVERALL TIME=   2354.02(SEC)  CPUeff=    100.00%  ITS/HR=    33033.
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+ IT= 21800 CPU=   2375.71(SEC)  OVERALL TIME=   2375.74(SEC)  CPUeff=    100.00%  ITS/HR=    33034.
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+ IT= 22000 CPU=   2397.44(SEC)  OVERALL TIME=   2397.46(SEC)  CPUeff=    100.00%  ITS/HR=    33035.
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+ IT= 22200 CPU=   2419.54(SEC)  OVERALL TIME=   2419.57(SEC)  CPUeff=    100.00%  ITS/HR=    33031.
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+ IT= 22400 CPU=   2441.26(SEC)  OVERALL TIME=   2441.29(SEC)  CPUeff=    100.00%  ITS/HR=    33032.
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+ IT= 22600 CPU=   2462.98(SEC)  OVERALL TIME=   2463.01(SEC)  CPUeff=    100.00%  ITS/HR=    33033.
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+ IT= 22800 CPU=   2484.70(SEC)  OVERALL TIME=   2484.72(SEC)  CPUeff=    100.00%  ITS/HR=    33034.
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+ IT= 23000 CPU=   2506.42(SEC)  OVERALL TIME=   2506.45(SEC)  CPUeff=    100.00%  ITS/HR=    33035.
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+ IT= 23200 CPU=   2528.50(SEC)  OVERALL TIME=   2528.53(SEC)  CPUeff=    100.00%  ITS/HR=    33031.
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+ IT= 23400 CPU=   2550.21(SEC)  OVERALL TIME=   2550.24(SEC)  CPUeff=    100.00%  ITS/HR=    33032.
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+ IT= 23600 CPU=   2571.92(SEC)  OVERALL TIME=   2571.95(SEC)  CPUeff=    100.00%  ITS/HR=    33033.
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+ IT= 23800 CPU=   2593.63(SEC)  OVERALL TIME=   2593.65(SEC)  CPUeff=    100.00%  ITS/HR=    33034.
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+ IT= 24000 CPU=   2615.34(SEC)  OVERALL TIME=   2615.37(SEC)  CPUeff=    100.00%  ITS/HR=    33035.
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+ IT= 24200 CPU=   2637.51(SEC)  OVERALL TIME=   2637.53(SEC)  CPUeff=    100.00%  ITS/HR=    33031.
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+ IT= 24400 CPU=   2659.22(SEC)  OVERALL TIME=   2659.24(SEC)  CPUeff=    100.00%  ITS/HR=    33032.
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+ IT= 24600 CPU=   2680.93(SEC)  OVERALL TIME=   2680.95(SEC)  CPUeff=    100.00%  ITS/HR=    33033.
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+ IT= 24800 CPU=   2702.64(SEC)  OVERALL TIME=   2702.67(SEC)  CPUeff=    100.00%  ITS/HR=    33034.
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+ IT= 25000 CPU=   2724.35(SEC)  OVERALL TIME=   2724.38(SEC)  CPUeff=    100.00%  ITS/HR=    33035.
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+ IT= 25200 CPU=   2746.55(SEC)  OVERALL TIME=   2746.57(SEC)  CPUeff=    100.00%  ITS/HR=    33030.
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+ IT= 25400 CPU=   2768.25(SEC)  OVERALL TIME=   2768.28(SEC)  CPUeff=    100.00%  ITS/HR=    33031.
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+ IT= 25600 CPU=   2789.96(SEC)  OVERALL TIME=   2789.98(SEC)  CPUeff=    100.00%  ITS/HR=    33032.
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+ IT= 25800 CPU=   2811.66(SEC)  OVERALL TIME=   2811.69(SEC)  CPUeff=    100.00%  ITS/HR=    33034.
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+ IT= 26000 CPU=   2833.37(SEC)  OVERALL TIME=   2833.40(SEC)  CPUeff=    100.00%  ITS/HR=    33035.
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+ IT= 26200 CPU=   2855.67(SEC)  OVERALL TIME=   2855.69(SEC)  CPUeff=    100.00%  ITS/HR=    33029.
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+ IT= 26400 CPU=   2877.39(SEC)  OVERALL TIME=   2877.42(SEC)  CPUeff=    100.00%  ITS/HR=    33030.
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+ IT= 26600 CPU=   2899.10(SEC)  OVERALL TIME=   2899.13(SEC)  CPUeff=    100.00%  ITS/HR=    33031.
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+ IT= 26800 CPU=   2920.82(SEC)  OVERALL TIME=   2920.84(SEC)  CPUeff=    100.00%  ITS/HR=    33032.
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+ IT= 27000 CPU=   2942.54(SEC)  OVERALL TIME=   2942.56(SEC)  CPUeff=    100.00%  ITS/HR=    33032.
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+ IT= 27200 CPU=   2964.70(SEC)  OVERALL TIME=   2964.73(SEC)  CPUeff=    100.00%  ITS/HR=    33028.
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+ IT= 27400 CPU=   2986.41(SEC)  OVERALL TIME=   2986.44(SEC)  CPUeff=    100.00%  ITS/HR=    33029.
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+ IT= 27600 CPU=   3008.12(SEC)  OVERALL TIME=   3008.14(SEC)  CPUeff=    100.00%  ITS/HR=    33030.
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+ IT= 27800 CPU=   3029.83(SEC)  OVERALL TIME=   3029.85(SEC)  CPUeff=    100.00%  ITS/HR=    33031.
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+ IT= 28000 CPU=   3051.54(SEC)  OVERALL TIME=   3051.57(SEC)  CPUeff=    100.00%  ITS/HR=    33032.
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+ IT= 28200 CPU=   3073.90(SEC)  OVERALL TIME=   3073.92(SEC)  CPUeff=    100.00%  ITS/HR=    33026.
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+ IT= 28400 CPU=   3095.61(SEC)  OVERALL TIME=   3095.64(SEC)  CPUeff=    100.00%  ITS/HR=    33027.
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+ IT= 28600 CPU=   3117.33(SEC)  OVERALL TIME=   3117.35(SEC)  CPUeff=    100.00%  ITS/HR=    33028.
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+ IT= 28800 CPU=   3139.05(SEC)  OVERALL TIME=   3139.08(SEC)  CPUeff=    100.00%  ITS/HR=    33029.
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+ IT= 29000 CPU=   3160.76(SEC)  OVERALL TIME=   3160.79(SEC)  CPUeff=    100.00%  ITS/HR=    33030.
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+ IT= 29200 CPU=   3182.94(SEC)  OVERALL TIME=   3182.97(SEC)  CPUeff=    100.00%  ITS/HR=    33026.
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+ IT= 29400 CPU=   3204.66(SEC)  OVERALL TIME=   3204.69(SEC)  CPUeff=    100.00%  ITS/HR=    33027.
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+ IT= 29600 CPU=   3226.39(SEC)  OVERALL TIME=   3226.41(SEC)  CPUeff=    100.00%  ITS/HR=    33027.
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+ IT= 29800 CPU=   3248.10(SEC)  OVERALL TIME=   3248.13(SEC)  CPUeff=    100.00%  ITS/HR=    33028.
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+   ITS     RHO        RHO*U      RHO*V       RHO*W      RHO*E      NODE#
+ IT= 30000 CPU=   3269.82(SEC)  OVERALL TIME=   3269.85(SEC)  CPUeff=    100.00%  ITS/HR=    33029.
+  
+  END OF JOB WITH CODE Leo ON 2025 06/10 11:35:50 ELAPSED TIME=    0HRS 54M 31S  489MS

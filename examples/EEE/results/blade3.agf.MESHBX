@@ -1,0 +1,10 @@
+ NBLOCK   ADVANCED
+        5        0
+      BCK#     IM        JM        KM
+        1      109        9       41
+        2      109       13       41
+        3      129       17       41
+        4       25       13       41
+        5       33       13       41
+ LE-RFA, LE-MOV, LE-ANG, TED-RFA, TE-MOV, TE-ANG
+   1.00000   0.00000   1.00000   1.00000   0.00000   1.00000
