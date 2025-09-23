@@ -73,7 +73,7 @@ def compute_massflow(row:BladeRow) -> None:
             C = np.sqrt(1+((row.r[j]-row.r[j-1])/dx)**2)
             area = 2*np.pi*C*(S/2*dx**2+row.r[j-1]*dx)
             total_area += area
-            massflow[j] = Vm * rho *area + massflow[j-1]
+            massflow[j] = Vm * rho *area * (1-row.blockage)+ massflow[j-1] 
     
     row.total_massflow_no_coolant = massflow[-1]
     if row.coolant != None:

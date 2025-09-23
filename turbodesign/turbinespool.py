@@ -39,7 +39,7 @@ class TurbineSpool(Spool):
         self.massflow_constraint = massflow_constraint
         pass
 
-    def initialize_quantities(self):
+    def initialize(self):
         """Initializes the massflow throughout the rows 
         """
         # Massflow from inlet already defined
@@ -136,7 +136,7 @@ class TurbineSpool(Spool):
             Solve for the exit flow angles to match the massflow distribution at the stage exit
         """
         self.initialize_streamlines()
-        self.initialize_quantities()
+        self.initialize()
         
         if self.massflow_constraint ==MassflowConstraint.MatchMassFlow:
             self.__match_massflow()  # Matches massflow by changing turning angle
@@ -225,9 +225,6 @@ class TurbineSpool(Spool):
                 2. Change degree of reaction to match the total massflow
                 3. Adjust the streamlines for each blade row to balance the massflow
         """
-        
-       
-            
         # Balance the massflow between Stages
         def balance_massflows(x0:List[float],blade_rows:List[BladeRow],P0:npt.NDArray,P:npt.NDArray,balance_mean_pressure:bool=True):
             """Balance Massflows. 
@@ -395,7 +392,7 @@ def calculate_massflows(blade_rows:List[BladeRow],calculate_vm:bool=False,fluid:
     Args:
         blade_rows (List[BladeRow]): _description_
         passage (Passage): _description_
-        calculate_vm (bool, optional): _description_. Defaults to False.
+        calculate_vm (bool, optional): true means meridional Vm is calculated. Defaults to False.
     """
     for i in range(1,len(blade_rows)-1):
         row = blade_rows[i]
@@ -455,7 +452,7 @@ def calculate_massflows(blade_rows:List[BladeRow],calculate_vm:bool=False,fluid:
                 compute_massflow(row)
                 compute_power(row,upstream)
     
-def massflow_loss_function(exit_angle:float,index:int,row:BladeRow,upstream:BladeRow,downstream:BladeRow=None,fluid:Solution=None):
+def massflow_loss_function(exit_angle:float,index:int,row:BladeRow,upstream:BladeRow,downstream:Optional[BladeRow]=None,fluid:Optional[Solution]=None):
     """Finds the blade exit angles that balance the massflow throughout the stage 
 
     Args:

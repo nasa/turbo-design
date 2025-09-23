@@ -81,11 +81,11 @@ class Passage:
         r_streamline = t_streamline.copy()*0
         x_streamline = t_streamline.copy()*0
         for i,t in enumerate(t_streamline):
-            xhub = self.xhub(t)
-            rhub = self.rhub(t)
-            xshroud = self.xshroud(t)
-            rshroud = self.rshroud(t)
-            x_streamline[i] ,r_streamline[i] = line2D([xhub,rhub],[xshroud,rshroud]).get_point(t_radial)
+            xhub = float(self.xhub(t))
+            rhub = float(self.rhub(t))
+            xshroud = float(self.xshroud(t))
+            rshroud = float(self.rshroud(t))
+            x_streamline[i] ,r_streamline[i] = line2D((xhub,rhub),(xshroud,rshroud)).get_point(t_radial)
         return t_streamline,x_streamline,r_streamline
 
     @staticmethod

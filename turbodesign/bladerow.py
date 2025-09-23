@@ -17,7 +17,7 @@ class BladeRow:
     id:int = 0
     stage_id:int = 0
     row_type: RowType = RowType.Stator
-    loss_function:LossBaseClass
+    loss_function:Optional[LossBaseClass]
     cutting_line:line2D         # Line perpendicular to the streamline
     rp:float = 0.4              # Degree of Reaction
     
@@ -64,6 +64,9 @@ class BladeRow:
     beta1_fixed:bool = False    # Geometry already defined. This affects the inlet flow angle
     beta2_fixed:bool = False    # Geometry already defined. This affects the exit flow angle
 
+    # Blockage
+    blockage: float = 0 # (1 - available flow area divided by geometric area)
+    
     # Velocities 
     Vm: npt.NDArray = field(default_factory=lambda: np.array([0]))               # Meridional velocity
     Vx: npt.NDArray = field(default_factory=lambda: np.array([0]))               # Axial Velocity

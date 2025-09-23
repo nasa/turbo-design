@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from typing import List, Union
+from typing import List, Optional, Union
 from .enums import RowType
 from .bladerow import BladeRow, compute_gas_constants, interpolate_quantities
 from .arrayfuncs import convert_to_ndarray
@@ -50,7 +50,7 @@ class Inlet(BladeRow):
         self.beta2 = np.radians(convert_to_ndarray(self.beta1))
         self.alpha1 = np.radians(convert_to_ndarray(self.beta1))         
         
-    def initialize_fluid(self,fluid:Solution=None,R:float=287.15,gamma:float=1.4,Cp:float=1024):
+    def initialize_fluid(self,fluid:Optional[Solution]=None,R:float=287.15,gamma:float=1.4,Cp:float=1024):
         """Initialize the inlet using the fluid. This function should be called by a class that inherits from spool
 
         Args:
