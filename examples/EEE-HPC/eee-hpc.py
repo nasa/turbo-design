@@ -9,7 +9,7 @@ from scipy.interpolate import PchipInterpolator
 # Geometry Import 
 from get_ss_ps import split_airfoil_by_angle_distance, resample_curve, plot_blade
 
-blades = pickle.load(open('stator_rotor.pkl','rb'))
+blades = pickle.load(open('rotor_stator.pkl','rb'))
 
 processed_data = []
 npts = 400
@@ -29,7 +29,6 @@ for i,blade in enumerate(blades):
     ps *= 25.4 # convert to mm
     print(f'Blade-{i} has {nsections} sections')
     processed_data.append((ss, ps))
-
 
 hub_shroud = pickle.load(open('hub_shroud.pkl','rb'))
 x = np.linspace(hub_shroud['Hub'][:,0].min(),hub_shroud['Hub'][:,0].max(),200)

@@ -4,7 +4,7 @@ import numpy.typing as npt
 import os, pyiges, pickle
 import matplotlib.pyplot as plt
 from pyiges.geometry import RationalBSplineCurve  # <-- import the class
-
+import matplotlib.pyplot as plt 
 
 def Process_HubShroud_IGES():
     """Exports hub and shroud curves in inches
@@ -88,6 +88,41 @@ def ProcessBlades_IGES():
                  rotor7,stator7,rotor8,stator8,
                  rotor9,stator9,rotor10,stator10],open('rotor_stator.pkl','wb'))
 
+def PlotBlades():
+    rotor_stator = []
+    with open('rotor_stator.pkl','rb') as fp:
+        rotor_stator = pickle.load(fp)
+        
+    with open('hub_shroud.pkl','rb') as fp:
+        hub_shroud = pickle.load(fp)
+    
+    plt.figure()
+    plt.plot(rotor_stator[0][:,0],rotor_stator[0][:,1],label='rotor1')
+    plt.plot(rotor_stator[1][:,0],rotor_stator[1][:,1],label='stator1')
+    plt.plot(rotor_stator[2][:,0],rotor_stator[2][:,1],label='rotor2')
+    plt.plot(rotor_stator[3][:,0],rotor_stator[3][:,1],label='stator2')
+    plt.plot(rotor_stator[4][:,0],rotor_stator[4][:,1],label='rotor3')
+    plt.plot(rotor_stator[5][:,0],rotor_stator[5][:,1],label='stator3')
+    plt.plot(rotor_stator[6][:,0],rotor_stator[6][:,1],label='rotor4')
+    plt.plot(rotor_stator[7][:,0],rotor_stator[7][:,1],label='stator4')
+    plt.plot(rotor_stator[8][:,0],rotor_stator[8][:,1],label='rotor5')
+    plt.plot(rotor_stator[9][:,0],rotor_stator[9][:,1],label='stator5')
+    plt.plot(rotor_stator[10][:,0],rotor_stator[10][:,1],label='rotor6')
+    plt.plot(rotor_stator[11][:,0],rotor_stator[11][:,1],label='stator6')
+    plt.plot(rotor_stator[12][:,0],rotor_stator[12][:,1],label='rotor7')
+    plt.plot(rotor_stator[13][:,0],rotor_stator[13][:,1],label='stator7')
+    plt.plot(rotor_stator[14][:,0],rotor_stator[14][:,1],label='rotor8')
+    plt.plot(rotor_stator[15][:,0],rotor_stator[15][:,1],label='stator8')
+    plt.plot(rotor_stator[16][:,0],rotor_stator[16][:,1],label='rotor9')
+    plt.plot(rotor_stator[17][:,0],rotor_stator[17][:,1],label='stator9')
+    plt.plot(rotor_stator[18][:,0],rotor_stator[18][:,1],label='rotor10')
+    plt.plot(rotor_stator[19][:,0],rotor_stator[19][:,1],label='stator10')
+    plt.legend()
+    plt.xlabel('x - Axial')
+    plt.ylabel('r - Radial')
+    plt.axis('equal')
+    plt.show()
 if __name__ == "__main__":
     Process_HubShroud_IGES()
     ProcessBlades_IGES()
+    
