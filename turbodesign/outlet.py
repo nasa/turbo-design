@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from typing import List, Union
+from typing import List, Optional, Union
 from .enums import RowType
 from .bladerow import BladeRow, compute_gas_constants, interpolate_quantities
 from .arrayfuncs import convert_to_ndarray
@@ -11,20 +11,32 @@ from scipy.interpolate import interp1d
 
 class Outlet(BladeRow):
     P_fun:interp1d
+    P0_fun:interp1d
     
-    def __init__(self,P:Union[float,List[float]],percent_radii:Union[List[float],float],num_streamlines:int=3,location:float=1):
-        """Initialize the outlet
+    def __init__(self,P:Union[float,List[float]],percent_radii:Union[List[float],float],P0:Optional[float]=None,num_streamlines:int=3,location:float=1):
+        """Initialize the outlet 
 
         Args:
-            P (Union[float,List[float]]): List of static pressure profile at outlet
-            percent_radii (List[float]): Percent Radius from 0 to 1 or just put 0.5 and it uses all of it 
+            P (Union[float,List[float]]): _description_
+            percent_radii (Union[List[float],float]): _description_
+            P0 (Optional[float], optional): _description_. Defaults to None.
+            num_streamlines (int, optional): _description_. Defaults to 3.
+            location (float, optional): _description_. Defaults to 1.
         """
-        self.P = convert_to_ndarray(P)
         self.percent_hub_shroud = convert_to_ndarray(percent_radii)
         if len(self.percent_hub_shroud)==1:
             self.percent_hub_shroud = np.arange(0,1,num_streamlines)
+            
+        if P0 is not None:
+            self.P = convert_to_ndarray(P)
             self.P = self.P[0]+0*self.percent_hub_shroud*0
-        self.P_fun = interp1d(self.percent_hub_shroud,self.P)
+            self.P_fun = interp1d(self.percent_hub_shroud,self.P)
+        else:
+            self.IsCompressor = True
+            self.P0 = convert_to_ndarray(P0)
+            self.P0 = self.P0[0]+0*self.percent_hub_shroud*0
+            self.P0_fun = interp1d(self.percent_hub_shroud,self.P0)
+        
         self.row_type = RowType.Outlet
         self.loss_function = None
         self.location = location

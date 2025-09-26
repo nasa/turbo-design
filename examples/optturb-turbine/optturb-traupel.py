@@ -3,17 +3,14 @@
     2 stage cooled turbine
 
 '''
-
-import sys
-sys.path.insert(0,'../../')
-from td3 import CoolingType, LossType, Units, TurbineSpool, Inlet, RowType, BladeRow
-from td3.coolant import Coolant
-from td3.loss.turbine import Traupel
+from turbodesign import Units, TurbineSpool, Inlet, RowType, BladeRow
+from turbodesign.coolant import Coolant
+from turbodesign.loss.turbine import Traupel
+from turbodesign.loss import LossType
 import numpy as np 
 from cantera import Solution
 
-lossType = LossType.TD2_Pressure_Loss
-coolingType = CoolingType.Cooled_EFFICIENCY_MF_T0_P0 
+lossType = LossType.Pressure
 #%% Initialize the Spool
 # Geometry - From TD2
 rmean = 0.389
@@ -42,14 +39,13 @@ print(f"Coefficient of Pressure [J/Kg] {fluid.cp:0.4f}")
 # Coolant: Use Kelvin and Pascal
 
 
-cooling_type = CoolingType.Cooled_EFFICIENCY_MF_T0_P0
-
 station1 = Inlet(M=0.4,P0=[P0], T0=[T0], beta=[0], fluid=fluid, percent_radii=0.5)
 station2 = BladeRow(RowType.Stator, power=0)
 station3 = BladeRow(RowType.Rotor, power=power)
 
-station2.coolant = Coolant(fluid, T0=616*0.555556, P0= 50.6 * 6894.76, massflow_percentage=0) 
-station3.coolant = Coolant(fluid, 622*0.555556, 50.3 * 6894.76,massflow_percentage=0)
+
+station2.coolant = Coolant(T0=616*0.55,P0=50.6*6894.76,massflow_percentage=0,Cp=1012)
+station3.coolant = Coolant(T0=616*0.55,P0=50.6*6894.76,massflow_percentage=0,Cp=1012)
 
 # Add in turning angles
 station2.beta2_metal = [73,73,73] # Angle, hub,mean,tip

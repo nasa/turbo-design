@@ -1,4 +1,4 @@
-from typing import List, Tuple, Union
+from typing import List, Optional, Tuple, Union
 import numpy as np
 import numpy.typing as npt
 from scipy.interpolate import PchipInterpolator, interp1d
@@ -119,8 +119,8 @@ class Passage:
         d_dx = FinDiff(0,x_streamline[indices[0]:indices[-1]],1)
         d2_dx2 = FinDiff(0,x_streamline[indices[0]:indices[-1]],2)
         
-        dr_dx = d_dx(r_streamline[indices[0]:indices[-1]])
-        d2r_dx2 = d2_dx2(r_streamline[indices[0]:indices[-1]])    
+        dr_dx = d_dx(r_streamline[indices[0]:indices[-1]]) # type: ignore
+        d2r_dx2 = d2_dx2(r_streamline[indices[0]:indices[-1]])     # type: ignore
             
         radius_curvature[indices[0]:indices[-1]] = np.power((1+np.power(dr_dx,2)),1.5)
         radius_curvature[indices[0]:indices[-1]] = np.divide(radius_curvature[indices[0]:indices[-1]], np.abs(d2r_dx2))
@@ -170,7 +170,7 @@ class Passage:
                 total_area += area
         return total_area
         
-    def get_cutting_line(self, t_hub:float) -> Tuple[line2D,float,float]:
+    def get_cutting_line(self, t_hub:float,t_shroud:Optional[float]=None) -> Tuple[line2D,float,float]:
         """Gets the cutting line perpendicular to hub and shroud 
 
         Args:
@@ -181,40 +181,41 @@ class Passage:
         
                 cut (line2D): line from hub to shroud
                 t_hub (float): Percentage along hub arc length
-                t_shroud (float): t corresponding to intersection of bisector of hub 
+                t_shroud (Optional[float]): t corresponding to intersection of bisector of hub. Defaults to None
                                 
         """
-        xhub = self.xhub(t_hub)
-        rhub = self.rhub(t_hub)
-        
-        if t_hub>0 and t_hub<1:
-            dx = self.xhub(t_hub+0.0001) - self.xhub(t_hub-0.0001) 
-            dr = self.rhub(t_hub+0.0001) - self.rhub(t_hub-0.0001)
-        elif t_hub>0:
-            dx = self.xhub(t_hub) - self.xhub(t_hub-0.0001) 
-            dr = self.rhub(t_hub) - self.rhub(t_hub-0.0001)
-        elif t_hub<1:
-            dx = self.xhub(t_hub+0.0001) - self.xhub(t_hub)
-            dr = self.rhub(t_hub+0.0001) - self.rhub(t_hub)
-        
-        if self.passageType == PassageType.Centrifugal:
-            if np.abs(dr)>1e-6:
-                # Draw a line perpendicular to the hub. 
-                # Find the intersection point to the shroud. 
-                h = -dx/dr # Slope of perpendicular line
+        xhub = float(self.xhub(t_hub))
+        rhub = float(self.rhub(t_hub))
+        if t_shroud is None:            
+            if t_hub>0 and t_hub<1:
+                dx = self.xhub(t_hub+0.0001) - self.xhub(t_hub-0.0001) 
+                dr = self.rhub(t_hub+0.0001) - self.rhub(t_hub-0.0001)
+            elif t_hub>0:
+                dx = self.xhub(t_hub) - self.xhub(t_hub-0.0001) 
+                dr = self.rhub(t_hub) - self.rhub(t_hub-0.0001)
+            else: # t_hub<1:
+                dx = self.xhub(t_hub+0.0001) - self.xhub(t_hub)
+                dr = self.rhub(t_hub+0.0001) - self.rhub(t_hub)
             
-                f = lambda t: h*(self.xshroud(t) - xhub)+rhub # line from hub to shroud 
-                fun = lambda t: np.abs(f(t)-self.rshroud(t)) # find where it intersects
-                res = minimize_scalar(fun,bounds=[0,1],tol=1E-3) 
-                t_shroud = res.x
+            if self.passageType == PassageType.Centrifugal:
+                if np.abs(dr)>1e-6:
+                    # Draw a line perpendicular to the hub. 
+                    # Find the intersection point to the shroud. 
+                    h = -dx/dr # Slope of perpendicular line
+                
+                    f = lambda t: h*(self.xshroud(t) - xhub)+rhub # line from hub to shroud 
+                    fun = lambda t: np.abs(f(t)-self.rshroud(t)) # find where it intersects
+                    res = minimize_scalar(fun,bounds=[0,1],tol=1E-3) 
+                    t_shroud = res.x # type: ignore
+                else:
+                    t_shroud = t_hub # Vertical line 
             else:
-                t_shroud = t_hub # Vertical line 
-        else:
-            t_shroud = t_hub
+                t_shroud = t_hub
+                
+        xshroud = float(self.xshroud(t_shroud))
+        rshroud = float(self.rshroud(t_shroud))
         
-        xshroud = self.xshroud(t_shroud)
-        rshroud = self.rshroud(t_shroud)
-        return line2D([xhub,rhub],[xshroud,rshroud]), t_hub, t_shroud
+        return line2D((xhub,rhub),(xshroud,rshroud)), t_hub, t_shroud # type: ignore
     
     def get_xr_slice(self,t_span:float,percent_hub:Tuple[float,float],resolution:int=100):
         """Returns the xr coordinates of a streamline, a line that is parallel to both hub and shroud
@@ -236,7 +237,7 @@ class Passage:
             
         xr = np.zeros((n,2))
         for j in range(n):
-            l = line2D(hub_pts_cyl[j,:],shroud_pts_cyl[j,:])
+            l = line2D(hub_pts_cyl[j,:],shroud_pts_cyl[j,:]) # type: ignore
             xr[j,0],xr[j,1] = l.get_point(t_span)
             
         return xr
@@ -269,7 +270,7 @@ class Passage:
             (float) : returns the derivative 
         """
         m = self.get_m(t_span,resolution)
-        return PchipInterpolator(np.linspace(0,1,resolution),np.diff(m))(location)
+        return PchipInterpolator(np.linspace(0,1,resolution),np.diff(m))(location) # type: ignore
     
     @property
     def hub_length(self):

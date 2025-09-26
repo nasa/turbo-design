@@ -1,6 +1,6 @@
-from ...bladerow import BladeRow
-from ..losstype import LossBaseClass
-from ...enums import LossType
+from ..bladerow import BladeRow
+from .losstype import LossBaseClass
+from ..enums import LossType
 
 class FixedPressureLoss(LossBaseClass):
     pressure_loss:float

@@ -14,6 +14,7 @@ from turbodesign.loss.turbine import CraigCox
 import numpy as np 
 from cantera import Solution
 from pyturbo.helper import bezier
+
 #%% Define the Passage 
 # Geometry from OptTurb
 rmean = 0.389
@@ -57,20 +58,20 @@ inlet = Inlet(M=0.2,
                  location=0)
 outlet = Outlet(P=P0/3.96,percent_radii=0.5,num_streamlines=3)
 
-stator1 = BladeRow(row_type=RowType.Stator,location=2*cax/axial_len)
-rotor1 = BladeRow(row_type=RowType.Rotor,location=3*cax/axial_len)
+stator1 = BladeRow(row_type=RowType.Stator,hub_location=2*cax/axial_len)
+rotor1 = BladeRow(row_type=RowType.Rotor,hub_location=3*cax/axial_len)
 
 stator1.axial_chord = cax # Set an axial chord. Used for plotting
 rotor1.axial_chord = cax
 
 # Coolant Definition: Use Kelvin and Pascal
-stator1.coolant = Coolant(fluid, T0=616*0.555556, P0= 50.6 * 6894.76, massflow_percentage=0) 
-rotor1.coolant = Coolant(fluid,T0= 622*0.555556,P0=50.3 * 6894.76,massflow_percentage=0)
+stator1.coolant = Coolant(T0=616*0.555556, P0= 50.6 * 6894.76, massflow_percentage=0) 
+rotor1.coolant = Coolant(T0= 622*0.555556,P0=50.3 * 6894.76,massflow_percentage=0)
 
 # Add in turning angles
 stator1.beta2_metal = [73,73,73] # Angle, hub,mean,tip
-stator1.loss_model = CraigCox()
-rotor1.loss_model = CraigCox()
+stator1.loss_model = CraigCox() # type: ignore
+rotor1.loss_model = CraigCox() # type: ignore
 rotor1.beta2_metal = [-67.6,-67.6,-67.6] # Angle, hub,mean,tip
 
 # Coolant: Use Kelvin and Pascal

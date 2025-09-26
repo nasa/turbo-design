@@ -87,7 +87,7 @@ from turbodesign import PassageType
 from turbodesign import TurbineSpool, Inlet, RowType, BladeRow, Passage, Outlet
 from turbodesign.enums import MassflowConstraint
 from turbodesign.coolant import Coolant
-from turbodesign.loss.turbine import FixedPressureLoss
+from turbodesign.loss import FixedPressureLoss
 from cantera import Solution
 from scipy.optimize import minimize_scalar
 from scipy.interpolate import pchip
@@ -147,12 +147,12 @@ inlet = Inlet(M=0.1,
 
 outlet = Outlet(P=P,percent_radii=[0.5],num_streamlines=5)
 
-stator = BladeRow(row_type=RowType.Stator, location=blade_position[0])
+stator = BladeRow(row_type=RowType.Stator, hub_location=blade_position[0])
 stator.R = 287.15
 stator.gamma = 1.35
 stator.Cp = stator.gamma*stator.R/(stator.gamma-1)
 
-rotor = BladeRow(row_type=RowType.Rotor, location=blade_position[1])
+rotor = BladeRow(row_type=RowType.Rotor, hub_location=blade_position[1])
 rotor.R = 287.15
 rotor.gamma = 1.35
 rotor.Cp = stator.gamma*stator.R/(stator.gamma-1)

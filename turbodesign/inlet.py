@@ -19,7 +19,9 @@ class Inlet(BladeRow):
     
     def __init__(self,M:float,T0:Union[float,List[float]],
                  P0:Union[float,List[float]],
-                 location:float=0,
+                 hub_location:float=0,
+                 shroud_location:float=0,
+                 P:Optional[Union[float,List[float]]]=None,
                  beta:Union[float,List[float]]=[0],
                  percent_radii:Union[float,List[float]]=[0.5]):
         """Initializes the inlet station. 
@@ -34,16 +36,30 @@ class Inlet(BladeRow):
             beta (Union[float,List[float]], optional): Inlet flow angle in relative direction. Defaults to [].
 
         """
-        super().__init__(row_type=RowType.Inlet,location=location,stage_id=-1)
+        super().__init__(row_type=RowType.Inlet,hub_location=hub_location,shroud_location=shroud_location,stage_id=-1)
         self.beta1 = convert_to_ndarray(beta)
         self.M = convert_to_ndarray(M)
         self.T0 = convert_to_ndarray(T0)
-        self.P0 = convert_to_ndarray(P0)
+        
+        if P is not None:
+            self.P = convert_to_ndarray(P)
+            self.IsCompressor = True 
+        else:
+            self.P0 = convert_to_ndarray(P0)
         self.percent_hub_shroud = convert_to_ndarray(percent_radii)
    
     def initialize_inputs(self,num_streamlines:int=5):
+        """Initializes the inputs 
+
+        Args:
+            num_streamlines (int, optional): _description_. Defaults to 5.
+            IsCompressor (bool, optional): This is if static pressure is defined at the inlet and total pressure at the outlet. Defaults to False.
+        """
         self.M = interpolate_quantities(self.M, self.percent_hub_shroud, np.linspace(0,1,num_streamlines))
-        self.P0 = interpolate_quantities(self.P0,self.percent_hub_shroud, np.linspace(0,1,num_streamlines))
+        if self.IsCompressor: # This comes from the initialization
+            self.P = interpolate_quantities(self.P,self.percent_hub_shroud, np.linspace(0,1,num_streamlines))
+        else:
+            self.P0 = interpolate_quantities(self.P0,self.percent_hub_shroud, np.linspace(0,1,num_streamlines))
         self.T0 = interpolate_quantities(self.T0,self.percent_hub_shroud, np.linspace(0,1,num_streamlines)) 
         # if it's inlet alpha and beta are the same, relative flow angle = absolute. 
         self.beta1 = interpolate_quantities(self.beta1,self.percent_hub_shroud, np.linspace(0,1,num_streamlines)) 
@@ -65,8 +81,11 @@ class Inlet(BladeRow):
         if fluid:
             fluid.TP = self.T0.mean(),self.P0.mean()
             self.gamma = fluid.cp/fluid.cv
+            if self.IsCompressor:
+                self.P0 = self.P * (1+(self.gamma-1)/2 * self.M**2) ** (self.gamma/(self.gamma-1))
+            else:
+                self.P = self.P0 * 1/(1 + (self.gamma-1) * self.M**2)**(self.gamma/(self.gamma-1))
             self.T = self.T0 * 1/(1 + (self.gamma-1) * self.M**2)
-            self.P = self.P0 * 1/(1 + (self.gamma-1) * self.M**2)**(self.gamma/(self.gamma-1))
             fluid.TP = self.T.mean(),self.P.mean()
             self.rho = convert_to_ndarray([fluid.density])
         else:
@@ -74,7 +93,10 @@ class Inlet(BladeRow):
             self.gamma = gamma
             self.R = R
             self.T = self.T0 * 1/(1 + (self.gamma-1) * self.M**2)
-            self.P = self.P0 * 1/(1 + (self.gamma-1) * self.M**2)**(self.gamma/(self.gamma-1))
+            if self.IsCompressor:
+                self.P0 = self.P * (1+(self.gamma-1)/2 * self.M**2) ** (self.gamma/(self.gamma-1)) 
+            else:
+                self.P = self.P0 * 1/(1 + (self.gamma-1) * self.M**2)**(self.gamma/(self.gamma-1))
             self.rho = self.P/(self.R*self.T)
 
         self.rpm = 0
@@ -86,7 +108,7 @@ class Inlet(BladeRow):
             self.T0 = self.percent_hub_shroud*0+self.T0[0]
         self.P0_fun = interp1d(self.percent_hub_shroud,self.P0)
         self.T0_fun = interp1d(self.percent_hub_shroud,self.T0)
-        self.mprime = [0]
+        self.mprime = [0] # type: ignore
         
     def initialize_velocity(self,passage:Passage,num_streamlines:int):
         """Initialize velocity calculations. Assumes streamlines and inclination angles have been calculated 
@@ -100,7 +122,7 @@ class Inlet(BladeRow):
         # Perform Calculations on Velocity 
         Vm_prev = 0; Vm_err = 0 
 
-        cutline,_,_ = passage.get_cutting_line(self.location)
+        cutline,_,_ = passage.get_cutting_line(t_hub=self.hub_location,t_shroud=self.shroud_location)
         self.x,self.r = cutline.get_point(np.linspace(0,1,num_streamlines))
         for _ in range(10):
             T0_T = (1+(self.gamma-1)/2 * self.M**2)

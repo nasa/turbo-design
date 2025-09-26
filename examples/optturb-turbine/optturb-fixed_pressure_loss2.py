@@ -11,7 +11,7 @@ from turbodesign import PassageType
 from turbodesign import TurbineSpool, Inlet, RowType, BladeRow, Passage,Outlet
 from turbodesign.enums import MassflowConstraint
 from turbodesign.coolant import Coolant
-from turbodesign.loss.turbine import FixedPressureLoss
+from turbodesign.loss import FixedPressureLoss
 import numpy as np 
 from cantera import Solution
 
@@ -54,8 +54,8 @@ outlet = Outlet(P=P0/3.96,percent_radii=0.5,num_streamlines=3)
 
 #%% Define Blade Rows 
 # Axial location is a percentage along the hub where row exit is defined
-stator1 = BladeRow(row_type=RowType.Stator,location=2*cax/axial_len)
-rotor1 = BladeRow(row_type=RowType.Rotor, location=3*cax/axial_len)
+stator1 = BladeRow(row_type=RowType.Stator,hub_location=2*cax/axial_len)
+rotor1 = BladeRow(row_type=RowType.Rotor, hub_location=3*cax/axial_len)
 
 stator1.axial_chord = cax # Set an axial chord
 rotor1.axial_chord = cax

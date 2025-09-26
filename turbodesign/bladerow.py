@@ -17,6 +17,7 @@ class BladeRow:
     id:int = 0
     stage_id:int = 0
     row_type: RowType = RowType.Stator
+    IsCompressor:bool = False 
     loss_function:Optional[LossBaseClass]
     cutting_line:line2D         # Line perpendicular to the streamline
     rp:float = 0.4              # Degree of Reaction
@@ -125,7 +126,8 @@ class BladeRow:
     _tip_clearance:float = 0 # Clearance as a percentage of span or blade height
 
     _inlet_to_outlet_pratio = [0.06,0.95]
-    location:float = 0 # Percent along hub where bladerow is defined
+    hub_location:float = 0 # Percent along hub where bladerow is defined
+    shroud_location:float = -1 # Percent along the shroud where blade row defined, not really needed but does help compute phi
     
     @property
     def inlet_to_outlet_pratio(self) -> Tuple[float,float]:
@@ -333,18 +335,20 @@ class BladeRow:
         """
         self._tip_clearance = val
         
-    def __init__(self,location:float,row_type:RowType=RowType.Stator,stage_id:int = 0):
+    def __init__(self,hub_location:float,row_type:RowType=RowType.Stator,stage_id:int = 0,shroud_location:float=-1):
         """Initializes the blade row to be a particular type
 
         Args:
-            location (float): Location of the blade row as a percentage of hub length
+            hub_location (float): Location of the blade row as a percentage of hub length
             row_type (RowType): Specifies the Type. Defaults to RowType.Stator
             power (float, optional): power . Defaults to 0.
             P0_P (float, optional): Total to Static Pressure Ratio
             stage_id (int, optional): ID of the stage so if you have 9 stages, the id could be 9. It's used to separate the stages. Each stage will have it's own unique degree of reaction 
+            shroud_location (float): Location along the shroud. This isn't required but if you specify then it can be used to help compute phi 
         """
         self.row_type = row_type
-        self.location = location 
+        self.hub_location = hub_location 
+        self.shroud_location = shroud_location
         self.Yp = 0 # Loss
         self.stage_id = stage_id
     
@@ -517,7 +521,7 @@ def interpolate_streamline_radii(row:BladeRow,passage:Passage,num_streamlines:in
     Returns:
         (BladeRow): new row object with quantities interpolated
     """
-    row.cutting_line,_,_ = passage.get_cutting_line(row.location)
+    row.cutting_line,_,_ = passage.get_cutting_line(t_hub=row.hub_location, t_shroud=row.shroud_location)
     row.x,row.r = row.cutting_line.get_point(np.linspace(0,1,num_streamlines))
     streamline_percent_length = np.sqrt((row.r-row.r[0])**2+(row.x-row.x[0])**2)/row.cutting_line.length
     
