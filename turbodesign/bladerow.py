@@ -118,6 +118,8 @@ class BladeRow:
     
     _aspect_ratio:float = 0.9 # 
     _pitch_to_chord:float = 0.7 # Pitch to chord ratio, used to determine number of blades and compute loss 
+    _num_blades:int = 28 # Number of blades 
+    _pitch:float
     
     _axial_chord:float = -1 
     _chord:float = -1 
@@ -263,21 +265,27 @@ class BladeRow:
     
     @property
     def chord(self) -> float:
-        """Chord defined at mean radius
-
+        """Calculates the pitch and pitch to chord.
+        
         Returns:
-            float: axial chord
+            float: chord
         """
-        return self.axial_chord / np.cos(np.radians(self.stagger))
+        self._pitch = 2*np.pi*self.r.mean() / self._num_blades
+        self._pitch_to_chord = self._pitch_to_chord/self._chord
+        return self._chord
     
+    @chord.setter
+    def chord(self,val:float):
+        self._chord = val
+        
     @property
     def pitch(self) -> float:
         """Returns the pitch which is the distance from blade to blade
-
+        
         Returns:
             float: pitch
         """
-        return self.pitch_to_chord*self.chord
+        return self._pitch_to_chord*self._chord
     
     @property
     def throat(self) -> float:
@@ -287,9 +295,9 @@ class BladeRow:
             float: throat 
         """
         if self.row_type == RowType.Stator:
-            return self.pitch*np.sin(np.pi/2-self.alpha2.mean())
+            return self._pitch*np.sin(np.pi/2-self.alpha2.mean())
         else:
-            return self.pitch*np.sin(np.pi/2-self.beta2.mean())
+            return self._pitch*np.sin(np.pi/2-self.beta2.mean())
     
     @property
     def num_blades(self) ->float:
@@ -298,7 +306,13 @@ class BladeRow:
         Returns:
             float: number of blades
         """
-        return int(2*np.pi*self.r.mean() / self.pitch)
+        return self._num_blades
+    
+    @num_blades.setter
+    def num_blades(self, val:int):
+        self._num_blades = val
+        self._pitch = 2*np.pi*self.r.mean() / self._num_blades
+        self._pitch_to_chord = self._pitch_to_chord/self._chord
     
     @property
     def camber(self) -> float:
@@ -574,12 +588,6 @@ def interpolate_streamline_radii(row:BladeRow,passage:Passage,num_streamlines:in
     row.T = interpolate_quantities(row.T,row.percent_hub_shroud,streamline_percent_length)
     row.T_is = interpolate_quantities(row.T_is,row.percent_hub_shroud,streamline_percent_length)
     row.rho = interpolate_quantities(row.rho,row.percent_hub_shroud,streamline_percent_length)
-
-    # if row.row_type == RowType.Inlet:
-    #     row.P0_fun = interp1d(row.percent_hub_shroud,row.P0) 
-    #     row.T0_fun = interp1d(row.percent_hub_shroud,row.T0) 
-    # elif row.row_type == RowType.Outlet:
-    #     row.P_fun = interp1d(row.percent_hub_shroud,row.P) 
 
     return row
 

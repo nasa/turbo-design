@@ -1,21 +1,29 @@
 from typing import List, Optional
-import numpy as np 
 from cantera.composite import Solution
-from enums import MassflowConstraint
-from passage import Passage
-from .bladerow import BladeRow,RowType, compute_gas_constants, interpolate_quantities, interpolate_streamline_radii
-from td_math import inlet_calc, stator_calc, rotor_calc, compute_massflow, compute_power, compute_reynolds
+from .bladerow import BladeRow, interpolate_streamline_radii
+from .enums import RowType, MassflowConstraint, LossType, PassageType
 from .spool import Spool
-import json
+import json, copy
+from .passage import Passage
+from scipy.interpolate import interp1d
+import numpy as np
+import numpy.typing as npt
+from .td_math import inlet_calc,rotor_calc, stator_calc, compute_massflow, compute_power, compute_gas_constants, compute_reynolds
+from .solve_radeq import adjust_streamlines, radeq
+from scipy.optimize import minimize_scalar, differential_evolution, fmin_slsqp
+from .inlet import Inlet
+from .outlet import Outlet
+from pyturbo.helper import convert_to_ndarray
 
 class CompressorSpool(Spool):
+    
     def __init__(self,passage:Passage,
                  massflow:float,rows:List[BladeRow],
                  num_streamlines:int=3,
                  fluid:Optional[Solution]=Solution('air.yaml'),
                  rpm:float=-1,
-                 massflow_constraint:MassflowConstraint=MassflowConstraint.MatchMassFlow):
-        """Initializes a Compressor Spool
+                 massflow_constraint:MassflowConstraint=MassflowConstraint.MatchMassFlow): # type: ignore
+        """Initializes a Turbine Spool
 
         Args:
             passage (Passage): Passage defining hub and shroud
@@ -30,27 +38,31 @@ class CompressorSpool(Spool):
         super().__init__(passage, massflow, rows,num_streamlines, fluid, rpm)
         self.massflow_constraint = massflow_constraint
         pass
-    
+
     def initialize(self):
-        """Intializes the massflow through the rows
-            Called by solve
+        """Initializes the massflow throughout the rows 
         """
+        # Massflow from inlet already defined
+        # Check if both inlet and outlet are compressors or turbines
+        assert(self.blade_rows[0].IsCompressor != self.blade_rows[-1].IsCompressor, 
+               'Inlet and Outlet have to be defined the same way either both init_compressor or init_turbine')
+        
         # Inlet
         W0 = self.massflow
         inlet = self.blade_rows[0]
         if self.fluid:
-            inlet.initialize_fluid(self.fluid) # type: ignore
+            inlet.__initialize_fluid__(self.fluid) # type: ignore
         else:
-            inlet.initialize_fluid(R=self.blade_rows[1].R, # type: ignore
-                                    gamma=self.blade_rows[1].gamma,
-                                    Cp=self.blade_rows[1].Cp)
-            
-        inlet.total_massflow = W0 
+            inlet.__initialize_fluid__(R=self.blade_rows[1].R,                  # type: ignore
+                                        gamma=self.blade_rows[1].gamma,
+                                        Cp=self.blade_rows[1].Cp)
+        
+        inlet.total_massflow = W0
         inlet.total_massflow_no_coolant = W0
         inlet.massflow = np.linspace(0,1,self.num_streamlines)*W0
         
-        inlet.initialize_inputs(self.num_streamlines)
-        inlet.initialize_velocity(self.passage,self.num_streamlines)     # type: ignore
+        inlet.__interpolate_quantities__(self.num_streamlines)
+        inlet.__initialize_velocity__(self.passage,self.num_streamlines)        # type: ignore
         interpolate_streamline_radii(inlet,self.passage,self.num_streamlines)
 
         compute_gas_constants(inlet,self.fluid)
@@ -58,13 +70,14 @@ class CompressorSpool(Spool):
         
         for row in self.blade_rows:
             interpolate_streamline_radii(row,self.passage,self.num_streamlines)
-
+            row.IsCompressor = self.blade_rows[0].IsCompressor                  # Changes it all the compressor
+            
         outlet = self.blade_rows[-1]
         for j in range(self.num_streamlines):
             P0 = inlet.get_total_pressure(inlet.percent_hub_shroud[j]) # type: ignore
             percents = np.zeros(shape=(len(self.blade_rows)-2)) + 0.3
             percents[-1] = 1
-            Ps_range = outlet_pressure(percents=percents,inletP0=inlet.P0[j],outletP=outlet.P[j]) # type: ignore
+            Ps_range = outlet_pressure_breakdown(percents=percents,inletP0=inlet.P0[j],outletP=outlet.P[j]) # type: ignore
             for i in range(1,len(self.blade_rows)-1):
                 self.blade_rows[i].P[j] = Ps_range[i-1]
             
@@ -119,8 +132,8 @@ class CompressorSpool(Spool):
             elif row.row_type == RowType.Rotor:
                 rotor_calc(row,upstream)
                 compute_massflow(row)
-                compute_power(row,upstream)      
-    
+                compute_power(row,upstream)        
+      
     def solve(self):
         """
             Solve for the exit flow angles to match the massflow distribution at the stage exit
@@ -132,7 +145,8 @@ class CompressorSpool(Spool):
             self.__match_massflow()  # Matches massflow by changing turning angle
         elif self.massflow_constraint == MassflowConstraint.BalanceMassFlow:
             self.__balance_massflow()   # Balances massflow by changing row exit static pressure
-            
+
+    
     def __match_massflow(self):
         """ Matches the massflow between streamtubes by changing exit angles. Doesn't use radial equilibrium.
         """
@@ -214,8 +228,9 @@ class CompressorSpool(Spool):
                 2. Change degree of reaction to match the total massflow
                 3. Adjust the streamlines for each blade row to balance the massflow
         """
+        IsCompressor = blade_rows[0].IsCompressor
         # Balance the massflow between Stages
-        def balance_massflows(x0:List[float],blade_rows:List[BladeRow],P0:npt.NDArray,P:npt.NDArray,balance_mean_pressure:bool=True):
+        def balance_massflows_loop(x0:List[float],blade_rows:List[BladeRow],Pinlet:npt.NDArray,Poutlet:npt.NDArray,balance_mean_pressure:bool=True):
             """Balance Massflows. 
             
             Steps:
@@ -226,37 +241,47 @@ class CompressorSpool(Spool):
 
             Args:
                 x0 (List[float]): Percentage of P0 exiting each row
-                blade_rows (List[List[BladeRow]]): _description_
-                P0 (npt.NDArray): _description_
+                blade_rows (List[List[BladeRow]]): List of blade rows
+                P0 (npt.NDArray): Pressure at Inlet
                 P (npt.NDArray): (1) Outlet Static Pressure. (2) 
                 balance_mean_pressure (bool, optional): _description_. Defaults to True.
-
+                
             Returns:
                 _type_: _description_
             """
             # blade_rows_backup = copy.deepcopy(blade_rows)
-            # try:
             if balance_mean_pressure:
                 for j in range(self.num_streamlines):
-                    Ps = outlet_pressure(x0,P0[j],P[j])
-                    for i in range(1,len(blade_rows)-2):
-                        blade_rows[i].P[j] = float(Ps[i-1]) # type: ignore
-                blade_rows[-2].P = P # type: ignore
+                    if IsCompressor:
+                        P = Pinlet
+                        P0 = Poutlet
+                        P0s = outlet_pressure_breakdown(x0,P[j],P0[j])
+                        for i in range(1,len(blade_rows)-2):
+                            blade_rows[i].P0[j] = float(P0s[i-1]) # NOTE: For Compressors we set the total pressure for each blade row.
+                    else:
+                        P0 = Pinlet; 
+                        P = Poutlet
+                        Ps = outlet_pressure_breakdown(x0,P0[j],P[j])
+                        for i in range(1,len(blade_rows)-2):
+                            blade_rows[i].P[j] = float(Ps[i-1]) # type: ignore
+                if IsCompressor:
+                    # Set the total pressure for the 2nd to last row to match the outlet total pressure.
+                    blade_rows[-2].P0 = P0
+                else:
+                    # Set the static pressure for the 2nd to last row to match the outlet static pressure.
+                    blade_rows[-2].P = P
             else:
                 for i in range(1,len(blade_rows)-1):
                     for j in range(self.num_streamlines):
-                        blade_rows[i].P[j] = P[j]*x0[(i-1)*self.num_streamlines+j]    # type: ignore # x0 size = num_streamlines -1 
-            # try:  
+                        if IsCompressor:
+                            blade_rows[i].P0[j] = Poutlet[j]*x0[(i-1)*self.num_streamlines+j]   # type: ignore # x0 size = num_streamlines -1 
+                        else:
+                            blade_rows[i].P[j] = Pinlet[j]*x0[(i-1)*self.num_streamlines+j]     # type: ignore # x0 size = num_streamlines -1 
+            
             calculate_massflows(blade_rows,True,self.fluid)
             print(x0)
             return self.__massflow_std__(blade_rows[1:-1]) # do not consider inlet and outlet
-            # except Exception as e:
-            #     print(e)
-            # finally:
-            #     blade_rows = blade_rows_backup
-            #     return np.inf # Return a high error
             
-
         # Break apart the rows to stages
         outlet_P=list(); outlet_P_guess = list() # Outlet P is the bounds, outlet_p_guess is the guessed values 
         
@@ -269,11 +294,14 @@ class CompressorSpool(Spool):
         while (np.abs((err-past_err)/err)>0.05) and loop_iter<10:
             if len(outlet_P) == 1:
                 # x = balance_massflows(0.22896832148169688,self.blade_rows,self.blade_rows[0].P0,self.blade_rows[-1].P)
-                res = minimize_scalar(fun=balance_massflows,args=(self.blade_rows,self.blade_rows[0].P0,self.blade_rows[-1].P),bounds=outlet_P[0],tol=0.001,options={'disp': True},method='bounded')
+                if IsCompressor:
+                    res = minimize_scalar(fun=balance_massflows_loop,args=(self.blade_rows,self.blade_rows[0].P0,self.blade_rows[-1].P0),bounds=outlet_P[0],tol=0.001,options={'disp': True},method='bounded')
+                else:
+                    res = minimize_scalar(fun=balance_massflows_loop,args=(self.blade_rows,self.blade_rows[0].P0,self.blade_rows[-1].P),bounds=outlet_P[0],tol=0.001,options={'disp': True},method='bounded')
                 x = res.x
                 print(x)
             else:
-                x = fmin_slsqp(func=balance_massflows,args=(self.blade_rows,self.blade_rows[0].P0,self.blade_rows[-1].P), 
+                x = fmin_slsqp(func=balance_massflows_loop,args=(self.blade_rows,self.blade_rows[0].P0,self.blade_rows[-1].P), 
                             bounds=outlet_P, x0=outlet_P_guess,epsilon=0.001,iter=100) # ,tol=0.001,options={'disp': True})
                 outlet_P_guess = x 
         
@@ -297,14 +325,83 @@ class CompressorSpool(Spool):
         
         # calculate Reynolds number
         compute_reynolds(self.blade_rows,self.passage)
+        
     
-    def export_properties(self,filename:str="compressor_spool.json"):
+    def export_properties(self,filename:str="turbine_spool.json"):
         """Export the spool object to json 
 
         Args:
             filename (str, optional): name of export file. Defaults to "spool.json".
         """
-        pass 
+        blade_rows = list()
+        degree_of_reaction = list() 
+        total_total_efficiency = list() 
+        total_static_efficiency = list()
+        stage_loading = list() 
+        euler_power = list() 
+        enthalpy_power = list()
+        x_streamline = np.zeros((self.num_streamlines,len(self.blade_rows)))
+        r_streamline = np.zeros((self.num_streamlines,len(self.blade_rows)))
+        massflow = list()
+        for indx,row in enumerate(self.blade_rows):
+            blade_rows.append(row.to_dict()) # Appending data 
+            if row.row_type == RowType.Rotor:
+                # Calculation for these are specific to Turbines 
+                degree_of_reaction.append(((self.blade_rows[indx-1].P- row.P)/(self.blade_rows[indx-2].P-row.P)).mean())
+                
+                total_total_efficiency.append(row.eta_total)
+                total_static_efficiency.append(row.eta_static)
+
+                stage_loading.append(row.stage_loading)
+                euler_power.append(row.euler_power)
+                enthalpy_power.append(row.power)
+            if row.row_type!=RowType.Inlet and row.row_type!=RowType.Outlet:
+                massflow.append(row.massflow[-1])
+            
+            for j,p in enumerate(row.percent_hub_shroud):
+                t,x,r = self.passage.get_streamline(p)
+                x_streamline[j,indx] = float(interp1d(t,x)(row.percent_hub))
+                r_streamline[j,indx] = float(interp1d(t,r)(row.percent_hub))
+        
+        Pratio_Total_Total = np.mean(self.blade_rows[0].P0 / self.blade_rows[-2].P0)
+        Pratio_Total_Static = np.mean(self.blade_rows[0].P0 / self.blade_rows[-2].P)
+        FlowFunction = np.mean(massflow)*np.sqrt(self.blade_rows[0].T0)*self.blade_rows[0].P0/1000 # kg sqrt(K)/(sec kPa)
+        CorrectedSpeed = self.rpm * np.pi/30 / np.sqrt(self.blade_rows[0].T0.mean())   # rad/s * 1/sqrt(K)
+        EnergyFunction = (self.blade_rows[0].T0 - self.blade_rows[-2].T0) * 0.5* (self.blade_rows[0].Cp + self.blade_rows[-2].Cp) / self.blade_rows[0].T0 # J/(KgK)
+        EnergyFunction = np.mean(EnergyFunction)
+        data = {            
+            "blade_rows": blade_rows,
+            "massflow":np.mean(massflow),
+            "rpm":self.rpm,
+            "r_streamline":r_streamline.tolist(),
+            "x_streamline":x_streamline.tolist(),
+            "rhub":self.passage.rhub_pts.tolist(),
+            "rshroud":self.passage.rshroud_pts.tolist(),
+            "xhub":self.passage.xhub_pts.tolist(),
+            "xshroud":self.passage.xshroud_pts.tolist(),
+            "num_streamlines":self.num_streamlines,
+            "euler_power": euler_power,
+            "enthalpy_power":enthalpy_power,
+            "total-total_efficiency":total_total_efficiency,
+            "total-static_efficiency":total_static_efficiency,
+            "stage_loading":stage_loading,
+            "degree_of_reaction":degree_of_reaction,
+            "Pratio_Total_Total":Pratio_Total_Total,
+            "Pratio_Total_Static":Pratio_Total_Static,
+            "FlowFunction":FlowFunction,
+            "CorrectedSpeed":CorrectedSpeed,
+            "EnergyFunction":EnergyFunction
+        }
+        # Dump all the Python objects into a single JSON file.
+        class NumpyEncoder(json.JSONEncoder):
+            def default(self, obj):
+                if isinstance(obj, np.ndarray):
+                    return obj.tolist()
+                return super().default(obj)
+
+        with open(filename, "w") as f:
+            json.dump(data, f, indent=4,cls=NumpyEncoder)
+
 
 def calculate_massflows(blade_rows:List[BladeRow],calculate_vm:bool=False,fluid:Optional[Solution]=None):
     """Calculates the massflow 
@@ -440,7 +537,7 @@ def massflow_loss_function(exit_angle:float,index:int,row:BladeRow,upstream:Blad
         
     return np.abs(row.total_massflow*index/(len(row.massflow)-1) - row.massflow[index])
     
-def outlet_pressure(percents:List[float],inletP0:float,outletP:float) -> npt.NDArray:
+def outlet_pressure_breakdown(percents:List[float],inletP0:float,outletP:float) -> npt.NDArray:
     """Given a list of percents from 0 to 1 for each row, output each row's outlet static pressure
 
     Args:

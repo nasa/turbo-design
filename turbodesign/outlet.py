@@ -13,7 +13,7 @@ class Outlet(BladeRow):
     P_fun:interp1d
     P0_fun:interp1d
     
-    def __init__(self,P:Union[float,List[float]],percent_radii:Union[List[float],float],P0:Optional[float]=None,num_streamlines:int=3,location:float=1):
+    def __init__(self,num_streamlines:int=3,location:float=1):
         """Initialize the outlet 
 
         Args:
@@ -23,25 +23,40 @@ class Outlet(BladeRow):
             num_streamlines (int, optional): _description_. Defaults to 3.
             location (float, optional): _description_. Defaults to 1.
         """
-        self.percent_hub_shroud = convert_to_ndarray(percent_radii)
-        if len(self.percent_hub_shroud)==1:
-            self.percent_hub_shroud = np.arange(0,1,num_streamlines)
-            
-        if P0 is not None:
-            self.P = convert_to_ndarray(P)
-            self.P = self.P[0]+0*self.percent_hub_shroud*0
-            self.P_fun = interp1d(self.percent_hub_shroud,self.P)
-        else:
-            self.IsCompressor = True
-            self.P0 = convert_to_ndarray(P0)
-            self.P0 = self.P0[0]+0*self.percent_hub_shroud*0
-            self.P0_fun = interp1d(self.percent_hub_shroud,self.P0)
-        
         self.row_type = RowType.Outlet
         self.loss_function = None
         self.location = location
+        
+    def init_turbine(self,P:Union[List[float],float],percent_radii:Union[List[float],float]):
+        """Initialize turbine inputs 
+
+        Args:
+            P (float): Exit static pressure
+            percent_radii (Union[List[float],float]): percent radii where the exit static pressure is defined.
+        """
+        if len(self.percent_hub_shroud)==1:
+            self.percent_hub_shroud = np.arange(0,1,num_streamlines)
+        self.percent_hub_shroud = convert_to_ndarray(percent_radii)
+        self.P = convert_to_ndarray(P)
+        self.P = self.P[0]+0*self.percent_hub_shroud*0
+        self.P_fun = interp1d(self.percent_hub_shroud,self.P)
     
-    
+    def init_compressor(self,P0:Union[List[float],float],percent_radii:Union[List[float],float]):
+        """Initialize compressor inputs 
+
+        Args:
+            P0 (Union[List[float],float]): Exit Total Pressure (this will be matched)
+            percent_radii (Union[List[float],float]): percent radii where exit total pressure is defined 
+        """
+        if len(self.percent_hub_shroud)==1:
+            self.percent_hub_shroud = np.arange(0,1,num_streamlines)
+        self.percent_hub_shroud = convert_to_ndarray(percent_radii)
+        self.IsCompressor = True
+        self.P0 = convert_to_ndarray(P0)
+        self.P0 = self.P0[0]+0*self.percent_hub_shroud*0
+        self.P0_fun = interp1d(self.percent_hub_shroud,self.P0)
+        self.IsCompressor = True
+        
     def transfer_quantities(self,upstream:BladeRow):
         """Transfer quantities from upstream row to outlet while maintaining the outlet static pressure
 
@@ -49,7 +64,10 @@ class Outlet(BladeRow):
             upstream (BladeRow): Upstream row, for turbines this is a rotor, for compressors this is a stator. 
         """
         self.__dict__ = upstream.__dict__.copy() # Copies P and hub shroud percentage  
-        self.P_fun = interp1d(self.percent_hub_shroud,self.P)
+        if self.IsCompressor:
+            self.P0_fun = interp1d(self.percent_hub_shroud,self.P0) 
+        else: # Turbine 
+            self.P_fun = interp1d(self.percent_hub_shroud,self.P)
         self.row_type = RowType.Outlet
         
     
@@ -57,14 +75,27 @@ class Outlet(BladeRow):
         """Returns the static pressure at a certain percent hub_shroud
 
         Args:
-            percent_hub_shroud (Union[float,npt.NDArray]): _description_
+            percent_hub_shroud (Union[float,npt.NDArray]): value or array from 0 to 1 where you want the exit static pressure
 
         Returns:
-            _type_: _description_
+            npt.NDArray: Returns an array of static pressure
         """
         if type(percent_hub_shroud) == float:
             return float(self.P_fun(percent_hub_shroud))
         else:
             return self.P_fun(percent_hub_shroud)
-        
+    
+    def get_total_pressure(self,self.percent_hub_shroud:Union[float,npt.NDArray]):
+        """Returns the total pressure at a certain percent hub shroud 
+
+        Args:
+            percent_hub_shroud (Union[float,npt.NDArray]): value or array from 0 to 1 where you want the exit total pressure
+
+        Returns:
+            npt.NDArray: Returns an array of total pressure
+        """
+        if type(percent_hub_shroud) == float:
+            return float(self.P0_fun(percent_hub_shroud))
+        else:
+            return self.P0_fun(percent_hub_shroud)
         

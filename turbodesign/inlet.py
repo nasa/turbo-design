@@ -17,11 +17,9 @@ class Inlet(BladeRow):
     """
     fun: interp1d
     
-    def __init__(self,M:float,T0:Union[float,List[float]],
-                 P0:Union[float,List[float]],
+    def __init__(self, 
                  hub_location:float=0,
                  shroud_location:float=0,
-                 P:Optional[Union[float,List[float]]]=None,
                  beta:Union[float,List[float]]=[0],
                  percent_radii:Union[float,List[float]]=[0.5]):
         """Initializes the inlet station. 
@@ -38,19 +36,21 @@ class Inlet(BladeRow):
         """
         super().__init__(row_type=RowType.Inlet,hub_location=hub_location,shroud_location=shroud_location,stage_id=-1)
         self.beta1 = convert_to_ndarray(beta)
-        self.M = convert_to_ndarray(M)
-        self.T0 = convert_to_ndarray(T0)
-        
-        if P is not None:
-            self.P = convert_to_ndarray(P)
-            self.IsCompressor = True 
-        else:
-            self.P0 = convert_to_ndarray(P0)
+        self.T0 = convert_to_ndarray(T0)            
         self.percent_hub_shroud = convert_to_ndarray(percent_radii)
-   
-    def initialize_inputs(self,num_streamlines:int=5):
+    
+    def init_compressor(self,P:Union[float,List[float]],T:Union[float,List[float]],M:Union[float,List[float]]):
+        self.IsCompressor = True
+        self.P = convert_to_ndarray(P)
+        self.M = convert_to_ndarray(M)
+        
+    def init_turbine(self,P0:Union[float,List[float]],T0:Union[float,List[float]],M:Union[float,List[float]]):
+        self.P0 = convert_to_ndarray(P0)
+        self.M = convert_to_ndarray(M)
+        
+    def __interpolate_quantities__(self,num_streamlines:int=5):
         """Initializes the inputs 
-
+        
         Args:
             num_streamlines (int, optional): _description_. Defaults to 5.
             IsCompressor (bool, optional): This is if static pressure is defined at the inlet and total pressure at the outlet. Defaults to False.
@@ -66,7 +66,7 @@ class Inlet(BladeRow):
         self.beta2 = np.radians(convert_to_ndarray(self.beta1))
         self.alpha1 = np.radians(convert_to_ndarray(self.beta1))         
         
-    def initialize_fluid(self,fluid:Optional[Solution]=None,R:float=287.15,gamma:float=1.4,Cp:float=1024):
+    def __initialize_fluid__(self,fluid:Optional[Solution]=None,R:float=287.15,gamma:float=1.4,Cp:float=1024):
         """Initialize the inlet using the fluid. This function should be called by a class that inherits from spool
 
         Args:
@@ -110,7 +110,7 @@ class Inlet(BladeRow):
         self.T0_fun = interp1d(self.percent_hub_shroud,self.T0)
         self.mprime = [0] # type: ignore
         
-    def initialize_velocity(self,passage:Passage,num_streamlines:int):
+    def __initialize_velocity__(self,passage:Passage,num_streamlines:int):
         """Initialize velocity calculations. Assumes streamlines and inclination angles have been calculated 
             Call this before performing calculations
             

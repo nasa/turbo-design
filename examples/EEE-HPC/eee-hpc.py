@@ -11,11 +11,11 @@ e3_hpc = pickle.load(open('e3_hpc_processed.pkl','rb'))
 hub = e3_hpc['hub']
 shroud = e3_hpc['shroud']
 
-# TurboDesign Setup 
-nblades = [46,76,48,70] # Vanes, Rotors, Vanes, Rotors
-P0 = 1257450        # Pa
-T0 = 1587           # K
-P = 230.295*1000    # Pa
+# TurboDesign Setup - Climb
+P0_Ratio = 23
+P0 = 59641.8        # Total Pressure [Pa]
+T0 = 1587           # Total Temperature [K]
+P = P0              # Static Pressure [Pa] @ mach = 0
 n_streamlines = 12
 
 # Fluid
@@ -23,13 +23,8 @@ fluid = Solution('air.yaml')
 fluid.TP = T0, P0 # Use pascal for cantera
 print(f"Coefficient of Pressure [J/Kg] {fluid.cp:0.4f}")
 #%% Defining the Inlet
-inlet = Inlet(M=0.1,
-                 P0=[P0,P0],
-                 T0=[T0,T0],
-                 beta=[0,0],
-                 percent_radii=[0,1],
-                 location=0)
-outlet = Outlet(P=P,percent_radii=[0.5],num_streamlines=n_streamlines)
+inlet = Inlet(M=0, P0=[P0], T0=[T0,T0], beta=[0,0], percent_radii=[0,1], hub_location=0, shroud_location=0)
+outlet = Outlet(P0=P0*P0_Ratio,percent_radii=[0.5],num_streamlines=n_streamlines)
 
 #%% Define Blade Rows, processed data is already in mm, hub is already in mm 
 cax_arr = [ (blade[0,:,0].max()-blade[0][0,:,0].min())/1000 for blade in e3_hpc['rotor_stator'] ]
@@ -83,37 +78,38 @@ stator9 = BladeRow(row_type=RowType.Stator, hub_location=hub_exit_locations[18],
 
 rotor10 = BladeRow(row_type=RowType.Rotor, hub_location=hub_exit_locations[19],shroud_location=shroud_exit_locations[19],stage_id=10)
 stator10 = BladeRow(row_type=RowType.Stator, hub_location=hub_exit_locations[20],shroud_location=shroud_exit_locations[20],stage_id=10)
+ 
+ # Set an axial chord and number of blades (solidity)
+IGV1.axial_chord = cax_arr[0]; IGV1.num_blades = 32
+rotor1.axial_chord = cax_arr[1]; rotor1.num_blades = 28 
+stator1.axial_chord = cax_arr[2]; stator1.num_blades = 50
 
-IGV1.axial_chord = cax_arr[0]
-rotor1.axial_chord = cax_arr[1] # Set an axial chord
-stator1.axial_chord = cax_arr[2]
+rotor2.axial_chord = cax_arr[3]; rotor2.num_blades = 38
+stator2.axial_chord = cax_arr[4]; stator2.num_blades = 68
 
-rotor2.axial_chord = cax_arr[3]
-stator2.axial_chord = cax_arr[4]
+rotor3.axial_chord = cax_arr[5]; rotor3.num_blades = 50
+stator3.axial_chord = cax_arr[6]; stator3.num_blades = 83
 
-rotor3.axial_chord = cax_arr[5]
-stator3.axial_chord = cax_arr[6]
+rotor4.axial_chord = cax_arr[7]; rotor4.num_blades = 60
+stator4.axial_chord = cax_arr[8]; stator4.num_blades = 92
 
-rotor4.axial_chord = cax_arr[7]
-stator4.axial_chord = cax_arr[8]
+rotor5.axial_chord = cax_arr[9]; rotor5.num_blades = 70 
+stator5.axial_chord = cax_arr[10]; stator5.num_blades = 110
 
-rotor5.axial_chord = cax_arr[9]
-stator5.axial_chord = cax_arr[10]
+rotor6.axial_chord = cax_arr[11]; rotor6.num_blades = 80
+stator6.axial_chord = cax_arr[12]; stator6.num_blades = 120
 
-rotor6.axial_chord = cax_arr[11]
-stator6.axial_chord = cax_arr[12]
+rotor7.axial_chord = cax_arr[13]; rotor7.num_blades = 82 
+stator7.axial_chord = cax_arr[14]; stator7.num_blades = 112
 
-rotor7.axial_chord = cax_arr[13]
-stator7.axial_chord = cax_arr[14]
+rotor8.axial_chord = cax_arr[15]; rotor8.num_blades = 84
+stator8.axial_chord = cax_arr[16]; stator8.num_blades = 104
 
-rotor8.axial_chord = cax_arr[15]
-stator8.axial_chord = cax_arr[16]
+rotor9.axial_chord = cax_arr[17]; rotor9.num_blades = 88
+stator9.axial_chord = cax_arr[18]; stator9.num_blades = 118
 
-rotor9.axial_chord = cax_arr[17]
-stator9.axial_chord = cax_arr[18]
-
-rotor10.axial_chord = cax_arr[19]
-stator10.axial_chord = cax_arr[20]
+rotor10.axial_chord = cax_arr[19]; rotor10.num_blades = 95
+stator10.axial_chord = cax_arr[20]; stator10.num_blades = 140 
 
 gamma = 1.4
 Cp = gamma/(gamma-1) * 287.15
