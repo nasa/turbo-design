@@ -1,53 +1,12 @@
 from typing import List, Optional, Tuple
 import numpy as np
-import math
 import numpy.typing as npt
 from .bladerow import BladeRow, compute_gas_constants
 from .enums import RowType, LossType
 from scipy.integrate import trapezoid
 from .passage import Passage
 from .isentropic import IsenP
-
-def T0_coolant_weighted_average(row:BladeRow) -> float:
-    """Calculate the new weighted Total Temperature array considering coolant
-
-    Args:
-        coolant (Coolant): Coolant
-        massflow (np.ndarray): massflow mainstream
-
-    Returns:
-        float: Total Temperature drop
-    """
-    
-    massflow = row.massflow
-    total_massflow_no_coolant = row.total_massflow_no_coolant
-    Cp = row.Cp
-    
-    Cpc = row.coolant.Cp
-    T0c = row.coolant.T0
-    massflow_coolant = row.coolant.massflow_percentage*total_massflow_no_coolant*row.massflow[1:]/row.massflow[-1] 
-    if massflow_coolant.mean()>0:
-        if row.row_type == RowType.Stator:
-            T0= row.T0
-            dT0 = T0.copy() * 0 
-            T0_new = (massflow[1:]*Cp*T0[1:] + massflow_coolant*Cpc*T0c) \
-                        /(massflow[1:]*Cp + massflow_coolant*Cpc)
-            dT0[1:] = T0_new - row.T0[1:]
-            dT0[0] = dT0[1]
-        else:
-            T0R = row.T0R
-            T0R_new = T0R.copy()
-            Cp = row.Cp
-            T0R_new[1:] = (massflow[1:]*Cp*T0R[1:] + massflow_coolant*Cpc*T0c) \
-                        /(massflow[1:]*Cp + massflow_coolant*Cpc)
-            T0R_new[0] = T0R_new[1]
-            
-            T = T0R_new - row.W**2/(2*Cp)   # Dont change the velocity triangle but adjust the static temperature 
-            T0_new = T+row.V**2/(2*Cp)      # Use new static temperature to calculate the total temperature 
-            dT0 = T0_new - row.T0
-        return dT0
-    else:
-        return row.T0*0
+from .coolant import T0_coolant_weighted_average
 
 def compute_massflow(row:BladeRow) -> None:
     """Populates row.massflow and row.calculated_massflow 
@@ -93,7 +52,7 @@ def compute_reynolds(rows:List[BladeRow],passage:Passage):
     
     for i in range(1,len(rows)):
         row = rows[i]
-        xr = passage.get_xr_slice(0.5,(rows[i-1].location,row.percent_hub))
+        xr = passage.get_xr_slice(0.5,(rows[i-1].hub_location,row.percent_hub))
         dx = np.diff(xr[:,0])
         dr = np.diff(xr[:,1])
         c = np.sum(np.sqrt(dx**2+dr**2))
@@ -128,6 +87,7 @@ def compute_power(row:BladeRow,upstream:BladeRow) -> None:
         row.T0_is = 0 * row.T0 # Make it an array
     else:
         P0_P = (upstream.P0/row.P).mean()
+        row.P02_P01 = (row.P0/upstream.P0).mean()
         row.T_is = upstream.T0 * (1/P0_P)**((row.gamma-1)/row.gamma)
         a = np.sqrt(row.gamma*row.R*row.T_is)
         row.T0_is = row.T_is * (1+(row.gamma-1)/2*(row.V/a)**2)
@@ -206,7 +166,7 @@ def compute_quantities(row:BladeRow,upstream:BladeRow):
         row.T0R = row.T + row.W**2 / (2*row.Cp)
         row.P0R = row.P*(row.T0R/row.T)**((row.gamma)/(row.gamma-1))
    
-def stator_calc(row:BladeRow,upstream:BladeRow,downstream:Optional[BladeRow]=None,calculate_vm:bool=True):
+def stator_calc(row:BladeRow,upstream:BladeRow,downstream:Optional[BladeRow]=None,calculate_vm:bool=True, P0_specified:bool=False):
     """Given P0, T0, P, alpha2 of stator calculate all other quantities
 
     Usage:
@@ -229,8 +189,12 @@ def stator_calc(row:BladeRow,upstream:BladeRow,downstream:Optional[BladeRow]=Non
     # else:
     #     row.P = upstream.P    
     
-    # Static Pressure is assumed 
-    row.P0 = upstream.P0 - row.Yp*(upstream.P0-row.P)
+    # Static Pressure is assumed
+    if P0_specified:
+        row.P = upstream.P0 + (row.P0- upstream.P0)/row.Yp
+    else:
+        row.P0 = upstream.P0 - row.Yp*(upstream.P0-row.P)
+    
     
     if downstream is not None:
         row.P0_P = float((row.P0/downstream.P).mean())
@@ -252,7 +216,6 @@ def stator_calc(row:BladeRow,upstream:BladeRow,downstream:Optional[BladeRow]=Non
         row.Vr = row.Vm*np.sin(row.phi)
         row.Vt = row.Vm*np.tan(row.alpha2)
         row.V = np.sqrt(row.Vx**2 + row.Vr**2 + row.Vt**2)
-        
         row.T = row.P/(row.R*row.rho)   # We know P, this is a guess
         row.M = row.V/np.sqrt(row.gamma*row.R*row.T)
         
@@ -264,21 +227,20 @@ def stator_calc(row:BladeRow,upstream:BladeRow,downstream:Optional[BladeRow]=Non
     row.Wt = row.Vt-row.U
     row.P0_stator_inlet = upstream.P0
 
-def rotor_calc(row:BladeRow,upstream:BladeRow,calculate_vm:bool=True):
+def rotor_calc(row:BladeRow,upstream:BladeRow,calculate_vm:bool=True,P0_specified:bool=False):
     """Calculates quantities given beta2 
 
     Args:
         row (BladeRow): Rotor Row
         upstream (BladeRow): Stator Row or Rotor Row
     """
-    row.P0_stator_inlet = upstream.P0_stator_inlet
+    row.P0 = upstream.P0
     ## P0_P is assumed 
     # row.P = row.P0_stator_inlet*1/row.P0_P
     
     # Static Pressure is assumed
-    row.P0_P = (row.P0_stator_inlet/row.P).mean()
+    row.P0_P = (row.P0/row.P).mean()
     upstream_radius = upstream.r
-    row.U = row.omega*row.r
     # Upstream Relative Frame Calculations 
     upstream.U = upstream.rpm*np.pi/30 * upstream_radius # rad/s 
     upstream.Wt = upstream.Vt - upstream.U
@@ -287,10 +249,12 @@ def rotor_calc(row:BladeRow,upstream:BladeRow,calculate_vm:bool=True):
     upstream.T0R = upstream.T+upstream.W**2/(2*upstream.Cp)
     upstream.P0R = upstream.P * (upstream.T0R/upstream.T)**((upstream.gamma)/(upstream.gamma-1))      
     upstream.M_rel = upstream.W/np.sqrt(upstream.gamma*upstream.R*upstream.T)
-    
     upstream_rothalpy = upstream.T0R*upstream.Cp - 0.5*upstream.U**2 # H01R - 1/2 U1^2 
+    row.U = row.omega*row.r
+    
     if np.any(upstream_rothalpy < 0):
         print('U is too high, reduce RPM or radius')
+        
     # Rotor Exit Calculations
     row.beta1 = upstream.beta2
     #row.Yp # Evaluated earlier 
@@ -315,7 +279,10 @@ def rotor_calc(row:BladeRow,upstream:BladeRow,calculate_vm:bool=True):
         row.M = row.V/np.sqrt(row.gamma*row.R*row.T)
         row.Vm = np.sqrt(row.Vx**2+row.Vr**2)
         row.T0 = row.T + row.V**2/(2*row.Cp)
-        row.P0 = row.P*(row.T0/row.T)**(row.gamma/(row.gamma-1))
+        if P0_specified:
+            row.P = row.P0 / (row.T0/row.T)**(row.gamma/(row.gamma-1))
+        else:
+            row.P0 = row.P*(row.T0/row.T)**(row.gamma/(row.gamma-1))
         row.alpha2 = np.arctan2(row.Vt,row.Vm)
     else: # We know Vm, P0, T0
         row.Vr = row.Vm*np.sin(row.phi)
@@ -331,7 +298,10 @@ def rotor_calc(row:BladeRow,upstream:BladeRow,calculate_vm:bool=True):
         
         row.M = row.V/np.sqrt(row.gamma*row.R*row.T)
         T0_T = (1+(row.gamma-1)/2 * row.M**2)
-        row.P0 = row.P * T0_T**(row.gamma/(row.gamma-1))
+        if P0_specified: 
+            row.P = row.P0 / T0_T**(row.gamma/(row.gamma-1))
+        else:
+            row.P0 = row.P * T0_T**(row.gamma/(row.gamma-1))
     
     row.M_rel = row.W/np.sqrt(row.gamma*row.R*row.T)
     row.T0 = row.T+row.V**2/(2*row.Cp)

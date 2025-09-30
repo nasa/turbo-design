@@ -45,7 +45,7 @@ class CompressorSpool(Spool):
         # Massflow from inlet already defined
         # Check if both inlet and outlet are compressors or turbines
         assert(self.blade_rows[0].IsCompressor != self.blade_rows[-1].IsCompressor, 
-               'Inlet and Outlet have to be defined the same way either both init_compressor or init_turbine')
+               'Inlet and Outlet have to be defined the same way either both init_compressor or init_turbine') # type: ignore
         
         # Inlet
         W0 = self.massflow
@@ -77,9 +77,9 @@ class CompressorSpool(Spool):
             P0 = inlet.get_total_pressure(inlet.percent_hub_shroud[j]) # type: ignore
             percents = np.zeros(shape=(len(self.blade_rows)-2)) + 0.3
             percents[-1] = 1
-            Ps_range = outlet_pressure_breakdown(percents=percents,inletP0=inlet.P0[j],outletP=outlet.P[j]) # type: ignore
+            P0_range = outlet_pressure_breakdown(percents=percents,inletP0=inlet.P0[j],outletP=outlet.P0[j]) # type: ignore
             for i in range(1,len(self.blade_rows)-1):
-                self.blade_rows[i].P[j] = Ps_range[i-1]
+                self.blade_rows[i].P0[j] = P0_range[i-1]
             
         # Pass T0 and P0 to all the other blade_rows
         for i in range(1,len(self.blade_rows)-1):
@@ -228,7 +228,7 @@ class CompressorSpool(Spool):
                 2. Change degree of reaction to match the total massflow
                 3. Adjust the streamlines for each blade row to balance the massflow
         """
-        IsCompressor = blade_rows[0].IsCompressor
+        IsCompressor = self.blade_rows[0].IsCompressor
         # Balance the massflow between Stages
         def balance_massflows_loop(x0:List[float],blade_rows:List[BladeRow],Pinlet:npt.NDArray,Poutlet:npt.NDArray,balance_mean_pressure:bool=True):
             """Balance Massflows. 
@@ -252,31 +252,17 @@ class CompressorSpool(Spool):
             # blade_rows_backup = copy.deepcopy(blade_rows)
             if balance_mean_pressure:
                 for j in range(self.num_streamlines):
-                    if IsCompressor:
-                        P = Pinlet
-                        P0 = Poutlet
-                        P0s = outlet_pressure_breakdown(x0,P[j],P0[j])
-                        for i in range(1,len(blade_rows)-2):
-                            blade_rows[i].P0[j] = float(P0s[i-1]) # NOTE: For Compressors we set the total pressure for each blade row.
-                    else:
-                        P0 = Pinlet; 
-                        P = Poutlet
-                        Ps = outlet_pressure_breakdown(x0,P0[j],P[j])
-                        for i in range(1,len(blade_rows)-2):
-                            blade_rows[i].P[j] = float(Ps[i-1]) # type: ignore
-                if IsCompressor:
-                    # Set the total pressure for the 2nd to last row to match the outlet total pressure.
-                    blade_rows[-2].P0 = P0
-                else:
-                    # Set the static pressure for the 2nd to last row to match the outlet static pressure.
-                    blade_rows[-2].P = P
+                    P0 = Pinlet; 
+                    P = Poutlet
+                    Ps = outlet_pressure_breakdown(x0,P0[j],P[j])
+                    for i in range(1,len(blade_rows)-2):
+                        blade_rows[i].P[j] = float(Ps[i-1]) # type: ignore
+                # Set the static pressure for the 2nd to last row to match the outlet static pressure.
+                blade_rows[-2].P = P
             else:
                 for i in range(1,len(blade_rows)-1):
                     for j in range(self.num_streamlines):
-                        if IsCompressor:
-                            blade_rows[i].P0[j] = Poutlet[j]*x0[(i-1)*self.num_streamlines+j]   # type: ignore # x0 size = num_streamlines -1 
-                        else:
-                            blade_rows[i].P[j] = Pinlet[j]*x0[(i-1)*self.num_streamlines+j]     # type: ignore # x0 size = num_streamlines -1 
+                        blade_rows[i].P[j] = Pinlet[j]*x0[(i-1)*self.num_streamlines+j]     # type: ignore # x0 size = num_streamlines -1 
             
             calculate_massflows(blade_rows,True,self.fluid)
             print(x0)

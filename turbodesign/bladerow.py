@@ -18,7 +18,7 @@ class BladeRow:
     stage_id:int = 0
     row_type: RowType = RowType.Stator
     IsCompressor:bool = False 
-    loss_function:Optional[LossBaseClass]
+    loss_function:LossBaseClass
     cutting_line:line2D         # Line perpendicular to the streamline
     rp:float = 0.4              # Degree of Reaction
     
@@ -109,6 +109,7 @@ class BladeRow:
     power_mean:float = 0
     power_distribution:npt.NDArray  # How power is divided by radius. Example: Equal distribution [0.33 0.33 0.33]. More at Tip [0.2,0.3,0.5]. More at Hub [0.6 0.5 ]
     P0_P:float = 0                  # Total to Static Pressure Ratio 
+    P02_P01:float = 0
     Power_Type:PowerType
     euler_power:float = 0
     Reynolds:float = 0

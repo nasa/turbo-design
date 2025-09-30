@@ -217,30 +217,54 @@ class Passage:
         
         return line2D((xhub,rhub),(xshroud,rshroud)), t_hub, t_shroud # type: ignore
     
-    def get_xr_slice(self,t_span:float,percent_hub:Tuple[float,float],resolution:int=100):
-        """Returns the xr coordinates of a streamline, a line that is parallel to both hub and shroud
-            
+    def get_xr_slice(self, t_span: float, percent_hub: Tuple[float, float], 
+                     percent_shroud: Optional[Tuple[float, float]] = None, resolution: int = 100) -> npt.NDArray[np.float64]:
+        """
+        Return the (x, r) coordinates of a *straight* streamline segment that
+        connects corresponding hub and shroud points, sampled uniformly along
+        each surface between the given percent limits.
+
+        The point returned on each connecting line is at parametric position
+        `t_span` in [0, 1], where 0 = hub point and 1 = shroud point.
+
         Args:
-            t_span (float): _description_
-            meridional_location (float): _description_
-            resolution (int): number of points to resolve 
+            t_span: Interpolation parameter along each hub→shroud connector (0..1).
+            percent_hub: (start, end) fractional arc-length positions along the hub (0..1).
+            percent_shroud: Optional (start, end) along the shroud (0..1). If None,
+                the shroud uses the same normalized range as `percent_hub`.
+            resolution: Number of sample points along the streamwise direction.
 
         Returns:
-            np.NDArray: _description_
+            (resolution, 2) array of [x, r] coordinates.
         """
-        t_hub = np.linspace(percent_hub[0],percent_hub[1],resolution)
-        t_hub = convert_to_ndarray(t_hub)*self.hub_length
-        
-        shroud_pts_cyl = np.vstack([self.xshroud(t_hub),self.rshroud(t_hub)]).transpose()
-        hub_pts_cyl = np.vstack([self.xhub(t_hub),self.rhub(t_hub)]).transpose()
-        n = len(t_hub)
-            
-        xr = np.zeros((n,2))
-        for j in range(n):
-            l = line2D(hub_pts_cyl[j,:],shroud_pts_cyl[j,:]) # type: ignore
-            xr[j,0],xr[j,1] = l.get_point(t_span)
-            
-        return xr
+        # ---- validation
+        if not (0.0 <= t_span <= 1.0):
+            raise ValueError("t_span must be in [0, 1].")
+        if resolution < 2:
+            raise ValueError("resolution must be >= 2.")
+        if not (0.0 <= percent_hub[0] <= 1.0 and 0.0 <= percent_hub[1] <= 1.0):
+            raise ValueError("percent_hub values must be in [0, 1].")
+        if percent_shroud is not None and not (
+            0.0 <= percent_shroud[0] <= 1.0 and 0.0 <= percent_shroud[1] <= 1.0
+        ):
+            raise ValueError("percent_shroud values must be in [0, 1].")
+
+        # ---- parameterize along hub and shroud (use each surface's own length!)
+        t_hub = np.linspace(percent_hub[0], percent_hub[1], resolution) * self.hub_length
+        if percent_shroud is None:
+            t_shroud = np.linspace(percent_hub[0], percent_hub[1], resolution) * self.shroud_length
+        else:
+            t_shroud = np.linspace(percent_shroud[0], percent_shroud[1], resolution) * self.shroud_length
+
+        # ---- sample hub & shroud curves (x, r)
+        hub_pts = np.column_stack([self.xhub(t_hub), self.rhub(t_hub)])          # (N, 2)
+        shroud_pts = np.column_stack([self.xshroud(t_shroud), self.rshroud(t_shroud)])  # (N, 2)
+
+        # ---- vectorized interpolation along each connector: hub + t*(shroud - hub)
+        xr = hub_pts + (shroud_pts - hub_pts) * float(t_span)  # (N, 2)
+
+        return xr.astype(np.float64, copy=False)
+
     
     def get_m(self,t_span:float,resolution:int=100) -> npt.NDArray:
         """Meridional cooridnates
@@ -279,6 +303,14 @@ class Passage:
             _type_: _description_
         """
         return np.sum(np.sqrt(np.diff(self.xhub_pts)**2 + np.diff(self.rhub_pts)**2))
+    
+    @property
+    def shroud_length(self):
+        """returns the computed length of the shroud 
+        Returns:
+            _type_: _description_
+        """
+        return np.sum(np.sqrt(np.diff(self.xshroud_pts)**2 + np.diff(self.rshroud_pts)**2))
     
     def plot_cuts(self,percent_axial:List[float]=[]):
         """_summary_

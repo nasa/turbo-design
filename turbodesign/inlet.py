@@ -16,7 +16,7 @@ class Inlet(BladeRow):
         (BladeRow): Defines the properties of the blade row
     """
     fun: interp1d
-    
+    static_defined: bool
     def __init__(self, 
                  hub_location:float=0,
                  shroud_location:float=0,
@@ -36,18 +36,20 @@ class Inlet(BladeRow):
         """
         super().__init__(row_type=RowType.Inlet,hub_location=hub_location,shroud_location=shroud_location,stage_id=-1)
         self.beta1 = convert_to_ndarray(beta)
-        self.T0 = convert_to_ndarray(T0)            
+                   
         self.percent_hub_shroud = convert_to_ndarray(percent_radii)
     
     def init_compressor(self,P:Union[float,List[float]],T:Union[float,List[float]],M:Union[float,List[float]]):
-        self.IsCompressor = True
         self.P = convert_to_ndarray(P)
         self.M = convert_to_ndarray(M)
+        self.T = convert_to_ndarray(T)
+        self.static_defined = True
         
     def init_turbine(self,P0:Union[float,List[float]],T0:Union[float,List[float]],M:Union[float,List[float]]):
         self.P0 = convert_to_ndarray(P0)
+        self.T0 = convert_to_ndarray(T0) 
         self.M = convert_to_ndarray(M)
-        
+        self.static_defined = False
     def __interpolate_quantities__(self,num_streamlines:int=5):
         """Initializes the inputs 
         
@@ -56,7 +58,7 @@ class Inlet(BladeRow):
             IsCompressor (bool, optional): This is if static pressure is defined at the inlet and total pressure at the outlet. Defaults to False.
         """
         self.M = interpolate_quantities(self.M, self.percent_hub_shroud, np.linspace(0,1,num_streamlines))
-        if self.IsCompressor: # This comes from the initialization
+        if self.static_defined: # This comes from the initialization
             self.P = interpolate_quantities(self.P,self.percent_hub_shroud, np.linspace(0,1,num_streamlines))
         else:
             self.P0 = interpolate_quantities(self.P0,self.percent_hub_shroud, np.linspace(0,1,num_streamlines))
@@ -74,15 +76,15 @@ class Inlet(BladeRow):
             R (float, optional): Ideal Gas Constant. Defaults to 287.15 J/(Kg K) for air
             gamma (float, optional): _description_. Defaults to 1.4.
             Cp (float, optional): _description_. Defaults to 1024 J/(Kg K).
-        
         """
         self.loss_function = None
         
         if fluid:
             fluid.TP = self.T0.mean(),self.P0.mean()
             self.gamma = fluid.cp/fluid.cv
-            if self.IsCompressor:
+            if not self.static_defined:
                 self.P0 = self.P * (1+(self.gamma-1)/2 * self.M**2) ** (self.gamma/(self.gamma-1))
+                self.T0 = self.T * (1+(self.gamma-1)/2 * self.M**2)
             else:
                 self.P = self.P0 * 1/(1 + (self.gamma-1) * self.M**2)**(self.gamma/(self.gamma-1))
             self.T = self.T0 * 1/(1 + (self.gamma-1) * self.M**2)
@@ -93,8 +95,9 @@ class Inlet(BladeRow):
             self.gamma = gamma
             self.R = R
             self.T = self.T0 * 1/(1 + (self.gamma-1) * self.M**2)
-            if self.IsCompressor:
+            if not self.IsCompressor:
                 self.P0 = self.P * (1+(self.gamma-1)/2 * self.M**2) ** (self.gamma/(self.gamma-1)) 
+                self.T0 = self.T * (1+(self.gamma-1)/2 * self.M**2)
             else:
                 self.P = self.P0 * 1/(1 + (self.gamma-1) * self.M**2)**(self.gamma/(self.gamma-1))
             self.rho = self.P/(self.R*self.T)

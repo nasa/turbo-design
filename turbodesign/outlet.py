@@ -12,6 +12,8 @@ from scipy.interpolate import interp1d
 class Outlet(BladeRow):
     P_fun:interp1d
     P0_fun:interp1d
+    num_streamlines:int 
+    static_defined: bool = True
     
     def __init__(self,num_streamlines:int=3,location:float=1):
         """Initialize the outlet 
@@ -26,8 +28,9 @@ class Outlet(BladeRow):
         self.row_type = RowType.Outlet
         self.loss_function = None
         self.location = location
+        self.num_streamlines = num_streamlines
         
-    def init_turbine(self,P:Union[List[float],float],percent_radii:Union[List[float],float]):
+    def init_static(self,P:Union[List[float],float],percent_radii:Union[List[float],float]):
         """Initialize turbine inputs 
 
         Args:
@@ -35,13 +38,14 @@ class Outlet(BladeRow):
             percent_radii (Union[List[float],float]): percent radii where the exit static pressure is defined.
         """
         if len(self.percent_hub_shroud)==1:
-            self.percent_hub_shroud = np.arange(0,1,num_streamlines)
+            self.percent_hub_shroud = np.arange(0,1,self.num_streamlines)
         self.percent_hub_shroud = convert_to_ndarray(percent_radii)
         self.P = convert_to_ndarray(P)
         self.P = self.P[0]+0*self.percent_hub_shroud*0
         self.P_fun = interp1d(self.percent_hub_shroud,self.P)
-    
-    def init_compressor(self,P0:Union[List[float],float],percent_radii:Union[List[float],float]):
+        self.static_defined = True
+        
+    def init_total(self,P0:Union[List[float],float],percent_radii:Union[List[float],float]):
         """Initialize compressor inputs 
 
         Args:
@@ -49,13 +53,15 @@ class Outlet(BladeRow):
             percent_radii (Union[List[float],float]): percent radii where exit total pressure is defined 
         """
         if len(self.percent_hub_shroud)==1:
-            self.percent_hub_shroud = np.arange(0,1,num_streamlines)
+            self.percent_hub_shroud = np.arange(0,1,self.num_streamlines)
         self.percent_hub_shroud = convert_to_ndarray(percent_radii)
         self.IsCompressor = True
         self.P0 = convert_to_ndarray(P0)
         self.P0 = self.P0[0]+0*self.percent_hub_shroud*0
         self.P0_fun = interp1d(self.percent_hub_shroud,self.P0)
         self.IsCompressor = True
+        self.static_defined = False 
+        self.P = self.P0 # Do this first but we will adjust
         
     def transfer_quantities(self,upstream:BladeRow):
         """Transfer quantities from upstream row to outlet while maintaining the outlet static pressure
