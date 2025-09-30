@@ -166,7 +166,7 @@ def compute_quantities(row:BladeRow,upstream:BladeRow):
         row.T0R = row.T + row.W**2 / (2*row.Cp)
         row.P0R = row.P*(row.T0R/row.T)**((row.gamma)/(row.gamma-1))
    
-def stator_calc(row:BladeRow,upstream:BladeRow,downstream:Optional[BladeRow]=None,calculate_vm:bool=True, P0_specified:bool=False):
+def stator_calc(row:BladeRow,upstream:BladeRow,downstream:Optional[BladeRow]=None,calculate_vm:bool=True, static_defined:bool=False):
     """Given P0, T0, P, alpha2 of stator calculate all other quantities
 
     Usage:
@@ -179,7 +179,8 @@ def stator_calc(row:BladeRow,upstream:BladeRow,downstream:Optional[BladeRow]=Non
         row (BladeRow): Stator Row
         upstream (BladeRow): Stator or Rotor Row 
         downstream (BladeRow): Stator or Rotor Row. Defaults to None
-         
+        calculate_vm (bool): True to calculate the meridional velocity. False, do not calculate this and let radeq calculate it
+        static_defined (bool): True if static conditions defined at the outlet. False if total conditions defined at outlet
     """
     ## degree of reaction (rp) is assumed 
     # downstream.P = upstream.P0 * 1/downstream.P0_P 
@@ -190,11 +191,10 @@ def stator_calc(row:BladeRow,upstream:BladeRow,downstream:Optional[BladeRow]=Non
     #     row.P = upstream.P    
     
     # Static Pressure is assumed
-    if P0_specified:
-        row.P = upstream.P0 + (row.P0- upstream.P0)/row.Yp
+    if static_defined:
+        row.P0 = upstream.P0 - row.Yp*(upstream.P0-row.P) # When static conditions are defined, use it to calculate P0
     else:
-        row.P0 = upstream.P0 - row.Yp*(upstream.P0-row.P)
-    
+        row.P = upstream.P0 + (row.P0- upstream.P0)/row.Yp # When total conditions are defined we calculate static pressure
     
     if downstream is not None:
         row.P0_P = float((row.P0/downstream.P).mean())
@@ -227,12 +227,14 @@ def stator_calc(row:BladeRow,upstream:BladeRow,downstream:Optional[BladeRow]=Non
     row.Wt = row.Vt-row.U
     row.P0_stator_inlet = upstream.P0
 
-def rotor_calc(row:BladeRow,upstream:BladeRow,calculate_vm:bool=True,P0_specified:bool=False):
+def rotor_calc(row:BladeRow,upstream:BladeRow,calculate_vm:bool=True,static_defined:bool=False):
     """Calculates quantities given beta2 
 
     Args:
         row (BladeRow): Rotor Row
         upstream (BladeRow): Stator Row or Rotor Row
+        calculate_vm (bool): True to calculate the meridional velocity. False, do not calculate this and let radeq calculate it
+        static_defined (bool): True if static conditions defined at the outlet. False if total conditions defined at outlet
     """
     row.P0 = upstream.P0
     ## P0_P is assumed 
@@ -279,10 +281,10 @@ def rotor_calc(row:BladeRow,upstream:BladeRow,calculate_vm:bool=True,P0_specifie
         row.M = row.V/np.sqrt(row.gamma*row.R*row.T)
         row.Vm = np.sqrt(row.Vx**2+row.Vr**2)
         row.T0 = row.T + row.V**2/(2*row.Cp)
-        if P0_specified:
-            row.P = row.P0 / (row.T0/row.T)**(row.gamma/(row.gamma-1))
+        if static_defined: # static conditions defined at the outlet and bladerows
+            row.P0 = row.P*(row.T0/row.T)**(row.gamma/(row.gamma-1)) # use static conditions to calculate total
         else:
-            row.P0 = row.P*(row.T0/row.T)**(row.gamma/(row.gamma-1))
+            row.P = row.P0 / (row.T0/row.T)**(row.gamma/(row.gamma-1)) # use total conditions to calculate total
         row.alpha2 = np.arctan2(row.Vt,row.Vm)
     else: # We know Vm, P0, T0
         row.Vr = row.Vm*np.sin(row.phi)
@@ -298,10 +300,10 @@ def rotor_calc(row:BladeRow,upstream:BladeRow,calculate_vm:bool=True,P0_specifie
         
         row.M = row.V/np.sqrt(row.gamma*row.R*row.T)
         T0_T = (1+(row.gamma-1)/2 * row.M**2)
-        if P0_specified: 
-            row.P = row.P0 / T0_T**(row.gamma/(row.gamma-1))
-        else:
+        if static_defined: # static conditions defined at the outlet and bladerows
             row.P0 = row.P * T0_T**(row.gamma/(row.gamma-1))
+        else:
+            row.P = row.P0 / T0_T**(row.gamma/(row.gamma-1))
     
     row.M_rel = row.W/np.sqrt(row.gamma*row.R*row.T)
     row.T0 = row.T+row.V**2/(2*row.Cp)
@@ -319,6 +321,9 @@ def inlet_calc(row:BladeRow):
     row.P = row.P0
     row.rho = row.P/(row.T*row.R)
     total_area = 0
+    iter = 0
+    avg_mach = -1
+    
     for iter in range(5): # Lets converge the Mach and Total and Static pressures
         for j in range(1,len(row.percent_hub_shroud)):
             rho = row.rho[j]
@@ -349,3 +354,44 @@ def inlet_calc(row:BladeRow):
     
     if np.mean(row.M)<0.01:
         print(f"Unusually slow flow:{iter} Mach:{avg_mach}")
+
+def T0_coolant_weighted_average(row:BladeRow) -> npt.NDArray:
+    """Calculate the new weighted Total Temperature array considering coolant
+
+    Args:
+        row (BladeRow): Coolant
+        massflow (np.ndarray): massflow mainstream
+
+    Returns:
+        float: Total Temperature drop
+    """
+    
+    massflow = row.massflow
+    total_massflow_no_coolant = row.total_massflow_no_coolant
+    Cp = row.Cp
+    
+    Cpc = row.coolant.Cp
+    T0c = row.coolant.T0
+    massflow_coolant = row.coolant.massflow_percentage*total_massflow_no_coolant*row.massflow[1:]/row.massflow[-1] 
+    if massflow_coolant.mean()>0:
+        if row.row_type == RowType.Stator:
+            T0= row.T0
+            dT0 = T0.copy() * 0 
+            T0_new = (massflow[1:]*Cp*T0[1:] + massflow_coolant*Cpc*T0c) \
+                        /(massflow[1:]*Cp + massflow_coolant*Cpc)
+            dT0[1:] = T0_new - row.T0[1:]
+            dT0[0] = dT0[1]
+        else:
+            T0R = row.T0R
+            T0R_new = T0R.copy()
+            Cp = row.Cp
+            T0R_new[1:] = (massflow[1:]*Cp*T0R[1:] + massflow_coolant*Cpc*T0c) \
+                        /(massflow[1:]*Cp + massflow_coolant*Cpc)
+            T0R_new[0] = T0R_new[1]
+            
+            T = T0R_new - row.W**2/(2*Cp)   # Dont change the velocity triangle but adjust the static temperature 
+            T0_new = T+row.V**2/(2*Cp)      # Use new static temperature to calculate the total temperature 
+            dT0 = T0_new - row.T0
+        return dT0
+    else:
+        return row.T0*0

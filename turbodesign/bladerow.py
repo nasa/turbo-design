@@ -1,4 +1,4 @@
-from dataclasses import field, Field
+from dataclasses import dataclass, field, Field
 from typing import Any, Callable, List, Optional, Tuple, Union
 from .enums import RowType, PowerType
 import numpy as np 
@@ -6,13 +6,19 @@ import numpy.typing as npt
 from scipy.interpolate import interp1d
 from .arrayfuncs import convert_to_ndarray
 from cantera import Solution, composite
-from .coolant import Coolant
 from pyturbo.helper import line2D
 from pyturbo.aero.airfoil2D import Airfoil2D
 from .loss import LossBaseClass
 from .passage import Passage
     
 
+@dataclass
+class Coolant:
+    T0:float = field(default=900)                               # Kelvin
+    P0:float = field(default=50*101325)                         # Pascal
+    massflow_percentage:float = field(default=0.03)     # Fraction of total massflow going through compressor
+    Cp:float = field(default=1000)                              # J/K
+    
 class BladeRow:
     id:int = 0
     stage_id:int = 0
@@ -648,3 +654,4 @@ def compute_gas_constants(row:BladeRow,fluid:Optional[Solution]=None) -> None:
     # Use Ideal Gas 
     row.rho = row.P/(row.T*row.R)
     row.mu = sutherland(row.T) # type: ignore
+    

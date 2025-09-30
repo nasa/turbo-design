@@ -191,6 +191,8 @@ class Spool:
     # ------------------------------
     def initialize(self) -> None:
         """Initialize massflow and thermodynamic state through rows (turbines)."""
+        Is_static_defined = self.blade_rows[-1].static_defined
+
         # Inlet
         W0 = self.massflow
         inlet: Inlet = self.blade_rows[0]  # type: ignore[assignment]
@@ -222,11 +224,15 @@ class Spool:
             P0 = inlet.get_total_pressure(inlet.percent_hub_shroud[j])  # type: ignore[attr-defined]
             percents = np.zeros(shape=(len(self.blade_rows) - 2)) + 0.3
             percents[-1] = 1
-            Ps_range = outlet_pressure(
-                percents=percents, inletP0=inlet.P0[j], outletP=outlet.P[j]  # type: ignore[index]
-            )
-            for i in range(1, len(self.blade_rows) - 1):
-                self.blade_rows[i].P[j] = Ps_range[i - 1]
+            if Is_static_defined:
+                Ps_range = outlet_pressure(percents=percents, inletP0=inlet.P0[j], outletP=outlet.P[j])
+                for i in range(1, len(self.blade_rows) - 1):
+                    self.blade_rows[i].P[j] = Ps_range[i - 1]
+            else:
+                P0_range = outlet_pressure(percents=percents, inletP0=inlet.P0[j], outletP=outlet.P[j])
+                for i in range(1, len(self.blade_rows) - 1):
+                    self.blade_rows[i].P0[j] = P0_range[i - 1]
+                    
 
         # Pass T0, P0 to downstream rows
         for i in range(1, len(self.blade_rows) - 1):
@@ -271,10 +277,10 @@ class Spool:
             row.R = upstream.R
 
             if row.row_type == RowType.Stator:
-                stator_calc(row, upstream, downstream)  # type: ignore[arg-type]
+                stator_calc(row, upstream, downstream,Is_static_defined)  # type: ignore[arg-type]
                 compute_massflow(row)
             elif row.row_type == RowType.Rotor:
-                rotor_calc(row, upstream)
+                rotor_calc(row, upstream,Is_static_defined)
                 compute_massflow(row)
                 compute_power(row, upstream)
 

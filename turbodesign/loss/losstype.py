@@ -2,7 +2,6 @@ from typing import Any, Dict
 from ..lossinterp import LossInterp
 import os 
 from ..enums import LossType
-from turbodesign.bladerow import BladeRow
 
 class LossBaseClass:  
     data: Dict[str,LossInterp]
@@ -16,7 +15,7 @@ class LossBaseClass:
         
         self._loss_type = lossType
 
-    def __call__(self, row:BladeRow, upstream:BladeRow) -> float:
+    def __call__(self, row:Any, upstream:Any) -> float: # row and upstream should be bladerow type
         return 0 
 
     

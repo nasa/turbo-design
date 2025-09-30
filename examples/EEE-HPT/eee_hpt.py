@@ -1,7 +1,6 @@
-from turbodesign import TurbineSpool, Inlet, RowType, BladeRow, Passage, Outlet, PassageType
+from turbodesign import Spool, Inlet, RowType, BladeRow, Passage, Outlet, PassageType, Coolant
 from turbodesign.enums import MassflowConstraint
-from turbodesign.coolant import Coolant
-from turbodesign.loss.turbine import FixedPressureLoss
+from turbodesign.loss import FixedPressureLoss
 import numpy as np
 from cantera import Solution
 import pickle
@@ -52,14 +51,10 @@ fluid = Solution('air.yaml')
 fluid.TP = T0, P0 # Use pascal for cantera
 print(f"Coefficient of Pressure [J/Kg] {fluid.cp:0.4f}")
 #%% Defining the Inlet
-inlet = Inlet(M=0.1,
-                 P0=[P0,P0],
-                 T0=[T0,T0],
-                 beta=[0,0],
-                 percent_radii=[0,1],
-                 location=0)
-outlet = Outlet(P=P,percent_radii=[0.5],num_streamlines=n_streamlines)
-
+inlet = Inlet(beta=[0,0], percent_radii=[0,1], hub_location=0)
+inlet.init_turbine(P0=[P0,P0],T0=[T0,T0],M=0.1)
+outlet = Outlet(num_streamlines=n_streamlines)
+outlet.init_static(P=P,percent_radii=[0.5])
 #%% Define Blade Rows, processed data is already in mm, hub is already in mm 
 cax1 = ( processed_data[0][0][0,:,0].max()-processed_data[0][0][0,:,0].min() )/1000
 cax2 = ( processed_data[1][0][0,:,0].max()-processed_data[1][0][0,:,0].min() )/1000
@@ -122,7 +117,7 @@ passage = Passage(hub_m[:,0],hub_m[:,1],
                  shroud_m[:,0],shroud_m[:,1],
                  passageType=PassageType.Axial) # type: ignore
 
-spool = TurbineSpool(passage=passage,
+spool = Spool(passage=passage,
             rpm=12400, 
             num_streamlines=n_streamlines, 
             massflow=20, 
