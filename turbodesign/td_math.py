@@ -6,7 +6,6 @@ from .enums import RowType, LossType
 from scipy.integrate import trapezoid
 from .passage import Passage
 from .isentropic import IsenP
-from .coolant import T0_coolant_weighted_average
 
 def compute_massflow(row:BladeRow) -> None:
     """Populates row.massflow and row.calculated_massflow 

@@ -8,9 +8,12 @@ from .arrayfuncs import convert_to_ndarray
 from cantera import Solution, composite
 from pyturbo.helper import line2D
 from pyturbo.aero.airfoil2D import Airfoil2D
-from .loss import LossBaseClass
 from .passage import Passage
-    
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from .loss import LossBaseClass  # type: ignore
+
 
 @dataclass
 class Coolant:
@@ -24,7 +27,7 @@ class BladeRow:
     stage_id:int = 0
     row_type: RowType = RowType.Stator
     IsCompressor:bool = False 
-    loss_function:LossBaseClass
+    loss_function: "LossBaseClass | None" = None
     cutting_line:line2D         # Line perpendicular to the streamline
     rp:float = 0.4              # Degree of Reaction
     

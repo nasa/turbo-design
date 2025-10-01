@@ -276,7 +276,7 @@ class Passage:
         Returns:
             npt.NDArray: _description_
         """
-        xr = self.get_xr_slice(t_span,(0,1),resolution)
+        xr = self.get_xr_slice(t_span=t_span,percent_hub=(0,1),resolution=resolution)
         dx = np.diff(xr[:,0])
         dr = np.diff(xr[:,1])
         m = np.concat([[0],np.cumsum(np.sqrt(dx**2 + dr**2))])

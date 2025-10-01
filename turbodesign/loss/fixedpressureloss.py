@@ -1,6 +1,8 @@
-from ..bladerow import BladeRow
 from .losstype import LossBaseClass
 from ..enums import LossType
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from ..bladerow import BladeRow  # for type hints only
 
 class FixedPressureLoss(LossBaseClass):
     pressure_loss:float
@@ -12,7 +14,7 @@ class FixedPressureLoss(LossBaseClass):
         self.pressure_loss = pressure_loss
     
     
-    def __call__(self,row:BladeRow, upstream:BladeRow) -> float:
+    def __call__(self, row: "BladeRow", upstream: "BladeRow") -> float:
         """Outputs the fixed Pressure Loss
         
         Args:

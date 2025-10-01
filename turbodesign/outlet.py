@@ -37,9 +37,9 @@ class Outlet(BladeRow):
             P (float): Exit static pressure
             percent_radii (Union[List[float],float]): percent radii where the exit static pressure is defined.
         """
+        self.percent_hub_shroud = convert_to_ndarray(percent_radii)
         if len(self.percent_hub_shroud)==1:
             self.percent_hub_shroud = np.arange(0,1,self.num_streamlines)
-        self.percent_hub_shroud = convert_to_ndarray(percent_radii)
         self.P = convert_to_ndarray(P)
         self.P = self.P[0]+0*self.percent_hub_shroud*0
         self.P_fun = interp1d(self.percent_hub_shroud,self.P)
@@ -91,7 +91,7 @@ class Outlet(BladeRow):
         else:
             return self.P_fun(percent_hub_shroud)
     
-    def get_total_pressure(self,self.percent_hub_shroud:Union[float,npt.NDArray]):
+    def get_total_pressure(self, percent_hub_shroud:Union[float,npt.NDArray]):
         """Returns the total pressure at a certain percent hub shroud 
 
         Args:

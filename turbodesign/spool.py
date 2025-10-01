@@ -15,7 +15,7 @@ from scipy.optimize import minimize_scalar, fmin_slsqp
 
 # --- Project-local imports
 from .bladerow import BladeRow, interpolate_streamline_radii
-from .enums import RowType, MassflowConstraint, LossType, PassageType, SolutionType
+from .enums import RowType, MassflowConstraint, LossType, PassageType
 from .loss.turbine import TD2
 from .passage import Passage
 from .inlet import Inlet
@@ -101,7 +101,7 @@ class Spool:
             br.id = i
             if not isinstance(br, (Inlet, Outlet)):
                 br.rpm = rpm
-                br.axial_chord = br.location * self.passage.hub_length
+                br.axial_chord = br.hub_location * self.passage.hub_length
 
         # Propagate initial fluid to rows
         for br in self.blade_rows:
@@ -179,11 +179,11 @@ class Spool:
         for i, tr in enumerate(t_radial):
             t_s, x_s, r_s = self.passage.get_streamline(tr)
             phi, rm, r = self.passage.streamline_curvature(x_s, r_s)
-            row.phi[i] = float(interp1d(t_s, phi)(row.location))
-            row.rm[i] = float(interp1d(t_s, rm)(row.location))
-            row.r[i] = float(interp1d(t_s, r)(row.location))
+            row.phi[i] = float(interp1d(t_s, phi)(row.hub_location))
+            row.rm[i] = float(interp1d(t_s, rm)(row.hub_location))
+            row.r[i] = float(interp1d(t_s, r)(row.hub_location))
             row.m[i] = float(
-                interp1d(t_s, self.passage.get_m(tr, resolution=len(t_s)))(row.location)
+                interp1d(t_s, self.passage.get_m(tr, resolution=len(t_s)))(row.hub_location)
             )
 
     # ------------------------------
@@ -197,9 +197,9 @@ class Spool:
         W0 = self.massflow
         inlet: Inlet = self.blade_rows[0]  # type: ignore[assignment]
         if self.fluid:
-            inlet.initialize_fluid(self.fluid)  # type: ignore[arg-type]
+            inlet.__initialize_fluid__(self.fluid)  # type: ignore[arg-type]
         else:
-            inlet.initialize_fluid(  # type: ignore[call-arg]
+            inlet.__initialize_fluid__(  # type: ignore[call-arg]
                 R=self.blade_rows[1].R,
                 gamma=self.blade_rows[1].gamma,
                 Cp=self.blade_rows[1].Cp,
