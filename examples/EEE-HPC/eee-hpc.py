@@ -1,6 +1,6 @@
-from turbodesign import TurbineSpool, Inlet, RowType, BladeRow, Passage, Outlet, PassageType
+from turbodesign import Spool, Inlet, RowType, BladeRow, Passage, Outlet, PassageType
 from turbodesign.enums import MassflowConstraint
-from turbodesign.coolant import Coolant
+from turbodesign import Coolant
 from turbodesign.loss import FixedPressureLoss
 import numpy as np
 from cantera import Solution
@@ -23,9 +23,11 @@ fluid = Solution('air.yaml')
 fluid.TP = T0, P0 # Use pascal for cantera
 print(f"Coefficient of Pressure [J/Kg] {fluid.cp:0.4f}")
 #%% Defining the Inlet
-inlet = Inlet(M=0, P0=[P0], T0=[T0,T0], beta=[0,0], percent_radii=[0,1], hub_location=0, shroud_location=0)
+inlet = Inlet(hub_location=0, shroud_location=0,beta=[0])
+inlet.init_compressor(M=0, P=[P0], T=[T0])
 outlet = Outlet(P0=P0*P0_Ratio,percent_radii=[0.5],num_streamlines=n_streamlines)
 
+outlet.init_total(P0=P0*P0_Ratio)
 #%% Define Blade Rows, processed data is already in mm, hub is already in mm 
 cax_arr = [ (blade[0,:,0].max()-blade[0][0,:,0].min())/1000 for blade in e3_hpc['rotor_stator'] ]
 hub_exit_locations = []; shroud_exit_locations = []
@@ -168,7 +170,7 @@ rotor3.loss_model = FixedPressureLoss(0.0619)
 rotor4.loss_model = FixedPressureLoss(0.0559)
 stator4.loss_model = FixedPressureLoss(0.8024)
 
-rotor5.loss_model = FixedPressureLoss(0.089475)
+rotor5.loss_model = FixedPressureLoss(0.089475) 
 stator5.loss_model = FixedPressureLoss(0.056125)
 
 rotor6.loss_model = FixedPressureLoss(0.0564)
@@ -193,7 +195,7 @@ passage = Passage(hub_m[:,0],hub_m[:,1],
                  shroud_m[:,0],shroud_m[:,1],
                  passageType=PassageType.Axial) # type: ignore
 
-spool = TurbineSpool(passage=passage,
+spool = Spool(passage=passage,
             rpm=12400, 
             num_streamlines=n_streamlines, 
             massflow=20, 

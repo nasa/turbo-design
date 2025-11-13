@@ -20,8 +20,7 @@ class Inlet(BladeRow):
     def __init__(self, 
                  hub_location:float=0,
                  shroud_location:float=0,
-                 beta:Union[float,List[float]]=[0],
-                 percent_radii:Union[float,List[float]]=[0.5]):
+                 beta:Union[float,List[float]]=[0]):
         """Initializes the inlet station. 
             Uses the beta and exit mach number to predict a value for Vm
 
@@ -37,19 +36,37 @@ class Inlet(BladeRow):
         super().__init__(row_type=RowType.Inlet,hub_location=hub_location,shroud_location=shroud_location,stage_id=-1)
         self.beta1 = convert_to_ndarray(beta)
                    
-        self.percent_hub_shroud = convert_to_ndarray(percent_radii)
     
-    def init_compressor(self,P:Union[float,List[float]],T:Union[float,List[float]],M:Union[float,List[float]]):
+    def init_static(self,P:Union[float,List[float]],T:Union[float,List[float]],M:Union[float,List[float]],percent_radii:Union[float,List[float]]=[0.5]):
+        """Initializes the inlet with static quantities at the inlet
+
+        Args:
+            P (Union[float,List[float]]): _description_
+            T (Union[float,List[float]]): _description_
+            M (Union[float,List[float]]): _description_
+            percent_radii (Union[float,List[float]], optional): Percent radii where P,T, and M are defined. Defaults to [0.5].
+        """
         self.P = convert_to_ndarray(P)
         self.M = convert_to_ndarray(M)
         self.T = convert_to_ndarray(T)
         self.static_defined = True
+        self.percent_hub_shroud = convert_to_ndarray(percent_radii)
         
-    def init_turbine(self,P0:Union[float,List[float]],T0:Union[float,List[float]],M:Union[float,List[float]]):
+    def init_total(self,P0:Union[float,List[float]],T0:Union[float,List[float]],M:Union[float,List[float]],percent_radii:Union[float,List[float]]=[0.5]):
+        """Initializes the inlet with total quantities at the inlet
+
+        Args:
+            P0 (Union[float,List[float]]): Total Pressure
+            T0 (Union[float,List[float]]): Total Temperature
+            M (Union[float,List[float]]): Mach Number
+            percent_radii (Union[float,List[float]], optional): Percent radii where P0,T0, and M are defined. Defaults to [0.5].
+        """
         self.P0 = convert_to_ndarray(P0)
         self.T0 = convert_to_ndarray(T0) 
         self.M = convert_to_ndarray(M)
         self.static_defined = False
+        self.percent_hub_shroud = convert_to_ndarray(percent_radii)
+        
     def __interpolate_quantities__(self,num_streamlines:int=5):
         """Initializes the inputs 
         
