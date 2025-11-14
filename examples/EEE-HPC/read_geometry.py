@@ -6,7 +6,8 @@ import matplotlib.pyplot as plt
 from matplotlib import colors as mcolors
 from pyiges.geometry import RationalBSplineCurve  # <-- import the class
 from scipy.interpolate import PchipInterpolator
-from copy import deepcopy
+from scipy.signal import savgol_filter
+from scipy.interpolate import splprep, splev
 
 def Process_HubShroud_IGES():
     """Exports hub and shroud curves in inches
@@ -157,8 +158,6 @@ def tab_palette(n):
     cmap = plt.get_cmap('tab20')  # or 'tab10'
     return [cmap(i % cmap.N) for i in range(n)]
 
-from scipy.signal import savgol_filter
-from scipy.interpolate import splprep, splev
 
 def resample_curve(curve, M):
     tck, _ = splprep(curve.T, s=0, per=0)
@@ -244,8 +243,8 @@ def plot_blade(ss:npt.NDArray,ps:npt.NDArray,name:str):
     
     
 if __name__ == "__main__":
-    # Process_HubShroud_IGES()
-    # ProcessBlades_IGES()
+    Process_HubShroud_IGES()
+    ProcessBlades_IGES()
     
     rotor_stator = []
     with open('rotor_stator.pkl','rb') as fp:

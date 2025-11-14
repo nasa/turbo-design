@@ -5,7 +5,6 @@ from .bladerow import BladeRow, compute_gas_constants, interpolate_quantities
 from .arrayfuncs import convert_to_ndarray
 import numpy as np
 import numpy.typing as npt 
-import copy 
 from scipy.interpolate import interp1d
 
 
@@ -14,27 +13,26 @@ class Outlet(BladeRow):
     P0_fun:interp1d
     num_streamlines:int 
     static_defined: bool = True
+    percent_hub_shroud:npt.NDArray
     
     def __init__(self,num_streamlines:int=3,location:float=1):
-        """Initialize the outlet 
+        """Initialize the outlet with streamlines and a location as a percentage along the hub 
 
         Args:
-            P (Union[float,List[float]]): _description_
-            percent_radii (Union[List[float],float]): _description_
-            P0 (Optional[float], optional): _description_. Defaults to None.
             num_streamlines (int, optional): _description_. Defaults to 3.
-            location (float, optional): _description_. Defaults to 1.
+            location (float, optional): Location as percentage along hub curve. Defaults to 1.
         """
         self.row_type = RowType.Outlet
         self.loss_function = None
         self.location = location
         self.num_streamlines = num_streamlines
+        self.percent_hub_shroud = np.arange(0,1,self.num_streamlines)
         
     def init_static(self,P:Union[List[float],float],percent_radii:Union[List[float],float]):
         """Initialize turbine inputs 
 
         Args:
-            P (float): Exit static pressure
+            P (float): Exit static pressure [Pa]
             percent_radii (Union[List[float],float]): percent radii where the exit static pressure is defined.
         """
         self.percent_hub_shroud = convert_to_ndarray(percent_radii)
@@ -52,8 +50,7 @@ class Outlet(BladeRow):
             P0 (Union[List[float],float]): Exit Total Pressure (this will be matched)
             percent_radii (Union[List[float],float]): percent radii where exit total pressure is defined 
         """
-        if len(self.percent_hub_shroud)==1:
-            self.percent_hub_shroud = np.arange(0,1,self.num_streamlines)
+        
         self.percent_hub_shroud = convert_to_ndarray(percent_radii)
         self.IsCompressor = True
         self.P0 = convert_to_ndarray(P0)

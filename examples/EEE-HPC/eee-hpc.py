@@ -24,12 +24,15 @@ fluid.TP = T0, P0 # Use pascal for cantera
 print(f"Coefficient of Pressure [J/Kg] {fluid.cp:0.4f}")
 #%% Defining the Inlet
 inlet = Inlet(hub_location=0, shroud_location=0,beta=[0])
-inlet.init_compressor(M=0, P=[P0], T=[T0])
-outlet = Outlet(P0=P0*P0_Ratio,percent_radii=[0.5],num_streamlines=n_streamlines)
-
-outlet.init_total(P0=P0*P0_Ratio)
+inlet.init_static(M=0, P=[P0], T=[T0])
+outlet = Outlet(num_streamlines=n_streamlines)
+outlet.init_total(P0=P0*P0_Ratio,percent_radii=[0.5])
 #%% Define Blade Rows, processed data is already in mm, hub is already in mm 
-cax_arr = [ (blade[0,:,0].max()-blade[0][0,:,0].min())/1000 for blade in e3_hpc['rotor_stator'] ]
+cax_arr = [] 
+for blade in e3_hpc['blades']: # There should be 21 blades starting with igv and moving into rotor stator pairs
+    cax = (blade[0,:,0].max()-blade[0][0,:,0].min())/1000
+    cax_arr.append(cax)
+    
 hub_exit_locations = []; shroud_exit_locations = []
 # Get the exit locations
 for i in range(1,len(e3_hpc['rotor_stator'])):
