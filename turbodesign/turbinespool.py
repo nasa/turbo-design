@@ -449,9 +449,9 @@ def calculate_massflows(blade_rows:List[BladeRow],calculate_vm:bool=False,fluid:
                     row.Yp = 0
                     stator_calc(row,upstream,downstream,calculate_vm=True)
                     row = radeq(row,upstream) 
-                    row = compute_gas_constants(row,fluid)
+                    compute_gas_constants(row,fluid)
                     stator_calc(row,upstream,downstream,calculate_vm=False)
-                row = compute_gas_constants(row,fluid)
+                compute_gas_constants(row,fluid)
                 compute_massflow(row)
                 compute_power(row,upstream)
     

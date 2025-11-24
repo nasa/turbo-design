@@ -70,12 +70,13 @@ def radeq(row:BladeRow,upstream:BladeRow,downstream:Optional[BladeRow]=None) -> 
                 down_Vm = interp1d(row_radius, downstream.Vm)(r)
         else:
             down_Vm = Vm
+        
+        row_m = interp1d(row_radius, row.m)(r)
         up_m = interp1d(row_radius, upstream.m)(r)
         
-        # Get a rough guess of dVm/dm
+        # Get a rough guess of dVm/dmv
         if downstream!=None:
             down_m = interp1d(row_radius, downstream.m)(r)
-            row_m = interp1d(row_radius, row.m)(r)
             if down_m != row_m:
                 func_Vm_m = PchipInterpolator([up_m, row_m, down_m],[up_Vm, Vm, down_Vm])
             else:

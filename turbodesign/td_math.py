@@ -1,6 +1,5 @@
-from typing import List, Optional, Tuple
+from typing import List, Optional
 import numpy as np
-import math
 import numpy.typing as npt
 from .bladerow import BladeRow, compute_gas_constants
 from .enums import RowType, LossType
