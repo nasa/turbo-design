@@ -677,31 +677,30 @@ def calculate_massflows(
                     compute_massflow(row)
                     compute_power(row, upstream)
 
-            elif row.loss_function.loss_type == LossType.Enthalpy:  # type: ignore[union-attr]
+            elif row.loss_function.loss_type == LossType.Enthalpy: 
                 if row.row_type == RowType.Rotor:
                     row.Yp = 0
-                    rotor_calc(row, upstream, calculate_vm=calculate_vm)
-                    eta_total = float(row.loss_function(row, upstream))  # type: ignore[arg-type]
-
-                    def find_yp(Yp, row=row, upstream=upstream):
+                    rotor_calc(row,upstream,calculate_vm=calculate_vm)
+                    eta_total = float(row.loss_function(row,upstream))
+                    def find_yp(Yp,row,upstream):
                         row.Yp = Yp
-                        rotor_calc(row, upstream, calculate_vm=True)
-                        row = radeq(row, upstream)
-                        compute_gas_constants(row, fluid)
-                        rotor_calc(row, upstream, calculate_vm=False)
+                        rotor_calc(row,upstream,calculate_vm=True)
+                        row = radeq(row,upstream)
+                        compute_gas_constants(row,fluid)
+                        rotor_calc(row,upstream,calculate_vm=False)
                         return abs(row.eta_total - eta_total)
-
-                    res = minimize_scalar(find_yp, bounds=[0, 0.6], method="bounded")
+                    
+                    res = minimize_scalar(find_yp,bounds=[0,0.6],args=(row,upstream))
                     row.Yp = res.x
                 elif row.row_type == RowType.Stator:
                     row.Yp = 0
-                    stator_calc(row, upstream, downstream, calculate_vm=True)
-                    row = radeq(row, upstream)
-                    row = compute_gas_constants(row, fluid)
-                    stator_calc(row, upstream, downstream, calculate_vm=False)
-                row = compute_gas_constants(row, fluid)
+                    stator_calc(row,upstream,downstream,calculate_vm=True)
+                    row = radeq(row,upstream) 
+                    compute_gas_constants(row,fluid)
+                    stator_calc(row,upstream,downstream,calculate_vm=False)
+                compute_gas_constants(row,fluid)
                 compute_massflow(row)
-                compute_power(row, upstream)
+                compute_power(row,upstream)
 
 
 def massflow_loss_function(
