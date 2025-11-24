@@ -69,7 +69,7 @@ class AinleyMathieson(LossBaseClass):
             beta1 = -np.abs(np.radians(row.beta1_metal))
             alpha2 = np.abs(row.alpha2)
             if row.M<0.5:
-                alpha2 = self.data['Fig05'](np.degrees(np.cos(row.throat/row.pitch)))
+                alpha2 = self.data['Fig05'](float(np.degrees(np.cos(row.throat/row.pitch))))
             elif row.M<0.95:
                 X = 0.7
                 alpha2 = np.arctan( 
@@ -88,7 +88,7 @@ class AinleyMathieson(LossBaseClass):
             beta1 = np.abs(np.radians(row.beta1_metal))
             alpha2 = -np.abs(row.beta2)
             if row.M_rel<0.5:
-                alpha2 = self.data['Fig05'](np.degrees(np.cos(row.throat/row.pitch)))
+                alpha2 = self.data['Fig05'](float(np.degrees(np.cos(row.throat/row.pitch))))
             elif row.M_rel<0.95:
                 X = 1.35 # Shrouded Blade
                 alpha2 = np.arctan( 
@@ -106,15 +106,15 @@ class AinleyMathieson(LossBaseClass):
         ID = (upstream.r[-1]+row.r[-1])/2; OD = (upstream.r[-1]+row.r[-1])/2
         A1 = np.pi*(upstream.r[-1]**2 - upstream.r[0]**2)*np.cos(beta1)
         A2 = np.pi*(row.r[-1]**2 - row.r[0]**2)*np.cos(alpha2)
-        lam = self.data['Fig08']((A2/A1)**2/(1+ID/OD)) # Eqn but using Figure 8
+        lam = self.data['Fig08'](float((A2/A1)**2/(1+ID/OD))) # Eqn but using Figure 8
         alpha_m = np.arctan((np.tan(alpha1) - np.tan(alpha2))/2)
         Cl_s_c = 2*(np.tan(alpha1)-np.tan(alpha2))*np.cos(alpha_m)
         # calculated but not used 
         Y_secondary_clearance = (lam + B * k/h) * (Cl_s_c)**2 * (np.cos(alpha2)/np.cos(alpha_m)) # Eqn 6
         
         
-        Yp_beta0 = self.data['Fig04a'](s_c, np.degrees(alpha2))
-        Yp_beta1_eq_alpha2 = self.data['Fig04b'](s_c, np.degrees(alpha2))
+        Yp_beta0 = self.data['Fig04a'](float(s_c), float(np.degrees(alpha2)))
+        Yp_beta1_eq_alpha2 = self.data['Fig04b'](float(s_c), float(np.degrees(alpha2)))
         
         Yp_i0 = (Yp_beta0 + (beta1/alpha2)**2 *(Yp_beta1_eq_alpha2 - Yp_beta0)) *(t_c/0.2)**(-beta1/alpha2) # Fig 4 and Eqn 5
         

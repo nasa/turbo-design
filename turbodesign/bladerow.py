@@ -1,5 +1,5 @@
 from dataclasses import field, Field
-from typing import Any, Callable, List, Optional, Tuple, Union
+from typing import Any, Callable, List, Optional, Sequence, Tuple, Union
 from .enums import RowType, PowerType
 import numpy as np 
 import numpy.typing as npt
@@ -9,7 +9,7 @@ from cantera import Solution, composite
 from .coolant import Coolant
 from pyturbo.helper import line2D
 from pyturbo.aero.airfoil2D import Airfoil2D
-from .loss import LossBaseClass
+from .loss import LossBaseClass, CompositeLossModel
 from .passage import Passage
     
 
@@ -406,19 +406,25 @@ class BladeRow:
         return self.loss_function
     
     @loss_model.setter
-    def loss_model(self, model:Callable[[Any], Any]):
-        """Add in custom loss model
+    def loss_model(self, model:Union[LossBaseClass, Sequence[LossBaseClass]]):
+        """Assign one or more loss models that inherit :class:`LossBaseClass`.
 
         Args:
-            model (function): custom loss function. Input will be of the format blade row
-
-        Example:
-        
-        def mylossfunction(row:BladeRow) -> float
-            code to do something with machine learning
-            return pressure loss
+            model: Either a single loss model or a sequence of models.
         """
-        self.loss_function = model # type: ignore
+        if isinstance(model, LossBaseClass):
+            self.loss_function = model
+            return
+
+        if isinstance(model, Sequence):
+            if len(model) == 0:
+                raise ValueError("At least one loss model must be provided.")
+            if not all(isinstance(m, LossBaseClass) for m in model):
+                raise TypeError("All entries must inherit LossBaseClass.")
+            self.loss_function = CompositeLossModel(model)
+            return
+
+        raise TypeError("Loss models must inherit LossBaseClass.")
     
     @property
     def te_pitch(self):
