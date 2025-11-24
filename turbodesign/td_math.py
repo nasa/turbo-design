@@ -334,7 +334,7 @@ def rotor_calc(row:BladeRow,upstream:BladeRow,calculate_vm:bool=True):
             if high_loss:
                 reason += "; Yp > 0.3 This could be a problem with the loss model;"
             _log_rotor_failure(reason)
-            raise ValueError(f'nan detected: check flow path. Turbine inlet cut should be horizontal')
+            raise ValueError(f'nan detected')
         row.Vr = row.W*np.sin(row.phi)
         row.Vm = row.W*np.cos(row.beta2)
         row.Wt = row.W*np.sin(row.beta2)

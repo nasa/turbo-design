@@ -13,20 +13,17 @@ def _mean_value(value):
     """Return the mean of an array-like as a Python float."""
     return float(np.asarray(value).mean())
 
-
-def _mean_radians(value):
-    """Alias for readability when working with angular quantities already in radians."""
-    return _mean_value(value)
-
-
 class KackerOkapuu(LossBaseClass):
-
-    def __init__(self):
+    UseCFM:bool = False
+    def __init__(self,UseCFM:bool=False):
         """KackerOkapuu model is an improvement to the Ainley Mathieson model. 
         
         Limitations:
             - Doesn't factor incidence loss 
             - For steam turbines and impulse turbines
+        
+        Args:
+            UseCFM (bool): Factor in supersonic drag rise. Authors state in AMDC loss that this is not accurate. It's a multplier to pressure loss. 
             
         Reference:
             Kacker, S. C., and U. Okapuu. "A mean line prediction method for axial flow turbine efficiency." (1982): 111-119.
@@ -44,7 +41,7 @@ class KackerOkapuu(LossBaseClass):
         
         with open(path.absolute(),'rb') as f:
             self.data = pickle.load(f) # type: ignore
-    
+        self.UseCFM = UseCFM
         
     
     def __call__(self,row:BladeRow, upstream:BladeRow) -> float:
@@ -64,35 +61,40 @@ class KackerOkapuu(LossBaseClass):
             float: Pressure Loss 
         """
         # Get the Inlet incoming mach number relative to the blade
-        if upstream.row_type == RowType.Stator:
-            M1 = _mean_value(upstream.M)
-        else:
-            M1 = _mean_value(upstream.M_rel) 
-        
         c = row.chord
         b = row.axial_chord
         if row.row_type == RowType.Stator:
-            alpha1_rad = _mean_radians(row.alpha1)
-            beta1_rad = _mean_radians(row.beta1_metal)
-            alpha2_rad = _mean_radians(row.alpha2)
+            beta1_rad = np.abs(_mean_value(np.radians(row.beta1_metal))) # Metal angle from fig 3
+            alpha1_rad = np.abs(_mean_value(row.alpha1)) # Flow angle
+            alpha2_rad = np.abs(_mean_value(row.alpha2)) # Flow angle at exit which is metal angle
+            beta2_rad = alpha2_rad                  
+            alpham_rad = (alpha1_rad + alpha2_rad)*0.5
+            M1 = _mean_value(upstream.M)
             M2 = _mean_value(row.M)
             h = 0
             Rec = _mean_value(row.V*row.rho*row.chord / sutherland(row.T))
+            
+            beta1_deg = np.abs(np.degrees(beta1_rad))
+            alpha2_deg = np.abs(np.degrees(alpha2_rad))
+            Yp_beta0 = self.data['Fig01_beta0'](float(row.pitch_to_chord), alpha2_deg)  # when beta1 = 0 
+            Yp_beta1_alpha2 = self.data['Fig02'](float(row.pitch_to_chord), alpha2_deg) # When beta1 = alpha2
+            t_max_c = self.data['Fig04'](beta1_deg+alpha2_deg)
         else:
             h = row.tip_clearance * (row.r[-1]-row.r[0])
-            alpha1_rad = _mean_radians(row.beta1)
-            beta1_rad = _mean_radians(row.beta1_metal)
-            alpha2_rad = _mean_radians(row.beta2)
+            alpha1_rad = np.abs(_mean_value(row.beta1))
+            beta1_rad = np.abs(_mean_value(np.radians(row.beta1_metal))) # metal angles are stored as degrees 
+            beta2_rad = np.abs(_mean_value(np.radians(row.beta2_metal)))
+            alpha2_rad = np.abs(_mean_value(row.beta2))
+            alpham_rad = (beta1_rad + beta2_rad)*0.5
+            M1 = _mean_value(upstream.M_rel) 
             M2 = _mean_value(row.M_rel)
             Rec = _mean_value(row.W*row.rho*row.chord / sutherland(row.T))
 
-        alpha1_deg = float(np.degrees(alpha1_rad))
-        alpha2_deg = float(np.degrees(alpha2_rad))
-        beta1_deg = float(np.degrees(beta1_rad))
-            
-        Yp_beta0 = self.data['Fig01_beta0'](float(row.pitch_to_chord), float(alpha2_deg))
-        Yp_beta1_alpha2 = self.data['Fig02'](float(row.pitch_to_chord), float(alpha2_deg))
-        t_max_c = self.data['Fig04'](float(np.abs(beta1_deg)+np.abs(alpha2_deg)))
+            beta1_deg = np.abs(np.degrees(beta1_rad))
+            alpha2_deg = np.abs(np.degrees(beta2_rad))
+            Yp_beta0 = self.data['Fig01_beta0'](float(row.pitch_to_chord), alpha2_deg)  # when beta1 = 0 
+            Yp_beta1_alpha2 = self.data['Fig02'](float(row.pitch_to_chord), alpha2_deg) # When beta1 = alpha2
+            t_max_c = self.data['Fig04'](beta1_deg+alpha2_deg)
         
         ratio = beta1_rad / alpha2_rad
         Yp_amdc = (Yp_beta0 + np.abs(ratio) * ratio * (Yp_beta1_alpha2-Yp_beta0)) * ((t_max_c)/0.2)**(ratio) # Eqn 2, AMDC = Ainley Mathieson Dunham Came
@@ -113,10 +115,10 @@ class KackerOkapuu(LossBaseClass):
         K2 = (M1/M2)**2 
         Kp = 1-K2*(1-K1)
         
-        if M2>1:
+        if (M2>1) and (self.UseCFM is True):
             CFM = 1+60*(M2-1)**2    # Eqn 9 
         else:
-            CFM = 0
+            CFM = 1
         
         Yp = 0.914 * (2/3*Yp_amdc*Kp + Y_shock) # Eqn 8 Subsonic regime 
         if M2>1:
@@ -137,7 +139,7 @@ class KackerOkapuu(LossBaseClass):
             Ys = 0 
         
         # Trailing Edge
-        if np.abs(alpha1_deg-alpha2_deg)<5:
+        if np.abs(beta1_deg-np.degrees(beta2_rad))<5: # impulse turbine the inlet and exit angles are the same
             delta_phi2 = self.data['Fig14_Impulse'](float(row.te_pitch*row.pitch / row.throat))
         else:
             delta_phi2 = self.data['Fig14_Axial_Entry'](float(row.te_pitch*row.pitch / row.throat))
