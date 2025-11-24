@@ -1,33 +1,23 @@
-from dataclasses import dataclass, field, Field
-from typing import Any, Callable, List, Optional, Tuple, Union
+from dataclasses import field, Field
+from typing import Any, Callable, List, Optional, Sequence, Tuple, Union
 from .enums import RowType, PowerType
 import numpy as np 
 import numpy.typing as npt
 from scipy.interpolate import interp1d
 from .arrayfuncs import convert_to_ndarray
 from cantera import Solution, composite
+from .coolant import Coolant
 from pyturbo.helper import line2D
 from pyturbo.aero.airfoil2D import Airfoil2D
+from .loss import LossBaseClass, CompositeLossModel
 from .passage import Passage
-from typing import TYPE_CHECKING
-
-if TYPE_CHECKING:
-    from .loss import LossBaseClass  # type: ignore
-
-
-@dataclass
-class Coolant:
-    T0:float = field(default=900)                               # Kelvin
-    P0:float = field(default=50*101325)                         # Pascal
-    massflow_percentage:float = field(default=0.03)     # Fraction of total massflow going through compressor
-    Cp:float = field(default=1000)                              # J/K
     
+
 class BladeRow:
     id:int = 0
     stage_id:int = 0
     row_type: RowType = RowType.Stator
-    IsCompressor:bool = False 
-    loss_function: "LossBaseClass | None" = None
+    loss_function:LossBaseClass
     cutting_line:line2D         # Line perpendicular to the streamline
     rp:float = 0.4              # Degree of Reaction
     
@@ -74,9 +64,6 @@ class BladeRow:
     beta1_fixed:bool = False    # Geometry already defined. This affects the inlet flow angle
     beta2_fixed:bool = False    # Geometry already defined. This affects the exit flow angle
 
-    # Blockage
-    blockage: float = 0 # (1 - available flow area divided by geometric area)
-    
     # Velocities 
     Vm: npt.NDArray = field(default_factory=lambda: np.array([0]))               # Meridional velocity
     Vx: npt.NDArray = field(default_factory=lambda: np.array([0]))               # Axial Velocity
@@ -118,7 +105,6 @@ class BladeRow:
     power_mean:float = 0
     power_distribution:npt.NDArray  # How power is divided by radius. Example: Equal distribution [0.33 0.33 0.33]. More at Tip [0.2,0.3,0.5]. More at Hub [0.6 0.5 ]
     P0_P:float = 0                  # Total to Static Pressure Ratio 
-    P02_P01:float = 0
     Power_Type:PowerType
     euler_power:float = 0
     Reynolds:float = 0
@@ -128,8 +114,6 @@ class BladeRow:
     
     _aspect_ratio:float = 0.9 # 
     _pitch_to_chord:float = 0.7 # Pitch to chord ratio, used to determine number of blades and compute loss 
-    _num_blades:int = 28 # Number of blades 
-    _pitch:float
     
     _axial_chord:float = -1 
     _chord:float = -1 
@@ -138,8 +122,7 @@ class BladeRow:
     _tip_clearance:float = 0 # Clearance as a percentage of span or blade height
 
     _inlet_to_outlet_pratio = [0.06,0.95]
-    hub_location:float = 0 # Percent along hub where bladerow is defined
-    shroud_location:float = -1 # Percent along the shroud where blade row defined, not really needed but does help compute phi
+    location:float = 0 # Percent along hub where bladerow is defined
     
     @property
     def inlet_to_outlet_pratio(self) -> Tuple[float,float]:
@@ -275,27 +258,21 @@ class BladeRow:
     
     @property
     def chord(self) -> float:
-        """Calculates the pitch and pitch to chord.
-        
+        """Chord defined at mean radius
+
         Returns:
-            float: chord
+            float: axial chord
         """
-        self._pitch = 2*np.pi*self.r.mean() / self._num_blades
-        self._pitch_to_chord = self._pitch_to_chord/self._chord
-        return self._chord
+        return self.axial_chord / np.cos(np.radians(self.stagger))
     
-    @chord.setter
-    def chord(self,val:float):
-        self._chord = val
-        
     @property
     def pitch(self) -> float:
         """Returns the pitch which is the distance from blade to blade
-        
+
         Returns:
             float: pitch
         """
-        return self._pitch_to_chord*self._chord
+        return self.pitch_to_chord*self.chord
     
     @property
     def throat(self) -> float:
@@ -305,9 +282,9 @@ class BladeRow:
             float: throat 
         """
         if self.row_type == RowType.Stator:
-            return self._pitch*np.sin(np.pi/2-self.alpha2.mean())
+            return self.pitch*np.sin(np.pi/2-self.alpha2.mean())
         else:
-            return self._pitch*np.sin(np.pi/2-self.beta2.mean())
+            return self.pitch*np.sin(np.pi/2-self.beta2.mean())
     
     @property
     def num_blades(self) ->float:
@@ -316,13 +293,7 @@ class BladeRow:
         Returns:
             float: number of blades
         """
-        return self._num_blades
-    
-    @num_blades.setter
-    def num_blades(self, val:int):
-        self._num_blades = val
-        self._pitch = 2*np.pi*self.r.mean() / self._num_blades
-        self._pitch_to_chord = self._pitch_to_chord/self._chord
+        return int(2*np.pi*self.r.mean() / self.pitch)
     
     @property
     def camber(self) -> float:
@@ -359,20 +330,18 @@ class BladeRow:
         """
         self._tip_clearance = val
         
-    def __init__(self,hub_location:float,row_type:RowType=RowType.Stator,stage_id:int = 0,shroud_location:float=-1):
+    def __init__(self,location:float,row_type:RowType=RowType.Stator,stage_id:int = 0):
         """Initializes the blade row to be a particular type
 
         Args:
-            hub_location (float): Location of the blade row as a percentage of hub length
+            location (float): Location of the blade row as a percentage of hub length
             row_type (RowType): Specifies the Type. Defaults to RowType.Stator
             power (float, optional): power . Defaults to 0.
             P0_P (float, optional): Total to Static Pressure Ratio
             stage_id (int, optional): ID of the stage so if you have 9 stages, the id could be 9. It's used to separate the stages. Each stage will have it's own unique degree of reaction 
-            shroud_location (float): Location along the shroud. This isn't required but if you specify then it can be used to help compute phi 
         """
         self.row_type = row_type
-        self.hub_location = hub_location 
-        self.shroud_location = shroud_location
+        self.location = location 
         self.Yp = 0 # Loss
         self.stage_id = stage_id
     
@@ -437,19 +406,25 @@ class BladeRow:
         return self.loss_function
     
     @loss_model.setter
-    def loss_model(self, model:Callable[[Any], Any]):
-        """Add in custom loss model
+    def loss_model(self, model:Union[LossBaseClass, Sequence[LossBaseClass]]):
+        """Assign one or more loss models that inherit :class:`LossBaseClass`.
 
         Args:
-            model (function): custom loss function. Input will be of the format blade row
-
-        Example:
-        
-        def mylossfunction(row:BladeRow) -> float
-            code to do something with machine learning
-            return pressure loss
+            model: Either a single loss model or a sequence of models.
         """
-        self.loss_function = model # type: ignore
+        if isinstance(model, LossBaseClass):
+            self.loss_function = model
+            return
+
+        if isinstance(model, Sequence):
+            if len(model) == 0:
+                raise ValueError("At least one loss model must be provided.")
+            if not all(isinstance(m, LossBaseClass) for m in model):
+                raise TypeError("All entries must inherit LossBaseClass.")
+            self.loss_function = CompositeLossModel(model)
+            return
+
+        raise TypeError("Loss models must inherit LossBaseClass.")
     
     @property
     def te_pitch(self):
@@ -545,7 +520,7 @@ def interpolate_streamline_radii(row:BladeRow,passage:Passage,num_streamlines:in
     Returns:
         (BladeRow): new row object with quantities interpolated
     """
-    row.cutting_line,_,_ = passage.get_cutting_line(t_hub=row.hub_location, t_shroud=row.shroud_location)
+    row.cutting_line,_,_ = passage.get_cutting_line(row.location)
     row.x,row.r = row.cutting_line.get_point(np.linspace(0,1,num_streamlines))
     streamline_percent_length = np.sqrt((row.r-row.r[0])**2+(row.x-row.x[0])**2)/row.cutting_line.length
     
@@ -598,6 +573,12 @@ def interpolate_streamline_radii(row:BladeRow,passage:Passage,num_streamlines:in
     row.T = interpolate_quantities(row.T,row.percent_hub_shroud,streamline_percent_length)
     row.T_is = interpolate_quantities(row.T_is,row.percent_hub_shroud,streamline_percent_length)
     row.rho = interpolate_quantities(row.rho,row.percent_hub_shroud,streamline_percent_length)
+
+    # if row.row_type == RowType.Inlet:
+    #     row.P0_fun = interp1d(row.percent_hub_shroud,row.P0) 
+    #     row.T0_fun = interp1d(row.percent_hub_shroud,row.T0) 
+    # elif row.row_type == RowType.Outlet:
+    #     row.P_fun = interp1d(row.percent_hub_shroud,row.P) 
 
     return row
 
@@ -657,4 +638,3 @@ def compute_gas_constants(row:BladeRow,fluid:Optional[Solution]=None) -> None:
     # Use Ideal Gas 
     row.rho = row.P/(row.T*row.R)
     row.mu = sutherland(row.T) # type: ignore
-    

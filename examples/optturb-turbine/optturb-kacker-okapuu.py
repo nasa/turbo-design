@@ -1,16 +1,17 @@
 '''
-    GEE3HP Turbine
-    2 stage cooled turbine
-
+    1D meanline example from 
+    Turbine Passage Design Methodology to Minimize Entropy Production—A Two-Step Optimization Strategy. 
+    https://doi.org/10.3390/e21060604 
+    
+    In this example the blade exit angles are fixed and only degree of reaction changes between the stage to match the massflow
 '''
-
 #%% Import Library
 from pathlib import Path
 from turbodesign import PassageType
 from turbodesign import TurbineSpool, Inlet, RowType, BladeRow, Passage,Outlet
 from turbodesign.enums import MassflowConstraint
 from turbodesign.coolant import Coolant
-from turbodesign.loss.turbine import CraigCox
+from turbodesign.loss.turbine import FixedPressureLoss, KackerOkapuu
 import numpy as np 
 from cantera import Solution
 
@@ -66,8 +67,8 @@ rotor1.coolant = Coolant(T0=622*0.555556, P0=50.3 * 6894.76,massflow_percentage=
 
 # Add in turning angles
 stator1.beta2_metal = [73,73,73] # Angle, hub,mean,tip
-stator1.loss_model = CraigCox()
-rotor1.loss_model = CraigCox()
+stator1.loss_model = KackerOkapuu()
+rotor1.loss_model = KackerOkapuu()
 rotor1.beta2_metal = [-67.6,-67.6,-67.6] # Angle, hub,mean,tip
 
 #%% Initialize the Spool
