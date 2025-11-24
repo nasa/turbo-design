@@ -271,6 +271,26 @@ def rotor_calc(row:BladeRow,upstream:BladeRow,calculate_vm:bool=True):
         row (BladeRow): Rotor Row
         upstream (BladeRow): Stator Row or Rotor Row
     """
+    def _log_rotor_failure(reason:str):
+        def _fmt(val):
+            try:
+                return np.array2string(np.asarray(val), precision=5)
+            except Exception:
+                return str(val)
+
+        print(f"[RotorCalc] Failure detected: {reason}")
+        print(f"    row.T0R: {_fmt(row.T0R)}")
+        print(f"    row.T: {_fmt(row.T)}")
+        print(f"    row.W: {_fmt(row.W)}")
+        print(f"    row.M: {_fmt(getattr(row,'M', np.nan))}")
+        print(f"    row.M_rel: {_fmt(getattr(row,'M_rel', np.nan))}")
+        print(f"    row.Yp: {_fmt(getattr(row,'Yp', np.nan))}")
+        if np.any(row.T >= row.T0R):
+            print("    Note: T should be less than T0R.")
+        yp_val = getattr(row,'Yp', None)
+        if yp_val is not None and np.any(yp_val > 0.3):
+            print("    Note: row.Yp exceeded 0.3 which may indicate an issue with the design or loss model.")
+
     row.P0_stator_inlet = upstream.P0_stator_inlet
     ## P0_P is assumed 
     # row.P = row.P0_stator_inlet*1/row.P0_P
@@ -303,9 +323,18 @@ def rotor_calc(row:BladeRow,upstream:BladeRow,calculate_vm:bool=True):
     row.T = (row.T0R/T0R_T)     # Exit static temperature
     if calculate_vm:    # Calculates the T0 at the exit
         row.W = np.sqrt(2*row.Cp*(row.T0R-row.T)) #! nan popups here a lot for radial machines 
-        if np.isnan(np.sum(row.W)):
+        nan_in_velocity = np.isnan(np.sum(row.W))
+        temp_issue = np.any(row.T >= row.T0R)
+        high_loss = np.any(getattr(row,'Yp',0) > 0.3)
+        if nan_in_velocity:
             # Need to adjust T
-            raise ValueError(f'nan detected: check flow path. Turbine inlet cut should be horizontal')
+            reason = "nan detected in relative velocity"
+            if temp_issue:
+                reason += "; T >= T0R shouldn't happen because of T-s diagram'"
+            if high_loss:
+                reason += "; Yp > 0.3 This could be a problem with the loss model;"
+            _log_rotor_failure(reason)
+            raise ValueError(f'nan detected')
         row.Vr = row.W*np.sin(row.phi)
         row.Vm = row.W*np.cos(row.beta2)
         row.Wt = row.W*np.sin(row.beta2)

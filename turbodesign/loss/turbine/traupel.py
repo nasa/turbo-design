@@ -45,21 +45,21 @@ class Traupel(LossBaseClass):
 
         if row.row_type == RowType.Rotor:
             turning = np.abs(np.degrees(upstream.beta2-row.beta2).mean())
-            F = self.data['Fig06']((upstream.W/row.W).mean(),turning) # Inlet velocity
+            F = self.data['Fig06'](float((upstream.W/row.W).mean()), float(turning)) # Inlet velocity
         else:
             turning = np.abs(np.degrees(upstream.alpha2-row.alpha2).mean())
-            F = self.data['Fig06']((upstream.V/row.V).mean(),turning) # Inlet velocity
+            F = self.data['Fig06'](float((upstream.V/row.V).mean()), float(turning)) # Inlet velocity
 
-        H = self.data['Fig07'](alpha1-beta2,alpha2-beta3)
+        H = self.data['Fig07'](float(alpha1-beta2), float(alpha2-beta3))
         
         zeta_s = F*g/h_stator  # (h1-h1s)/(0.5*c1s**2) # no idea what h1s or h2s is
         zeta_r = F*g/h_rotor # (h2-h2s)/(0.5*w2s**2)
-        x_p_stator = self.data['Fig01'](alpha1,alpha2) # not sure if this is the right figure
-        x_p_rotor = self.data['Fig01'](beta2,beta3) # not sure if this is the right figure
-        zeta_p_stator = self.data['Fig02'](alpha1,alpha2)
-        x_m_stator = self.data['Fig03_0'](upstream.M)
-        zeta_p_rotor = self.data['Fig02'](beta2,beta3)
-        x_m_rotor = self.data['Fig03_0'](row.M_rel)
+        x_p_stator = self.data['Fig01'](float(alpha1), float(alpha2)) # not sure if this is the right figure
+        x_p_rotor = self.data['Fig01'](float(beta2), float(beta3)) # not sure if this is the right figure
+        zeta_p_stator = self.data['Fig02'](float(alpha1), float(alpha2))
+        x_m_stator = self.data['Fig03_0'](float(np.mean(upstream.M)))
+        zeta_p_rotor = self.data['Fig02'](float(beta2), float(beta3))
+        x_m_rotor = self.data['Fig03_0'](float(np.mean(row.M_rel)))
         
         
         e_te = upstream.te_pitch * g
@@ -67,10 +67,10 @@ class Traupel(LossBaseClass):
         ssen_alpha2 = e_te/o # Thickness of Trailing edge divide by throat 
         ssen_beta2 = row.te_pitch*g / row.throat
         
-        x_delta_stator = self.data['Fig05'](ssen_alpha2,alpha2)
-        zeta_delta_stator = self.data['Fig04'](ssen_alpha2,alpha2)
-        x_delta_rotor = self.data['Fig05'](ssen_beta2,beta3)
-        zeta_delta_rotor = self.data['Fig04'](ssen_beta2,beta3)
+        x_delta_stator = self.data['Fig05'](float(ssen_alpha2), float(alpha2))
+        zeta_delta_stator = self.data['Fig04'](float(ssen_alpha2), float(alpha2))
+        x_delta_rotor = self.data['Fig05'](float(ssen_beta2), float(beta3))
+        zeta_delta_rotor = self.data['Fig04'](float(ssen_beta2), float(beta3))
         
         Dm = 2* (upstream.r[-1] + upstream.r[0])/2 # Is this the mean diameter? I dont know
         zeta_f = 0.5 * (h_stator/Dm)**2
@@ -85,7 +85,7 @@ class Traupel(LossBaseClass):
         if row.row_type == RowType.Stator:
             zeta_cl = 0 
         else:
-            zeta_cl = self.data['Fig08'](row.tip_clearance) # For simplicity assume unshrouded blade 
+            zeta_cl = self.data['Fig08'](float(row.tip_clearance)) # For simplicity assume unshrouded blade 
             
         zeta_z = 0 # Do not factor this in, a bit complicated
         # 1 - (internal) - (external) 
