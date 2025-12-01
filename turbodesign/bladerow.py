@@ -102,10 +102,12 @@ class BladeRow:
     mprime:npt.NDArray = field(default_factory=lambda: np.array([0]))                   # Mprime distance
     
     Yp: float = 0                   # Pressure loss
+    blockage:float = 0 
     power:float = 0                 # Watts 
     power_mean:float = 0
-    power_distribution:npt.NDArray  # How power is divided by radius. Example: Equal distribution [0.33 0.33 0.33]. More at Tip [0.2,0.3,0.5]. More at Hub [0.6 0.5 ]
-    P0_P:float = 0                  # Total to Static Pressure Ratio 
+    power_distribution:npt.NDArray  # How power is divided by radius. Example: Equal distribution [0.33 0.33 0.33]. More at Tip [0.2,0.3,0.5]. More at Hub [0.6 0.5]
+    P0_P:float = 0                  # Total to Static Pressure Ratio
+    P0_ratio:float = 0              # Total to Total ratio
     Power_Type:PowerType
     euler_power:float = 0
     Reynolds:float = 0
@@ -124,6 +126,7 @@ class BladeRow:
 
     _inlet_to_outlet_pratio = [0.06,0.95]
     location:float = 0 # Percent along hub where bladerow is defined
+    shroud_location:float = 0
     
     @property
     def inlet_to_outlet_pratio(self) -> Tuple[float,float]:
@@ -287,14 +290,16 @@ class BladeRow:
         else:
             return self.pitch*np.sin(np.pi/2-self.beta2.mean())
     
-    @property
-    def num_blades(self) ->float:
-        """returns the number of blades 
+    _num_blades: float = 0
 
-        Returns:
-            float: number of blades
-        """
-        return int(2*np.pi*self.r.mean() / self.pitch)
+    @property
+    def num_blades(self) -> float:
+        """Configured number of blades (set during design/initialization)."""
+        return self._num_blades
+
+    @num_blades.setter
+    def num_blades(self, val: float) -> None:
+        self._num_blades = val
     
     @property
     def camber(self) -> float:
@@ -331,7 +336,7 @@ class BladeRow:
         """
         self._tip_clearance = val
         
-    def __init__(self,location:float,row_type:RowType=RowType.Stator,stage_id:int = 0):
+    def __init__(self,location:float,row_type:RowType=RowType.Stator,stage_id:int = 0,shroud_location:Optional[float]=None):
         """Initializes the blade row to be a particular type
 
         Args:
@@ -342,7 +347,11 @@ class BladeRow:
             stage_id (int, optional): ID of the stage so if you have 9 stages, the id could be 9. It's used to separate the stages. Each stage will have it's own unique degree of reaction 
         """
         self.row_type = row_type
-        self.location = location 
+        self.location = location
+        if shroud_location is not None:
+            self.shroud_location = shroud_location
+        else:
+            self.shroud_location = location
         self.Yp = 0 # Loss
         self.stage_id = stage_id
     

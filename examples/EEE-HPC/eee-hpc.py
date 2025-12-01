@@ -23,7 +23,7 @@ fluid = Solution('air.yaml')
 fluid.TP = T0, P0 # Use pascal for cantera
 print(f"Coefficient of Pressure [J/Kg] {fluid.cp:0.4f}")
 #%% Defining the Inlet
-inlet = Inlet(hub_location=0, shroud_location=0,beta=[0])
+inlet = Inlet(location=0, shroud_location=0,beta=[0])
 inlet.init_static(M=0, P=[P0], T=[T0])
 outlet = Outlet(num_streamlines=n_streamlines)
 outlet.init_total(P0=P0*P0_Ratio,percent_radii=[0.5])
@@ -53,36 +53,36 @@ beta_exit_flow = [73.6,-67.2,69.5,-63.9]
 P0_Loss = [0.057,0.088,0.069,0.014]         # (P01-P02)/(P01-P2)
 
 # Axial location is a percentage along the hub where row exit is defined
-IGV1 = BladeRow(row_type=RowType.Stator, hub_location=hub_exit_locations[0],shroud_location=shroud_exit_locations[0],stage_id=1)
-rotor1 = BladeRow(row_type=RowType.Rotor, hub_location=hub_exit_locations[1],shroud_location=shroud_exit_locations[1],stage_id=1)
-stator1 = BladeRow(row_type=RowType.Stator, hub_location=hub_exit_locations[2],shroud_location=shroud_exit_locations[2],stage_id=1)
+IGV1 = BladeRow(row_type=RowType.Stator, location=hub_exit_locations[0],shroud_location=shroud_exit_locations[0],stage_id=1)
+rotor1 = BladeRow(row_type=RowType.Rotor, location=hub_exit_locations[1],shroud_location=shroud_exit_locations[1],stage_id=1)
+stator1 = BladeRow(row_type=RowType.Stator, location=hub_exit_locations[2],shroud_location=shroud_exit_locations[2],stage_id=1)
 
-rotor2 = BladeRow(row_type=RowType.Rotor, hub_location=hub_exit_locations[3],shroud_location=shroud_exit_locations[3],stage_id=2)
-stator2 = BladeRow(row_type=RowType.Stator, hub_location=hub_exit_locations[4],shroud_location=shroud_exit_locations[4],stage_id=2)
+rotor2 = BladeRow(row_type=RowType.Rotor, location=hub_exit_locations[3],shroud_location=shroud_exit_locations[3],stage_id=2)
+stator2 = BladeRow(row_type=RowType.Stator, location=hub_exit_locations[4],shroud_location=shroud_exit_locations[4],stage_id=2)
 
-rotor3 = BladeRow(row_type=RowType.Rotor, hub_location=hub_exit_locations[5],shroud_location=shroud_exit_locations[5],stage_id=3)
-stator3 = BladeRow(row_type=RowType.Stator, hub_location=hub_exit_locations[6],shroud_location=shroud_exit_locations[6],stage_id=3)
+rotor3 = BladeRow(row_type=RowType.Rotor, location=hub_exit_locations[5],shroud_location=shroud_exit_locations[5],stage_id=3)
+stator3 = BladeRow(row_type=RowType.Stator, location=hub_exit_locations[6],shroud_location=shroud_exit_locations[6],stage_id=3)
 
-rotor4 = BladeRow(row_type=RowType.Rotor, hub_location=hub_exit_locations[7],shroud_location=shroud_exit_locations[7],stage_id=4)
-stator4 = BladeRow(row_type=RowType.Stator, hub_location=hub_exit_locations[8],shroud_location=shroud_exit_locations[8],stage_id=4)
+rotor4 = BladeRow(row_type=RowType.Rotor, location=hub_exit_locations[7],shroud_location=shroud_exit_locations[7],stage_id=4)
+stator4 = BladeRow(row_type=RowType.Stator, location=hub_exit_locations[8],shroud_location=shroud_exit_locations[8],stage_id=4)
 
-rotor5 = BladeRow(row_type=RowType.Rotor, hub_location=hub_exit_locations[9],shroud_location=shroud_exit_locations[9],stage_id=5)
-stator5 = BladeRow(row_type=RowType.Stator, hub_location=hub_exit_locations[10],shroud_location=shroud_exit_locations[10],stage_id=5)
+rotor5 = BladeRow(row_type=RowType.Rotor, location=hub_exit_locations[9],shroud_location=shroud_exit_locations[9],stage_id=5)
+stator5 = BladeRow(row_type=RowType.Stator, location=hub_exit_locations[10],shroud_location=shroud_exit_locations[10],stage_id=5)
 
-rotor6 = BladeRow(row_type=RowType.Rotor, hub_location=hub_exit_locations[11],shroud_location=shroud_exit_locations[11],stage_id=6)
-stator6 = BladeRow(row_type=RowType.Stator, hub_location=hub_exit_locations[12],shroud_location=shroud_exit_locations[12],stage_id=6)
+rotor6 = BladeRow(row_type=RowType.Rotor, location=hub_exit_locations[11],shroud_location=shroud_exit_locations[11],stage_id=6)
+stator6 = BladeRow(row_type=RowType.Stator, location=hub_exit_locations[12],shroud_location=shroud_exit_locations[12],stage_id=6)
 
-rotor7 = BladeRow(row_type=RowType.Rotor, hub_location=hub_exit_locations[13],shroud_location=shroud_exit_locations[13],stage_id=7)
-stator7 = BladeRow(row_type=RowType.Stator, hub_location=hub_exit_locations[14],shroud_location=shroud_exit_locations[14],stage_id=7)
+rotor7 = BladeRow(row_type=RowType.Rotor, location=hub_exit_locations[13],shroud_location=shroud_exit_locations[13],stage_id=7)
+stator7 = BladeRow(row_type=RowType.Stator, location=hub_exit_locations[14],shroud_location=shroud_exit_locations[14],stage_id=7)
 
-rotor8 = BladeRow(row_type=RowType.Rotor, hub_location=hub_exit_locations[15],shroud_location=shroud_exit_locations[15],stage_id=8)
-stator8 = BladeRow(row_type=RowType.Stator, hub_location=hub_exit_locations[16],shroud_location=shroud_exit_locations[16],stage_id=8)
+rotor8 = BladeRow(row_type=RowType.Rotor, location=hub_exit_locations[15],shroud_location=shroud_exit_locations[15],stage_id=8)
+stator8 = BladeRow(row_type=RowType.Stator, location=hub_exit_locations[16],shroud_location=shroud_exit_locations[16],stage_id=8)
 
-rotor9 = BladeRow(row_type=RowType.Rotor, hub_location=hub_exit_locations[17],shroud_location=shroud_exit_locations[17],stage_id=9)
-stator9 = BladeRow(row_type=RowType.Stator, hub_location=hub_exit_locations[18],shroud_location=shroud_exit_locations[18],stage_id=9)
+rotor9 = BladeRow(row_type=RowType.Rotor, location=hub_exit_locations[17],shroud_location=shroud_exit_locations[17],stage_id=9)
+stator9 = BladeRow(row_type=RowType.Stator, location=hub_exit_locations[18],shroud_location=shroud_exit_locations[18],stage_id=9)
 
-rotor10 = BladeRow(row_type=RowType.Rotor, hub_location=hub_exit_locations[19],shroud_location=shroud_exit_locations[19],stage_id=10)
-stator10 = BladeRow(row_type=RowType.Stator, hub_location=hub_exit_locations[20],shroud_location=shroud_exit_locations[20],stage_id=10)
+rotor10 = BladeRow(row_type=RowType.Rotor, location=hub_exit_locations[19],shroud_location=shroud_exit_locations[19],stage_id=10)
+stator10 = BladeRow(row_type=RowType.Stator, location=hub_exit_locations[20],shroud_location=shroud_exit_locations[20],stage_id=10)
  
  # Set an axial chord and number of blades (solidity)
 IGV1.axial_chord = cax_arr[0]; IGV1.num_blades = 32

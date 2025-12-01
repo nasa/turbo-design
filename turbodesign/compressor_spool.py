@@ -243,6 +243,10 @@ class CompressorSpool:
             row.m[i] = float(
                 interp1d(t_s, self.passage.get_m(tr, resolution=len(t_s)))(row.hub_location)
             )
+        if row.num_blades and row.chord != 0:
+            mean_r = float(row.r.mean())
+            pitch = 2 * np.pi * mean_r / row.num_blades
+            row.pitch_to_chord = pitch / row.chord
 
     # ------------------------------
     # initialization/solve

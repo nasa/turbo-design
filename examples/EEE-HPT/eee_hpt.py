@@ -1,14 +1,15 @@
 from turbodesign import TurbineSpool, Inlet, RowType, BladeRow, Passage, Outlet, PassageType, Coolant
 from turbodesign.enums import MassflowConstraint
-from turbodesign.loss import FixedPressureLoss
+from turbodesign.loss.fixedpressureloss import FixedPressureLoss
 import numpy as np
 from cantera import Solution
 import pickle
+from pathlib import Path
 from scipy.interpolate import PchipInterpolator
 # Geometry Import 
 from get_ss_ps import split_airfoil_by_angle_distance, resample_curve, plot_blade
 
-blades = pickle.load(open('stator_rotor.pkl','rb'))
+blades = pickle.load(open(Path(__file__).resolve().parent / 'stator_rotor.pkl','rb'))
 
 processed_data = []
 npts = 400
@@ -30,7 +31,9 @@ for i,blade in enumerate(blades):
     processed_data.append((ss, ps))
 
 
-hub_shroud = pickle.load(open('hub_shroud.pkl','rb'))
+data_dir = Path(__file__).resolve().parent
+
+hub_shroud = pickle.load(open(data_dir / 'hub_shroud.pkl','rb'))
 x = np.linspace(hub_shroud['Hub'][:,0].min(),hub_shroud['Hub'][:,0].max(),200)
 
 hub = np.vstack([x,PchipInterpolator(hub_shroud['Hub'][:,0],hub_shroud['Hub'][:,1])(x)]).transpose()
@@ -51,8 +54,8 @@ fluid = Solution('air.yaml')
 fluid.TP = T0, P0 # Use pascal for cantera
 print(f"Coefficient of Pressure [J/Kg] {fluid.cp:0.4f}")
 #%% Defining the Inlet
-inlet = Inlet(beta=[0,0], percent_radii=[0,1], hub_location=0)
-inlet.init_turbine(P0=[P0,P0],T0=[T0,T0],M=0.1)
+inlet = Inlet(beta=[0,0], location=0)
+inlet.init_total(P0=[P0,P0],T0=[T0,T0],M=0.1)
 outlet = Outlet(num_streamlines=n_streamlines)
 outlet.init_static(P=P,percent_radii=[0.5])
 #%% Define Blade Rows, processed data is already in mm, hub is already in mm 
@@ -68,10 +71,10 @@ beta_exit_flow = [73.6,-67.2,69.5,-63.9]
 P0_Loss = [0.057,0.088,0.069,0.014]         # (P01-P02)/(P01-P2)
 
 # Axial location is a percentage along the hub where row exit is defined
-stator1 = BladeRow(row_type=RowType.Stator,hub_location=location1)
-rotor1 = BladeRow(row_type=RowType.Rotor, hub_location=location2)
-stator2 = BladeRow(row_type=RowType.Stator,hub_location=location3)
-rotor2 = BladeRow(row_type=RowType.Rotor, hub_location=location4)
+stator1 = BladeRow(row_type=RowType.Stator,location=location1)
+rotor1 = BladeRow(row_type=RowType.Rotor, location=location2)
+stator2 = BladeRow(row_type=RowType.Stator,location=location3)
+rotor2 = BladeRow(row_type=RowType.Rotor, location=location4)
 
 stator1.axial_chord = cax1 # Set an axial chord
 rotor1.axial_chord = cax2
@@ -129,6 +132,6 @@ spool.massflow_constraint = MassflowConstraint.PressureBalance # Fixes the exit 
 # spool.plot_geometry()
 spool.adjust_streamlines = False
 spool.solve() # This also initializes streamlines
-spool.export_properties("eee_results.json")
+spool.export_properties(str(data_dir / "eee_results.json"))
 spool.plot()
 spool.plot_velocity_triangles()

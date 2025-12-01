@@ -51,7 +51,7 @@ def compute_reynolds(rows:List[BladeRow],passage:Passage):
     
     for i in range(1,len(rows)):
         row = rows[i]
-        xr = passage.get_xr_slice(0.5,(rows[i-1].hub_location,row.percent_hub))
+        xr = passage.get_xr_slice(0.5,(rows[i-1].location,row.percent_hub))
         dx = np.diff(xr[:,0])
         dr = np.diff(xr[:,1])
         c = np.sum(np.sqrt(dx**2+dr**2))
@@ -86,7 +86,7 @@ def compute_power(row:BladeRow,upstream:BladeRow) -> None:
         row.T0_is = 0 * row.T0 # Make it an array
     else:
         P0_P = (upstream.P0/row.P).mean()
-        row.P02_P01 = (row.P0/upstream.P0).mean()
+        row.P0_ratio = (row.P0/upstream.P0).mean()
         row.T_is = upstream.T0 * (1/P0_P)**((row.gamma-1)/row.gamma)
         a = np.sqrt(row.gamma*row.R*row.T_is)
         row.T0_is = row.T_is * (1+(row.gamma-1)/2*(row.V/a)**2)
@@ -111,14 +111,14 @@ def compute_quantities(row:BladeRow,upstream:BladeRow):
         row (BladeRow): current blade row. All quantities are at exit
         upstream (BladeRow): upstream blade row. All quantities are at exit
     """
-
     if row.row_type == RowType.Rotor:
         Cp_avg = (row.Cp+upstream.Cp)/2
         # Factor any coolant added and changes in streamline radius
         row.T0R = upstream.T0R - T0_coolant_weighted_average(row) # - (upstream.U**2-row.U**2)/(2*Cp_avg) 
         row.P = upstream.P0_stator_inlet/row.P0_P
-        
-        if row.loss_function.loss_type == LossType.Pressure: 
+
+        loss_type = getattr(row.loss_function, "loss_type", None)
+        if loss_type == LossType.Pressure: 
             # This affects the velocity triangle
             row.P0R = upstream.P0R - row.Yp*(upstream.P0R-row.P)
             row.T = (row.P/row.P0R)**((row.gamma-1)/row.gamma) * row.T0R
@@ -127,7 +127,7 @@ def compute_quantities(row:BladeRow,upstream:BladeRow):
             row.power = np.trapezoid(row.power_distribution,row.r-row.r[0])
             row.power_mean = row.massflow[-1] * row.Cp * (upstream.T0.mean()-row.T0.mean())
 
-        elif row.loss_function.loss_type == LossType.Enthalpy:
+        elif loss_type == LossType.Enthalpy:
             ' For Enthalpy related loss, assume the static quantities do not change '
             row.T = (row.P/row.P0R)**((row.gamma-1)/row.gamma) * row.T0R
             row.T0 = (1+(row.gamma-1)/2 * row.M**2) * row.T
@@ -155,7 +155,8 @@ def compute_quantities(row:BladeRow,upstream:BladeRow):
             
     elif row.row_type == RowType.Stator:
         ' For the stator we already assume the upstream P0 already applied '
-        if row.loss_function == LossType.Pressure:
+        loss_type = getattr(row.loss_function, "loss_type", None)
+        if loss_type == LossType.Pressure:
             row.P0 = upstream.P0 - row.Yp*(upstream.P0-row.P)
         else:
             row.P0 = upstream.P0
@@ -259,8 +260,6 @@ def rotor_calc(row:BladeRow,upstream:BladeRow,calculate_vm:bool=True,static_defi
     ## P0_P is assumed 
     # row.P = row.P0_stator_inlet*1/row.P0_P
     
-    # Static Pressure is assumed
-    row.P0_P = (row.P0/row.P).mean()
     upstream_radius = upstream.r
     # Upstream Relative Frame Calculations 
     upstream.U = upstream.rpm*np.pi/30 * upstream_radius # rad/s 
@@ -279,7 +278,12 @@ def rotor_calc(row:BladeRow,upstream:BladeRow,calculate_vm:bool=True,static_defi
     # Rotor Exit Calculations
     row.beta1 = upstream.beta2
     #row.Yp # Evaluated earlier 
-    row.P0R = upstream.P0R - row.Yp*(upstream.P0R-row.P)
+    if static_defined:
+        row.P0R = upstream.P0R - row.Yp*(upstream.P0R-row.P)
+    else:
+        row.P = upstream.P0R - (upstream.P0R-row.P0R)/row.Yp
+    
+    row.P0_P = (row.P0/row.P).mean()
     
     # Total Relative Temperature stays constant through the rotor. Adjust for change in radius from rotor inlet to exit
     row.T0R = upstream.T0R # (upstream_rothalpy + 0.5*row.U**2)/row.Cp # - T0_coolant_weighted_average(row) 
@@ -328,10 +332,7 @@ def rotor_calc(row:BladeRow,upstream:BladeRow,calculate_vm:bool=True,static_defi
         
         row.M = row.V/np.sqrt(row.gamma*row.R*row.T)
         T0_T = (1+(row.gamma-1)/2 * row.M**2)
-        if static_defined: # static conditions defined at the outlet and bladerows
-            row.P0 = row.P * T0_T**(row.gamma/(row.gamma-1))
-        else:
-            row.P = row.P0 / T0_T**(row.gamma/(row.gamma-1))
+        row.P0 = row.P * T0_T**(row.gamma/(row.gamma-1))
     
     row.M_rel = row.W/np.sqrt(row.gamma*row.R*row.T)
     row.T0 = row.T+row.V**2/(2*row.Cp)

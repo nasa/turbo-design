@@ -1,4 +1,5 @@
 from dataclasses import dataclass, field
+from optparse import Option
 from typing import List, Optional, Union
 from .enums import RowType
 from .bladerow import BladeRow, compute_gas_constants, interpolate_quantities
@@ -18,22 +19,18 @@ class Inlet(BladeRow):
     fun: interp1d
     static_defined: bool
     def __init__(self, 
-                 hub_location:float=0,
-                 shroud_location:float=0,
+                 location:float=0,
+                 shroud_location:Optional[float]=None,
                  beta:Union[float,List[float]]=[0]):
         """Initializes the inlet station. 
             Uses the beta and exit mach number to predict a value for Vm
 
         Args:
-            M (float): Mach number at the inlet plane
-            T0 (Union[float,List[float]]): Total Temperature Array
-            P0 (Union[float,List[float]]): Total Pressure Array
-            percent_radii (Union[float,List[float]]): Radius where total pressure and temperature are defined
             location (float): Location as a percentage of hub length
             beta (Union[float,List[float]], optional): Inlet flow angle in relative direction. Defaults to [].
 
         """
-        super().__init__(row_type=RowType.Inlet,hub_location=hub_location,shroud_location=shroud_location,stage_id=-1)
+        super().__init__(row_type=RowType.Inlet,location=location,shroud_location=shroud_location,stage_id=-1)
         self.beta1 = convert_to_ndarray(beta)
                    
     
@@ -41,9 +38,9 @@ class Inlet(BladeRow):
         """Initializes the inlet with static quantities at the inlet
 
         Args:
-            P (Union[float,List[float]]): _description_
-            T (Union[float,List[float]]): _description_
-            M (Union[float,List[float]]): _description_
+            P (Union[float,List[float]]): Static Pressure either as a float or array
+            T (Union[float,List[float]]): Static Temperature either as a float or array 
+            M (Union[float,List[float]]): Mach Number either as a float or array 
             percent_radii (Union[float,List[float]], optional): Percent radii where P,T, and M are defined. Defaults to [0.5].
         """
         self.P = convert_to_ndarray(P)
@@ -56,9 +53,9 @@ class Inlet(BladeRow):
         """Initializes the inlet with total quantities at the inlet
 
         Args:
-            P0 (Union[float,List[float]]): Total Pressure
-            T0 (Union[float,List[float]]): Total Temperature
-            M (Union[float,List[float]]): Mach Number
+            P0 (Union[float,List[float]]): Total Pressure either as a float or array 
+            T0 (Union[float,List[float]]): Total Temperature either as a float or array 
+            M (Union[float,List[float]]): Mach Number either as a float or array 
             percent_radii (Union[float,List[float]], optional): Percent radii where P0,T0, and M are defined. Defaults to [0.5].
         """
         self.P0 = convert_to_ndarray(P0)
@@ -112,7 +109,7 @@ class Inlet(BladeRow):
             self.gamma = gamma
             self.R = R
             self.T = self.T0 * 1/(1 + (self.gamma-1) * self.M**2)
-            if not self.IsCompressor:
+            if not self.static_defined:
                 self.P0 = self.P * (1+(self.gamma-1)/2 * self.M**2) ** (self.gamma/(self.gamma-1)) 
                 self.T0 = self.T * (1+(self.gamma-1)/2 * self.M**2)
             else:
@@ -142,7 +139,7 @@ class Inlet(BladeRow):
         # Perform Calculations on Velocity 
         Vm_prev = 0; Vm_err = 0 
 
-        cutline,_,_ = passage.get_cutting_line(t_hub=self.hub_location,t_shroud=self.shroud_location)
+        cutline,_,_ = passage.get_cutting_line(t_hub=self.location,t_shroud=self.shroud_location)
         self.x,self.r = cutline.get_point(np.linspace(0,1,num_streamlines))
         for _ in range(10):
             T0_T = (1+(self.gamma-1)/2 * self.M**2)
