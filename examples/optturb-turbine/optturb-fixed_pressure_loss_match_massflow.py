@@ -72,10 +72,12 @@ rotor1.loss_model = FixedPressureLoss(0.214)
 #%% Initialize the TurbineSpool
 spool = TurbineSpool(
     passage=passage,
+    massflow=massflow,
+    inlet=inlet,
+    outlet=outlet,
+    rows=[stator1, rotor1],
     rpm=Design_RPM,
     num_streamlines=3,
-    massflow=massflow,
-    rows=[inlet, stator1, rotor1, outlet],
 )
 spool.fluid = fluid
 spool.massflow_constraint = MassflowConstraint.AngleMatch # changes the exit angle

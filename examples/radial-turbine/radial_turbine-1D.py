@@ -168,11 +168,14 @@ stator.loss_model = FixedPressureLoss(0.0) # type: ignore
 rotor.beta2_metal = [45,47,52,57,60] # Angle, hub,mean,tip
 rotor.loss_model = FixedPressureLoss(0.15669278543371953) # type: ignore # <- From CFD.
 
-spool = TurbineSpool(passage=passage,
-                rpm=RPM, 
-                num_streamlines=5,
+spool = TurbineSpool(
+                passage=passage,
                 massflow=massflow,
-                rows=[inlet,stator,rotor,outlet],
+                inlet=inlet,
+                outlet=outlet,
+                rows=[stator, rotor],
+                rpm=RPM,
+                num_streamlines=5,
                 fluid=None)
 
 spool.adjust_streamlines = False

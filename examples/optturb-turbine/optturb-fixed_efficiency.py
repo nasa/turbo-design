@@ -59,10 +59,12 @@ station3.loss_model = FixedEfficiency(0.90)
 
 spool = TurbineSpool(
     passage=passage,
+    massflow=massflow,
+    inlet=station1,
+    outlet=outlet,
+    rows=[station2, station3],
     rpm=Design_RPM,
     num_streamlines=3,
-    massflow=massflow,
-    rows=[station1, station2, station3, outlet],
 )
 spool.fluid = fluid
 

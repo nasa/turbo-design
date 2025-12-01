@@ -155,10 +155,12 @@ rotor2.inlet_to_outlet_pratio = [0.15, 0.5]
 
 #%% Initialize the TurbineSpool
 spool = TurbineSpool(passage=passage,
-            rpm=Design_RPM, 
-            num_streamlines=3, 
-            massflow=massflow, 
-            rows=[inlet,stator1,rotor1,stator2,rotor2,outlet])
+            massflow=massflow,
+            inlet=inlet,
+            outlet=outlet,
+            rows=[stator1,rotor1,stator2,rotor2],
+            rpm=Design_RPM,
+            num_streamlines=3)
 spool.fluid = fluid
 spool.massflow_constraint = MassflowConstraint.PressureBalance # Fixes the exit angle and changes degree of reaction
 # spool.plot_geometry()

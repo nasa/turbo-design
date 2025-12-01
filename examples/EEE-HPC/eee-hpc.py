@@ -122,10 +122,8 @@ Cp = gamma/(gamma-1) * 287.15
 rows = [IGV1,rotor1,stator1,rotor2,stator2,rotor3,stator3,rotor4,stator4,
         rotor5,stator5,rotor6,stator6,rotor7,stator7,rotor8,stator8,
         rotor9,stator9,rotor10,stator10]
-rows.insert(0,inlet)
-rows.append(outlet)
 
-for row in rows:
+for row in [inlet, *rows, outlet]:
     row.gamma = gamma
     row.Cp = Cp
     row.coolant = Coolant(T0=293,P0=101325,massflow_percentage=0)
@@ -198,12 +196,15 @@ passage = Passage(hub_m[:,0],hub_m[:,1],
                  shroud_m[:,0],shroud_m[:,1],
                  passageType=PassageType.Axial) # type: ignore
 
-spool = TurbineSpool(passage=passage,
-            rpm=12400, 
-            num_streamlines=n_streamlines, 
-            massflow=20, 
-            fluid=None,
-            rows=rows)
+spool = TurbineSpool(
+            passage=passage,
+            massflow=20,
+            inlet=inlet,
+            outlet=outlet,
+            rows=rows,
+            rpm=12400,
+            num_streamlines=n_streamlines,
+            fluid=None)
 spool.massflow_constraint = MassflowConstraint.PressureBalance # Fixes the exit angle and changes degree of reaction
 # spool.plot_geometry()
 spool.adjust_streamlines = False

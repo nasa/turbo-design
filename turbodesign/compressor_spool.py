@@ -3,7 +3,6 @@ from __future__ import annotations
 
 from typing import Dict, List, Union, Optional
 import json
-import copy
 
 import numpy as np
 import numpy.typing as npt
@@ -96,7 +95,7 @@ class CompressorSpool:
     """
 
     # Class-level defaults (avoid mutable defaults here!)
-    blade_rows: List[BladeRow]
+    rows: List[BladeRow]
     massflow: float
     rpm: float
 
@@ -113,6 +112,8 @@ class CompressorSpool:
         self,
         passage: Passage,
         massflow: float,
+        inlet: Inlet,
+        outlet: Outlet,
         rows: List[BladeRow],
         num_streamlines: int = 3,
         fluid: Optional[Solution] = None,
@@ -124,7 +125,9 @@ class CompressorSpool:
         Args:
             passage: Passage defining hub and shroud
             massflow: massflow at spool inlet
-            rows: List of blade rows (include inlet at [0] and outlet at [-1])
+            inlet: Inlet object
+            outlet: Outlet object
+            rows: List of blade rows between inlet and outlet
             num_streamlines: number of streamlines used through the meridional passage
             fluid: cantera gas solution; defaults to air.yaml if None
             rpm: RPM for the entire spool. Individual rows can override later.
@@ -132,7 +135,9 @@ class CompressorSpool:
         """
         self.passage = passage
         self.massflow = massflow
-        self.blade_rows = rows
+        self.inlet = inlet
+        self.outlet = outlet
+        self.rows = rows
         self.num_streamlines = num_streamlines
         self._fluid = fluid if fluid is not None else Solution("air.yaml")
         self.massflow_constraint = massflow_constraint
@@ -143,15 +148,24 @@ class CompressorSpool:
         self._adjust_streamlines = True
 
         # Assign IDs, RPMs, and axial chords where appropriate
-        for i, br in enumerate(self.blade_rows):
+        for i, br in enumerate(self._all_rows()):
             br.id = i
             if not isinstance(br, (Inlet, Outlet)):
                 br.rpm = rpm
                 br.axial_chord = br.hub_location * self.passage.hub_length
 
         # Propagate initial fluid to rows
-        for br in self.blade_rows:
+        for br in self._all_rows():
             br.fluid = self._fluid
+
+    def _all_rows(self) -> List[BladeRow]:
+        """Convenience to iterate inlet + interior rows + outlet."""
+        return [self.inlet, *self.rows, self.outlet]
+
+    @property
+    def blade_rows(self) -> List[BladeRow]:
+        """Backwards-compatible combined row list."""
+        return self._all_rows()
 
     # ------------------------------
     # Properties
@@ -164,7 +178,7 @@ class CompressorSpool:
     def fluid(self, newFluid: Solution) -> None:
         """Change the gas used in the spool and cascade to rows."""
         self._fluid = newFluid
-        for br in self.blade_rows:
+        for br in self._all_rows():
             br.fluid = self._fluid
 
     @property
@@ -179,10 +193,10 @@ class CompressorSpool:
     # Row utilities
     # ------------------------------
     def set_blade_row_rpm(self, index: int, rpm: float) -> None:
-        self.blade_rows[index].rpm = rpm
+        self.rows[index].rpm = rpm
 
     def set_blade_row_type(self, blade_row_index: int, rowType: RowType) -> None:
-        self.blade_rows[blade_row_index].row_type = rowType
+        self.rows[blade_row_index].row_type = rowType
 
     def set_blade_row_exit_angles(
         self,
@@ -192,21 +206,19 @@ class CompressorSpool:
     ) -> None:
         """Set intended exit flow angles for rows (useful when geometry is fixed)."""
         for k, v in radius.items():
-            self.blade_rows[k].radii_geom = v
+            self.rows[k].radii_geom = v
         for k, v in beta.items():
-            self.blade_rows[k].beta_geom = v
-            self.blade_rows[k].beta_fixed = True
-        for br in self.blade_rows:
-            br.solution_type = (
-                SolutionType.supersonic if IsSupersonic else SolutionType.subsonic
-            )
+            self.rows[k].beta_geom = v
+            self.rows[k].beta_fixed = True
+        for br in self._all_rows():
+            br.solution_type = "supersonic" if IsSupersonic else "subsonic"
 
     # ------------------------------
     # Streamline setup/geometry
     # ------------------------------
     def initialize_streamlines(self) -> None:
         """Initialize streamline storage per row and compute curvature."""
-        for row in self.blade_rows:
+        for row in self._all_rows():
             row.phi = np.zeros((self.num_streamlines,))
             row.rm = np.zeros((self.num_streamlines,))
             row.r = np.zeros((self.num_streamlines,))
@@ -237,18 +249,19 @@ class CompressorSpool:
     # ------------------------------
     def initialize(self) -> None:
         """Initialize massflow and thermodynamic state through rows (turbines)."""
-        Is_static_defined = self.blade_rows[-1].static_defined # This is set when you initialize the outlet 
+        blade_rows = self._all_rows()
+        Is_static_defined = self.outlet.static_defined # This is set when you initialize the outlet 
 
         # Inlet
         W0 = self.massflow
-        inlet: Inlet = self.blade_rows[0]  # type: ignore[assignment]
+        inlet: Inlet = self.inlet
         if self.fluid:
             inlet.__initialize_fluid__(self.fluid)  # type: ignore[arg-type]
         else:
             inlet.__initialize_fluid__(  # type: ignore[call-arg]
-                R=self.blade_rows[1].R,
-                gamma=self.blade_rows[1].gamma,
-                Cp=self.blade_rows[1].Cp,
+                R=blade_rows[1].R,
+                gamma=blade_rows[1].gamma,
+                Cp=blade_rows[1].Cp,
             )
 
         inlet.total_massflow = W0
@@ -262,30 +275,30 @@ class CompressorSpool:
         compute_gas_constants(inlet, self.fluid)
         inlet_calc(inlet)
 
-        for row in self.blade_rows:
+        for row in blade_rows:
             interpolate_streamline_radii(row, self.passage, self.num_streamlines)
 
-        outlet: Outlet = self.blade_rows[-1]  # type: ignore[assignment]
+        outlet: Outlet = self.outlet
         for j in range(self.num_streamlines):
             P0 = inlet.get_total_pressure(inlet.percent_hub_shroud[j])  # type: ignore[attr-defined]
-            percents = np.zeros(shape=(len(self.blade_rows) - 2)) + 0.3
+            percents = np.zeros(shape=(len(blade_rows) - 2)) + 0.3
             percents[-1] = 1
             if Is_static_defined:
                 Ps_range = outlet_pressure(percents=percents, inletP0=inlet.P0[j], outletP=outlet.P[j])
-                for i in range(1, len(self.blade_rows) - 1):
-                    self.blade_rows[i].P[j] = Ps_range[i - 1]
+                for i in range(1, len(blade_rows) - 1):
+                    blade_rows[i].P[j] = Ps_range[i - 1]
             else:
                 P0_range = outlet_pressure(percents=percents, inletP0=inlet.P0[j], outletP=outlet.P[j])
-                for i in range(1, len(self.blade_rows) - 1):
-                    self.blade_rows[i].P0[j] = P0_range[i - 1]
+                for i in range(1, len(blade_rows) - 1):
+                    blade_rows[i].P0[j] = P0_range[i - 1]
                     
 
         # Pass T0, P0 to downstream rows
-        for i in range(1, len(self.blade_rows) - 1):
-            upstream = self.blade_rows[i - 1]
-            downstream = self.blade_rows[i + 1] if i + 1 < len(self.blade_rows) else None
+        for i in range(1, len(blade_rows) - 1):
+            upstream = blade_rows[i - 1]
+            downstream = blade_rows[i + 1] if i + 1 < len(blade_rows) else None
 
-            row = self.blade_rows[i]
+            row = blade_rows[i]
             if row.coolant is not None:
                 T0c = row.coolant.T0
                 P0c = row.coolant.P0
@@ -337,17 +350,19 @@ class CompressorSpool:
             pass
     
     def _pressure_balance(self):
+        blade_rows = self._all_rows()
         outlet_P = []
         outlet_P_guess = []
-        for i in range(1, len(self.blade_rows) - 2):
-            outlet_P.append(self.blade_rows[i].inlet_to_outlet_pratio) # inlet_to_outlet_pratio is a default property  
-            outlet_P_guess.append(np.mean(self.blade_rows[i].inlet_to_outlet_pratio))
+        for i in range(1, len(blade_rows) - 2):
+            outlet_P.append(blade_rows[i].inlet_to_outlet_pratio) # inlet_to_outlet_pratio is a default property  
+            outlet_P_guess.append(np.mean(blade_rows[i].inlet_to_outlet_pratio))
             
         
     # ------------------------------
     # Export / Plotting
     # ------------------------------
     def export_properties(self, filename: str = "compressor_spool.json") -> None:
+        blade_rows = self._all_rows()
         blade_rows_out = []
         degree_of_reaction = []
         total_total_efficiency = []
@@ -355,17 +370,17 @@ class CompressorSpool:
         stage_loading = []
         euler_power = []
         enthalpy_power = []
-        x_streamline = np.zeros((self.num_streamlines, len(self.blade_rows)))
-        r_streamline = np.zeros((self.num_streamlines, len(self.blade_rows)))
+        x_streamline = np.zeros((self.num_streamlines, len(blade_rows)))
+        r_streamline = np.zeros((self.num_streamlines, len(blade_rows)))
         massflow = []
 
-        for indx, row in enumerate(self.blade_rows):
+        for indx, row in enumerate(blade_rows):
             blade_rows_out.append(row.to_dict())
             if row.row_type == RowType.Rotor:
                 degree_of_reaction.append(
                     (
-                        (self.blade_rows[indx - 1].P - row.P)
-                        / (self.blade_rows[indx - 2].P - row.P)
+                        (blade_rows[indx - 1].P - row.P)
+                        / (blade_rows[indx - 2].P - row.P)
                     ).mean()
                 )
                 total_total_efficiency.append(row.eta_total)
@@ -381,17 +396,15 @@ class CompressorSpool:
                 x_streamline[j, indx] = float(interp1d(t, x)(row.percent_hub))
                 r_streamline[j, indx] = float(interp1d(t, r)(row.percent_hub))
 
-        Pratio_Total_Total = np.mean(self.blade_rows[0].P0 / self.blade_rows[-2].P0)
-        Pratio_Total_Static = np.mean(self.blade_rows[0].P0 / self.blade_rows[-2].P)
-        FlowFunction = (
-            np.mean(massflow) * np.sqrt(self.blade_rows[0].T0) * self.blade_rows[0].P0 / 1000
-        )
-        CorrectedSpeed = self.rpm * np.pi / 30 / np.sqrt(self.blade_rows[0].T0.mean())
+        Pratio_Total_Total = np.mean(self.inlet.P0 / blade_rows[-2].P0)
+        Pratio_Total_Static = np.mean(self.inlet.P0 / blade_rows[-2].P)
+        FlowFunction = np.mean(massflow) * np.sqrt(self.inlet.T0) * self.inlet.P0 / 1000
+        CorrectedSpeed = self.rpm * np.pi / 30 / np.sqrt(self.inlet.T0.mean())
         EnergyFunction = (
-            (self.blade_rows[0].T0 - self.blade_rows[-2].T0)
+            (self.inlet.T0 - blade_rows[-2].T0)
             * 0.5
-            * (self.blade_rows[0].Cp + self.blade_rows[-2].Cp)
-            / self.blade_rows[0].T0
+            * (self.inlet.Cp + blade_rows[-2].Cp)
+            / self.inlet.T0
         )
         EnergyFunction = np.mean(EnergyFunction)
 
@@ -430,6 +443,7 @@ class CompressorSpool:
 
     def plot(self) -> None:
         """Plot hub/shroud and streamlines."""
+        blade_rows = self._all_rows()
         plt.figure(num=1, clear=True, dpi=150, figsize=(15, 10))
         plt.plot(
             self.passage.xhub_pts,
@@ -453,21 +467,21 @@ class CompressorSpool:
         )
         x_streamline = np.zeros((self.num_streamlines, len(self.blade_rows)))
         r_streamline = np.zeros((self.num_streamlines, len(self.blade_rows)))
-        for i in range(len(self.blade_rows)):
-            x_streamline[:, i] = self.blade_rows[i].x
-            r_streamline[:, i] = self.blade_rows[i].r
+        for i in range(len(blade_rows)):
+            x_streamline[:, i] = blade_rows[i].x
+            r_streamline[:, i] = blade_rows[i].r
 
-        for i in range(1, len(self.blade_rows) - 1):
+        for i in range(1, len(blade_rows) - 1):
             plt.plot(x_streamline[:, i], r_streamline[:, i], "--b", linewidth=1.5)
 
-        for i, row in enumerate(self.blade_rows):
+        for i, row in enumerate(blade_rows):
             plt.plot(row.x, row.r, linestyle="dashed", linewidth=1.5, color="blue", alpha=0.4)
             plt.plot(x_streamline[:, i], r_streamline[:, i], "or")
 
             if i == 0:
                 pass
             else:
-                upstream = self.blade_rows[i - 1]
+                upstream = blade_rows[i - 1]
                 if upstream.row_type == RowType.Inlet:
                     cut_line1, _, _ = self.passage.get_cutting_line(
                         (row.location * hub_length + (0.5 * row.blade_to_blade_gap * row.axial_chord) - row.axial_chord)
@@ -505,6 +519,7 @@ class CompressorSpool:
     def plot_velocity_triangles(self) -> None:
         """Plot velocity triangles for each blade row (turbines).
         """
+        blade_rows = self._all_rows()
         prop = dict(arrowstyle="-|>,head_width=0.4,head_length=0.8", shrinkA=0, shrinkB=0)
 
         for j in range(self.num_streamlines):
@@ -512,8 +527,8 @@ class CompressorSpool:
             y_max = 0.0
             y_min = 0.0
             plt.figure(num=1, clear=True)
-            for i in range(1, len(self.blade_rows) - 1):
-                row = self.blade_rows[i]
+            for i in range(1, len(blade_rows) - 1):
+                row = blade_rows[i]
                 x_end = x_start + row.Vm.mean()
                 dx = x_end - x_start
 
