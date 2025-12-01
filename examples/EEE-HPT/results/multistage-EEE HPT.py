@@ -153,14 +153,14 @@ rotor1.inlet_to_outlet_pratio = [0.15, 0.7]
 stator2.inlet_to_outlet_pratio = [0.10, 0.9]
 rotor2.inlet_to_outlet_pratio = [0.15, 0.5]
 
-#%% Initialize the Spool
+#%% Initialize the TurbineSpool
 spool = TurbineSpool(passage=passage,
             rpm=Design_RPM, 
             num_streamlines=3, 
             massflow=massflow, 
             rows=[inlet,stator1,rotor1,stator2,rotor2,outlet])
 spool.fluid = fluid
-spool.massflow_constraint = MassflowConstraint.BalanceMassFlow # Fixes the exit angle and changes degree of reaction
+spool.massflow_constraint = MassflowConstraint.PressureBalance # Fixes the exit angle and changes degree of reaction
 # spool.plot_geometry()
 spool.solve() # This also initializes streamlines
 spool.export_properties("examples/EEE/EEE-HPT.json")

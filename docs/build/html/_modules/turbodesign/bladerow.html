@@ -43,16 +43,12 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../modules/bladerow.html">BladeRow</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../modules/bladerow.html#turbodesign.bladerow.BladeRow"><code class="docutils literal notranslate"><span class="pre">BladeRow</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../modules/bladerow.html#turbodesign.bladerow.compute_gas_constants"><code class="docutils literal notranslate"><span class="pre">compute_gas_constants()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../modules/bladerow.html#turbodesign.bladerow.interpolate_quantities"><code class="docutils literal notranslate"><span class="pre">interpolate_quantities()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../modules/bladerow.html#turbodesign.bladerow.interpolate_streamline_radii"><code class="docutils literal notranslate"><span class="pre">interpolate_streamline_radii()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../modules/bladerow.html#turbodesign.bladerow.sutherland"><code class="docutils literal notranslate"><span class="pre">sutherland()</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="../../modules/coolant.html">Coolant</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="../../modules/coolant.html#turbodesign.coolant.Coolant"><code class="docutils literal notranslate"><span class="pre">Coolant</span></code></a></li>
-</ul>
-</li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules/coolant.html">Coolant</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../modules/enums.html">Enums</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../modules/enums.html#turbodesign.enums.LossType"><code class="docutils literal notranslate"><span class="pre">LossType</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../modules/enums.html#turbodesign.enums.MassflowConstraint"><code class="docutils literal notranslate"><span class="pre">MassflowConstraint</span></code></a></li>
@@ -100,16 +96,13 @@
 <li class="toctree-l2"><a class="reference internal" href="../../modules/radeq.html#turbodesign.radeq.radeq"><code class="docutils literal notranslate"><span class="pre">radeq()</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="../../modules/rotor.html">Rotor</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="../../modules/rotor.html#turbodesign.rotor.Rotor"><code class="docutils literal notranslate"><span class="pre">Rotor</span></code></a></li>
-</ul>
-</li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules/rotor.html">Rotor</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../modules/solve_radeq.html">Solve Radial Equilibrium</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../modules/solve_radeq.html#turbodesign.solve_radeq.adjust_streamlines"><code class="docutils literal notranslate"><span class="pre">adjust_streamlines()</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="../../modules/spool.html">Spool</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="../../modules/spool.html#turbodesign.spool.Spool"><code class="docutils literal notranslate"><span class="pre">Spool</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules/spool.html">TurbineSpool</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/spool.html#turbodesign.turbine_spool.TurbineSpool"><code class="docutils literal notranslate"><span class="pre">TurbineSpool</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../modules/td_math.html">Turbine Design Math</a><ul>
@@ -124,7 +117,7 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../modules/turbinespool.html">Turbine Spool</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="../../modules/turbinespool.html#turbodesign.turbinespool.TurbineSpool"><code class="docutils literal notranslate"><span class="pre">TurbineSpool</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/turbinespool.html#turbodesign.turbine_spool.TurbineSpool"><code class="docutils literal notranslate"><span class="pre">TurbineSpool</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -155,7 +148,7 @@
              
   <h1>Source code for turbodesign.bladerow</h1><div class="highlight"><pre>
 <span></span><span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">field</span><span class="p">,</span> <span class="n">Field</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.enums</span><span class="w"> </span><span class="kn">import</span> <span class="n">RowType</span><span class="p">,</span> <span class="n">PowerType</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span> 
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy.typing</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">npt</span>
@@ -165,7 +158,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">.coolant</span><span class="w"> </span><span class="kn">import</span> <span class="n">Coolant</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyturbo.helper</span><span class="w"> </span><span class="kn">import</span> <span class="n">line2D</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyturbo.aero.airfoil2D</span><span class="w"> </span><span class="kn">import</span> <span class="n">Airfoil2D</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">.loss</span><span class="w"> </span><span class="kn">import</span> <span class="n">LossBaseClass</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.loss</span><span class="w"> </span><span class="kn">import</span> <span class="n">LossBaseClass</span><span class="p">,</span> <span class="n">CompositeLossModel</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.passage</span><span class="w"> </span><span class="kn">import</span> <span class="n">Passage</span>
     
 
@@ -241,6 +234,7 @@
     <span class="n">P0_stator_inlet</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">]))</span>              <span class="c1"># Every quantity is an exit quantity, This is used  for efficiency calcs</span>
     <span class="n">T0_stator_inlet</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">]))</span>              <span class="c1"># Every quantity is an exit quantity, This is used  for efficiency calcs</span>
     <span class="n">P0</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">]))</span>              <span class="c1"># Total Quantities </span>
+    <span class="n">P0_is</span><span class="p">:</span><span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">]))</span>
     <span class="n">T0</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">]))</span>          
     <span class="n">T0_is</span><span class="p">:</span><span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">]))</span> 
     <span class="n">P0R</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">]))</span>             <span class="c1"># Relative Total Pressure (Pa)</span>
@@ -564,19 +558,25 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">loss_function</span>
     
     <span class="nd">@loss_model</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">loss_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">:</span><span class="n">Callable</span><span class="p">[[</span><span class="n">Any</span><span class="p">],</span> <span class="n">Any</span><span class="p">]):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Add in custom loss model</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">loss_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">:</span><span class="n">Union</span><span class="p">[</span><span class="n">LossBaseClass</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">LossBaseClass</span><span class="p">]]):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Assign one or more loss models that inherit :class:`LossBaseClass`.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            model (function): custom loss function. Input will be of the format blade row</span>
-
-<span class="sd">        Example:</span>
-<span class="sd">        </span>
-<span class="sd">        def mylossfunction(row:BladeRow) -&gt; float</span>
-<span class="sd">            code to do something with machine learning</span>
-<span class="sd">            return pressure loss</span>
+<span class="sd">            model: Either a single loss model or a sequence of models.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">loss_function</span> <span class="o">=</span> <span class="n">model</span> <span class="c1"># type: ignore</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">LossBaseClass</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">loss_function</span> <span class="o">=</span> <span class="n">model</span>
+            <span class="k">return</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">):</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">model</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;At least one loss model must be provided.&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">LossBaseClass</span><span class="p">)</span> <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">model</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;All entries must inherit LossBaseClass.&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">loss_function</span> <span class="o">=</span> <span class="n">CompositeLossModel</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+            <span class="k">return</span>
+
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Loss models must inherit LossBaseClass.&quot;</span><span class="p">)</span>
     
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">te_pitch</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -715,8 +715,9 @@
 
     <span class="c1"># Total Quantities</span>
     <span class="n">row</span><span class="o">.</span><span class="n">T0</span> <span class="o">=</span> <span class="n">interpolate_quantities</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">T0</span><span class="p">,</span><span class="n">row</span><span class="o">.</span><span class="n">percent_hub_shroud</span><span class="p">,</span><span class="n">streamline_percent_length</span><span class="p">)</span>
-    <span class="n">row</span><span class="o">.</span><span class="n">T0_is</span> <span class="o">=</span> <span class="n">interpolate_quantities</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">T0</span><span class="p">,</span><span class="n">row</span><span class="o">.</span><span class="n">percent_hub_shroud</span><span class="p">,</span><span class="n">streamline_percent_length</span><span class="p">)</span>
+    <span class="n">row</span><span class="o">.</span><span class="n">T0_is</span> <span class="o">=</span> <span class="n">interpolate_quantities</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">T0</span><span class="p">,</span><span class="n">row</span><span class="o">.</span><span class="n">percent_hub_shroud</span><span class="p">,</span><span class="n">streamline_percent_length</span><span class="p">)</span> <span class="c1"># For Turbines</span>
     <span class="n">row</span><span class="o">.</span><span class="n">P0</span> <span class="o">=</span> <span class="n">interpolate_quantities</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">P0</span><span class="p">,</span><span class="n">row</span><span class="o">.</span><span class="n">percent_hub_shroud</span><span class="p">,</span><span class="n">streamline_percent_length</span><span class="p">)</span>
+    <span class="n">row</span><span class="o">.</span><span class="n">P0_is</span> <span class="o">=</span> <span class="n">interpolate_quantities</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">P0</span><span class="p">,</span><span class="n">row</span><span class="o">.</span><span class="n">percent_hub_shroud</span><span class="p">,</span><span class="n">streamline_percent_length</span><span class="p">)</span> <span class="c1"># For Compressors </span>
     <span class="n">row</span><span class="o">.</span><span class="n">P0_stator_inlet</span> <span class="o">=</span> <span class="n">interpolate_quantities</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">P0_stator_inlet</span><span class="p">,</span><span class="n">row</span><span class="o">.</span><span class="n">percent_hub_shroud</span><span class="p">,</span><span class="n">streamline_percent_length</span><span class="p">)</span>
     
     <span class="c1"># Relative Quantities</span>
@@ -779,8 +780,6 @@
         <span class="k">return</span> <span class="n">interp1d</span><span class="p">(</span><span class="n">r</span><span class="p">,</span><span class="n">q</span><span class="p">,</span><span class="n">kind</span><span class="o">=</span><span class="s1">&#39;linear&#39;</span><span class="p">)(</span><span class="n">r2</span><span class="p">)</span></div>
 
     
-<div class="viewcode-block" id="compute_gas_constants">
-<a class="viewcode-back" href="../../modules/bladerow.html#turbodesign.bladerow.compute_gas_constants">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">compute_gas_constants</span><span class="p">(</span><span class="n">row</span><span class="p">:</span><span class="n">BladeRow</span><span class="p">,</span><span class="n">fluid</span><span class="p">:</span><span class="n">Optional</span><span class="p">[</span><span class="n">Solution</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Updates the Cp, Gamma, and density for a blade row. If fluid is not specified then only density and viscosity is updated. </span>
 <span class="sd">    </span>
@@ -801,8 +800,7 @@
         <span class="n">row</span><span class="o">.</span><span class="n">gamma</span> <span class="o">=</span> <span class="n">row</span><span class="o">.</span><span class="n">Cp</span><span class="o">/</span><span class="n">row</span><span class="o">.</span><span class="n">Cv</span>
     <span class="c1"># Use Ideal Gas </span>
     <span class="n">row</span><span class="o">.</span><span class="n">rho</span> <span class="o">=</span> <span class="n">row</span><span class="o">.</span><span class="n">P</span><span class="o">/</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">T</span><span class="o">*</span><span class="n">row</span><span class="o">.</span><span class="n">R</span><span class="p">)</span>
-    <span class="n">row</span><span class="o">.</span><span class="n">mu</span> <span class="o">=</span> <span class="n">sutherland</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">T</span><span class="p">)</span> <span class="c1"># type: ignore</span></div>
-
+    <span class="n">row</span><span class="o">.</span><span class="n">mu</span> <span class="o">=</span> <span class="n">sutherland</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">T</span><span class="p">)</span> <span class="c1"># type: ignore</span>
 </pre></div>
 
            </div>

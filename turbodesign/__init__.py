@@ -1,8 +1,9 @@
-from .spool import Spool
+from .turbine_spool import TurbineSpool
 from .stage import Stage
 from .enums import LossType, RowType, PassageType, MassflowConstraint
 from .inlet import Inlet
-from .bladerow import BladeRow, Coolant
+from .bladerow import BladeRow
+from .coolant import Coolant
 from .lossinterp import LossInterp
 from .passage import Passage
 from .outlet import Outlet
@@ -11,17 +12,17 @@ from .outlet import Outlet
 from importlib import import_module
 
 __all__ = [
-    "Spool", "Stage", "Inlet", "Outlet", "BladeRow", "Coolant",
+    "TurbineSpool", "Stage", "Inlet", "Outlet", "BladeRow", "Coolant",
     "Passage", "RowType", "PassageType", "MassflowConstraint", "LossInterp",
 ]
 
 _module_map = {
-    "Spool": ("turbodesign.spool", "Spool"),
+    "TurbineSpool": ("turbodesign.turbine_spool", "TurbineSpool"),
     "Stage": ("turbodesign.stage", "Stage"),
     "Inlet": ("turbodesign.inlet", "Inlet"),
     "Outlet": ("turbodesign.outlet", "Outlet"),
     "BladeRow": ("turbodesign.bladerow", "BladeRow"),
-    "Coolant": ("turbodesign.bladerow", "Coolant"),
+    "Coolant": ("turbodesign.coolant", "Coolant"),
     "Passage": ("turbodesign.passage", "Passage"),
     "RowType": ("turbodesign.enums", "RowType"),
     "PassageType": ("turbodesign.enums", "PassageType"),

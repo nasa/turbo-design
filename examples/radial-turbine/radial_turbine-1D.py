@@ -176,7 +176,7 @@ spool = TurbineSpool(passage=passage,
                 fluid=None)
 
 spool.adjust_streamlines = False
-spool.massflow_constraint = MassflowConstraint.BalanceMassFlow # type: ignore
+spool.massflow_constraint = MassflowConstraint.PressureBalance # type: ignore
     
 spool.solve() # This also initializes streamlines
 spool.plot_velocity_triangles()

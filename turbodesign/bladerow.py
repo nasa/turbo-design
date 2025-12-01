@@ -17,7 +17,7 @@ class BladeRow:
     id:int = 0
     stage_id:int = 0
     row_type: RowType = RowType.Stator
-    loss_function:LossBaseClass
+    loss_function:Optional[LossBaseClass]
     cutting_line:line2D         # Line perpendicular to the streamline
     rp:float = 0.4              # Degree of Reaction
     
@@ -83,6 +83,7 @@ class BladeRow:
     P0_stator_inlet = field(default_factory=lambda: np.array([0]))              # Every quantity is an exit quantity, This is used  for efficiency calcs
     T0_stator_inlet = field(default_factory=lambda: np.array([0]))              # Every quantity is an exit quantity, This is used  for efficiency calcs
     P0: npt.NDArray = field(default_factory=lambda: np.array([0]))              # Total Quantities 
+    P0_is:npt.NDArray = field(default_factory=lambda: np.array([0]))
     T0: npt.NDArray = field(default_factory=lambda: np.array([0]))          
     T0_is:npt.NDArray = field(default_factory=lambda: np.array([0])) 
     P0R: npt.NDArray = field(default_factory=lambda: np.array([0]))             # Relative Total Pressure (Pa)
@@ -560,8 +561,9 @@ def interpolate_streamline_radii(row:BladeRow,passage:Passage,num_streamlines:in
 
     # Total Quantities
     row.T0 = interpolate_quantities(row.T0,row.percent_hub_shroud,streamline_percent_length)
-    row.T0_is = interpolate_quantities(row.T0,row.percent_hub_shroud,streamline_percent_length)
+    row.T0_is = interpolate_quantities(row.T0,row.percent_hub_shroud,streamline_percent_length) # For Turbines
     row.P0 = interpolate_quantities(row.P0,row.percent_hub_shroud,streamline_percent_length)
+    row.P0_is = interpolate_quantities(row.P0,row.percent_hub_shroud,streamline_percent_length) # For Compressors 
     row.P0_stator_inlet = interpolate_quantities(row.P0_stator_inlet,row.percent_hub_shroud,streamline_percent_length)
     
     # Relative Quantities

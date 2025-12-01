@@ -1,4 +1,4 @@
-from turbodesign import Spool, Inlet, RowType, BladeRow, Passage, Outlet, PassageType, Coolant
+from turbodesign import TurbineSpool, Inlet, RowType, BladeRow, Passage, Outlet, PassageType, Coolant
 from turbodesign.enums import MassflowConstraint
 from turbodesign.loss import FixedPressureLoss
 import numpy as np
@@ -117,13 +117,13 @@ passage = Passage(hub_m[:,0],hub_m[:,1],
                  shroud_m[:,0],shroud_m[:,1],
                  passageType=PassageType.Axial) # type: ignore
 
-spool = Spool(passage=passage,
+spool = TurbineSpool(passage=passage,
             rpm=12400, 
             num_streamlines=n_streamlines, 
             massflow=20, 
             fluid=None,
             rows=[inlet,stator1,rotor1,stator2,rotor2,outlet])
-spool.massflow_constraint = MassflowConstraint.BalanceMassFlow # Fixes the exit angle and changes degree of reaction
+spool.massflow_constraint = MassflowConstraint.PressureBalance # Fixes the exit angle and changes degree of reaction
 # spool.plot_geometry()
 spool.adjust_streamlines = False
 spool.solve() # This also initializes streamlines

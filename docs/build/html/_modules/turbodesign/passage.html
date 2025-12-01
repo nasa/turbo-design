@@ -43,16 +43,12 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../modules/bladerow.html">BladeRow</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../modules/bladerow.html#turbodesign.bladerow.BladeRow"><code class="docutils literal notranslate"><span class="pre">BladeRow</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../modules/bladerow.html#turbodesign.bladerow.compute_gas_constants"><code class="docutils literal notranslate"><span class="pre">compute_gas_constants()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../modules/bladerow.html#turbodesign.bladerow.interpolate_quantities"><code class="docutils literal notranslate"><span class="pre">interpolate_quantities()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../modules/bladerow.html#turbodesign.bladerow.interpolate_streamline_radii"><code class="docutils literal notranslate"><span class="pre">interpolate_streamline_radii()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../modules/bladerow.html#turbodesign.bladerow.sutherland"><code class="docutils literal notranslate"><span class="pre">sutherland()</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="../../modules/coolant.html">Coolant</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="../../modules/coolant.html#turbodesign.coolant.Coolant"><code class="docutils literal notranslate"><span class="pre">Coolant</span></code></a></li>
-</ul>
-</li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules/coolant.html">Coolant</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../modules/enums.html">Enums</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../modules/enums.html#turbodesign.enums.LossType"><code class="docutils literal notranslate"><span class="pre">LossType</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../modules/enums.html#turbodesign.enums.MassflowConstraint"><code class="docutils literal notranslate"><span class="pre">MassflowConstraint</span></code></a></li>
@@ -100,16 +96,13 @@
 <li class="toctree-l2"><a class="reference internal" href="../../modules/radeq.html#turbodesign.radeq.radeq"><code class="docutils literal notranslate"><span class="pre">radeq()</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="../../modules/rotor.html">Rotor</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="../../modules/rotor.html#turbodesign.rotor.Rotor"><code class="docutils literal notranslate"><span class="pre">Rotor</span></code></a></li>
-</ul>
-</li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules/rotor.html">Rotor</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../modules/solve_radeq.html">Solve Radial Equilibrium</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../modules/solve_radeq.html#turbodesign.solve_radeq.adjust_streamlines"><code class="docutils literal notranslate"><span class="pre">adjust_streamlines()</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="../../modules/spool.html">Spool</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="../../modules/spool.html#turbodesign.spool.Spool"><code class="docutils literal notranslate"><span class="pre">Spool</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules/spool.html">TurbineSpool</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/spool.html#turbodesign.turbine_spool.TurbineSpool"><code class="docutils literal notranslate"><span class="pre">TurbineSpool</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../modules/td_math.html">Turbine Design Math</a><ul>
@@ -124,7 +117,7 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../modules/turbinespool.html">Turbine Spool</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="../../modules/turbinespool.html#turbodesign.turbinespool.TurbineSpool"><code class="docutils literal notranslate"><span class="pre">TurbineSpool</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/turbinespool.html#turbodesign.turbine_spool.TurbineSpool"><code class="docutils literal notranslate"><span class="pre">TurbineSpool</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -154,7 +147,7 @@
            <div itemprop="articleBody">
              
   <h1>Source code for turbodesign.passage</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span>
+<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy.typing</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">npt</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">scipy.interpolate</span><span class="w"> </span><span class="kn">import</span> <span class="n">PchipInterpolator</span><span class="p">,</span> <span class="n">interp1d</span>
@@ -162,7 +155,8 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">.enums</span><span class="w"> </span><span class="kn">import</span> <span class="n">PassageType</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">scipy.optimize</span><span class="w"> </span><span class="kn">import</span> <span class="n">minimize_scalar</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">findiff</span><span class="w"> </span><span class="kn">import</span> <span class="n">FinDiff</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pyturbo.helper</span><span class="w"> </span><span class="kn">import</span> <span class="n">convert_to_ndarray</span><span class="p">,</span><span class="n">xr_to_mprime</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyturbo.helper</span><span class="w"> </span><span class="kn">import</span> <span class="n">convert_to_ndarray</span><span class="p">,</span> <span class="n">xr_to_mprime</span>
+
 <span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span> 
 
 <div class="viewcode-block" id="Passage">
@@ -208,10 +202,13 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">xshroud</span> <span class="o">=</span> <span class="n">PchipInterpolator</span><span class="p">(</span><span class="n">hub_arc_len</span><span class="o">/</span><span class="n">hub_arc_len</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span><span class="n">xshroud</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">rshroud</span> <span class="o">=</span> <span class="n">PchipInterpolator</span><span class="p">(</span><span class="n">hub_arc_len</span><span class="o">/</span><span class="n">hub_arc_len</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span><span class="n">rshroud</span><span class="p">)</span>
         
-        <span class="bp">self</span><span class="o">.</span><span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">xhub</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">xhub</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">10</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">n</span> <span class="o">=</span> <span class="mi">10</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">xhub</span><span class="p">)</span>
         
-        <span class="bp">self</span><span class="o">.</span><span class="n">xhub_pts</span> <span class="o">=</span> <span class="n">convert_to_ndarray</span><span class="p">(</span><span class="n">xhub</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">rhub_pts</span> <span class="o">=</span> <span class="n">convert_to_ndarray</span><span class="p">(</span><span class="n">rhub</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">xhub_pts</span> <span class="o">=</span> <span class="n">convert_to_ndarray</span><span class="p">(</span><span class="n">xhub</span><span class="p">)</span> <span class="c1"># type: ignore</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rhub_pts</span> <span class="o">=</span> <span class="n">convert_to_ndarray</span><span class="p">(</span><span class="n">rhub</span><span class="p">)</span> <span class="c1"># type: ignore</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">xshroud_pts</span> <span class="o">=</span> <span class="n">convert_to_ndarray</span><span class="p">(</span><span class="n">xshroud</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">rshroud_pts</span> <span class="o">=</span> <span class="n">convert_to_ndarray</span><span class="p">(</span><span class="n">rshroud</span><span class="p">)</span>
         
@@ -237,11 +234,11 @@
         <span class="n">r_streamline</span> <span class="o">=</span> <span class="n">t_streamline</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span><span class="o">*</span><span class="mi">0</span>
         <span class="n">x_streamline</span> <span class="o">=</span> <span class="n">t_streamline</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span><span class="o">*</span><span class="mi">0</span>
         <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">t</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">t_streamline</span><span class="p">):</span>
-            <span class="n">xhub</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">xhub</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
-            <span class="n">rhub</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rhub</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
-            <span class="n">xshroud</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">xshroud</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
-            <span class="n">rshroud</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rshroud</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
-            <span class="n">x_streamline</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="p">,</span><span class="n">r_streamline</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">line2D</span><span class="p">([</span><span class="n">xhub</span><span class="p">,</span><span class="n">rhub</span><span class="p">],[</span><span class="n">xshroud</span><span class="p">,</span><span class="n">rshroud</span><span class="p">])</span><span class="o">.</span><span class="n">get_point</span><span class="p">(</span><span class="n">t_radial</span><span class="p">)</span>
+            <span class="n">xhub</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">xhub</span><span class="p">(</span><span class="n">t</span><span class="p">))</span>
+            <span class="n">rhub</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rhub</span><span class="p">(</span><span class="n">t</span><span class="p">))</span>
+            <span class="n">xshroud</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">xshroud</span><span class="p">(</span><span class="n">t</span><span class="p">))</span>
+            <span class="n">rshroud</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rshroud</span><span class="p">(</span><span class="n">t</span><span class="p">))</span>
+            <span class="n">x_streamline</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="p">,</span><span class="n">r_streamline</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">line2D</span><span class="p">((</span><span class="n">xhub</span><span class="p">,</span><span class="n">rhub</span><span class="p">),(</span><span class="n">xshroud</span><span class="p">,</span><span class="n">rshroud</span><span class="p">))</span><span class="o">.</span><span class="n">get_point</span><span class="p">(</span><span class="n">t_radial</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">t_streamline</span><span class="p">,</span><span class="n">x_streamline</span><span class="p">,</span><span class="n">r_streamline</span></div>
 
 
@@ -277,8 +274,9 @@
     
         <span class="n">d_dx</span> <span class="o">=</span> <span class="n">FinDiff</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">x_streamline</span><span class="p">[</span><span class="n">indices</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span><span class="n">indices</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]],</span><span class="mi">1</span><span class="p">)</span>
         <span class="n">d2_dx2</span> <span class="o">=</span> <span class="n">FinDiff</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">x_streamline</span><span class="p">[</span><span class="n">indices</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span><span class="n">indices</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]],</span><span class="mi">2</span><span class="p">)</span>
-        <span class="n">dr_dx</span> <span class="o">=</span> <span class="n">d_dx</span><span class="p">(</span><span class="n">r_streamline</span><span class="p">[</span><span class="n">indices</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span><span class="n">indices</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]])</span>
-        <span class="n">d2r_dx2</span> <span class="o">=</span> <span class="n">d2_dx2</span><span class="p">(</span><span class="n">r_streamline</span><span class="p">[</span><span class="n">indices</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span><span class="n">indices</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]])</span>    
+        
+        <span class="n">dr_dx</span> <span class="o">=</span> <span class="n">d_dx</span><span class="p">(</span><span class="n">r_streamline</span><span class="p">[</span><span class="n">indices</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span><span class="n">indices</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]])</span> <span class="c1"># type: ignore</span>
+        <span class="n">d2r_dx2</span> <span class="o">=</span> <span class="n">d2_dx2</span><span class="p">(</span><span class="n">r_streamline</span><span class="p">[</span><span class="n">indices</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span><span class="n">indices</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]])</span>     <span class="c1"># type: ignore</span>
             
         <span class="n">radius_curvature</span><span class="p">[</span><span class="n">indices</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span><span class="n">indices</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">((</span><span class="mi">1</span><span class="o">+</span><span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="n">dr_dx</span><span class="p">,</span><span class="mi">2</span><span class="p">)),</span><span class="mf">1.5</span><span class="p">)</span>
         <span class="n">radius_curvature</span><span class="p">[</span><span class="n">indices</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span><span class="n">indices</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">divide</span><span class="p">(</span><span class="n">radius_curvature</span><span class="p">[</span><span class="n">indices</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span><span class="n">indices</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]],</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">d2r_dx2</span><span class="p">))</span>
@@ -334,7 +332,7 @@
         
 <div class="viewcode-block" id="Passage.get_cutting_line">
 <a class="viewcode-back" href="../../modules/passage.html#turbodesign.passage.Passage.get_cutting_line">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">get_cutting_line</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">t_hub</span><span class="p">:</span><span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">line2D</span><span class="p">,</span><span class="nb">float</span><span class="p">,</span><span class="nb">float</span><span class="p">]:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_cutting_line</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">t_hub</span><span class="p">:</span><span class="nb">float</span><span class="p">,</span><span class="n">t_shroud</span><span class="p">:</span><span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">line2D</span><span class="p">,</span><span class="nb">float</span><span class="p">,</span><span class="nb">float</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Gets the cutting line perpendicular to hub and shroud </span>
 
 <span class="sd">        Args:</span>
@@ -345,68 +343,93 @@
 <span class="sd">        </span>
 <span class="sd">                cut (line2D): line from hub to shroud</span>
 <span class="sd">                t_hub (float): Percentage along hub arc length</span>
-<span class="sd">                t_shroud (float): t corresponding to intersection of bisector of hub </span>
+<span class="sd">                t_shroud (Optional[float]): t corresponding to intersection of bisector of hub. Defaults to None</span>
 <span class="sd">                                </span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">xhub</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">xhub</span><span class="p">(</span><span class="n">t_hub</span><span class="p">)</span>
-        <span class="n">rhub</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rhub</span><span class="p">(</span><span class="n">t_hub</span><span class="p">)</span>
-        
-        <span class="k">if</span> <span class="n">t_hub</span><span class="o">&gt;</span><span class="mi">0</span> <span class="ow">and</span> <span class="n">t_hub</span><span class="o">&lt;</span><span class="mi">1</span><span class="p">:</span>
-            <span class="n">dx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">xhub</span><span class="p">(</span><span class="n">t_hub</span><span class="o">+</span><span class="mf">0.0001</span><span class="p">)</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">xhub</span><span class="p">(</span><span class="n">t_hub</span><span class="o">-</span><span class="mf">0.0001</span><span class="p">)</span> 
-            <span class="n">dr</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rhub</span><span class="p">(</span><span class="n">t_hub</span><span class="o">+</span><span class="mf">0.0001</span><span class="p">)</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">rhub</span><span class="p">(</span><span class="n">t_hub</span><span class="o">-</span><span class="mf">0.0001</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="n">t_hub</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span>
-            <span class="n">dx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">xhub</span><span class="p">(</span><span class="n">t_hub</span><span class="p">)</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">xhub</span><span class="p">(</span><span class="n">t_hub</span><span class="o">-</span><span class="mf">0.0001</span><span class="p">)</span> 
-            <span class="n">dr</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rhub</span><span class="p">(</span><span class="n">t_hub</span><span class="p">)</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">rhub</span><span class="p">(</span><span class="n">t_hub</span><span class="o">-</span><span class="mf">0.0001</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="n">t_hub</span><span class="o">&lt;</span><span class="mi">1</span><span class="p">:</span>
-            <span class="n">dx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">xhub</span><span class="p">(</span><span class="n">t_hub</span><span class="o">+</span><span class="mf">0.0001</span><span class="p">)</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">xhub</span><span class="p">(</span><span class="n">t_hub</span><span class="p">)</span>
-            <span class="n">dr</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rhub</span><span class="p">(</span><span class="n">t_hub</span><span class="o">+</span><span class="mf">0.0001</span><span class="p">)</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">rhub</span><span class="p">(</span><span class="n">t_hub</span><span class="p">)</span>
-        
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">passageType</span> <span class="o">==</span> <span class="n">PassageType</span><span class="o">.</span><span class="n">Centrifugal</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">dr</span><span class="p">)</span><span class="o">&gt;</span><span class="mf">1e-6</span><span class="p">:</span>
-                <span class="c1"># Draw a line perpendicular to the hub. </span>
-                <span class="c1"># Find the intersection point to the shroud. </span>
-                <span class="n">h</span> <span class="o">=</span> <span class="o">-</span><span class="n">dx</span><span class="o">/</span><span class="n">dr</span> <span class="c1"># Slope of perpendicular line</span>
+        <span class="n">xhub</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">xhub</span><span class="p">(</span><span class="n">t_hub</span><span class="p">))</span>
+        <span class="n">rhub</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rhub</span><span class="p">(</span><span class="n">t_hub</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">t_shroud</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>            
+            <span class="k">if</span> <span class="n">t_hub</span><span class="o">&gt;</span><span class="mi">0</span> <span class="ow">and</span> <span class="n">t_hub</span><span class="o">&lt;</span><span class="mi">1</span><span class="p">:</span>
+                <span class="n">dx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">xhub</span><span class="p">(</span><span class="n">t_hub</span><span class="o">+</span><span class="mf">0.0001</span><span class="p">)</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">xhub</span><span class="p">(</span><span class="n">t_hub</span><span class="o">-</span><span class="mf">0.0001</span><span class="p">)</span> 
+                <span class="n">dr</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rhub</span><span class="p">(</span><span class="n">t_hub</span><span class="o">+</span><span class="mf">0.0001</span><span class="p">)</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">rhub</span><span class="p">(</span><span class="n">t_hub</span><span class="o">-</span><span class="mf">0.0001</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">t_hub</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span>
+                <span class="n">dx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">xhub</span><span class="p">(</span><span class="n">t_hub</span><span class="p">)</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">xhub</span><span class="p">(</span><span class="n">t_hub</span><span class="o">-</span><span class="mf">0.0001</span><span class="p">)</span> 
+                <span class="n">dr</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rhub</span><span class="p">(</span><span class="n">t_hub</span><span class="p">)</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">rhub</span><span class="p">(</span><span class="n">t_hub</span><span class="o">-</span><span class="mf">0.0001</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span> <span class="c1"># t_hub&lt;1:</span>
+                <span class="n">dx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">xhub</span><span class="p">(</span><span class="n">t_hub</span><span class="o">+</span><span class="mf">0.0001</span><span class="p">)</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">xhub</span><span class="p">(</span><span class="n">t_hub</span><span class="p">)</span>
+                <span class="n">dr</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rhub</span><span class="p">(</span><span class="n">t_hub</span><span class="o">+</span><span class="mf">0.0001</span><span class="p">)</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">rhub</span><span class="p">(</span><span class="n">t_hub</span><span class="p">)</span>
             
-                <span class="n">f</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">t</span><span class="p">:</span> <span class="n">h</span><span class="o">*</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">xshroud</span><span class="p">(</span><span class="n">t</span><span class="p">)</span> <span class="o">-</span> <span class="n">xhub</span><span class="p">)</span><span class="o">+</span><span class="n">rhub</span> <span class="c1"># line from hub to shroud </span>
-                <span class="n">fun</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">t</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">f</span><span class="p">(</span><span class="n">t</span><span class="p">)</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">rshroud</span><span class="p">(</span><span class="n">t</span><span class="p">))</span> <span class="c1"># find where it intersects</span>
-                <span class="n">res</span> <span class="o">=</span> <span class="n">minimize_scalar</span><span class="p">(</span><span class="n">fun</span><span class="p">,</span><span class="n">bounds</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">],</span><span class="n">tol</span><span class="o">=</span><span class="mf">1E-3</span><span class="p">)</span> 
-                <span class="n">t_shroud</span> <span class="o">=</span> <span class="n">res</span><span class="o">.</span><span class="n">x</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">passageType</span> <span class="o">==</span> <span class="n">PassageType</span><span class="o">.</span><span class="n">Centrifugal</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">dr</span><span class="p">)</span><span class="o">&gt;</span><span class="mf">1e-6</span><span class="p">:</span>
+                    <span class="c1"># Draw a line perpendicular to the hub. </span>
+                    <span class="c1"># Find the intersection point to the shroud. </span>
+                    <span class="n">h</span> <span class="o">=</span> <span class="o">-</span><span class="n">dx</span><span class="o">/</span><span class="n">dr</span> <span class="c1"># Slope of perpendicular line</span>
+                
+                    <span class="n">f</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">t</span><span class="p">:</span> <span class="n">h</span><span class="o">*</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">xshroud</span><span class="p">(</span><span class="n">t</span><span class="p">)</span> <span class="o">-</span> <span class="n">xhub</span><span class="p">)</span><span class="o">+</span><span class="n">rhub</span> <span class="c1"># line from hub to shroud </span>
+                    <span class="n">fun</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">t</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">f</span><span class="p">(</span><span class="n">t</span><span class="p">)</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">rshroud</span><span class="p">(</span><span class="n">t</span><span class="p">))</span> <span class="c1"># find where it intersects</span>
+                    <span class="n">res</span> <span class="o">=</span> <span class="n">minimize_scalar</span><span class="p">(</span><span class="n">fun</span><span class="p">,</span><span class="n">bounds</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">],</span><span class="n">tol</span><span class="o">=</span><span class="mf">1E-3</span><span class="p">)</span> 
+                    <span class="n">t_shroud</span> <span class="o">=</span> <span class="n">res</span><span class="o">.</span><span class="n">x</span> <span class="c1"># type: ignore</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">t_shroud</span> <span class="o">=</span> <span class="n">t_hub</span> <span class="c1"># Vertical line </span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">t_shroud</span> <span class="o">=</span> <span class="n">t_hub</span> <span class="c1"># Vertical line </span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">t_shroud</span> <span class="o">=</span> <span class="n">t_hub</span>
+                <span class="n">t_shroud</span> <span class="o">=</span> <span class="n">t_hub</span>
+                
+        <span class="n">xshroud</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">xshroud</span><span class="p">(</span><span class="n">t_shroud</span><span class="p">))</span>
+        <span class="n">rshroud</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rshroud</span><span class="p">(</span><span class="n">t_shroud</span><span class="p">))</span>
         
-        <span class="n">xshroud</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">xshroud</span><span class="p">(</span><span class="n">t_shroud</span><span class="p">)</span>
-        <span class="n">rshroud</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rshroud</span><span class="p">(</span><span class="n">t_shroud</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">line2D</span><span class="p">([</span><span class="n">xhub</span><span class="p">,</span><span class="n">rhub</span><span class="p">],[</span><span class="n">xshroud</span><span class="p">,</span><span class="n">rshroud</span><span class="p">]),</span> <span class="n">t_hub</span><span class="p">,</span> <span class="n">t_shroud</span></div>
+        <span class="k">return</span> <span class="n">line2D</span><span class="p">((</span><span class="n">xhub</span><span class="p">,</span><span class="n">rhub</span><span class="p">),(</span><span class="n">xshroud</span><span class="p">,</span><span class="n">rshroud</span><span class="p">)),</span> <span class="n">t_hub</span><span class="p">,</span> <span class="n">t_shroud</span> <span class="c1"># type: ignore</span></div>
 
     
 <div class="viewcode-block" id="Passage.get_xr_slice">
 <a class="viewcode-back" href="../../modules/passage.html#turbodesign.passage.Passage.get_xr_slice">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">get_xr_slice</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">t_span</span><span class="p">:</span><span class="nb">float</span><span class="p">,</span><span class="n">percent_hub</span><span class="p">:</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span><span class="nb">float</span><span class="p">],</span><span class="n">resolution</span><span class="p">:</span><span class="nb">int</span><span class="o">=</span><span class="mi">100</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns the xr coordinates of a streamline, a line that is parallel to both hub and shroud</span>
-<span class="sd">            </span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_xr_slice</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">t_span</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">percent_hub</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span> 
+                     <span class="n">percent_shroud</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">resolution</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">100</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return the (x, r) coordinates of a *straight* streamline segment that</span>
+<span class="sd">        connects corresponding hub and shroud points, sampled uniformly along</span>
+<span class="sd">        each surface between the given percent limits.</span>
+
+<span class="sd">        The point returned on each connecting line is at parametric position</span>
+<span class="sd">        `t_span` in [0, 1], where 0 = hub point and 1 = shroud point.</span>
+
 <span class="sd">        Args:</span>
-<span class="sd">            t_span (float): _description_</span>
-<span class="sd">            meridional_location (float): _description_</span>
-<span class="sd">            resolution (int): number of points to resolve </span>
+<span class="sd">            t_span: Interpolation parameter along each hub→shroud connector (0..1).</span>
+<span class="sd">            percent_hub: (start, end) fractional arc-length positions along the hub (0..1).</span>
+<span class="sd">            percent_shroud: Optional (start, end) along the shroud (0..1). If None,</span>
+<span class="sd">                the shroud uses the same normalized range as `percent_hub`.</span>
+<span class="sd">            resolution: Number of sample points along the streamwise direction.</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            np.NDArray: _description_</span>
+<span class="sd">            (resolution, 2) array of [x, r] coordinates.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">t_hub</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">percent_hub</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">percent_hub</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="n">resolution</span><span class="p">)</span>
-        <span class="n">t_hub</span> <span class="o">=</span> <span class="n">convert_to_ndarray</span><span class="p">(</span><span class="n">t_hub</span><span class="p">)</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">hub_length</span>
-        
-        <span class="n">shroud_pts_cyl</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">xshroud</span><span class="p">(</span><span class="n">t_hub</span><span class="p">),</span><span class="bp">self</span><span class="o">.</span><span class="n">rshroud</span><span class="p">(</span><span class="n">t_hub</span><span class="p">)])</span><span class="o">.</span><span class="n">transpose</span><span class="p">()</span>
-        <span class="n">hub_pts_cyl</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">xhub</span><span class="p">(</span><span class="n">t_hub</span><span class="p">),</span><span class="bp">self</span><span class="o">.</span><span class="n">rhub</span><span class="p">(</span><span class="n">t_hub</span><span class="p">)])</span><span class="o">.</span><span class="n">transpose</span><span class="p">()</span>
-        <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">t_hub</span><span class="p">)</span>
-            
-        <span class="n">xr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">n</span><span class="p">,</span><span class="mi">2</span><span class="p">))</span>
-        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
-            <span class="n">l</span> <span class="o">=</span> <span class="n">line2D</span><span class="p">(</span><span class="n">hub_pts_cyl</span><span class="p">[</span><span class="n">j</span><span class="p">,:],</span><span class="n">shroud_pts_cyl</span><span class="p">[</span><span class="n">j</span><span class="p">,:])</span>
-            <span class="n">xr</span><span class="p">[</span><span class="n">j</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span><span class="n">xr</span><span class="p">[</span><span class="n">j</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">l</span><span class="o">.</span><span class="n">get_point</span><span class="p">(</span><span class="n">t_span</span><span class="p">)</span>
-            
-        <span class="k">return</span> <span class="n">xr</span></div>
+        <span class="c1"># ---- validation</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="mf">0.0</span> <span class="o">&lt;=</span> <span class="n">t_span</span> <span class="o">&lt;=</span> <span class="mf">1.0</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;t_span must be in [0, 1].&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">resolution</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;resolution must be &gt;= 2.&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="mf">0.0</span> <span class="o">&lt;=</span> <span class="n">percent_hub</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="mf">1.0</span> <span class="ow">and</span> <span class="mf">0.0</span> <span class="o">&lt;=</span> <span class="n">percent_hub</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="mf">1.0</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;percent_hub values must be in [0, 1].&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">percent_shroud</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="p">(</span>
+            <span class="mf">0.0</span> <span class="o">&lt;=</span> <span class="n">percent_shroud</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="mf">1.0</span> <span class="ow">and</span> <span class="mf">0.0</span> <span class="o">&lt;=</span> <span class="n">percent_shroud</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="mf">1.0</span>
+        <span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;percent_shroud values must be in [0, 1].&quot;</span><span class="p">)</span>
+
+        <span class="c1"># ---- parameterize along hub and shroud (use each surface&#39;s own length!)</span>
+        <span class="n">t_hub</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">percent_hub</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">percent_hub</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">resolution</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">hub_length</span>
+        <span class="k">if</span> <span class="n">percent_shroud</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">t_shroud</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">percent_hub</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">percent_hub</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">resolution</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">shroud_length</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">t_shroud</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">percent_shroud</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">percent_shroud</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">resolution</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">shroud_length</span>
+
+        <span class="c1"># ---- sample hub &amp; shroud curves (x, r)</span>
+        <span class="n">hub_pts</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">column_stack</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">xhub</span><span class="p">(</span><span class="n">t_hub</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">rhub</span><span class="p">(</span><span class="n">t_hub</span><span class="p">)])</span>          <span class="c1"># (N, 2)</span>
+        <span class="n">shroud_pts</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">column_stack</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">xshroud</span><span class="p">(</span><span class="n">t_shroud</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">rshroud</span><span class="p">(</span><span class="n">t_shroud</span><span class="p">)])</span>  <span class="c1"># (N, 2)</span>
+
+        <span class="c1"># ---- vectorized interpolation along each connector: hub + t*(shroud - hub)</span>
+        <span class="n">xr</span> <span class="o">=</span> <span class="n">hub_pts</span> <span class="o">+</span> <span class="p">(</span><span class="n">shroud_pts</span> <span class="o">-</span> <span class="n">hub_pts</span><span class="p">)</span> <span class="o">*</span> <span class="nb">float</span><span class="p">(</span><span class="n">t_span</span><span class="p">)</span>  <span class="c1"># (N, 2)</span>
+
+        <span class="k">return</span> <span class="n">xr</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></div>
+
 
     
 <div class="viewcode-block" id="Passage.get_m">
@@ -421,7 +444,7 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            npt.NDArray: _description_</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">xr</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_xr_slice</span><span class="p">(</span><span class="n">t_span</span><span class="p">,(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">),</span><span class="n">resolution</span><span class="p">)</span>
+        <span class="n">xr</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_xr_slice</span><span class="p">(</span><span class="n">t_span</span><span class="o">=</span><span class="n">t_span</span><span class="p">,</span><span class="n">percent_hub</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">),</span><span class="n">resolution</span><span class="o">=</span><span class="n">resolution</span><span class="p">)</span>
         <span class="n">dx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">xr</span><span class="p">[:,</span><span class="mi">0</span><span class="p">])</span>
         <span class="n">dr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">xr</span><span class="p">[:,</span><span class="mi">1</span><span class="p">])</span>
         <span class="n">m</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concat</span><span class="p">([[</span><span class="mi">0</span><span class="p">],</span><span class="n">np</span><span class="o">.</span><span class="n">cumsum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">dx</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">dr</span><span class="o">**</span><span class="mi">2</span><span class="p">))])</span>
@@ -442,7 +465,7 @@
 <span class="sd">            (float) : returns the derivative </span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">m</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_m</span><span class="p">(</span><span class="n">t_span</span><span class="p">,</span><span class="n">resolution</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">PchipInterpolator</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="n">resolution</span><span class="p">),</span><span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">m</span><span class="p">))(</span><span class="n">location</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="n">PchipInterpolator</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="n">resolution</span><span class="p">),</span><span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">m</span><span class="p">))(</span><span class="n">location</span><span class="p">)</span> <span class="c1"># type: ignore</span></div>
 
     
     <span class="nd">@property</span>
@@ -452,6 +475,14 @@
 <span class="sd">            _type_: _description_</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">xhub_pts</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rhub_pts</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span>
+    
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">shroud_length</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;returns the computed length of the shroud </span>
+<span class="sd">        Returns:</span>
+<span class="sd">            _type_: _description_</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">xshroud_pts</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rshroud_pts</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span>
     
 <div class="viewcode-block" id="Passage.plot_cuts">
 <a class="viewcode-back" href="../../modules/passage.html#turbodesign.passage.Passage.plot_cuts">[docs]</a>

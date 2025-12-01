@@ -46,16 +46,12 @@
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="bladerow.html">BladeRow</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="bladerow.html#turbodesign.bladerow.BladeRow"><code class="docutils literal notranslate"><span class="pre">BladeRow</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="bladerow.html#turbodesign.bladerow.compute_gas_constants"><code class="docutils literal notranslate"><span class="pre">compute_gas_constants()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="bladerow.html#turbodesign.bladerow.interpolate_quantities"><code class="docutils literal notranslate"><span class="pre">interpolate_quantities()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="bladerow.html#turbodesign.bladerow.interpolate_streamline_radii"><code class="docutils literal notranslate"><span class="pre">interpolate_streamline_radii()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="bladerow.html#turbodesign.bladerow.sutherland"><code class="docutils literal notranslate"><span class="pre">sutherland()</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="coolant.html">Coolant</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="coolant.html#turbodesign.coolant.Coolant"><code class="docutils literal notranslate"><span class="pre">Coolant</span></code></a></li>
-</ul>
-</li>
+<li class="toctree-l1"><a class="reference internal" href="coolant.html">Coolant</a></li>
 <li class="toctree-l1"><a class="reference internal" href="enums.html">Enums</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="enums.html#turbodesign.enums.LossType"><code class="docutils literal notranslate"><span class="pre">LossType</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="enums.html#turbodesign.enums.MassflowConstraint"><code class="docutils literal notranslate"><span class="pre">MassflowConstraint</span></code></a></li>
@@ -103,16 +99,13 @@
 <li class="toctree-l2"><a class="reference internal" href="radeq.html#turbodesign.radeq.radeq"><code class="docutils literal notranslate"><span class="pre">radeq()</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="rotor.html">Rotor</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="rotor.html#turbodesign.rotor.Rotor"><code class="docutils literal notranslate"><span class="pre">Rotor</span></code></a></li>
-</ul>
-</li>
+<li class="toctree-l1"><a class="reference internal" href="rotor.html">Rotor</a></li>
 <li class="toctree-l1"><a class="reference internal" href="solve_radeq.html">Solve Radial Equilibrium</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="solve_radeq.html#turbodesign.solve_radeq.adjust_streamlines"><code class="docutils literal notranslate"><span class="pre">adjust_streamlines()</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="spool.html">Spool</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="spool.html#turbodesign.spool.Spool"><code class="docutils literal notranslate"><span class="pre">Spool</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="spool.html">TurbineSpool</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="spool.html#turbodesign.turbine_spool.TurbineSpool"><code class="docutils literal notranslate"><span class="pre">TurbineSpool</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="td_math.html">Turbine Design Math</a><ul>
@@ -127,7 +120,7 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="turbinespool.html">Turbine Spool</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="turbinespool.html#turbodesign.turbinespool.TurbineSpool"><code class="docutils literal notranslate"><span class="pre">TurbineSpool</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="turbinespool.html#turbodesign.turbine_spool.TurbineSpool"><code class="docutils literal notranslate"><span class="pre">TurbineSpool</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -160,12 +153,43 @@
 <h1>Inlet<a class="headerlink" href="#inlet" title="Link to this heading"></a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="turbodesign.inlet.Inlet">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">turbodesign.inlet.</span></span><span class="sig-name descname"><span class="pre">Inlet</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">M</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">T0</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">P0</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">location</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">beta</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">[0]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">percent_radii</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">[0.5]</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/turbodesign/inlet.html#Inlet"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#turbodesign.inlet.Inlet" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">turbodesign.inlet.</span></span><span class="sig-name descname"><span class="pre">Inlet</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hub_location</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shroud_location</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">beta</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">[0]</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/turbodesign/inlet.html#Inlet"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#turbodesign.inlet.Inlet" title="Link to this definition"></a></dt>
 <dd><p>Station defined at Inlet</p>
 <dl class="simple">
 <dt>Inherits:</dt><dd><p>(BladeRow): Defines the properties of the blade row</p>
 </dd>
 </dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="turbodesign.inlet.Inlet.__initialize_velocity__">
+<span class="sig-name descname"><span class="pre">__initialize_velocity__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">passage</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="passage.html#turbodesign.passage.Passage" title="turbodesign.passage.Passage"><span class="pre">Passage</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_streamlines</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/turbodesign/inlet.html#Inlet.__initialize_velocity__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#turbodesign.inlet.Inlet.__initialize_velocity__" title="Link to this definition"></a></dt>
+<dd><dl class="simple">
+<dt>Initialize velocity calculations. Assumes streamlines and inclination angles have been calculated</dt><dd><p>Call this before performing calculations</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>passage</strong> (<a class="reference internal" href="passage.html#turbodesign.passage.Passage" title="turbodesign.passage.Passage"><em>Passage</em></a>) – Passage object</p></li>
+<li><p><strong>num_streamlines</strong> (<em>int</em>) – number of streamlines</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="turbodesign.inlet.Inlet.__interpolate_quantities__">
+<span class="sig-name descname"><span class="pre">__interpolate_quantities__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num_streamlines</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">5</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/turbodesign/inlet.html#Inlet.__interpolate_quantities__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#turbodesign.inlet.Inlet.__interpolate_quantities__" title="Link to this definition"></a></dt>
+<dd><p>Initializes the inputs</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>num_streamlines</strong> (<em>int</em><em>, </em><em>optional</em>) – _description_. Defaults to 5.</p></li>
+<li><p><strong>IsCompressor</strong> (<em>bool</em><em>, </em><em>optional</em>) – This is if static pressure is defined at the inlet and total pressure at the outlet. Defaults to False.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="turbodesign.inlet.Inlet.get_total_pressure">
 <span class="sig-name descname"><span class="pre">get_total_pressure</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">percent_hub_shroud</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">_ScalarType_co</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/turbodesign/inlet.html#Inlet.get_total_pressure"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#turbodesign.inlet.Inlet.get_total_pressure" title="Link to this definition"></a></dt>
@@ -201,33 +225,32 @@
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="turbodesign.inlet.Inlet.initialize_fluid">
-<span class="sig-name descname"><span class="pre">initialize_fluid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fluid</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Solution</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">R</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">287.15</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gamma</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1.4</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Cp</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1024</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/turbodesign/inlet.html#Inlet.initialize_fluid"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#turbodesign.inlet.Inlet.initialize_fluid" title="Link to this definition"></a></dt>
-<dd><p>Initialize the inlet using the fluid. This function should be called by a class that inherits from spool</p>
+<dt class="sig sig-object py" id="turbodesign.inlet.Inlet.init_static">
+<span class="sig-name descname"><span class="pre">init_static</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">P</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">T</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">M</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">percent_radii</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">[0.5]</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/turbodesign/inlet.html#Inlet.init_static"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#turbodesign.inlet.Inlet.init_static" title="Link to this definition"></a></dt>
+<dd><p>Initializes the inlet with static quantities at the inlet</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>fluid</strong> (<em>Solution</em><em>, </em><em>optional</em>) – Cantera fluid object. Defaults to None.</p></li>
-<li><p><strong>R</strong> (<em>float</em><em>, </em><em>optional</em>) – Ideal Gas Constant. Defaults to 287.15 J/(Kg K) for air</p></li>
-<li><p><strong>gamma</strong> (<em>float</em><em>, </em><em>optional</em>) – _description_. Defaults to 1.4.</p></li>
-<li><p><strong>Cp</strong> (<em>float</em><em>, </em><em>optional</em>) – _description_. Defaults to 1024 J/(Kg K).</p></li>
+<li><p><strong>P</strong> (<em>Union</em><em>[</em><em>float</em><em>,</em><em>List</em><em>[</em><em>float</em><em>]</em><em>]</em>) – _description_</p></li>
+<li><p><strong>T</strong> (<em>Union</em><em>[</em><em>float</em><em>,</em><em>List</em><em>[</em><em>float</em><em>]</em><em>]</em>) – _description_</p></li>
+<li><p><strong>M</strong> (<em>Union</em><em>[</em><em>float</em><em>,</em><em>List</em><em>[</em><em>float</em><em>]</em><em>]</em>) – _description_</p></li>
+<li><p><strong>percent_radii</strong> (<em>Union</em><em>[</em><em>float</em><em>,</em><em>List</em><em>[</em><em>float</em><em>]</em><em>]</em><em>, </em><em>optional</em>) – Percent radii where P,T, and M are defined. Defaults to [0.5].</p></li>
 </ul>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="turbodesign.inlet.Inlet.initialize_velocity">
-<span class="sig-name descname"><span class="pre">initialize_velocity</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">passage</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="passage.html#turbodesign.passage.Passage" title="turbodesign.passage.Passage"><span class="pre">Passage</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_streamlines</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/turbodesign/inlet.html#Inlet.initialize_velocity"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#turbodesign.inlet.Inlet.initialize_velocity" title="Link to this definition"></a></dt>
-<dd><dl class="simple">
-<dt>Initialize velocity calculations. Assumes streamlines and inclination angles have been calculated</dt><dd><p>Call this before performing calculations</p>
-</dd>
-</dl>
+<dt class="sig sig-object py" id="turbodesign.inlet.Inlet.init_total">
+<span class="sig-name descname"><span class="pre">init_total</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">P0</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">T0</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">M</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">percent_radii</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">[0.5]</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/turbodesign/inlet.html#Inlet.init_total"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#turbodesign.inlet.Inlet.init_total" title="Link to this definition"></a></dt>
+<dd><p>Initializes the inlet with total quantities at the inlet</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>passage</strong> (<a class="reference internal" href="passage.html#turbodesign.passage.Passage" title="turbodesign.passage.Passage"><em>Passage</em></a>) – Passage object</p></li>
-<li><p><strong>num_streamlines</strong> (<em>int</em>) – number of streamlines</p></li>
+<li><p><strong>P0</strong> (<em>Union</em><em>[</em><em>float</em><em>,</em><em>List</em><em>[</em><em>float</em><em>]</em><em>]</em>) – Total Pressure</p></li>
+<li><p><strong>T0</strong> (<em>Union</em><em>[</em><em>float</em><em>,</em><em>List</em><em>[</em><em>float</em><em>]</em><em>]</em>) – Total Temperature</p></li>
+<li><p><strong>M</strong> (<em>Union</em><em>[</em><em>float</em><em>,</em><em>List</em><em>[</em><em>float</em><em>]</em><em>]</em>) – Mach Number</p></li>
+<li><p><strong>percent_radii</strong> (<em>Union</em><em>[</em><em>float</em><em>,</em><em>List</em><em>[</em><em>float</em><em>]</em><em>]</em><em>, </em><em>optional</em>) – Percent radii where P0,T0, and M are defined. Defaults to [0.5].</p></li>
 </ul>
 </dd>
 </dl>

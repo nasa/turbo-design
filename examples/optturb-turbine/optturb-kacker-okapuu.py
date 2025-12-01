@@ -10,7 +10,7 @@ from pathlib import Path
 from turbodesign import PassageType
 from turbodesign import TurbineSpool, Inlet, RowType, BladeRow, Passage,Outlet
 from turbodesign.enums import MassflowConstraint
-from turbodesign.coolant import Coolant
+from turbodesign import Coolant
 from turbodesign.loss.turbine import FixedPressureLoss, KackerOkapuu
 import numpy as np 
 from cantera import Solution
@@ -71,14 +71,14 @@ stator1.loss_model = KackerOkapuu()
 rotor1.loss_model = KackerOkapuu()
 rotor1.beta2_metal = [-67.6,-67.6,-67.6] # Angle, hub,mean,tip
 
-#%% Initialize the Spool
+#%% Initialize the TurbineSpool
 spool = TurbineSpool(passage=passage,
             rpm=Design_RPM, 
             num_streamlines=3, 
             massflow=massflow, 
             rows=[inlet,stator1,rotor1,outlet])
 spool.fluid = fluid
-spool.massflow_constraint = MassflowConstraint.BalanceMassFlow # Fixes the exit angle and changes degree of reaction
+spool.massflow_constraint = MassflowConstraint.PressureBalance # Fixes the exit angle and changes degree of reaction
 # spool.plot_geometry()
 spool.solve() # This also initializes streamlines
 export_path = Path(__file__).resolve().parent / "optturb.json"

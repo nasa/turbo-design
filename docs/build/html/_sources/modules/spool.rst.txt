@@ -1,5 +1,5 @@
-Spool
+TurbineSpool
 ====================
-.. autoclass:: turbodesign.spool.Spool
+.. autoclass:: turbodesign.turbine_spool.TurbineSpool
     :members:
     :special-members:

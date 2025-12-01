@@ -43,16 +43,12 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../modules/bladerow.html">BladeRow</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../modules/bladerow.html#turbodesign.bladerow.BladeRow"><code class="docutils literal notranslate"><span class="pre">BladeRow</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../modules/bladerow.html#turbodesign.bladerow.compute_gas_constants"><code class="docutils literal notranslate"><span class="pre">compute_gas_constants()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../modules/bladerow.html#turbodesign.bladerow.interpolate_quantities"><code class="docutils literal notranslate"><span class="pre">interpolate_quantities()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../modules/bladerow.html#turbodesign.bladerow.interpolate_streamline_radii"><code class="docutils literal notranslate"><span class="pre">interpolate_streamline_radii()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../modules/bladerow.html#turbodesign.bladerow.sutherland"><code class="docutils literal notranslate"><span class="pre">sutherland()</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="../../modules/coolant.html">Coolant</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="../../modules/coolant.html#turbodesign.coolant.Coolant"><code class="docutils literal notranslate"><span class="pre">Coolant</span></code></a></li>
-</ul>
-</li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules/coolant.html">Coolant</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../modules/enums.html">Enums</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../modules/enums.html#turbodesign.enums.LossType"><code class="docutils literal notranslate"><span class="pre">LossType</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../modules/enums.html#turbodesign.enums.MassflowConstraint"><code class="docutils literal notranslate"><span class="pre">MassflowConstraint</span></code></a></li>
@@ -100,16 +96,13 @@
 <li class="toctree-l2"><a class="reference internal" href="../../modules/radeq.html#turbodesign.radeq.radeq"><code class="docutils literal notranslate"><span class="pre">radeq()</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="../../modules/rotor.html">Rotor</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="../../modules/rotor.html#turbodesign.rotor.Rotor"><code class="docutils literal notranslate"><span class="pre">Rotor</span></code></a></li>
-</ul>
-</li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules/rotor.html">Rotor</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../modules/solve_radeq.html">Solve Radial Equilibrium</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../modules/solve_radeq.html#turbodesign.solve_radeq.adjust_streamlines"><code class="docutils literal notranslate"><span class="pre">adjust_streamlines()</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="../../modules/spool.html">Spool</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="../../modules/spool.html#turbodesign.spool.Spool"><code class="docutils literal notranslate"><span class="pre">Spool</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules/spool.html">TurbineSpool</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/spool.html#turbodesign.turbine_spool.TurbineSpool"><code class="docutils literal notranslate"><span class="pre">TurbineSpool</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../modules/td_math.html">Turbine Design Math</a><ul>
@@ -124,7 +117,7 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../modules/turbinespool.html">Turbine Spool</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="../../modules/turbinespool.html#turbodesign.turbinespool.TurbineSpool"><code class="docutils literal notranslate"><span class="pre">TurbineSpool</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../modules/turbinespool.html#turbodesign.turbine_spool.TurbineSpool"><code class="docutils literal notranslate"><span class="pre">TurbineSpool</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -155,13 +148,12 @@
              
   <h1>Source code for turbodesign.outlet</h1><div class="highlight"><pre>
 <span></span><span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span><span class="p">,</span> <span class="n">field</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Union</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.enums</span><span class="w"> </span><span class="kn">import</span> <span class="n">RowType</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.bladerow</span><span class="w"> </span><span class="kn">import</span> <span class="n">BladeRow</span><span class="p">,</span> <span class="n">compute_gas_constants</span><span class="p">,</span> <span class="n">interpolate_quantities</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.arrayfuncs</span><span class="w"> </span><span class="kn">import</span> <span class="n">convert_to_ndarray</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy.typing</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">npt</span> 
-<span class="kn">import</span><span class="w"> </span><span class="nn">copy</span> 
 <span class="kn">from</span><span class="w"> </span><span class="nn">scipy.interpolate</span><span class="w"> </span><span class="kn">import</span> <span class="n">interp1d</span>
 
 
@@ -169,25 +161,62 @@
 <a class="viewcode-back" href="../../modules/outlet.html#turbodesign.outlet.Outlet">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">Outlet</span><span class="p">(</span><span class="n">BladeRow</span><span class="p">):</span>
     <span class="n">P_fun</span><span class="p">:</span><span class="n">interp1d</span>
+    <span class="n">P0_fun</span><span class="p">:</span><span class="n">interp1d</span>
+    <span class="n">num_streamlines</span><span class="p">:</span><span class="nb">int</span> 
+    <span class="n">static_defined</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">percent_hub_shroud</span><span class="p">:</span><span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span>
     
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">P</span><span class="p">:</span><span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span><span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">]],</span><span class="n">percent_radii</span><span class="p">:</span><span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span><span class="nb">float</span><span class="p">],</span><span class="n">num_streamlines</span><span class="p">:</span><span class="nb">int</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span><span class="n">location</span><span class="p">:</span><span class="nb">float</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize the outlet</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">num_streamlines</span><span class="p">:</span><span class="nb">int</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span><span class="n">location</span><span class="p">:</span><span class="nb">float</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize the outlet with streamlines and a location as a percentage along the hub </span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            P (Union[float,List[float]]): List of static pressure profile at outlet</span>
-<span class="sd">            percent_radii (List[float]): Percent Radius from 0 to 1 or just put 0.5 and it uses all of it </span>
+<span class="sd">            num_streamlines (int, optional): _description_. Defaults to 3.</span>
+<span class="sd">            location (float, optional): Location as percentage along hub curve. Defaults to 1.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">P</span> <span class="o">=</span> <span class="n">convert_to_ndarray</span><span class="p">(</span><span class="n">P</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">percent_hub_shroud</span> <span class="o">=</span> <span class="n">convert_to_ndarray</span><span class="p">(</span><span class="n">percent_radii</span><span class="p">)</span>
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">percent_hub_shroud</span><span class="p">)</span><span class="o">==</span><span class="mi">1</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">percent_hub_shroud</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="n">num_streamlines</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">P</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">P</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">+</span><span class="mi">0</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">percent_hub_shroud</span><span class="o">*</span><span class="mi">0</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">P_fun</span> <span class="o">=</span> <span class="n">interp1d</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">percent_hub_shroud</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">P</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">row_type</span> <span class="o">=</span> <span class="n">RowType</span><span class="o">.</span><span class="n">Outlet</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">loss_function</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">location</span> <span class="o">=</span> <span class="n">location</span>
-    
-    
+        <span class="bp">self</span><span class="o">.</span><span class="n">num_streamlines</span> <span class="o">=</span> <span class="n">num_streamlines</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">percent_hub_shroud</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">num_streamlines</span><span class="p">)</span>
+        
+<div class="viewcode-block" id="Outlet.init_static">
+<a class="viewcode-back" href="../../modules/outlet.html#turbodesign.outlet.Outlet.init_static">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">init_static</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">P</span><span class="p">:</span><span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span><span class="nb">float</span><span class="p">],</span><span class="n">percent_radii</span><span class="p">:</span><span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span><span class="nb">float</span><span class="p">]):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize turbine inputs </span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            P (float): Exit static pressure [Pa]</span>
+<span class="sd">            percent_radii (Union[List[float],float]): percent radii where the exit static pressure is defined.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">percent_hub_shroud</span> <span class="o">=</span> <span class="n">convert_to_ndarray</span><span class="p">(</span><span class="n">percent_radii</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">percent_hub_shroud</span><span class="p">)</span><span class="o">==</span><span class="mi">1</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">percent_hub_shroud</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">num_streamlines</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">P</span> <span class="o">=</span> <span class="n">convert_to_ndarray</span><span class="p">(</span><span class="n">P</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">P</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">P</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">+</span><span class="mi">0</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">percent_hub_shroud</span><span class="o">*</span><span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">P_fun</span> <span class="o">=</span> <span class="n">interp1d</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">percent_hub_shroud</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">P</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">static_defined</span> <span class="o">=</span> <span class="kc">True</span></div>
+
+        
+<div class="viewcode-block" id="Outlet.init_total">
+<a class="viewcode-back" href="../../modules/outlet.html#turbodesign.outlet.Outlet.init_total">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">init_total</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">P0</span><span class="p">:</span><span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span><span class="nb">float</span><span class="p">],</span><span class="n">percent_radii</span><span class="p">:</span><span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span><span class="nb">float</span><span class="p">]):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize compressor inputs </span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            P0 (Union[List[float],float]): Exit Total Pressure (this will be matched)</span>
+<span class="sd">            percent_radii (Union[List[float],float]): percent radii where exit total pressure is defined </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">percent_hub_shroud</span> <span class="o">=</span> <span class="n">convert_to_ndarray</span><span class="p">(</span><span class="n">percent_radii</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">IsCompressor</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">P0</span> <span class="o">=</span> <span class="n">convert_to_ndarray</span><span class="p">(</span><span class="n">P0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">P0</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">P0</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">+</span><span class="mi">0</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">percent_hub_shroud</span><span class="o">*</span><span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">P0_fun</span> <span class="o">=</span> <span class="n">interp1d</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">percent_hub_shroud</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">P0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">IsCompressor</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">static_defined</span> <span class="o">=</span> <span class="kc">False</span> 
+        <span class="bp">self</span><span class="o">.</span><span class="n">P</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">P0</span> <span class="c1"># Do this first but we will adjust</span></div>
+
+        
 <div class="viewcode-block" id="Outlet.transfer_quantities">
 <a class="viewcode-back" href="../../modules/outlet.html#turbodesign.outlet.Outlet.transfer_quantities">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">transfer_quantities</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">upstream</span><span class="p">:</span><span class="n">BladeRow</span><span class="p">):</span>
@@ -197,7 +226,10 @@
 <span class="sd">            upstream (BladeRow): Upstream row, for turbines this is a rotor, for compressors this is a stator. </span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span> <span class="o">=</span> <span class="n">upstream</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span> <span class="c1"># Copies P and hub shroud percentage  </span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">P_fun</span> <span class="o">=</span> <span class="n">interp1d</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">percent_hub_shroud</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">P</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">IsCompressor</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">P0_fun</span> <span class="o">=</span> <span class="n">interp1d</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">percent_hub_shroud</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">P0</span><span class="p">)</span> 
+        <span class="k">else</span><span class="p">:</span> <span class="c1"># Turbine </span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">P_fun</span> <span class="o">=</span> <span class="n">interp1d</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">percent_hub_shroud</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">P</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">row_type</span> <span class="o">=</span> <span class="n">RowType</span><span class="o">.</span><span class="n">Outlet</span></div>
 
         
@@ -208,18 +240,34 @@
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns the static pressure at a certain percent hub_shroud</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            percent_hub_shroud (Union[float,npt.NDArray]): _description_</span>
+<span class="sd">            percent_hub_shroud (Union[float,npt.NDArray]): value or array from 0 to 1 where you want the exit static pressure</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            _type_: _description_</span>
+<span class="sd">            npt.NDArray: Returns an array of static pressure</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">percent_hub_shroud</span><span class="p">)</span> <span class="o">==</span> <span class="nb">float</span><span class="p">:</span>
             <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">P_fun</span><span class="p">(</span><span class="n">percent_hub_shroud</span><span class="p">))</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">P_fun</span><span class="p">(</span><span class="n">percent_hub_shroud</span><span class="p">)</span></div>
+
+    
+<div class="viewcode-block" id="Outlet.get_total_pressure">
+<a class="viewcode-back" href="../../modules/outlet.html#turbodesign.outlet.Outlet.get_total_pressure">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_total_pressure</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">percent_hub_shroud</span><span class="p">:</span><span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span><span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">]):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns the total pressure at a certain percent hub shroud </span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            percent_hub_shroud (Union[float,npt.NDArray]): value or array from 0 to 1 where you want the exit total pressure</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            npt.NDArray: Returns an array of total pressure</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">percent_hub_shroud</span><span class="p">)</span> <span class="o">==</span> <span class="nb">float</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">P0_fun</span><span class="p">(</span><span class="n">percent_hub_shroud</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">P0_fun</span><span class="p">(</span><span class="n">percent_hub_shroud</span><span class="p">)</span></div>
 </div>
 
-        
         
 </pre></div>
 

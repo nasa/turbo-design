@@ -69,14 +69,16 @@ rotor1.beta2_metal = [-67.6,-67.6,-67.6] # Angle, hub,mean,tip
 # Loss Values for Stator and Rotor 
 stator1.loss_model = FixedPressureLoss(0.118)
 rotor1.loss_model = FixedPressureLoss(0.214)
-#%% Initialize the Spool
-spool = TurbineSpool(passage=passage,
-            rpm=Design_RPM, 
-            num_streamlines=3, 
-            massflow=massflow, 
-            rows=[inlet,stator1,rotor1])
+#%% Initialize the TurbineSpool
+spool = TurbineSpool(
+    passage=passage,
+    rpm=Design_RPM,
+    num_streamlines=3,
+    massflow=massflow,
+    rows=[inlet, stator1, rotor1, outlet],
+)
 spool.fluid = fluid
-spool.massflow_constraint = MassflowConstraint.MatchMassFlow # changes the exit angle
+spool.massflow_constraint = MassflowConstraint.AngleMatch # changes the exit angle
 # spool.plot_geometry()
 spool.solve() # This also initializes streamlines
 spool.export_properties("optturb.json")

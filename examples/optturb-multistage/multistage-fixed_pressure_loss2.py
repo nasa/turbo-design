@@ -87,14 +87,14 @@ stator2.loss_model = FixedPressureLoss(0.15)
 rotor2.loss_model = FixedPressureLoss(0.18)
 
 
-#%% Initialize the Spool
+#%% Initialize the TurbineSpool
 spool = TurbineSpool(passage=passage,
             rpm=Design_RPM, 
             num_streamlines=5, 
             massflow=massflow, 
             fluid=fluid,
             rows=[inlet,stator1,rotor1,stator2,rotor2,outlet])
-spool.massflow_constraint = MassflowConstraint.BalanceMassFlow # Fixes the exit angle and changes degree of reaction
+spool.massflow_constraint = MassflowConstraint.PressureBalance # Fixes the exit angle and changes degree of reaction
 # spool.plot_geometry()
 spool.solve() # This also initializes streamlines
 spool.export_properties("optturb.json")

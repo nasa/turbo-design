@@ -46,16 +46,12 @@
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="bladerow.html">BladeRow</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="bladerow.html#turbodesign.bladerow.BladeRow"><code class="docutils literal notranslate"><span class="pre">BladeRow</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="bladerow.html#turbodesign.bladerow.compute_gas_constants"><code class="docutils literal notranslate"><span class="pre">compute_gas_constants()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="bladerow.html#turbodesign.bladerow.interpolate_quantities"><code class="docutils literal notranslate"><span class="pre">interpolate_quantities()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="bladerow.html#turbodesign.bladerow.interpolate_streamline_radii"><code class="docutils literal notranslate"><span class="pre">interpolate_streamline_radii()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="bladerow.html#turbodesign.bladerow.sutherland"><code class="docutils literal notranslate"><span class="pre">sutherland()</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="coolant.html">Coolant</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="coolant.html#turbodesign.coolant.Coolant"><code class="docutils literal notranslate"><span class="pre">Coolant</span></code></a></li>
-</ul>
-</li>
+<li class="toctree-l1"><a class="reference internal" href="coolant.html">Coolant</a></li>
 <li class="toctree-l1"><a class="reference internal" href="enums.html">Enums</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="enums.html#turbodesign.enums.LossType"><code class="docutils literal notranslate"><span class="pre">LossType</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="enums.html#turbodesign.enums.MassflowConstraint"><code class="docutils literal notranslate"><span class="pre">MassflowConstraint</span></code></a></li>
@@ -103,16 +99,13 @@
 <li class="toctree-l2"><a class="reference internal" href="radeq.html#turbodesign.radeq.radeq"><code class="docutils literal notranslate"><span class="pre">radeq()</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="rotor.html">Rotor</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="rotor.html#turbodesign.rotor.Rotor"><code class="docutils literal notranslate"><span class="pre">Rotor</span></code></a></li>
-</ul>
-</li>
+<li class="toctree-l1"><a class="reference internal" href="rotor.html">Rotor</a></li>
 <li class="toctree-l1"><a class="reference internal" href="solve_radeq.html">Solve Radial Equilibrium</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="solve_radeq.html#turbodesign.solve_radeq.adjust_streamlines"><code class="docutils literal notranslate"><span class="pre">adjust_streamlines()</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="spool.html">Spool</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="spool.html#turbodesign.spool.Spool"><code class="docutils literal notranslate"><span class="pre">Spool</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="spool.html">TurbineSpool</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="spool.html#turbodesign.turbine_spool.TurbineSpool"><code class="docutils literal notranslate"><span class="pre">TurbineSpool</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="td_math.html">Turbine Design Math</a><ul>
@@ -127,7 +120,7 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="turbinespool.html">Turbine Spool</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="turbinespool.html#turbodesign.turbinespool.TurbineSpool"><code class="docutils literal notranslate"><span class="pre">TurbineSpool</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="turbinespool.html#turbodesign.turbine_spool.TurbineSpool"><code class="docutils literal notranslate"><span class="pre">TurbineSpool</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -165,8 +158,8 @@
 <em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">turbodesign.loss.</span></span><span class="sig-name descname"><span class="pre">LossBaseClass</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lossType</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="enums.html#turbodesign.enums.LossType" title="turbodesign.enums.LossType"><span class="pre">LossType</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/turbodesign/loss/losstype.html#LossBaseClass"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#turbodesign.loss.LossBaseClass" title="Link to this definition"></a></dt>
 <dd><dl class="py method">
 <dt class="sig sig-object py" id="turbodesign.loss.LossBaseClass.__call__">
-<span class="sig-name descname"><span class="pre">__call__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">row</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">upstream</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/turbodesign/loss/losstype.html#LossBaseClass.__call__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#turbodesign.loss.LossBaseClass.__call__" title="Link to this definition"></a></dt>
-<dd><p>Call self as a function.</p>
+<em class="property"><span class="k"><span class="pre">abstractmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">__call__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">row</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">upstream</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="../_modules/turbodesign/loss/losstype.html#LossBaseClass.__call__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#turbodesign.loss.LossBaseClass.__call__" title="Link to this definition"></a></dt>
+<dd><p>Evaluate the loss for the supplied blade row.</p>
 </dd></dl>
 
 </dd></dl>
@@ -293,7 +286,7 @@ Xp = x_pb N_pr N_pi N_pt + (delta x_p)_t + (delta x_p)_s/e + (delta x_p)_m</p>
 <h2>Kacker Okapuu<a class="headerlink" href="#kacker-okapuu" title="Link to this heading"></a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="turbodesign.loss.turbine.kackerokapuu.KackerOkapuu">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">turbodesign.loss.turbine.kackerokapuu.</span></span><span class="sig-name descname"><span class="pre">KackerOkapuu</span></span><a class="reference internal" href="../_modules/turbodesign/loss/turbine/kackerokapuu.html#KackerOkapuu"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#turbodesign.loss.turbine.kackerokapuu.KackerOkapuu" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">turbodesign.loss.turbine.kackerokapuu.</span></span><span class="sig-name descname"><span class="pre">KackerOkapuu</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">UseCFM</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/turbodesign/loss/turbine/kackerokapuu.html#KackerOkapuu"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#turbodesign.loss.turbine.kackerokapuu.KackerOkapuu" title="Link to this definition"></a></dt>
 <dd><dl class="py method">
 <dt class="sig sig-object py" id="turbodesign.loss.turbine.kackerokapuu.KackerOkapuu.__call__">
 <span class="sig-name descname"><span class="pre">__call__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">row</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="bladerow.html#turbodesign.bladerow.BladeRow" title="turbodesign.bladerow.BladeRow"><span class="pre">BladeRow</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">upstream</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="bladerow.html#turbodesign.bladerow.BladeRow" title="turbodesign.bladerow.BladeRow"><span class="pre">BladeRow</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="../_modules/turbodesign/loss/turbine/kackerokapuu.html#KackerOkapuu.__call__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#turbodesign.loss.turbine.kackerokapuu.KackerOkapuu.__call__" title="Link to this definition"></a></dt>
@@ -395,31 +388,6 @@ WYECOR(I)=WYECOR(I)*(0.35+0.65*18.21)/(0.35+0.65*(FLWP/VISC/RST(MEAN))**(0.2))</
 </section>
 <section id="fixed-pressure-loss">
 <h2>Fixed Pressure Loss<a class="headerlink" href="#fixed-pressure-loss" title="Link to this heading"></a></h2>
-<dl class="py class">
-<dt class="sig sig-object py" id="turbodesign.loss.turbine.fixedpressureloss.FixedPressureLoss">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">turbodesign.loss.turbine.fixedpressureloss.</span></span><span class="sig-name descname"><span class="pre">FixedPressureLoss</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pressure_loss</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/turbodesign/loss/turbine/fixedpressureloss.html#FixedPressureLoss"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#turbodesign.loss.turbine.fixedpressureloss.FixedPressureLoss" title="Link to this definition"></a></dt>
-<dd><dl class="py method">
-<dt class="sig sig-object py" id="turbodesign.loss.turbine.fixedpressureloss.FixedPressureLoss.__call__">
-<span class="sig-name descname"><span class="pre">__call__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">row</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="bladerow.html#turbodesign.bladerow.BladeRow" title="turbodesign.bladerow.BladeRow"><span class="pre">BladeRow</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">upstream</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="bladerow.html#turbodesign.bladerow.BladeRow" title="turbodesign.bladerow.BladeRow"><span class="pre">BladeRow</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="../_modules/turbodesign/loss/turbine/fixedpressureloss.html#FixedPressureLoss.__call__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#turbodesign.loss.turbine.fixedpressureloss.FixedPressureLoss.__call__" title="Link to this definition"></a></dt>
-<dd><p>Outputs the fixed Pressure Loss</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>upstream</strong> (<a class="reference internal" href="bladerow.html#turbodesign.bladerow.BladeRow" title="turbodesign.bladerow.BladeRow"><em>BladeRow</em></a>) – Upstream blade row</p></li>
-<li><p><strong>row</strong> (<a class="reference internal" href="bladerow.html#turbodesign.bladerow.BladeRow" title="turbodesign.bladerow.BladeRow"><em>BladeRow</em></a>) – downstream blade row</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Pressure Loss</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>float</p>
-</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
-
 </section>
 <section id="fixed-efficiency-loss">
 <h2>Fixed Efficiency Loss<a class="headerlink" href="#fixed-efficiency-loss" title="Link to this heading"></a></h2>

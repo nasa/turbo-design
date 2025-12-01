@@ -26,7 +26,8 @@ class Outlet(BladeRow):
         self.loss_function = None
         self.location = location
         self.num_streamlines = num_streamlines
-        self.percent_hub_shroud = np.arange(0,1,self.num_streamlines)
+        # Evenly spaced from hub (0) to shroud (1)
+        self.percent_hub_shroud = np.linspace(0, 1, self.num_streamlines)
         
     def init_static(self,P:Union[List[float],float],percent_radii:Union[List[float],float]):
         """Initialize turbine inputs 

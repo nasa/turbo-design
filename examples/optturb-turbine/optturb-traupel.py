@@ -1,30 +1,36 @@
-'''
+"""
     GEE3HP Turbine
     2 stage cooled turbine
 
-'''
-from turbodesign import Units, TurbineSpool, Inlet, RowType, BladeRow
+"""
+from turbodesign import PassageType, TurbineSpool, Inlet, RowType, BladeRow, Passage, Outlet
 from turbodesign.coolant import Coolant
 from turbodesign.loss.turbine import Traupel
-from turbodesign.loss import LossType
 import numpy as np 
 from cantera import Solution
 
-lossType = LossType.Pressure
-#%% Initialize the Spool
+#%% Initialize the TurbineSpool
 # Geometry - From TD2
 rmean = 0.389
 H1 = 0.063
-H2 = 1.159*H1
-H3 = 1.317*H2
-cax = (H1+H2+H3)/3 
+H2 = 1.159 * H1
+H3 = 1.317 * H2
+cax = (H1 + H2 + H3) / 3
                         # Inlet, Stator Inlet, Stator Exit, Rotor Exit
-rhub = [rmean-H1/2,rmean-H1/2,rmean-H2/2,rmean-H3/2]
-rshroud = [rmean+H1/2,rmean+H1/2,rmean+H2/2,rmean+H3/2]
-xhub = np.array([-cax, 0.0, cax, 2*cax])
-xshroud = np.array([-cax, 0.0, cax, 2*cax])
+rhub = [rmean - H1 / 2, rmean - H1 / 2, rmean - H2 / 2, rmean - H3 / 2]
+rshroud = [rmean + H1 / 2, rmean + H1 / 2, rmean + H2 / 2, rmean + H3 / 2]
+xhub = np.array([-cax, 0.0, cax, 2 * cax])
+xshroud = np.array([-cax, 0.0, cax, 2 * cax])
 
-# Design Conditions 
+passage = Passage(
+    xhub,
+    rhub,
+    xshroud,
+    rshroud,
+    passageType=PassageType.Axial,
+)
+
+# Design Conditions
 Design_RPM = 7500
 power = 5.74E6 # Watts
 massflow = 35.9 # kg/s
@@ -39,25 +45,27 @@ print(f"Coefficient of Pressure [J/Kg] {fluid.cp:0.4f}")
 # Coolant: Use Kelvin and Pascal
 
 
-station1 = Inlet(M=0.4,P0=[P0], T0=[T0], beta=[0], fluid=fluid, percent_radii=0.5)
+station1 = Inlet(M=0.4, P0=[P0], T0=[T0], beta=[0], fluid=fluid, percent_radii=0.5)
 station2 = BladeRow(RowType.Stator, power=0)
 station3 = BladeRow(RowType.Rotor, power=power)
+outlet = Outlet(P=P0/3.96, percent_radii=0.5, num_streamlines=3)
 
 
-station2.coolant = Coolant(T0=616*0.55,P0=50.6*6894.76,massflow_percentage=0,Cp=1012)
-station3.coolant = Coolant(T0=616*0.55,P0=50.6*6894.76,massflow_percentage=0,Cp=1012)
+station2.coolant = Coolant(T0=616*0.55, P0=50.6*6894.76, massflow_percentage=0, Cp=1012)
+station3.coolant = Coolant(T0=616*0.55, P0=50.6*6894.76, massflow_percentage=0, Cp=1012)
 
 # Add in turning angles
 station2.beta2_metal = [73,73,73] # Angle, hub,mean,tip
 station2.loss_model = Traupel()
 station3.loss_model = Traupel()
 
-spool = TurbineSpool(rhub=rhub,xhub=xhub,
-            rshroud=rshroud,xshroud=xshroud,
-            rpm=Design_RPM, 
-            num_streamlines=3, 
-            massflow=massflow, 
-            rows=[station1,station2,station3])
+spool = TurbineSpool(
+    passage=passage,
+    rpm=Design_RPM,
+    num_streamlines=3,
+    massflow=massflow,
+    rows=[station1, station2, station3, outlet],
+)
 spool.fluid = fluid
 
 # spool.plot_geometry()
