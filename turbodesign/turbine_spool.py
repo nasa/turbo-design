@@ -98,6 +98,8 @@ class TurbineSpool:
 
         self.inlet = inlet
         self.outlet = outlet
+        if not self.outlet.static_defined:
+            assert "Outlet needs to be statically defined for turbine calculation"
         self.rows = rows
         self.t_streamline = np.zeros((10,), dtype=float)
         self._adjust_streamlines = True
@@ -260,7 +262,6 @@ class TurbineSpool:
         inlet.__initialize_velocity__(self.passage, self.num_streamlines)  # type: ignore[attr-defined]
         interpolate_streamline_radii(inlet, self.passage, self.num_streamlines)
 
-        compute_gas_constants(inlet, self.fluid)
         inlet_calc(inlet)
 
         for i,row in enumerate(blade_rows):
@@ -277,7 +278,10 @@ class TurbineSpool:
             else:
                 P0_range = step_pressures(percents=percents, inletP0=inlet.P0[j], outletP=outlet.P0[j])
                 for i in range(1, len(blade_rows) - 1):
-                    blade_rows[i].P0[j] = P0_range[i - 1]
+                    if blade_rows[i].row_type == RowType.Stator:
+                        blade_rows[i].P0[j] = P0_range[i - 1]
+                    else:
+                        blade_rows[i].P0R[j] = P0_range[i - 1]
                 
         # Pass T0, P0 to downstream rows
         for i in range(1, len(blade_rows) - 1):
@@ -298,7 +302,7 @@ class TurbineSpool:
                 
             # Adjust for Coolant
             T0 = (W0 * upstream.Cp * upstream.T0 + W0c * Cpc * T0c) / (Cpc * W0c + upstream.Cp * W0)
-            P0 = (W0 * upstream.Cp * upstream.P0 + W0c * Cpc * P0c) / (Cpc * W0c + upstream.Cp * W0)
+            # P0 = (W0 * upstream.Cp * upstream.P0 + W0c * Cpc * P0c) / (Cpc * W0c + upstream.Cp * W0)
             Cp = (W0 * upstream.Cp + W0c * Cpc) / (W0c + W0) if (W0c + W0) != 0 else upstream.Cp
             # Adjust for power 
             if row.row_type == RowType.Rotor:
@@ -306,7 +310,7 @@ class TurbineSpool:
 
             W0 += W0c
             row.T0 = T0
-            row.P0 = P0
+            # row.P0 = P0
             row.Cp = Cp
             row.total_massflow = W0
             row.massflow = np.linspace(0, 1, self.num_streamlines) * row.total_massflow
@@ -421,23 +425,12 @@ class TurbineSpool:
                 float: _description_
             """
             static_defined = self.outlet.static_defined
-            if static_defined:
-                P_exit = P_or_P0
-                for j in range(self.num_streamlines):
-                    Ps_guess = step_pressures(x0, P0[j], P_exit[j])
-                    for i in range(1, len(rows) - 2):
-                        rows[i].P[j] = float(Ps_guess[i - 1])
-                rows[-2].P[:] = P_exit[-1]
-            else:
-                P0_exit = P_or_P0
-                for j in range(self.num_streamlines):
-                    P0_guess = step_pressures(x0, P0[j], P0_exit[j])
-                    for i in range(1, len(rows) - 2):
-                        if rows[i].row_type == RowType.Stator:
-                            rows[i].P0[j] = float(P0_guess[i - 1])
-                        else:
-                            rows[i].P0R[j] = float(P0_guess[i - 1])
-                rows[-2].P0[:] = P0_exit[-1]
+            P_exit = P_or_P0
+            for j in range(self.num_streamlines):
+                Ps_guess = step_pressures(x0, P0[j], P_exit[j])
+                for i in range(1, len(rows) - 2):
+                    rows[i].P[j] = float(Ps_guess[i - 1])
+            rows[-2].P[:] = P_exit[-1]
             
             # Loop through massflow calculation for all rows
             for i in range(1, len(rows) - 1):

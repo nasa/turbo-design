@@ -132,6 +132,6 @@ spool.massflow_constraint = MassflowConstraint.PressureBalance # Fixes the exit 
 # spool.plot_geometry()
 spool.adjust_streamlines = False
 spool.solve() # This also initializes streamlines
-spool.export_properties(str(data_dir / "eee_results.json"))
+spool.export_properties(str(data_dir / "eee_results_P0.json"))
 spool.plot()
 spool.plot_velocity_triangles()

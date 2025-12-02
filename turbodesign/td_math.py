@@ -185,22 +185,13 @@ def stator_calc(row:BladeRow,upstream:BladeRow,downstream:Optional[BladeRow]=Non
         calculate_vm (bool): True to calculate the meridional velocity. False, do not calculate this and let radeq calculate it
         static_defined (bool): True if static conditions defined at the outlet. False if total conditions defined at outlet
     """
-    ## degree of reaction (rp) is assumed 
-    # downstream.P = upstream.P0 * 1/downstream.P0_P 
-    # if downstream is not None:
-    #     # Use the upstream P0 value then later factor in the loss
-    #     row.P = downstream.rp*(upstream.P0 - downstream.P) + downstream.P
-    # else:
-    #     row.P = upstream.P    
-    
+ 
     # Static Pressure is assumed
     row.T0 = upstream.T0 - T0_coolant_weighted_average(row)
     loss_type = getattr(row.loss_function, "loss_type", None)
     if loss_type == LossType.Pressure:
-        if static_defined:
-            row.P0 = upstream.P0 - row.Yp*(upstream.P0-row.P) # When static conditions are defined, use it to calculate P0
-        else:
-            row.P0 = upstream.P0 - row.Yp*(upstream.P0-row.P) # When static conditions are defined, use it to calculate P0
+        row.P0 = upstream.P0 - row.Yp*(upstream.P0-row.P) # When static conditions are defined, use it to calculate P0
+       
 
     elif loss_type == LossType.Enthalpy:
         b = row.area * row.P0 / np.sqrt(row.T0) * np.sqrt(row.gamma/row.R)
@@ -294,10 +285,8 @@ def rotor_calc(row:BladeRow,upstream:BladeRow,calculate_vm:bool=True,static_defi
     # Rotor Exit Calculations
     row.beta1 = upstream.beta2
     #row.Yp # Evaluated earlier 
-    if static_defined:
-        row.P0R = upstream.P0R - row.Yp*(upstream.P0R-row.P)
-    else:
-        row.P = upstream.P0R - (upstream.P0R-row.P0R)/row.Yp
+    row.P0R = upstream.P0R - row.Yp*(upstream.P0R-row.P)
+
         
     # Total Relative Temperature stays constant through the rotor. Adjust for change in radius from rotor inlet to exit
     row.T0R = upstream.T0R # (upstream_rothalpy + 0.5*row.U**2)/row.Cp # - T0_coolant_weighted_average(row) 
@@ -343,7 +332,7 @@ def rotor_calc(row:BladeRow,upstream:BladeRow,calculate_vm:bool=True,static_defi
         row.M = row.V/np.sqrt(row.gamma*row.R*row.T)
     T0_T = (1+(row.gamma-1)/2 * row.M**2)
     row.P0 = row.P * T0_T**(row.gamma/(row.gamma-1))
-    row.P0_P = (row.P0/row.P).mean()
+    row.P0_P = (row.P0_stator_inlet/row.P).mean()
 
     row.M_rel = row.W/np.sqrt(row.gamma*row.R*row.T)
     row.T0 = row.T+row.V**2/(2*row.Cp)
