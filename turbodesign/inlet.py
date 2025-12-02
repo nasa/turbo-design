@@ -96,7 +96,7 @@ class Inlet(BladeRow):
         if fluid:
             fluid.TP = self.T0.mean(),self.P0.mean()
             self.gamma = fluid.cp/fluid.cv
-            if not self.static_defined:
+            if self.static_defined:
                 self.P0 = self.P * (1+(self.gamma-1)/2 * self.M**2) ** (self.gamma/(self.gamma-1))
                 self.T0 = self.T * (1+(self.gamma-1)/2 * self.M**2)
             else:
@@ -109,7 +109,7 @@ class Inlet(BladeRow):
             self.gamma = gamma
             self.R = R
             self.T = self.T0 * 1/(1 + (self.gamma-1) * self.M**2)
-            if not self.static_defined:
+            if self.static_defined:
                 self.P0 = self.P * (1+(self.gamma-1)/2 * self.M**2) ** (self.gamma/(self.gamma-1)) 
                 self.T0 = self.T * (1+(self.gamma-1)/2 * self.M**2)
             else:

@@ -1,9 +1,12 @@
 from typing import List, Optional
 import numpy as np
 import numpy.typing as npt
+from .isentropic import IsenP, IsenT
+from turbodesign.loss import losstype
 from .bladerow import BladeRow, compute_gas_constants
 from .enums import RowType, LossType
 from scipy.integrate import trapezoid
+from scipy.optimize import minimize 
 from .passage import Passage
 from .isentropic import IsenP
 
@@ -191,11 +194,25 @@ def stator_calc(row:BladeRow,upstream:BladeRow,downstream:Optional[BladeRow]=Non
     #     row.P = upstream.P    
     
     # Static Pressure is assumed
-    if static_defined:
-        row.P0 = upstream.P0 - row.Yp*(upstream.P0-row.P) # When static conditions are defined, use it to calculate P0
-    else:
-        row.P = upstream.P0 + (row.P0- upstream.P0)/row.Yp # When total conditions are defined we calculate static pressure
-    
+    row.T0 = upstream.T0 - T0_coolant_weighted_average(row)
+    loss_type = getattr(row.loss_function, "loss_type", None)
+    if loss_type == LossType.Pressure:
+        if static_defined:
+            row.P0 = upstream.P0 - row.Yp*(upstream.P0-row.P) # When static conditions are defined, use it to calculate P0
+        else:
+            row.P0 = upstream.P0 - row.Yp*(upstream.P0-row.P) # When static conditions are defined, use it to calculate P0
+
+    elif loss_type == LossType.Enthalpy:
+        b = row.area * row.P0 / np.sqrt(row.T0) * np.sqrt(row.gamma/row.R)
+        solve_for_M = upstream.total_massflow / b
+        fun = lambda M : np.abs(solve_for_M - M*(1+(row.gamma-1)/2 * M**2) ** (-(row.gamma+1)/(2*(row.gamma-1))))
+        M_subsonic = minimize(fun,0.1, method='L-BFGS-B', bounds=[0,1])
+        M_supersonic = minimize(fun,1.5, method='L-BFGS-B', bounds=[1,5])
+        row.M = M_subsonic
+        row.T = row.T0/IsenT(M_subsonic,row.gamma)
+        a = np.sqrt(row.T*row.gamma*row.R)
+        row.P = row.total_massflow * row.R*row.T / (row.area * row.M * a) # Use the massflow to find static pressure 
+        
     if downstream is not None:
         row.P0_P = float((row.P0/downstream.P).mean())
         row.rp = ((row.P-downstream.P)/(upstream.P0-downstream.P)).mean()
@@ -204,7 +221,6 @@ def stator_calc(row:BladeRow,upstream:BladeRow,downstream:Optional[BladeRow]=Non
         row.M = ((row.P0/row.P)**((row.gamma-1)/row.gamma) - 1) * 2/(row.gamma-1)
         row.M = np.sqrt(row.M)
         T0_T = (1+(row.gamma-1)/2 * row.M**2)
-        row.T0 = upstream.T0 - T0_coolant_weighted_average(row)
         row.T = row.T0/T0_T
         row.V = row.M*np.sqrt(row.gamma*row.R*row.T)
         row.Vm = row.V*np.cos(row.alpha2)

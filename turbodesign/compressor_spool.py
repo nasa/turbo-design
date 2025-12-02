@@ -488,15 +488,15 @@ class CompressorSpool:
                 upstream = blade_rows[i - 1]
                 if upstream.row_type == RowType.Inlet:
                     cut_line1, _, _ = self.passage.get_cutting_line(
-                        (row.location * hub_length + (0.5 * row.blade_to_blade_gap * row.axial_chord) - row.axial_chord)
+                        (row.hub_location * hub_length + (0.5 * row.blade_to_blade_gap * row.axial_chord) - row.axial_chord)
                         / hub_length
                     )
                 else:
                     cut_line1, _, _ = self.passage.get_cutting_line(
-                        (upstream.location * hub_length) / hub_length
+                        (upstream.hub_location * hub_length) / hub_length
                     )
                 cut_line2, _, _ = self.passage.get_cutting_line(
-                    (row.location * hub_length - (0.5 * row.blade_to_blade_gap * row.axial_chord)) / hub_length
+                    (row.hub_location * hub_length - (0.5 * row.blade_to_blade_gap * row.axial_chord)) / hub_length
                 )
 
             if row.row_type == RowType.Stator:

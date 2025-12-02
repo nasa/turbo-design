@@ -336,24 +336,33 @@ class BladeRow:
         """
         self._tip_clearance = val
         
-    def __init__(self,location:float,row_type:RowType=RowType.Stator,stage_id:int = 0,shroud_location:Optional[float]=None):
+    def __init__(self, hub_location: float, row_type: RowType = RowType.Stator, stage_id: int = 0, shroud_location: Optional[float] = None):
         """Initializes the blade row to be a particular type
 
         Args:
-            location (float): Location of the blade row as a percentage of hub length
+            hub_location (float): Location of the blade row as a percentage of hub length
             row_type (RowType): Specifies the Type. Defaults to RowType.Stator
             power (float, optional): power . Defaults to 0.
             P0_P (float, optional): Total to Static Pressure Ratio
             stage_id (int, optional): ID of the stage so if you have 9 stages, the id could be 9. It's used to separate the stages. Each stage will have it's own unique degree of reaction 
         """
         self.row_type = row_type
-        self.location = location
+        self.hub_location = hub_location
         if shroud_location is not None:
             self.shroud_location = shroud_location
         else:
-            self.shroud_location = location
+            self.shroud_location = hub_location
         self.Yp = 0 # Loss
         self.stage_id = stage_id
+
+    # Backwards-compatible alias
+    @property
+    def location(self) -> float:
+        return self.hub_location
+
+    @location.setter
+    def location(self, val: float) -> None:
+        self.hub_location = val
     
     @beta1_metal.setter
     def beta1_metal(self,beta1_metal:List[float],percent:List[float]=[]):

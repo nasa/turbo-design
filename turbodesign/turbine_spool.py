@@ -12,6 +12,7 @@ import matplotlib.pyplot as plt
 from cantera.composite import Solution
 from scipy.interpolate import interp1d
 from scipy.optimize import minimize_scalar, fmin_slsqp
+from sympy import true
 
 # --- Project-local imports
 from .bladerow import BladeRow, interpolate_streamline_radii
@@ -106,7 +107,7 @@ class TurbineSpool:
             br.id = i
             if not isinstance(br, (Inlet, Outlet)):
                 br.rpm = rpm
-                br.axial_chord = br.location * self.passage.hub_length
+                br.axial_chord = br.hub_location * self.passage.hub_length
 
         # Propagate initial fluid to rows
         for br in self._all_rows():
@@ -209,6 +210,28 @@ class TurbineSpool:
             pitch = 2 * np.pi * mean_r / row.num_blades
             row.pitch_to_chord = pitch / row.chord
 
+    def solve_for_static_pressure(self,upstream:BladeRow,row:BladeRow):
+        if row.row_type == RowType.Stator:
+            b = row.area * row.P0 / np.sqrt(row.T0) * np.sqrt(row.gamma/row.R)
+        else:
+            b = row.area * row.P0R / np.sqrt(row.T0R) * np.sqrt(row.gamma/row.R)
+
+        solve_for_M = upstream.total_massflow / b
+        fun = lambda M : np.abs(solve_for_M - M*(1+(row.gamma-1)/2 * M**2) ** (-(row.gamma+1)/(2*(row.gamma-1))))
+        M_subsonic = minimize_scalar(fun,0.1, bounds=[0,1])
+        M_supersonic = minimize_scalar(fun,1.5, bounds=[1,5])
+        row.M = M_subsonic
+        if row.row_type == RowType.Stator:
+            row.T = row.T0/IsenT(M_subsonic,row.gamma)
+        else: 
+            row.T = row.T0R/IsenT(M_subsonic,row.gamma)
+        a = np.sqrt(row.T*row.gamma*row.R)
+        row.P = row.total_massflow * row.R*row.T / (row.area * row.M * a) 
+        # When total conditions are defined we calculate static pressure
+        if row.row_type == RowType.Stator:
+            row.P = upstream.P0 - (upstream.P0 - row.P0) / row.Yp 
+        else:
+            row.P = upstream.P0R - (upstream.P0R - row.P0R) / row.Yp 
     # ------------------------------
     # initialization/solve
     # ------------------------------
@@ -240,23 +263,22 @@ class TurbineSpool:
         compute_gas_constants(inlet, self.fluid)
         inlet_calc(inlet)
 
-        for row in blade_rows:
+        for i,row in enumerate(blade_rows):
             interpolate_streamline_radii(row, self.passage, self.num_streamlines)
-
+        
         outlet = self.outlet
         for j in range(self.num_streamlines):
-            P0 = inlet.get_total_pressure(inlet.percent_hub_shroud[j])  # type: ignore[attr-defined]
             percents = np.zeros(shape=(len(blade_rows) - 2)) + 0.3
             percents[-1] = 1
             if Is_static_defined:
                 Ps_range = step_pressures(percents=percents, inletP0=inlet.P0[j], outletP=outlet.P[j])
                 for i in range(1, len(blade_rows) - 1):
                     blade_rows[i].P[j] = Ps_range[i - 1]
-            else: # If total conditions are defined at the outlet 
-                P0_range = step_pressures(percents=percents, inletP0=inlet.P0[j], outletP=outlet.P[j])
+            else:
+                P0_range = step_pressures(percents=percents, inletP0=inlet.P0[j], outletP=outlet.P0[j])
                 for i in range(1, len(blade_rows) - 1):
                     blade_rows[i].P0[j] = P0_range[i - 1]
-
+                
         # Pass T0, P0 to downstream rows
         for i in range(1, len(blade_rows) - 1):
             upstream = blade_rows[i - 1]
@@ -273,19 +295,14 @@ class TurbineSpool:
                 P0c = 0
                 W0c = 0
                 Cpc = 0
-
-            T0 = upstream.T0
-            P0 = upstream.P0
-            Cp = upstream.Cp
-
-            T0 = (W0 * Cp * T0 + W0c * Cpc * T0c) / (Cpc * W0c + Cp * W0)
-            P0 = (W0 * Cp * P0 + W0c * Cpc * P0c) / (Cpc * W0c + Cp * W0)
-            Cp = (W0 * Cp + W0c * Cpc) / (W0c + W0) if (W0c + W0) != 0 else Cp
-
-            if row.row_type == RowType.Stator:
-                T0 = upstream.T0
-            else:
-                T0 = upstream.T0 - row.power / (Cp * (W0 + W0c))
+                
+            # Adjust for Coolant
+            T0 = (W0 * upstream.Cp * upstream.T0 + W0c * Cpc * T0c) / (Cpc * W0c + upstream.Cp * W0)
+            P0 = (W0 * upstream.Cp * upstream.P0 + W0c * Cpc * P0c) / (Cpc * W0c + upstream.Cp * W0)
+            Cp = (W0 * upstream.Cp + W0c * Cpc) / (W0c + W0) if (W0c + W0) != 0 else upstream.Cp
+            # Adjust for power 
+            if row.row_type == RowType.Rotor:
+                T0 = T0 - row.power / (Cp * (W0 + W0c))
 
             W0 += W0c
             row.T0 = T0
@@ -298,12 +315,17 @@ class TurbineSpool:
             row.rho = upstream.rho
             row.gamma = upstream.gamma
             row.R = upstream.R
-
+            
+            if row.loss_function.loss_type == LossType.Pressure:
+                row.Yp = row.loss_function(row, upstream)
+            elif row.loss_function.loss_type == LossType.Enthalpy: 
+                row.Yp = 0
+                    
             if row.row_type == RowType.Stator:
-                stator_calc(row, upstream, downstream,Is_static_defined)  # type: ignore[arg-type]
+                stator_calc(row, upstream, downstream,True,Is_static_defined)  # type: ignore[arg-type]
                 compute_massflow(row)
             elif row.row_type == RowType.Rotor:
-                rotor_calc(row, upstream,Is_static_defined)
+                rotor_calc(row, upstream,True,Is_static_defined)
                 compute_massflow(row)
                 compute_power(row, upstream)
 
@@ -405,7 +427,7 @@ class TurbineSpool:
                     Ps_guess = step_pressures(x0, P0[j], P_exit[j])
                     for i in range(1, len(rows) - 2):
                         rows[i].P[j] = float(Ps_guess[i - 1])
-                rows[-2].P = P_exit[-1]
+                rows[-2].P[:] = P_exit[-1]
             else:
                 P0_exit = P_or_P0
                 for j in range(self.num_streamlines):
@@ -415,7 +437,7 @@ class TurbineSpool:
                             rows[i].P0[j] = float(P0_guess[i - 1])
                         else:
                             rows[i].P0R[j] = float(P0_guess[i - 1])
-                rows[-2].P0 = P0_exit[-1]
+                rows[-2].P0[:] = P0_exit[-1]
             
             # Loop through massflow calculation for all rows
             for i in range(1, len(rows) - 1):
@@ -433,30 +455,31 @@ class TurbineSpool:
                                 rotor_calc(row, upstream, 
                                         calculate_vm=True,static_defined=static_defined)
                                 row = radeq(row, upstream, downstream)
-                                compute_gas_constants(row, fluid)
+                                compute_gas_constants(row, self.fluid)
                                 rotor_calc(row, upstream, 
                                         calculate_vm=False,static_defined=static_defined)
                             elif row.row_type == RowType.Stator:
                                 stator_calc(row, upstream, downstream, 
                                             calculate_vm=True,static_defined=static_defined)
                                 row = radeq(row, upstream, downstream)
-                                compute_gas_constants(row, fluid)
+                                compute_gas_constants(row, self.fluid)
                                 stator_calc(row, upstream, downstream, 
                                             calculate_vm=False,static_defined=static_defined)
-                            compute_gas_constants(row, fluid)
+                            compute_gas_constants(row, self.fluid)
                             compute_massflow(row)
                             compute_power(row, upstream)
 
                     elif row.loss_function.loss_type == LossType.Enthalpy: 
                         if row.row_type == RowType.Rotor:
                             row.Yp = 0
-                            rotor_calc(row,upstream,calculate_vm=calculate_vm)
+                            rotor_calc(row,upstream,calculate_vm=True)
                             eta_total = float(row.loss_function(row,upstream))
+                            
                             def find_yp(Yp,row,upstream):
                                 row.Yp = Yp
                                 rotor_calc(row,upstream,calculate_vm=True)
                                 row = radeq(row,upstream)
-                                compute_gas_constants(row,fluid)
+                                compute_gas_constants(row,self.fluid)
                                 rotor_calc(row,upstream,calculate_vm=False)
                                 return abs(row.eta_total - eta_total)
                             
@@ -466,9 +489,9 @@ class TurbineSpool:
                             row.Yp = 0
                             stator_calc(row,upstream,downstream,calculate_vm=True)
                             row = radeq(row,upstream) 
-                            compute_gas_constants(row,fluid)
+                            compute_gas_constants(row,self.fluid)
                             stator_calc(row,upstream,downstream,calculate_vm=False)
-                        compute_gas_constants(row,fluid)
+                        compute_gas_constants(row,self.fluid)
                         compute_massflow(row)
                         compute_power(row,upstream)
             return self.__massflow_std__(rows[1:-1])
@@ -484,7 +507,7 @@ class TurbineSpool:
         loop_iter = 0
         err = 1e-3
         while (np.abs((err - past_err) / err) > 0.05) and (loop_iter < 10):
-            if len(pressure_ratio_ranges) == 1:
+            if len(pressure_ratio_ranges) == 1: # Single stage, use minimize scalar 
                 if self.outlet.static_defined:
                     minimize_scalar(
                         fun=balance_loop,
@@ -499,7 +522,7 @@ class TurbineSpool:
                         bounds=pressure_ratio_ranges[0],
                         tol=1e-3,
                         method="bounded")
-            else:
+            else:   # Multiple stages, use slsqp
                 if self.outlet.static_defined:
                     fmin_slsqp(
                         func=balance_loop,
@@ -577,7 +600,7 @@ class TurbineSpool:
 
         Pratio_Total_Total = np.mean(self.inlet.P0 / blade_rows[-2].P0)
         Pratio_Total_Static = np.mean(self.inlet.P0 / blade_rows[-2].P)
-        FlowFunction = np.mean(massflow) * np.sqrt(self.inlet.T0) * self.inlet.P0 / 1000
+        FlowFunction = np.mean(massflow * np.sqrt(self.inlet.T0) * self.inlet.P0 / 1000)
         CorrectedSpeed = self.rpm * np.pi / 30 / np.sqrt(self.inlet.T0.mean())
         EnergyFunction = (
             (self.inlet.T0 - blade_rows[-2].T0)
@@ -663,15 +686,15 @@ class TurbineSpool:
                 upstream = blade_rows[i - 1]
                 if upstream.row_type == RowType.Inlet:
                     cut_line1, _, _ = self.passage.get_cutting_line(
-                        (row.location * hub_length + (0.5 * row.blade_to_blade_gap * row.axial_chord) - row.axial_chord)
+                        (row.hub_location * hub_length + (0.5 * row.blade_to_blade_gap * row.axial_chord) - row.axial_chord)
                         / hub_length
                     )
                 else:
                     cut_line1, _, _ = self.passage.get_cutting_line(
-                        (upstream.location * hub_length) / hub_length
+                        (upstream.hub_location * hub_length) / hub_length
                     )
                 cut_line2, _, _ = self.passage.get_cutting_line(
-                    (row.location * hub_length - (0.5 * row.blade_to_blade_gap * row.axial_chord)) / hub_length
+                    (row.hub_location * hub_length - (0.5 * row.blade_to_blade_gap * row.axial_chord)) / hub_length
                 )
 
             if row.row_type == RowType.Stator:

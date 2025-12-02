@@ -38,7 +38,7 @@ class Outlet(BladeRow):
         """
         self.percent_hub_shroud = convert_to_ndarray(percent_radii)
         if len(self.percent_hub_shroud)==1:
-            self.percent_hub_shroud = np.arange(0,1,self.num_streamlines)
+            self.percent_hub_shroud = np.linspace(0,1,self.num_streamlines)
         self.P = convert_to_ndarray(P)
         self.P = self.P[0]+0*self.percent_hub_shroud*0
         self.P_fun = interp1d(self.percent_hub_shroud,self.P)
@@ -68,10 +68,10 @@ class Outlet(BladeRow):
             upstream (BladeRow): Upstream row, for turbines this is a rotor, for compressors this is a stator. 
         """
         self.__dict__ = upstream.__dict__.copy() # Copies P and hub shroud percentage  
-        if self.IsCompressor:
-            self.P0_fun = interp1d(self.percent_hub_shroud,self.P0) 
-        else: # Turbine 
+        if self.static_defined:
             self.P_fun = interp1d(self.percent_hub_shroud,self.P)
+        else: # Turbine 
+            self.P0_fun = interp1d(self.percent_hub_shroud,self.P0) 
         self.row_type = RowType.Outlet
         
     
