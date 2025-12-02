@@ -52,12 +52,13 @@ air.TP = T0, P0 # Use pascal for cantera
 print(f"Coefficient of Pressure [J/Kg] {air.cp:0.4f}")
 
 #%% Defining the Inlet
-inlet = Inlet(M=0.02, 
-                 P0=[P0],
-                 T0=[T0], 
-                 beta=[0],
-                 percent_radii=0.5,
-                 location=0)
+inlet = Inlet(beta=[0], hub_location=0)
+inlet.init_total(
+    P0=[P0],
+    T0=[T0],
+    M=[0.02],
+    percent_radii=[0.5],
+)
 
 outlet = Outlet(P=206.799*1000,percent_radii=0.5,num_streamlines=5)
 
@@ -87,9 +88,9 @@ stator1.stage_id = 0; rotor1.stage_id = 0
 stator2.stage_id = 0; 
 
 # Coolant Definition: Use Kelvin and Pascal. Coolant only needs P0, T0, massflow, and Cp
-stator1.coolant = Coolant(T0=T0*0.5, P0 = P0 * 6894.76, massflow_percentage=0, Cp=air.cp) 
-rotor1.coolant = Coolant(T0*0.5, P0 = P0 * 6894.76, massflow_percentage=0, Cp=air.cp)
-stator2.coolant = Coolant(T0=T0*0.5, P0 = P0 * 6894.76, massflow_percentage=0, Cp=air.cp) 
+stator1.coolant = Coolant(T0=T0*0.5, P0=P0 * 6894.76, massflow_percentage=0, Cp=air.cp) 
+rotor1.coolant = Coolant(T0=T0*0.5, P0=P0 * 6894.76, massflow_percentage=0, Cp=air.cp)
+stator2.coolant = Coolant(T0=T0*0.5, P0=P0 * 6894.76, massflow_percentage=0, Cp=air.cp) 
 
 # Add in turning angles
 stator1.beta2_metal = [-67.1,-67.1,-67.1,-67.1,-67.1]                  # Alpha2

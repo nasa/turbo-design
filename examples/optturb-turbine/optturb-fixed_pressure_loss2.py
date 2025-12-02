@@ -44,12 +44,13 @@ fluid.TP = T0, P0 # Use pascal for cantera
 print(f"Coefficient of Pressure [J/Kg] {fluid.cp:0.4f}")
 
 #%% Defining the Inlet
-inlet = Inlet(M=0.2, 
-                 P0=[P0],
-                 T0=[T0], 
-                 beta=[0], 
-                 percent_radii=0.5,
-                 location=0)
+inlet = Inlet(beta=[0], hub_location=0)
+inlet.init_total(
+    P0=[P0],
+    T0=[T0],
+    M=[0.2],
+    percent_radii=[0.5],
+)
 outlet = Outlet(P=P0/3.96,percent_radii=0.5,num_streamlines=3)
 
 #%% Define Blade Rows 

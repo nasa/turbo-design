@@ -298,9 +298,7 @@ def rotor_calc(row:BladeRow,upstream:BladeRow,calculate_vm:bool=True,static_defi
         row.P0R = upstream.P0R - row.Yp*(upstream.P0R-row.P)
     else:
         row.P = upstream.P0R - (upstream.P0R-row.P0R)/row.Yp
-    
-    row.P0_P = (row.P0/row.P).mean()
-    
+        
     # Total Relative Temperature stays constant through the rotor. Adjust for change in radius from rotor inlet to exit
     row.T0R = upstream.T0R # (upstream_rothalpy + 0.5*row.U**2)/row.Cp # - T0_coolant_weighted_average(row) 
     P0R_P = row.P0R / row.P
@@ -329,10 +327,6 @@ def rotor_calc(row:BladeRow,upstream:BladeRow,calculate_vm:bool=True,static_defi
         row.M = row.V/np.sqrt(row.gamma*row.R*row.T)
         row.Vm = np.sqrt(row.Vx**2+row.Vr**2)
         row.T0 = row.T + row.V**2/(2*row.Cp)
-        if static_defined: # static conditions defined at the outlet and bladerows
-            row.P0 = row.P*(row.T0/row.T)**(row.gamma/(row.gamma-1)) # use static conditions to calculate total
-        else:
-            row.P = row.P0 / (row.T0/row.T)**(row.gamma/(row.gamma-1)) # use total conditions to calculate total
         row.alpha2 = np.arctan2(row.Vt,row.Vm)
     else: # We know Vm, P0, T0
         row.Vr = row.Vm*np.sin(row.phi)
@@ -347,9 +341,10 @@ def rotor_calc(row:BladeRow,upstream:BladeRow,calculate_vm:bool=True,static_defi
         row.V = np.sqrt(row.Vm**2*(1+np.tan(row.alpha2)**2))
         
         row.M = row.V/np.sqrt(row.gamma*row.R*row.T)
-        T0_T = (1+(row.gamma-1)/2 * row.M**2)
-        row.P0 = row.P * T0_T**(row.gamma/(row.gamma-1))
-    
+    T0_T = (1+(row.gamma-1)/2 * row.M**2)
+    row.P0 = row.P * T0_T**(row.gamma/(row.gamma-1))
+    row.P0_P = (row.P0/row.P).mean()
+
     row.M_rel = row.W/np.sqrt(row.gamma*row.R*row.T)
     row.T0 = row.T+row.V**2/(2*row.Cp)
 

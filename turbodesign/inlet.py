@@ -19,7 +19,7 @@ class Inlet(BladeRow):
     fun: interp1d
     static_defined: bool
     def __init__(self, 
-                 location:float=0,
+                 hub_location:float=0,
                  shroud_location:Optional[float]=None,
                  beta:Union[float,List[float]]=[0]):
         """Initializes the inlet station. 
@@ -30,7 +30,7 @@ class Inlet(BladeRow):
             beta (Union[float,List[float]], optional): Inlet flow angle in relative direction. Defaults to [].
 
         """
-        super().__init__(row_type=RowType.Inlet,location=location,shroud_location=shroud_location,stage_id=-1)
+        super().__init__(row_type=RowType.Inlet,hub_location=hub_location,shroud_location=shroud_location,stage_id=-1)
         self.beta1 = convert_to_ndarray(beta)
                    
     

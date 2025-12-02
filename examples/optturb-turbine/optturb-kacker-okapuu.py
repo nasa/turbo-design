@@ -45,18 +45,19 @@ print(f"Coefficient of Pressure [J/Kg] {fluid.cp:0.4f}")
 
 
 #%% Defining the Inlet
-inlet = Inlet(M=0.2, 
-                 P0=[P0],
-                 T0=[T0], 
-                 beta=[0], 
-                 percent_radii=0.5,
-                 location=0)
+inlet = Inlet(beta=[0], hub_location=0)
+inlet.init_total(
+    P0=[P0],
+    T0=[T0],
+    M=[0.2],
+    percent_radii=[0.5],
+)
 outlet = Outlet(P=P0/3.96,percent_radii=0.5,num_streamlines=3)
 
 #%% Define Blade Rows 
 # Axial location is a percentage along the hub where row exit is defined
-stator1 = BladeRow(row_type=RowType.Stator,location=2*cax/axial_len)
-rotor1 = BladeRow(row_type=RowType.Rotor, location=3*cax/axial_len)
+stator1 = BladeRow(row_type=RowType.Stator, hub_location=2*cax/axial_len)
+rotor1 = BladeRow(row_type=RowType.Rotor, hub_location=3*cax/axial_len)
 
 stator1.axial_chord = cax # Set an axial chord
 rotor1.axial_chord = cax

@@ -108,21 +108,22 @@ print(f"Coefficient of Pressure [J/Kg] {fluid.cp:0.4f}")
 
 #%% Defining the Inlet
 hub_len = max(hub[:,0])-min(hub[:,0])
-inlet = Inlet(M=0.1, 
-                 P0=[P0],
-                 T0=[T0], 
-                 beta=[0], 
-                 fluid=fluid,  # type: ignore
-                 percent_radii=0.5,
-                 meridional_location=(min(stator1[0][:,0]) - min(hub[:,0]))/hub_len) # type: ignore
+inlet_location = (min(stator1[0][:,0]) - min(hub[:,0]))/hub_len
+inlet = Inlet(beta=[0], hub_location=inlet_location)
+inlet.init_total(
+    P0=[P0],
+    T0=[T0],
+    M=[0.1],
+    percent_radii=[0.5],
+)
 outlet = Outlet(P=Pexit,percent_radii=0.5,num_streamlines=3) # type: ignore
 
 #%% Define Blade Rows 
 # Axial location is a percentage along the hub where row exit is defined
-stator1 = BladeRow(row_type=RowType.Stator,meridional_location=(max(stator1[0][:,0]) - min(hub[:,0]))/hub_len, stage_id=0)
-rotor1 = BladeRow(row_type=RowType.Rotor, meridional_location=(max(rotor1[0][:,0]) - min(hub[:,0]))/hub_len,stage_id=0)
-stator2 = BladeRow(row_type=RowType.Stator,meridional_location=(max(stator2[0][:,0]) - min(hub[:,0]))/hub_len,stage_id=1)
-rotor2 = BladeRow(row_type=RowType.Rotor, meridional_location=(max(rotor2[0][:,0]) - min(hub[:,0]))/hub_len,stage_id=1)
+stator1 = BladeRow(row_type=RowType.Stator,hub_location=(max(stator1[0][:,0]) - min(hub[:,0]))/hub_len, stage_id=0)
+rotor1 = BladeRow(row_type=RowType.Rotor, hub_location=(max(rotor1[0][:,0]) - min(hub[:,0]))/hub_len,stage_id=0)
+stator2 = BladeRow(row_type=RowType.Stator,hub_location=(max(stator2[0][:,0]) - min(hub[:,0]))/hub_len,stage_id=1)
+rotor2 = BladeRow(row_type=RowType.Rotor, hub_location=(max(rotor2[0][:,0]) - min(hub[:,0]))/hub_len,stage_id=1)
 
 stator1.axial_chord = stator1_cax # Set an axial chord
 rotor1.axial_chord = rotor1_cax

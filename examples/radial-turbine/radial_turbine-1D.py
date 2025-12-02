@@ -138,12 +138,13 @@ alpha2 = -51.5
 
 passage = Passage(hub[:,0],hub[:,1],shroud[:,0],shroud[:,1],passageType=PassageType.Centrifugal) # type: ignore
 #%% Defining the Inlet
-inlet = Inlet(M=0.1,
-                P0=[P0],
-                T0=[T0],
-                beta=[0],
-                percent_radii=0.5,
-                location=0)
+inlet = Inlet(beta=[0], hub_location=0)
+inlet.init_total(
+    P0=[P0],
+    T0=[T0],
+    M=[0.1],
+    percent_radii=[0.5],
+)
 
 outlet = Outlet(P=P,percent_radii=[0.5],num_streamlines=5)
 

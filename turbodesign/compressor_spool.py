@@ -402,7 +402,8 @@ class CompressorSpool:
 
         Pratio_Total_Total = np.mean(self.inlet.P0 / blade_rows[-2].P0)
         Pratio_Total_Static = np.mean(self.inlet.P0 / blade_rows[-2].P)
-        FlowFunction = np.mean(massflow) * np.sqrt(self.inlet.T0) * self.inlet.P0 / 1000
+        flow_fn_massflow = float(np.mean(massflow)) if massflow else 0.0
+        FlowFunction = flow_fn_massflow * np.sqrt(self.inlet.T0.mean()) * float(np.mean(self.inlet.P0)) / 1000
         CorrectedSpeed = self.rpm * np.pi / 30 / np.sqrt(self.inlet.T0.mean())
         EnergyFunction = (
             (self.inlet.T0 - blade_rows[-2].T0)

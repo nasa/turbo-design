@@ -17,6 +17,7 @@ findiff = "*"
 matplotlib = "*"
 pandas = "*"
 python = ">=3.9"
+shapely = "*"
 
 [poetry.group.dev.dependencies]
 python = ">=3.9"

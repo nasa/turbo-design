@@ -494,13 +494,15 @@ class TurbineSpool:
                         compute_gas_constants(row,self.fluid)
                         compute_massflow(row)
                         compute_power(row,upstream)
+            print(x0)
             return self.__massflow_std__(rows[1:-1])
 
-        pressure_ratio_ranges = []
-        pressure_ratio_guess = []
+        pressure_ratio_ranges: List[tuple] = []
+        pressure_ratio_guess: List[float] = []
         for i in range(1, len(rows) - 2):
-            pressure_ratio_ranges.append(rows[i].inlet_to_outlet_pratio)
-            pressure_ratio_guess.append(np.mean(rows[i].inlet_to_outlet_pratio))
+            bounds = tuple(float(v) for v in rows[i].inlet_to_outlet_pratio)
+            pressure_ratio_ranges.append(bounds)
+            pressure_ratio_guess.append(float(np.mean(bounds)))
 
         print("Looping to converge massflow")
         past_err = -100.0
@@ -509,36 +511,39 @@ class TurbineSpool:
         while (np.abs((err - past_err) / err) > 0.05) and (loop_iter < 10):
             if len(pressure_ratio_ranges) == 1: # Single stage, use minimize scalar 
                 if self.outlet.static_defined:
-                    minimize_scalar(
+                    x = minimize_scalar(
                         fun=balance_loop,
                         args=(rows, self.inlet.P0, self.outlet.P),
                         bounds=pressure_ratio_ranges[0],
-                        tol=1e-3,
+                        tol=1e-4,
                         method="bounded")
+                    print(x)
                 else:
-                    minimize_scalar(
+                    x = minimize_scalar(
                         fun=balance_loop,
                         args=(rows, self.inlet.P0, self.outlet.P0),
                         bounds=pressure_ratio_ranges[0],
-                        tol=1e-3,
+                        tol=1e-4,
                         method="bounded")
             else:   # Multiple stages, use slsqp
                 if self.outlet.static_defined:
-                    fmin_slsqp(
+                    x = fmin_slsqp(
                         func=balance_loop,
                         args=(rows, self.inlet.P0, self.outlet.P),
                         bounds=pressure_ratio_ranges,
                         x0=pressure_ratio_guess,
-                        epsilon=1e-3,
-                        iter=100)
+                        epsilon=1e-4,
+                        iter=200)
+                    pressure_ratio_guess = x.tolist()
                 else:
-                    fmin_slsqp(
+                    x = fmin_slsqp(
                         func=balance_loop,
                         args=(rows, self.inlet.P0, self.outlet.P0),
                         bounds=pressure_ratio_ranges,
                         x0=pressure_ratio_guess,
-                        epsilon=1e-3,
-                        iter=100)
+                        epsilon=1e-4,
+                        iter=200)
+                    pressure_ratio_guess = x.tolist()
 
             # Adjust inlet to match massflow found at first blade row
             self.inlet.massflow = (np.linspace(0, 1, self.num_streamlines) * rows[1].total_massflow_no_coolant)
@@ -600,7 +605,9 @@ class TurbineSpool:
 
         Pratio_Total_Total = np.mean(self.inlet.P0 / blade_rows[-2].P0)
         Pratio_Total_Static = np.mean(self.inlet.P0 / blade_rows[-2].P)
-        FlowFunction = np.mean(massflow * np.sqrt(self.inlet.T0) * self.inlet.P0 / 1000)
+        # Use scalarized inlet conditions to avoid shape mismatches with per-row massflow
+        flow_fn_massflow = float(np.mean(massflow)) if massflow else 0.0
+        FlowFunction = flow_fn_massflow * np.sqrt(self.inlet.T0.mean()) * float(np.mean(self.inlet.P0)) / 1000
         CorrectedSpeed = self.rpm * np.pi / 30 / np.sqrt(self.inlet.T0.mean())
         EnergyFunction = (
             (self.inlet.T0 - blade_rows[-2].T0)
