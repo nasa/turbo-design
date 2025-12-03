@@ -7,15 +7,21 @@ from cantera import Solution
 from pathlib import Path
 import pandas as pd
 import pickle
-from read_overall_data import load_overall_data, load_blade_counts
+from read_overall_data import load_overall_data, load_blade_counts, compute_entropy_rise
 # Geometry Import 
 
 e3_hpc = pickle.load(open(Path(__file__).resolve().parent / 'e3_hpc_processed.pkl','rb'))
 hub = e3_hpc['hub']
 shroud = e3_hpc['shroud']
 
-excel_data = load_overall_data(Path(__file__).resolve().parent / 'E3_HPC_Overall_Data.xlsx')
+excel_data = load_overall_data(
+    Path(__file__).resolve().parent / 'E3_HPC_Overall_Data.xlsx',
+    sheet_name=None,
+    loss_sheet_name="Detailed Report Data",
+    convert_units=True,
+)
 blade_counts = load_blade_counts(Path(__file__).resolve().parent / 'E3_HPC_Overall_Data.xlsx')
+
 
 P0 = excel_data['inlet']["Inlet Pt"].mean()
 T0 = excel_data['inlet']["TT Exit"].mean()
@@ -25,6 +31,7 @@ P0_Ratio = 1.0  # placeholder until defined from data
 # Fluid
 fluid = Solution('air.yaml')
 fluid.TP = T0, P0 # Use pascal for cantera
+entropy_calcs = compute_entropy_rise(Path(__file__).resolve().parent / 'E3_HPC_Overall_Data.xlsx',fluid=fluid)
 
 print(f"Coefficient of Pressure [J/Kg] {fluid.cp:0.4f}")
 #%% Defining the Inlet
@@ -34,25 +41,29 @@ outlet = Outlet(num_streamlines=n_streamlines)
 outlet.init_total(P0=excel_data['stator10']['PT Exit'].mean(),percent_radii=[0.5])
 #%% Define Blade Rows, processed data is already in mm, hub is already in mm 
 cax_arr = [] 
-for blade in e3_hpc['blades']: # There should be 21 blades starting with igv and moving into rotor stator pairs
-    cax = (blade[0,:,0].max()-blade[0][0,:,0].min())/1000
-    cax_arr.append(cax)
+# There should be 21 blades starting with igv and moving into rotor stator pairs
+for blade in e3_hpc['blades']:
+    ss = blade[0]; ps = blade[1]    
+    cax1 = (ss[0,:,0].max()-ss[0,:,0].min())/1000
+    cax2 = (ps[0,:,0].max()-ps[0,:,0].min())/1000
+    cax_arr.append(max([cax1,cax2]))
     
 hub_exit_locations = []; shroud_exit_locations = []
-# Get the exit locations
-for i in range(1,len(e3_hpc['rotor_stator'])):
-    prev_blade = e3_hpc['rotor_stator'][i-1]
-    blade = e3_hpc['rotor_stator'][i]
-    
-    hub_exit = ((prev_blade[0,:,0].max() + blade[0,:,0].min())/2  - hub[:,0].min()) / (hub[:,0].max() - hub[:,0].min())
+
+# Get the exit locations as a percentage along the hub and shroud 
+for i in range(1,len(e3_hpc['blades'])):
+    prev_blade = e3_hpc['blades'][i-1]
+    blade = e3_hpc['blades'][i]
+
+    hub_exit = ((prev_blade[0][0,:,0].max() + blade[0][0,:,0].min())/2  - hub[:,0].min()) / (hub[:,0].max() - hub[:,0].min())
     hub_exit_locations.append(hub_exit)
     
-    shroud_exit = ((prev_blade[-1,:,0].max() + blade[-1,:,0].min())/2  - shroud[:,0].min()) / (shroud[:,0].max() - shroud[:,0].min())
+    shroud_exit = ((prev_blade[0][-1,:,0].max() + blade[0][-1,:,0].min())/2  - shroud[:,0].min()) / (shroud[:,0].max() - shroud[:,0].min())
     shroud_exit_locations.append(shroud_exit)
 
-lastblade = e3_hpc['rotor_stator'][-1]
-hub_exit_locations.append((lastblade[0,:,0].max()  - hub[:,0].min()) / (hub[:,0].max() - hub[:,0].min()))
-shroud_exit_locations.append((lastblade[-1,:,0].max()  - shroud[:,0].min()) / (shroud[:,0].max() - shroud[:,0].min()))
+lastblade = e3_hpc['blades'][-1]
+hub_exit_locations.append((lastblade[0][0,:,0].max()  - hub[:,0].min()) / (hub[:,0].max() - hub[:,0].min()))
+shroud_exit_locations.append((lastblade[0][-1,:,0].max()  - shroud[:,0].min()) / (shroud[:,0].max() - shroud[:,0].min()))
 
 # Axial location is a percentage along the hub where row exit is defined
 IGV1 = BladeRow(row_type=RowType.Stator, hub_location=hub_exit_locations[0],shroud_location=shroud_exit_locations[0],stage_id=1)
@@ -144,35 +155,74 @@ rotor10.axial_chord = cax_arr[19]
 stator10.axial_chord = cax_arr[20]
 
 # Metal exit angles pulled from Excel Beta column
-def _set_beta2_metal(row: BladeRow, key: str):
+def set_beta2_metal(row: BladeRow, key: str):
     df = excel_data.get(key)
-    if df is None or "Beta" not in df.columns:
+    if df is None:
         return
-    beta_vals = pd.to_numeric(df["Beta"], errors="coerce").tolist()
+    beta_col = None
+    if "Beta.1" in df.columns:  # exit beta if duplicated
+        beta_col = "Beta.1"
+    elif "Beta" in df.columns:
+        beta_col = "Beta"
+    if beta_col is None:
+        return
+    beta_vals = pd.to_numeric(df[beta_col], errors="coerce").tolist()
     if len(beta_vals) >= n_streamlines:
         row.beta2_metal = beta_vals[:n_streamlines]
 
-_set_beta2_metal(IGV1, "inlet")
-_set_beta2_metal(rotor1, "rotor1")
-_set_beta2_metal(stator1, "stator1")
-_set_beta2_metal(rotor2, "rotor2")
-_set_beta2_metal(stator2, "stator2")
-_set_beta2_metal(rotor3, "rotor3")
-_set_beta2_metal(stator3, "stator3")
-_set_beta2_metal(rotor4, "rotor4")
-_set_beta2_metal(stator4, "stator4")
-_set_beta2_metal(rotor5, "rotor5")
-_set_beta2_metal(stator5, "stator5")
-_set_beta2_metal(rotor6, "rotor6")
-_set_beta2_metal(stator6, "stator6")
-_set_beta2_metal(rotor7, "rotor7")
-_set_beta2_metal(stator7, "stator7")
-_set_beta2_metal(rotor8, "rotor8")
-_set_beta2_metal(stator8, "stator8")
-_set_beta2_metal(rotor9, "rotor9")
-_set_beta2_metal(stator9, "stator9")
-_set_beta2_metal(rotor10, "rotor10")
-_set_beta2_metal(stator10, "stator10")
+set_beta2_metal(IGV1, "inlet")
+set_beta2_metal(rotor1, "rotor1")
+set_beta2_metal(stator1, "stator1")
+set_beta2_metal(rotor2, "rotor2")
+set_beta2_metal(stator2, "stator2")
+set_beta2_metal(rotor3, "rotor3")
+set_beta2_metal(stator3, "stator3")
+set_beta2_metal(rotor4, "rotor4")
+set_beta2_metal(stator4, "stator4")
+set_beta2_metal(rotor5, "rotor5")
+set_beta2_metal(stator5, "stator5")
+set_beta2_metal(rotor6, "rotor6")
+set_beta2_metal(stator6, "stator6")
+set_beta2_metal(rotor7, "rotor7")
+set_beta2_metal(stator7, "stator7")
+set_beta2_metal(rotor8, "rotor8")
+set_beta2_metal(stator8, "stator8")
+set_beta2_metal(rotor9, "rotor9")
+set_beta2_metal(stator9, "stator9")
+set_beta2_metal(rotor10, "rotor10")
+set_beta2_metal(stator10, "stator10")
+
+# Assign loss models from Excel Loss column where available
+def set_loss_model(row: BladeRow, key: str):
+    df = excel_data.get(key)
+    if df is None or "Loss" not in df.columns:
+        return
+    loss_vals = pd.to_numeric(df["Loss"], errors="coerce").to_numpy()
+    if loss_vals.size == 0:
+        return
+    row.loss_model = FixedPressureLoss(loss_vals)
+
+set_loss_model(IGV1, "inlet")
+set_loss_model(rotor1, "rotor1")
+set_loss_model(stator1, "stator1")
+set_loss_model(rotor2, "rotor2")
+set_loss_model(stator2, "stator2")
+set_loss_model(rotor3, "rotor3")
+set_loss_model(stator3, "stator3")
+set_loss_model(rotor4, "rotor4")
+set_loss_model(stator4, "stator4")
+set_loss_model(rotor5, "rotor5")
+set_loss_model(stator5, "stator5")
+set_loss_model(rotor6, "rotor6")
+set_loss_model(stator6, "stator6")
+set_loss_model(rotor7, "rotor7")
+set_loss_model(stator7, "stator7")
+set_loss_model(rotor8, "rotor8")
+set_loss_model(stator8, "stator8")
+set_loss_model(rotor9, "rotor9")
+set_loss_model(stator9, "stator9")
+set_loss_model(rotor10, "rotor10")
+set_loss_model(stator10, "stator10")
 
 gamma = 1.4
 Cp = gamma/(gamma-1) * 287.15
@@ -180,42 +230,6 @@ Cp = gamma/(gamma-1) * 287.15
 rows = [IGV1,rotor1,stator1,rotor2,stator2,rotor3,stator3,rotor4,stator4,
         rotor5,stator5,rotor6,stator6,rotor7,stator7,rotor8,stator8,
         rotor9,stator9,rotor10,stator10]
-
-for row in [inlet, *rows, outlet]:
-    row.gamma = gamma
-    row.Cp = Cp
-    row.coolant = Coolant(T0=293,P0=101325,massflow_percentage=0)
-
-# These are all guessed values
-IGV1.loss_model = FixedPressureLoss(0.0509)
-rotor1.loss_model = FixedPressureLoss(0.087)
-stator2.loss_model = FixedPressureLoss(0.0735)
-rotor2.loss_model = FixedPressureLoss(0.07225)
-stator3.loss_model = FixedPressureLoss(0.06675)
-rotor3.loss_model = FixedPressureLoss(0.06675)
-stator3.loss_model = FixedPressureLoss(0.0636)
-rotor3.loss_model = FixedPressureLoss(0.0619)
-
-rotor4.loss_model = FixedPressureLoss(0.0559)
-stator4.loss_model = FixedPressureLoss(0.8024)
-
-rotor5.loss_model = FixedPressureLoss(0.089475) 
-stator5.loss_model = FixedPressureLoss(0.056125)
-
-rotor6.loss_model = FixedPressureLoss(0.0564)
-stator6.loss_model = FixedPressureLoss(0.0565)
-
-rotor7.loss_model = FixedPressureLoss(0.0635)
-stator7.loss_model = FixedPressureLoss(0.0616)
-
-rotor8.loss_model = FixedPressureLoss(0.06696)
-stator8.loss_model = FixedPressureLoss(0.0673)
-
-rotor9.loss_model = FixedPressureLoss(0.0698)
-stator9.loss_model = FixedPressureLoss(0.0703)
-
-rotor10.loss_model = FixedPressureLoss(0.0728)
-stator10.loss_model = FixedPressureLoss(0.0935)
 
 hub_m = hub/1000
 shroud_m = shroud/1000
@@ -232,7 +246,8 @@ spool = TurbineSpool(
             rows=rows,
             rpm=12400,
             num_streamlines=n_streamlines,
-            fluid=None)
+            fluid=fluid)
+
 spool.massflow_constraint = MassflowConstraint.PressureBalance # Fixes the exit angle and changes degree of reaction
 # spool.plot_geometry()
 spool.adjust_streamlines = False

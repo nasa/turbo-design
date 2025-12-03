@@ -1,3 +1,4 @@
+from turbodesign.arrayfuncs import convert_to_ndarray
 from .losstype import LossBaseClass
 from ..enums import LossType
 import numpy.typing as npt 
@@ -6,24 +7,19 @@ if TYPE_CHECKING:
     from ..bladerow import BladeRow  # for type hints only
 
 class FixedPressureLoss(LossBaseClass):
-    pressure_loss:float
+    """Fixed pressure loss coefficient (scalar or spanwise array)."""
+
+    pressure_loss: npt.NDArray
     
-    def __init__(self,pressure_loss:float):
-        """Fixed Pressure Loss
-        """
+    def __init__(self, pressure_loss: float | npt.ArrayLike):
         super().__init__(LossType.Pressure)
-        self.pressure_loss = pressure_loss
-    
+        self.pressure_loss = convert_to_ndarray(pressure_loss)
     
     def __call__(self, row: "BladeRow", upstream: "BladeRow") -> npt.NDArray:
-        """Outputs the fixed Pressure Loss
-        
-        Args:
-            upstream (BladeRow): Upstream blade row
-            row (BladeRow): downstream blade row
-
-        Returns:
-            float: Pressure Loss
-        """
-        Yp = row.r*0+self.pressure_loss
-        return Yp
+        """Outputs the fixed pressure loss."""
+        loss = self.pressure_loss
+        if loss.size == 1:
+            loss = loss * npt.ones_like(row.r) # type: ignore
+        elif loss.shape != row.r.shape:
+            loss = npt.asarray(loss).reshape(row.r.shape) # type: ignore
+        return loss
