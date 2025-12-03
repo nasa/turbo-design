@@ -240,7 +240,7 @@ passage = Passage(hub_m[:,0],hub_m[:,1],
 
 spool = TurbineSpool(
             passage=passage,
-            massflow=20,
+            massflow=54,
             inlet=inlet,
             outlet=outlet,
             rows=rows,
@@ -252,6 +252,6 @@ spool.massflow_constraint = MassflowConstraint.PressureBalance # Fixes the exit 
 # spool.plot_geometry()
 spool.adjust_streamlines = False
 spool.solve() # This also initializes streamlines
-spool.export_properties("eee_results.json")
+spool.export_properties("E3-HPC-Results.json")
 spool.plot()
 spool.plot_velocity_triangles()
