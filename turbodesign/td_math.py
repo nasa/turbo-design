@@ -410,7 +410,7 @@ def T0_coolant_weighted_average(row:BladeRow) -> npt.NDArray:
                         /(massflow[1:]*Cp + massflow_coolant*Cpc)
             dT0[1:] = T0_new - row.T0[1:]
             dT0[0] = dT0[1]
-        else:
+        else:   # Rotor use relative total temperature
             T0R = row.T0R
             T0R_new = T0R.copy()
             Cp = row.Cp

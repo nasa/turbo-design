@@ -1,1 +1,1 @@
-from .losstype import LossType, LossBaseClass, CompositeLossModel
+from .losstype import LossType, LossBaseClass

@@ -9,7 +9,7 @@ from cantera import Solution, composite
 from .coolant import Coolant
 from pyturbo.helper import line2D
 from pyturbo.aero.airfoil2D import Airfoil2D
-from .loss import LossBaseClass, CompositeLossModel
+from .loss import LossBaseClass
 from .passage import Passage
     
 
@@ -94,14 +94,15 @@ class BladeRow:
     T: npt.NDArray = field(default_factory=lambda: np.array([0]))
     T_is: npt.NDArray = field(default_factory=lambda: np.array([0]))
     rho: npt.NDArray = field(default_factory=lambda: np.array([0]))
-
+    entropy_rise:npt.NDArray = field(default_factory=lambda: np.array([0]))
+    
     # Related to streamline curvature
     phi:npt.NDArray = field(default_factory=lambda: np.array([0]))                      # Inclination angle x,r plane. AY td2.f
     rm: npt.NDArray = field(default_factory=lambda: np.array([0]))                      # Curvature
     incli_curve_radii: npt.NDArray = field(default_factory=lambda: np.array([0]))       # radius at which curvature was evaluated
     mprime:npt.NDArray = field(default_factory=lambda: np.array([0]))                   # Mprime distance
     
-    Yp: float = 0                   # Pressure loss
+    Yp: npt.NDArray = field(default_factory=lambda: np.array([0]))                       # Pressure loss
     blockage:float = 0 
     power:float = 0                 # Watts 
     power_mean:float = 0
@@ -125,7 +126,6 @@ class BladeRow:
     _tip_clearance:float = 0 # Clearance as a percentage of span or blade height
 
     _inlet_to_outlet_pratio = [0.06,0.95]
-    location:float = 0 # Percent along hub where bladerow is defined
     shroud_location:float = 0
     
     @property
@@ -352,7 +352,7 @@ class BladeRow:
             self.shroud_location = shroud_location
         else:
             self.shroud_location = hub_location
-        self.Yp = 0 # Loss
+        self.Yp = np.array([0]) # Loss
         self.stage_id = stage_id
 
     # Backwards-compatible alias
@@ -433,14 +433,6 @@ class BladeRow:
         """
         if isinstance(model, LossBaseClass):
             self.loss_function = model
-            return
-
-        if isinstance(model, Sequence):
-            if len(model) == 0:
-                raise ValueError("At least one loss model must be provided.")
-            if not all(isinstance(m, LossBaseClass) for m in model):
-                raise TypeError("All entries must inherit LossBaseClass.")
-            self.loss_function = CompositeLossModel(model)
             return
 
         raise TypeError("Loss models must inherit LossBaseClass.")
@@ -554,6 +546,8 @@ def interpolate_streamline_radii(row:BladeRow,passage:Passage,num_streamlines:in
     row.beta1_metal_radii = streamline_percent_length
     row.beta2_metal_radii = streamline_percent_length
     
+    row.mprime = interpolate_quantities(row.mprime,row.percent_hub_shroud,streamline_percent_length)
+    
     if type(row.percent_hub_shroud) == Field: 
         row.percent_hub_shroud = streamline_percent_length
     else:
@@ -593,12 +587,7 @@ def interpolate_streamline_radii(row:BladeRow,passage:Passage,num_streamlines:in
     row.T = interpolate_quantities(row.T,row.percent_hub_shroud,streamline_percent_length)
     row.T_is = interpolate_quantities(row.T_is,row.percent_hub_shroud,streamline_percent_length)
     row.rho = interpolate_quantities(row.rho,row.percent_hub_shroud,streamline_percent_length)
-
-    # if row.row_type == RowType.Inlet:
-    #     row.P0_fun = interp1d(row.percent_hub_shroud,row.P0) 
-    #     row.T0_fun = interp1d(row.percent_hub_shroud,row.T0) 
-    # elif row.row_type == RowType.Outlet:
-    #     row.P_fun = interp1d(row.percent_hub_shroud,row.P) 
+    row.entropy_rise = interpolate_quantities(row.entropy_rise,row.percent_hub_shroud,streamline_percent_length)
 
     return row
 

@@ -1,5 +1,6 @@
 import pickle, os
 from typing import Dict
+import numpy.typing as npt
 from ...bladerow import BladeRow, sutherland
 from ...lossinterp import LossInterp
 from ...enums import RowType, LossType
@@ -34,7 +35,7 @@ class CraigCox(LossBaseClass):
         self.C = 1/(200*32.2*778.16) # https://www.sciencedirect.com/science/article/pii/S2666202721000574 
     
     
-    def __call__(self,row:BladeRow, upstream:BladeRow) -> float:
+    def __call__(self,row:BladeRow, upstream:BladeRow) -> npt.NDArray:
         """Craig and Cox uses the enthalpy definition of loss to calculate the loss of a turbine stage. 
         
         Note: 
@@ -67,11 +68,11 @@ class CraigCox(LossBaseClass):
             - (\delta x_p)_m from Figure 8
 
         Args:
-            upstream (BladeRow): Upstream blade row
-            row (BladeRow): downstream blade row
+            row (BladeRow): Downstream blade row being evaluated.
+            upstream (BladeRow): Upstream blade row providing inlet conditions.
 
         Returns:
-            float: Stage Efficiency
+            numpy.ndarray | int: Stage efficiency; returns 0 for stators, spanwise array for rotors.
         """
         if row.row_type == RowType.Stator:
             return 0
@@ -191,5 +192,5 @@ class CraigCox(LossBaseClass):
         
         # According to Equation 3, Group 1 loss is an enthalpy loss Cp*T0. Need to convert to Pressure Loss
         eta_total = (upstream.T0.mean() - row.T0.mean())/(upstream.T0.mean()-(row.T0.mean()-T0_Loss))
-        return eta_total
+        return eta_total + row.r*0
         

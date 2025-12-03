@@ -1,5 +1,6 @@
 from .losstype import LossBaseClass
 from ..enums import LossType
+import numpy.typing as npt 
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from ..bladerow import BladeRow  # for type hints only
@@ -14,7 +15,7 @@ class FixedPressureLoss(LossBaseClass):
         self.pressure_loss = pressure_loss
     
     
-    def __call__(self, row: "BladeRow", upstream: "BladeRow") -> float:
+    def __call__(self, row: "BladeRow", upstream: "BladeRow") -> npt.NDArray:
         """Outputs the fixed Pressure Loss
         
         Args:
@@ -24,4 +25,5 @@ class FixedPressureLoss(LossBaseClass):
         Returns:
             float: Pressure Loss
         """
-        return self.pressure_loss
+        Yp = row.r*0+self.pressure_loss
+        return Yp

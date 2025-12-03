@@ -4,7 +4,8 @@ from ...enums import RowType, LossType
 from typing import Any, Callable, Dict, List, Union 
 from ...bladerow import BladeRow
 from scipy.stats import linregress
-import numpy as np 
+import numpy as np
+import numpy.typing as npt
 from ..losstype import LossBaseClass
 
 
@@ -19,44 +20,40 @@ class TD2(LossBaseClass):
     def LossType(self):
         return self._loss_type
     
-    def __call__(self,row:BladeRow, upstream:BladeRow) -> float:
-        """TD2-2_Manual equations 12a and 12b. This is the loss equation used inside original TD2.
-        #! Wrong very wrong from the book definition
-        Total Pressure Loss (Y) = (P_in - P_ex) / (P_ex - P_ex,static)
-        Where P_in and P_ex are total quantities 
-        
-        Authors Comments:
-            Given the assumptions, the use of this loss correlation should be limited to starting a solution. 
+    def __call__(self,row:BladeRow, upstream:BladeRow) -> npt.NDArray:
+        """TD2-2 manual equations 12a/12b for total pressure loss coefficient.
+
+        The implementation mirrors the original TD2 code path, which differs from
+        the textbook definition but preserves legacy behavior. Use primarily for
+        initial estimates.
 
         Assumptions:
-            1. Rotor and stator loss coefficients were equal when their relative design requirements are identical 
-            2. Stage reaction at meanline is 50%
-            3. Axial velocity was constant through the stage
-            4. Stator exit Mach number is 0.8 
+            1. Rotor and stator loss coefficients are equal when design requirements match.
+            2. Stage reaction at meanline is 50%.
+            3. Axial velocity is constant through the stage.
+            4. Stator exit Mach number is 0.8.
 
         Args:
-            beta_in (float): Inlet flow angle in degrees. 
-            beta_ex (float): Exit flow angle in degrees.
-            V_ratio (float): Ratio if inlet velocity magnitude with relative exit velocity magnitude
+            row (BladeRow): Blade row being evaluated.
+            upstream (BladeRow): Upstream blade row supplying inlet conditions.
 
         Returns:
-            float: Total Pressure loss coefficient
+            numpy.ndarray: Total pressure loss coefficient repeated across ``row.r``.
         """
-        beta_in = row.beta1.mean() # absolute flow angle entering the blade row
-        beta_ex = row.beta2.mean()  # flow angle leaving the blade row
+        beta_in = row.beta1.mean()  # Inlet flow angle at the mean radius
+        beta_ex = row.beta2.mean()  # Exit flow angle at the mean radius
         if row.row_type == RowType.Stator:
             V_ratio = row.V.mean() / upstream.V.mean()    # Vin/Vex Equation 12a and 12b. Relative to Stator
         elif row.row_type == RowType.Rotor:
             V_ratio = row.W.mean() /upstream.W.mean()     # Vin/Vex Equation 12a and 12b. Relative to Rotor 
 
         a = [0.055, 0.15, 0.6, 0.6, 0.8, 0.03, 0.157255, 3.6] # Coefficients from pw3hp1.json
-        # mu should be in 
         if V_ratio < a[2]: 
             Y = abs(math.tan(beta_in) - math.tan(beta_ex)) / (a[3] + a[4]*math.cos(beta_ex)) * (a[5] + a[6]*V_ratio**a[7])
         else:
             Y = abs(math.tan(beta_in) - math.tan(beta_ex)) / (a[3] + a[4]*math.cos(beta_ex)) * (a[0] + a[1]*(V_ratio - a[2]))
 
-        return Y
+        return Y+row.r*0
     
 class TD2_Reynolds_Correction(LossBaseClass):
     
@@ -69,19 +66,18 @@ class TD2_Reynolds_Correction(LossBaseClass):
     def LossType(self):
         return self._loss_type
     
-    def __call__(self,upstream:BladeRow, row:BladeRow) -> float:
-        """TD2_Pressure_Loss with Reynolds Correction Factor. This is from NASA SP-290 (Vol.1, p.62)
+    def __call__(self,upstream:BladeRow, row:BladeRow) -> npt.NDArray:
+        """Apply TD2 Reynolds correction (NASA SP-290 Vol.1, p.62).
     
-        The correlations come from td2-2.f Line 2771 
-        WYECOR(I)=WYECOR(I)*(0.35+0.65*18.21)/(0.35+0.65*(FLWP/VISC/RST(MEAN))**(0.2))
-        
-        I have assumed that 18.21 is some reference reynolds number. There is very little documentation on what these numbers are. The entire fortran code is frustrating and probably should never have happened in the first place. 
+        The correction follows td2-2.f line 2771:
+        WYECOR = WYECOR*(0.35+0.65*18.21)/(0.35+0.65*(FLWP/VISC/RST(MEAN))**0.2)
 
         Args:
-            row (BladeRow): Current Blade Row
+            upstream (BladeRow): Upstream blade row supplying inlet conditions.
+            row (BladeRow): Blade row receiving the correction.
         
         Returns:
-            float: Total Pressure loss coefficient
+            numpy.ndarray: Reynolds-corrected total pressure loss coefficient.
         """
         Y = self.TD2(upstream,row)
         A = 0.35

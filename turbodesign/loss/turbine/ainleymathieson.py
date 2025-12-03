@@ -1,5 +1,6 @@
 import pickle, os
 from typing import Dict
+import numpy.typing as npt
 from ...bladerow import BladeRow, sutherland
 from ...lossinterp import LossInterp
 from ...enums import RowType, LossType
@@ -37,7 +38,7 @@ class AinleyMathieson(LossBaseClass):
         with open(path.absolute(),'rb') as f:
             self.data = pickle.load(f) # type: ignore
             
-    def __call__(self,row:BladeRow, upstream:BladeRow) -> float:
+    def __call__(self,row:BladeRow, upstream:BladeRow) -> npt.NDArray:
         """Ainley Mathieson predicts the pressure loss of a turbine nozzle or rotor. Since these correlations are from Cascade experiments, the user should be familar with the reynolds and mach number requirements for each equation and figure. Using something outside the bounds can give inaccuare approximations of loss. Additionally these correlations were done on unoptimized blades so efficiencies maybe lower than what's attainable. Massflow can also be affected because exit P0 is affected. 
         
         This code will attempt use the correct equations and warn the user if mach number is out of range.
@@ -47,11 +48,11 @@ class AinleyMathieson(LossBaseClass):
             beta: blade angle relative to axial direction 
             
         Args:
-            upstream (BladeRow): Upstream blade row
-            row (BladeRow): downstream blade row
+            row (BladeRow): Blade row being evaluated.
+            upstream (BladeRow): Upstream blade row providing inlet conditions.
 
         Returns:
-            float: Pressure Loss at zero incidence 
+            numpy.ndarray: Pressure loss at zero incidence matching ``row.r``.
         """
         Kp = 12300 # Ft / (pdl C); 1 pdl = 0.138254954376 N :(
         At = row.throat
@@ -119,5 +120,5 @@ class AinleyMathieson(LossBaseClass):
         Yp_i0 = (Yp_beta0 + (beta1/alpha2)**2 *(Yp_beta1_eq_alpha2 - Yp_beta0)) *(t_c/0.2)**(-beta1/alpha2) # Fig 4 and Eqn 5
         
         Yt = Yp_i0 + Y_secondary_clearance 
-        return Yt   # Profile loss at zero incidence 
+        return Yt+row.r*0   # Profile loss at zero incidence 
         
