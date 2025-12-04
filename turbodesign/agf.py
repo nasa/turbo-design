@@ -188,48 +188,131 @@ class AGF_Setup:
 
 def read_agf(file_path: str) -> dict:
     """
-    Read an AGF file and return its contents in structured form.
+    Parse an AGF file and reconstruct the data classes used to build it.
 
-    Returns a dict with keys: 'header', 'sections', 'endwall', 'raw'.
+    Returns:
+        dict with keys:
+            settings (Settings)
+            clearance (Clearance)
+            domain (Domain)
+            inlet (Inlet_bcs)
+            outlet (Outlet_bcs)
+            hub (np.ndarray): shape (nht, 2) of x, r (hub)
+            shroud (np.ndarray): shape (nht, 2) of x, r (shroud)
+            sections (np.ndarray): shape (n_sections, npts, 3) of x, rth, r
     """
     with open(file_path, "r") as f:
-        raw = f.read()
+        lines = [ln.strip() for ln in f.readlines()]
 
-    data = {"header": {}, "sections": [], "endwall": [], "raw": raw}
-    lines = raw.splitlines()
-    section = None
-    for line in lines:
-        if line.startswith("*SECTION"):
-            if section:
-                data["sections"].append(section)
-            section = {"header": line, "points": []}
-        elif section and line.strip() and line[0].isdigit():
-            try:
-                parts = [float(p) for p in line.split()[:3]]
-                section["points"].append(parts)
-            except Exception:
-                continue
-        elif section is None and "=" in line:
-            parts = line.split("=")
-            if len(parts) == 2:
-                key = parts[0].strip("[] \t")
-                val = parts[1].strip()
-                data["header"][key] = val
+    def find_after(marker: str) -> List[str]:
+        for idx, ln in enumerate(lines):
+            if ln.startswith(marker):
+                return lines[idx + 1].split()
+        return []
 
-    if section:
-        data["sections"].append(section)
+    # Settings and counts
+    nb_vals = find_after("*NBLADE")
+    nblades, npts, nspans, ity, iym, tcls, hcls, lete, isplit = [int(float(v)) for v in nb_vals]
 
-    if "[endwall]" in raw:
-        after = raw.split("[endwall]")[1]
-        for ln in after.splitlines():
-            parts = [p for p in ln.split() if p]
+    units_vals = find_after("*UNITS")
+    _, nprof, ifang, hbl, tbl, tfree, lfree = units_vals
+    nprof = int(nprof)
+    ifang = int(ifang)
+
+    settings = Settings(
+        nprof=nprof,
+        ifang=ifang,
+        hbl=float(hbl),
+        tbl=float(tbl),
+        nblades=nblades,
+        npts=npts,
+        nspans=nspans,
+        ity=int(ity),
+        iym=int(iym),
+        tcls=int(tcls),
+        hcls=int(hcls),
+        lete=int(lete),
+        isplit=int(isplit),
+    )
+
+    rpm_vals = find_after("*RPMS")
+    rpm, gamma, psout, twall, molwt = [float(v) for v in rpm_vals]
+    outlet = Outlet_bcs(rpm=rpm, gamma=gamma, psout=psout, twall=twall, molwt=molwt)
+
+    pspan_vals = find_after("*PSPAN")
+    pspan, machin, ptin, ttin, alpin, phiin = [float(v) for v in pspan_vals]
+    inlet = Inlet_bcs(ptin=ptin, ttin=ttin, pspan=pspan, machin=machin, alpin=alpin, phiin=phiin)
+
+    xhup_vals = find_after("*XHUP")
+    xhup, rhup, xtup, rtup = [float(v) for v in xhup_vals]
+    xhdw_vals = find_after("*XHDW")
+    xhdw, rhdw, xtdw, rtdw = [float(v) for v in xhdw_vals]
+    domain = Domain(xhup=xhup, rhup=rhup, xtup=xtup, rtup=rtup, xhdw=xhdw, rhdw=rhdw, xtdw=xtdw, rtdw=rtdw)
+
+    tlecl_vals = find_after("*TLECL")
+    hlecl_vals = find_after("*HLECL")
+    clearance = Clearance(
+        tlecl=float(tlecl_vals[0]) if tlecl_vals else 0.0,
+        tmccl=float(tlecl_vals[1]) if len(tlecl_vals) > 1 else 0.0,
+        ttecl=float(tlecl_vals[2]) if len(tlecl_vals) > 2 else 0.0,
+        hlecl=float(hlecl_vals[0]) if hlecl_vals else 0.0,
+        hmccl=float(hlecl_vals[1]) if len(hlecl_vals) > 1 else 0.0,
+        htecl=float(hlecl_vals[2]) if len(hlecl_vals) > 2 else 0.0,
+    )
+
+    nht_vals = find_after("*NHT")
+    if nht_vals:
+        settings.nht = int(float(nht_vals[0]))
+
+    # Endwall parsing
+    hub_pts: List[List[float]] = []
+    shroud_pts: List[List[float]] = []
+    if "*ENDWALL" in lines:
+        start = lines.index("*ENDWALL") + 2  # skip header and column line
+        idx = start
+        while idx < len(lines) and not lines[idx].startswith("*SECTION"):
+            parts = [p for p in lines[idx].split() if p]
             if len(parts) == 4:
-                try:
-                    data["endwall"].append([float(x) for x in parts])
-                except Exception:
-                    pass
+                xl, rl, xu, ru = [float(p) for p in parts]
+                hub_pts.append([xl, rl])
+                shroud_pts.append([xu, ru])
+            idx += 1
+    hub_arr = np.array(hub_pts) if hub_pts else np.zeros((0, 2))
+    shroud_arr = np.array(shroud_pts) if shroud_pts else np.zeros((0, 2))
 
-    return data
+    # Sections parsing
+    sections: List[np.ndarray] = []
+    idx = 0
+    while idx < len(lines):
+        line = lines[idx]
+        if line.startswith("*SECTION"):
+            idx += 1  # - SECTION - line
+            section_info = lines[idx].split()
+            npts_section = int(section_info[-1])
+            idx += 3  # skip offset/cone headers to column header
+            idx += 1  # column header line
+            pts = []
+            for _ in range(npts_section):
+                parts = lines[idx].split()
+                if len(parts) >= 3:
+                    pts.append([float(parts[0]), float(parts[1]), float(parts[2])])
+                idx += 1
+            sections.append(np.array(pts))
+            continue
+        idx += 1
+
+    sections_arr = np.array(sections) if sections else np.zeros((0, 0, 3))
+
+    return {
+        "settings": settings,
+        "clearance": clearance,
+        "domain": domain,
+        "inlet": inlet,
+        "outlet": outlet,
+        "hub": hub_arr,
+        "shroud": shroud_arr,
+        "sections": sections_arr,
+    }
 
 
 def plot_airfoil_inputs(nsections: int, npts: int):

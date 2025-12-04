@@ -6,7 +6,7 @@ Rotor 35 1 stage HPC
 
 from turbodesign import TurbineSpool, Inlet, RowType, BladeRow, Passage, Outlet, PassageType
 from turbodesign.enums import MassflowConstraint
-from turbodesign import Coolant
+from turbodesign import read_agf
 from turbodesign.loss.fixedpressureloss import FixedPressureLoss
 from turbodesign.deviation.fixed_deviation import FixedDeviation
 import numpy as np
@@ -16,8 +16,10 @@ import pandas as pd
 import pickle
 # Geometry Import 
 
-blade_counts = [36,46]
+blade_counts = {"rotor1": 36, "stator1": 46}
 
+rotor = read_agf(str(Path(__file__).resolve().parent / 'R35.agf'))
+stator = read_agf(str(Path(__file__).resolve().parent / 'S35.agf'))
 P0 = 20.5 * 6894.76 # Pa
 T0 = 518.67/1.8 # K
 M = 0.5 
@@ -62,9 +64,6 @@ hub_exit_locations.append((lastblade[0][0,:,0].max()  - hub[:,0].min()) / (hub[:
 shroud_exit_locations.append((lastblade[0][-1,:,0].max()  - shroud[:,0].min()) / (shroud[:,0].max() - shroud[:,0].min()))
 
 # Axial location is a percentage along the hub where row exit is defined
-IGV1 = BladeRow(row_type=RowType.Stator, hub_location=hub_exit_locations[0],shroud_location=shroud_exit_locations[0],stage_id=1)
-IGV1.num_blades = blade_counts.get("igv", IGV1.num_blades)
-
 rotor1 = BladeRow(row_type=RowType.Rotor, hub_location=hub_exit_locations[1],shroud_location=shroud_exit_locations[1],stage_id=1)
 rotor1.num_blades = blade_counts.get("rotor1", rotor1.num_blades)
 
