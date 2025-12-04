@@ -4,8 +4,8 @@ import numpy as np
 import numpy.typing as npt
 from scipy.interpolate import interp1d
 
-from turbodesign.arrayfuncs import convert_to_ndarray
-from deviation_base import DeviationBaseClass
+from ..arrayfuncs import convert_to_ndarray
+from .deviation_base import DeviationBaseClass
 
 if TYPE_CHECKING:
     from ..bladerow import BladeRow  # for type hints only

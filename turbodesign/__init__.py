@@ -7,13 +7,15 @@ from .coolant import Coolant
 from .lossinterp import LossInterp
 from .passage import Passage
 from .outlet import Outlet
+from .deviation import DeviationBaseClass, FixedDeviation
 
 # turbodesign/__init__.py
 from importlib import import_module
 
 __all__ = [
     "TurbineSpool", "Stage", "Inlet", "Outlet", "BladeRow", "Coolant",
-    "Passage", "RowType", "PassageType", "MassflowConstraint", "LossInterp",
+    "Passage", "RowType", "PassageType", "MassflowConstraint", "LossType",
+    "LossInterp", "DeviationBaseClass", "FixedDeviation",
 ]
 
 _module_map = {
@@ -24,10 +26,13 @@ _module_map = {
     "BladeRow": ("turbodesign.bladerow", "BladeRow"),
     "Coolant": ("turbodesign.coolant", "Coolant"),
     "Passage": ("turbodesign.passage", "Passage"),
+    "LossType": ("turbodesign.enums", "LossType"),
     "RowType": ("turbodesign.enums", "RowType"),
     "PassageType": ("turbodesign.enums", "PassageType"),
     "MassflowConstraint": ("turbodesign.enums", "MassflowConstraint"),
     "LossInterp": ("turbodesign.lossinterp", "LossInterp"),
+    "DeviationBaseClass": ("turbodesign.deviation", "DeviationBaseClass"),
+    "FixedDeviation": ("turbodesign.deviation", "FixedDeviation"),
 }
 
 def __getattr__(name: str):
