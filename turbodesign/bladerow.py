@@ -10,6 +10,7 @@ from .coolant import Coolant
 from pyturbo.helper import line2D
 from pyturbo.aero.airfoil2D import Airfoil2D
 from .loss import LossBaseClass
+from .deviation.deviation_base import DeviationBaseClass
 from .passage import Passage
     
 
@@ -18,6 +19,7 @@ class BladeRow:
     stage_id:int = 0
     row_type: RowType = RowType.Stator
     loss_function:Optional[LossBaseClass]
+    deviation_function: Optional[DeviationBaseClass]
     cutting_line:line2D         # Line perpendicular to the streamline
     rp:float = 0.4              # Degree of Reaction
     

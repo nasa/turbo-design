@@ -2,7 +2,7 @@ from typing import List, Tuple
 import numpy as np
 import numpy.typing as npt 
 import matplotlib.pyplot as plt 
-from agf import Inlet_bcs, Outlet_bcs, Settings, AGF_Setup, Clearance
+from turbodesign.agf import Inlet_bcs, Outlet_bcs, Settings, AGF_Setup, Clearance
 import pickle, os, subprocess, platform, pyiges
 from get_ss_ps import split_ss_ps, split_airfoil_smart,split_airfoil_by_angle_distance, resample_curve
 from plot_blade_rows import plot_xz

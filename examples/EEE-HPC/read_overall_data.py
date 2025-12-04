@@ -11,7 +11,7 @@ from __future__ import annotations
 
 from pathlib import Path
 from typing import Dict, List
-
+from cantera import Solution
 import numpy as np
 import pandas as pd
 
@@ -163,7 +163,6 @@ def load_overall_data(
 
     return main_blocks
 
-
 def load_blade_counts(workbook_path: Path | str | None = None) -> Dict[str, int]:
     """
     Read number of vanes/blades per row from the ``Design Parameters`` sheet.
@@ -188,7 +187,6 @@ def load_blade_counts(workbook_path: Path | str | None = None) -> Dict[str, int]
         except (TypeError, ValueError):
             continue
     return counts
-
 
 def compute_entropy_rise(
     workbook_path: Path | str | None = None,
@@ -262,7 +260,6 @@ def compute_entropy_rise(
         block["ds_calc"] = cps * np.log(ts_ratio) - rs * np.log(ps_ratio)
         blocks[name] = block
     return blocks
-
 
 if __name__ == "__main__":
     data = load_overall_data()

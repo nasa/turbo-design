@@ -188,7 +188,58 @@ class AGF_Setup:
                 
                 file_content = file_content.replace('[endwall]',self.endwall)
                 f.write(file_content)
-                
+
+def read_agf(file_path: str) -> dict:
+    """
+    Read an AGF file and return its contents in structured form.
+
+    Returns a dict with keys: 'header', 'sections', 'endwall', 'raw'
+    """
+    with open(file_path, "r") as f:
+        raw = f.read()
+
+    data = {
+        "header": {},
+        "sections": [],
+        "endwall": [],
+        "raw": raw,
+    }
+
+    lines = raw.splitlines()
+    section = None
+    for line in lines:
+        if line.startswith("*SECTION"):
+            if section:
+                data["sections"].append(section)
+            section = {"header": line, "points": []}
+        elif section and line.strip() and line[0].isdigit():
+            try:
+                parts = [float(p) for p in line.split()[:3]]
+                section["points"].append(parts)
+            except Exception:
+                continue
+        elif "[endwall]" in line:
+            continue
+        elif section is None and "name" in line.lower():
+            key = line.split("=")[0].strip("[] \t")
+            val = line.split("=")[-1].strip()
+            data["header"][key] = val
+
+    if section:
+        data["sections"].append(section)
+
+    # Extract endwall pairs if present
+    if "[endwall]" in raw:
+        after = raw.split("[endwall]")[1]
+        for ln in after.splitlines():
+            parts = [p for p in ln.split() if p]
+            if len(parts) == 4:
+                try:
+                    data["endwall"].append([float(x) for x in parts])
+                except Exception:
+                    pass
+
+    return data
 def plot_airfoil_inputs(nsections:int,npts:int):
     xthr = np.zeros(shape=(nsections,npts,3)) # section_num x theta r 
     with open('AIRFOIL.INPUTS','r') as f:

@@ -1,10 +1,6 @@
 """Background
 
-EEE report (the xlsx) was extracted from a publication in 1982 and it was scanned who knows when. The document looks old and hard to read. A lot of this work looks to be good but without the code used to generate the E3 spreadsheet or CFD results from the 1980s if they even have that, all this falls under the category of 'trust me bro'
-
-Todo: 
-1. Run a simulation of EEE and do the calculations then modify this file or create a new one with the latest data. 
-2. Match the 1D with CFD to validate the math. 
+Rotor 35 1 stage HPC 
 
 """
 
@@ -18,31 +14,20 @@ from cantera import Solution
 from pathlib import Path
 import pandas as pd
 import pickle
-from read_overall_data import load_overall_data, load_blade_counts, compute_entropy_rise
 # Geometry Import 
 
-e3_hpc = pickle.load(open(Path(__file__).resolve().parent / 'e3_hpc_processed.pkl','rb'))
-hub = e3_hpc['hub']
-shroud = e3_hpc['shroud']
+blade_counts = [36,46]
 
-excel_data = load_overall_data(
-    Path(__file__).resolve().parent / 'E3_HPC_Overall_Data.xlsx',
-    sheet_name=None,
-    loss_sheet_name="Detailed Report Data",
-    convert_units=True,
-)
-blade_counts = load_blade_counts(Path(__file__).resolve().parent / 'E3_HPC_Overall_Data.xlsx')
+P0 = 20.5 * 6894.76 # Pa
+T0 = 518.67/1.8 # K
+M = 0.5 
+P02 = 28.8
+n_streamlines = 5
 
-
-P0 = excel_data['inlet']["Inlet Pt"].mean()
-T0 = excel_data['inlet']["TT Exit"].mean()
-n_streamlines = 12
-P0_Ratio = 1.0  # placeholder until defined from data
 
 # Fluid
 fluid = Solution('air.yaml')
 fluid.TP = T0, P0 # Use pascal for cantera
-entropy_calcs = compute_entropy_rise(Path(__file__).resolve().parent / 'E3_HPC_Overall_Data.xlsx',fluid=fluid)
 
 print(f"Coefficient of Pressure [J/Kg] {fluid.cp:0.4f}")
 #%% Defining the Inlet
