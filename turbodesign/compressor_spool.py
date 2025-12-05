@@ -58,30 +58,6 @@ def stator_calc(row:BladeRow,upstream:BladeRow,downstream:Optional[BladeRow]=Non
         T0_coolant = T0_coolant_weighted_average(row)
     row.T0 = upstream.T0 - T0_coolant
 
-    loss_type = getattr(row.loss_function, "loss_type", None)
-    
-    if loss_type == LossType.Pressure:
-        row.Yp = row.loss_function(row,upstream)
-        stator_calculation(row.Yp)
-    elif loss_type == LossType.Entropy: 
-        desired_entropy_rise = convert_to_ndarray(row.loss_function(row,upstream))
-        if len(desired_entropy_rise) == 1: # If entropy rise is a bulk value
-            fun = lambda s: np.abs(desired_entropy_rise - stator_calculation(s))
-            x = minimize_scalar(fun,bounds=[0.01,0.4])
-            row.Yp = x
-        elif len(desired_entropy_rise) > 1: # In case entropy rise is an array 
-            fun = lambda s,j: np.abs(desired_entropy_rise[j] - stator_calculation(s)[j])
-            for j in range(len(desired_entropy_rise)):
-                x = minimize_scalar(fun,bounds=[0.01,0.4],args=(j))
-                row.Yp[j] = x
-            stator_calculation(row.Yp)
-    else: # loss_type == LossType.Enthalpy: 
-        # Enthalpy loss is typically calculated for a stage so I bulk the loss after the rotor. This is a really terrible way of doing loss but this is here for those legacy loss models. 
-        row.Yp = 0
-        stator_calculation(row.Yp)
-
-
-        
     def stator_calculation(Yp:npt.NDArray):
         row.Yp = Yp
         if static_defined:
@@ -122,6 +98,28 @@ def stator_calc(row:BladeRow,upstream:BladeRow,downstream:Optional[BladeRow]=Non
         row.P0_stator_inlet = upstream.P0
         row.entropy_rise = 0.5*(row.Cp+upstream.Cp)*np.log(row.T/upstream.T) - row.R * np.log(row.P/upstream.P)    
         return row.entropy_rise
+
+    loss_type = getattr(row.loss_function, "loss_type", None)
+    
+    if loss_type == LossType.Pressure:
+        row.Yp = row.loss_function(row,upstream)
+        stator_calculation(row.Yp)
+    elif loss_type == LossType.Entropy: 
+        desired_entropy_rise = convert_to_ndarray(row.loss_function(row,upstream))
+        if len(desired_entropy_rise) == 1: # If entropy rise is a bulk value
+            fun = lambda s: np.abs(desired_entropy_rise - stator_calculation(s))
+            x = minimize_scalar(fun,bounds=[0.01,0.4])
+            row.Yp = x
+        elif len(desired_entropy_rise) > 1: # In case entropy rise is an array 
+            fun = lambda s,j: np.abs(desired_entropy_rise[j] - stator_calculation(s)[j])
+            for j in range(len(desired_entropy_rise)):
+                x = minimize_scalar(fun,bounds=[0.01,0.4],args=(j))
+                row.Yp[j] = x
+            stator_calculation(row.Yp)
+    else: # loss_type == LossType.Enthalpy: 
+        # Enthalpy loss is typically calculated for a stage so I bulk the loss after the rotor. This is a really terrible way of doing loss but this is here for those legacy loss models. 
+        row.Yp = 0
+        stator_calculation(row.Yp)
 
 def solve_for_mach(M:float, row:BladeRow,area:float, massflow:float):
     expo = -(row.gamma+1)/(2*(row.gamma-1))
@@ -481,7 +479,7 @@ class CompressorSpool:
             percents[-1] = 1
             P0_range = outlet_pressure(percents=percents, inletP0=inlet.P0[j], outletP=outlet.P[j])
             for i in range(1, len(blade_rows) - 1):
-                blade_rows[i].P0[j] = P0_range[i - 1]
+                blade_rows[i].P0_is[j] = P0_range[i - 1]
                     
 
         # Pass T0, P0 to downstream rows
@@ -632,8 +630,8 @@ class CompressorSpool:
             for j in range(self.num_streamlines):
                 P0_guess = outlet_pressure(x0, P0[j], P0_exit[j])
                 for i in range(1, len(rows) - 2):
-                    rows[i].P0[j] = float(P0_guess[i - 1])
-                rows[-2].P0[:] = P0_exit[-1]
+                    rows[i].P0_is[j] = float(P0_guess[i - 1])
+                rows[-2].P0_is[:] = P0_exit[-1]
             
             for i in range(1, len(rows) - 1):
                 row = rows[i]
