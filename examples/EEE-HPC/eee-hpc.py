@@ -9,6 +9,7 @@ Todo:
 """
 
 from turbodesign import TurbineSpool, Inlet, RowType, BladeRow, Passage, Outlet, PassageType
+from turbodesign.compressor_spool import CompressorSpool
 from turbodesign.enums import MassflowConstraint
 from turbodesign import Coolant
 from turbodesign.loss.fixedpressureloss import FixedPressureLoss
@@ -282,7 +283,7 @@ passage = Passage(hub_m[:,0],hub_m[:,1],
                  shroud_m[:,0],shroud_m[:,1],
                  passageType=PassageType.Axial) # type: ignore
 
-spool = TurbineSpool(
+spool = CompressorSpool(
             passage=passage,
             massflow=54,
             inlet=inlet,

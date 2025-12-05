@@ -151,7 +151,7 @@ class Inlet(BladeRow):
 
         cutline,_,_ = passage.get_cutting_line(t_hub=self.location,t_shroud=self.shroud_location)
         self.x,self.r = cutline.get_point(np.linspace(0,1,num_streamlines))
-        for _ in range(10):
+        for _ in range(2):
             T0_T = (1+(self.gamma-1)/2 * self.M**2)
 
             self.Vm = self.M**2 * self.gamma*self.R*self.T0/T0_T \

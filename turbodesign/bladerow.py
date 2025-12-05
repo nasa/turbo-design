@@ -522,7 +522,7 @@ class BladeRow:
         return data
 
 #* Some functions related to blade row 
-def interpolate_streamline_radii(row:BladeRow,passage:Passage,num_streamlines:int=3):
+def interpolate_streamline_quantities(row:BladeRow,passage:Passage,num_streamlines:int=3):
     """Interpolate all quantities onto the streamline and allocates variables. 
     Run this after setting some initial conditions 
 

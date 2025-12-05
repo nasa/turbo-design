@@ -188,7 +188,11 @@ def stator_calc(row:BladeRow,upstream:BladeRow,downstream:Optional[BladeRow]=Non
     """
  
     # Static Pressure is assumed
-    row.T0 = upstream.T0 - T0_coolant_weighted_average(row)
+    T0_coolant = 0 
+    if row.coolant is not None:
+        T0_coolant = T0_coolant_weighted_average(row)
+    row.T0 = upstream.T0 - T0_coolant
+        
     loss_type = getattr(row.loss_function, "loss_type", None)
     if loss_type == LossType.Pressure:
         row.P0 = upstream.P0 - row.Yp*(upstream.P0-row.P) # When static conditions are defined, use it to calculate P0
@@ -290,7 +294,10 @@ def rotor_calc(row:BladeRow,upstream:BladeRow,calculate_vm:bool=True,static_defi
 
         
     # Total Relative Temperature stays constant through the rotor. Adjust for change in radius from rotor inlet to exit
-    row.T0R = upstream.T0R # (upstream_rothalpy + 0.5*row.U**2)/row.Cp # - T0_coolant_weighted_average(row) 
+    T0_coolant = 0 
+    if row.coolant is not None:
+        T0_coolant = T0_coolant_weighted_average(row)
+    row.T0R = upstream.T0R - T0_coolant # (upstream_rothalpy + 0.5*row.U**2)/row.Cp # - T0_coolant_weighted_average(row) 
     P0R_P = row.P0R / row.P
     T0R_T = P0R_P**((row.gamma-1)/row.gamma)
     row.T = (row.T0R/T0R_T)     # Exit static temperature
@@ -354,7 +361,7 @@ def inlet_calc(row:BladeRow):
     iter = 0
     avg_mach = -1
     
-    for iter in range(5): # Lets converge the Mach and Total and Static pressures
+    for iter in range(2): # Lets converge the Mach and Total and Static pressures
         for j in range(1,len(row.percent_hub_shroud)):
             rho = row.rho[j]
             tube_massflow = row.massflow[j]-row.massflow[j-1]

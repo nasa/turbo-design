@@ -1,6 +1,7 @@
 # type: ignore[arg-type, reportUnknownArgumentType]
 from __future__ import annotations
 
+from multiprocessing import Value
 import stat
 from typing import Dict, List, Union, Optional
 import json
@@ -15,7 +16,7 @@ from scipy.optimize import minimize_scalar, fmin_slsqp
 from sympy import true
 
 # --- Project-local imports
-from .bladerow import BladeRow, interpolate_streamline_radii
+from .bladerow import BladeRow, interpolate_streamline_quantities
 from .enums import RowType, MassflowConstraint, LossType, PassageType
 from .loss.turbine import TD2
 from .passage import Passage
@@ -260,12 +261,12 @@ class TurbineSpool:
 
         inlet.__interpolate_quantities__(self.num_streamlines)  # type: ignore[attr-defined]
         inlet.__initialize_velocity__(self.passage, self.num_streamlines)  # type: ignore[attr-defined]
-        interpolate_streamline_radii(inlet, self.passage, self.num_streamlines)
+        interpolate_streamline_quantities(inlet, self.passage, self.num_streamlines)
 
         inlet_calc(inlet)
 
         for i,row in enumerate(blade_rows):
-            interpolate_streamline_radii(row, self.passage, self.num_streamlines)
+            interpolate_streamline_quantities(row, self.passage, self.num_streamlines)
         
         outlet = self.outlet
         for j in range(self.num_streamlines):
@@ -497,47 +498,32 @@ class TurbineSpool:
             pressure_ratio_ranges.append(bounds)
             pressure_ratio_guess.append(float(np.mean(bounds)))
 
+        if not self.outlet.static_defined:
+            raise ValueError("For turbine calculations, please define outlet using init_static")
+        
         print("Looping to converge massflow")
         past_err = -100.0
         loop_iter = 0
         err = 1e-3
         while (np.abs((err - past_err) / err) > 0.05) and (loop_iter < 10):
             if len(pressure_ratio_ranges) == 1: # Single stage, use minimize scalar 
-                if self.outlet.static_defined:
-                    x = minimize_scalar(
-                        fun=balance_loop,
-                        args=(rows, self.inlet.P0, self.outlet.P),
-                        bounds=pressure_ratio_ranges[0],
-                        tol=1e-4,
-                        method="bounded")
-                    print(x)
-                else:
-                    x = minimize_scalar(
-                        fun=balance_loop,
-                        args=(rows, self.inlet.P0, self.outlet.P0),
-                        bounds=pressure_ratio_ranges[0],
-                        tol=1e-4,
-                        method="bounded")
+                x = minimize_scalar(
+                    fun=balance_loop,
+                    args=(rows, self.inlet.P0, self.outlet.P),
+                    bounds=pressure_ratio_ranges[0],
+                    tol=1e-4,
+                    method="bounded")
+                print(x)
             else:   # Multiple stages, use slsqp
-                if self.outlet.static_defined:
-                    x = fmin_slsqp(
-                        func=balance_loop,
-                        args=(rows, self.inlet.P0, self.outlet.P),
-                        bounds=pressure_ratio_ranges,
-                        x0=pressure_ratio_guess,
-                        epsilon=1e-4,
-                        iter=200)
-                    pressure_ratio_guess = x.tolist()
-                else:
-                    x = fmin_slsqp(
-                        func=balance_loop,
-                        args=(rows, self.inlet.P0, self.outlet.P0),
-                        bounds=pressure_ratio_ranges,
-                        x0=pressure_ratio_guess,
-                        epsilon=1e-4,
-                        iter=200)
-                    pressure_ratio_guess = x.tolist()
-
+                x = fmin_slsqp(
+                    func=balance_loop,
+                    args=(rows, self.inlet.P0, self.outlet.P),
+                    bounds=pressure_ratio_ranges,
+                    x0=pressure_ratio_guess,
+                    epsilon=1e-4,
+                    iter=200)
+                pressure_ratio_guess = x.tolist()
+                
             # Adjust inlet to match massflow found at first blade row
             self.inlet.massflow = (np.linspace(0, 1, self.num_streamlines) * rows[1].total_massflow_no_coolant)
             self.inlet.total_massflow_no_coolant = rows[1].total_massflow_no_coolant

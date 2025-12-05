@@ -16,7 +16,7 @@ from turbodesign import loss
 from turbodesign.loss import losstype
 
 # --- Project-local imports
-from .bladerow import BladeRow, interpolate_streamline_radii
+from .bladerow import BladeRow, interpolate_streamline_quantities
 from .enums import RowType, MassflowConstraint, LossType, PassageType
 from .loss.turbine import TD2
 from .passage import Passage
@@ -460,13 +460,13 @@ class CompressorSpool:
 
         inlet.__interpolate_quantities__(self.num_streamlines)  # type: ignore[attr-defined]
         inlet.__initialize_velocity__(self.passage, self.num_streamlines)  # type: ignore[attr-defined]
-        interpolate_streamline_radii(inlet, self.passage, self.num_streamlines)
+        interpolate_streamline_quantities(inlet, self.passage, self.num_streamlines)
 
         compute_gas_constants(inlet, self.fluid)
         inlet_calc(inlet)
 
         for row in blade_rows:
-            interpolate_streamline_radii(row, self.passage, self.num_streamlines)
+            interpolate_streamline_quantities(row, self.passage, self.num_streamlines)
 
         outlet: Outlet = self.outlet
         for j in range(self.num_streamlines):
@@ -533,20 +533,167 @@ class CompressorSpool:
                 compute_massflow(row)
                 compute_power(row, upstream)
 
+    @staticmethod
+    def __massflow_std__(blade_rows: List[BladeRow]) -> float:
+        total_massflow = []
+        massflow_stage = []
+        stage_ids = list({row.stage_id for row in blade_rows if row.stage_id >= 0})
+
+        for row in blade_rows:
+            total_massflow.append(row.total_massflow_no_coolant)
+            sign = 1
+            for s in stage_ids:
+                for r in blade_rows:
+                    if r.stage_id == s and r.row_type == RowType.Rotor:
+                        massflow_stage.append(sign * r.total_massflow_no_coolant)
+                        sign *= -1
+            if len(stage_ids) % 2 == 1 and massflow_stage:
+                massflow_stage.append(massflow_stage[-1] * sign)
+        deviation = np.std(total_massflow) * 2
+        if deviation > 1.0:
+            print("high massflow deviation detected")
+        return np.std(total_massflow) * 2
+
     def solve(self) -> None:
         if self.massflow_constraint == MassflowConstraint.AngleMatch:
             pass
-        elif self.massflow_constraint == MassflowConstraint.PressureBalance: # Balances the Total pressure
-            self._pressure_balance()
+        elif self.massflow_constraint == MassflowConstraint.PressureBalance:  # Balances the Total pressure
+            self.balance_pressure()
     
-    def _pressure_balance(self):
-        blade_rows = self._all_rows()
-        outlet_P = []
-        outlet_P_guess = []
-        for i in range(1, len(blade_rows) - 2):
-            outlet_P.append(blade_rows[i].inlet_to_outlet_pratio) # inlet_to_outlet_pratio is a default property  
-            outlet_P_guess.append(np.mean(blade_rows[i].inlet_to_outlet_pratio))
+    def balance_pressure(self) -> None:
+        """Balance massflow between rows using radial equilibrium."""
+        rows = self._all_rows()
+
+        def balance_loop(
+            x0: List[float],
+            rows: List[BladeRow],
+            P0: List[float],
+            P_or_P0: List[float],
+        ) -> float:
+            """Runs through the calculation and outputs the standard deviation of massflow."""
+            static_defined = self.outlet.static_defined
+            P0_exit = P_or_P0
+            for j in range(self.num_streamlines):
+                P0_guess = outlet_pressure(x0, P0[j], P0_exit[j])
+                for i in range(1, len(rows) - 2):
+                    rows[i].P0[j] = float(P0_guess[i - 1])
+                rows[-2].P0[:] = P0_exit[-1]
             
+            for i in range(1, len(rows) - 1):
+                row = rows[i]
+                upstream = rows[i - 1] if i > 0 else rows[i]
+                downstream = rows[i + 1]
+
+                if row.row_type == RowType.Inlet:
+                    row.Yp = 0
+                else:
+                    if row.loss_function.loss_type == LossType.Pressure:  # type: ignore[union-attr]
+                        row.Yp = row.loss_function(row, upstream)  # type: ignore[assignment]
+                        for _ in range(2):
+                            if row.row_type == RowType.Rotor:
+                                rotor_calc(row, upstream, calculate_vm=True, static_defined=static_defined)
+                                row = radeq(row, upstream, downstream)
+                                compute_gas_constants(row, self.fluid)
+                                rotor_calc(row, upstream, calculate_vm=False, static_defined=static_defined)
+                            elif row.row_type == RowType.Stator:
+                                stator_calc(
+                                    row,
+                                    upstream,
+                                    downstream,
+                                    calculate_vm=True,
+                                    static_defined=static_defined,
+                                )
+                                row = radeq(row, upstream, downstream)
+                                compute_gas_constants(row, self.fluid)
+                                stator_calc(
+                                    row,
+                                    upstream,
+                                    downstream,
+                                    calculate_vm=False,
+                                    static_defined=static_defined,
+                                )
+                            compute_gas_constants(row, self.fluid)
+                            compute_massflow(row)
+                            compute_power(row, upstream)
+
+                    elif row.loss_function.loss_type == LossType.Enthalpy:
+                        if row.row_type == RowType.Rotor:
+                            row.Yp = 0
+                            rotor_calc(row, upstream, calculate_vm=True)
+                            eta_total = float(row.loss_function(row, upstream))
+
+                            def find_yp(Yp, row=row, upstream=upstream, downstream=downstream):
+                                row.Yp = Yp
+                                rotor_calc(row, upstream, calculate_vm=True)
+                                row_local = radeq(row, upstream, downstream)
+                                compute_gas_constants(row_local, self.fluid)
+                                rotor_calc(row_local, upstream, calculate_vm=False)
+                                return abs(row_local.eta_total - eta_total)
+
+                            res = minimize_scalar(find_yp, bounds=[0, 0.6])
+                            row.Yp = res.x
+                        elif row.row_type == RowType.Stator:
+                            row.Yp = 0
+                            stator_calc(row, upstream, downstream, calculate_vm=True)
+                            row = radeq(row, upstream)
+                            compute_gas_constants(row, self.fluid)
+                            stator_calc(row, upstream, downstream, calculate_vm=False)
+                        compute_gas_constants(row, self.fluid)
+                        compute_massflow(row)
+                        compute_power(row, upstream)
+            print(x0)
+            return self.__massflow_std__(rows[1:-1])
+
+        pressure_ratio_ranges: List[tuple] = []
+        pressure_ratio_guess: List[float] = []
+        for i in range(1, len(rows) - 2):
+            bounds = tuple(float(v) for v in rows[i].inlet_to_outlet_pratio)
+            pressure_ratio_ranges.append(bounds)
+            pressure_ratio_guess.append(float(np.mean(bounds)))
+
+        print("Looping to converge massflow")
+        past_err = -100.0
+        loop_iter = 0
+        err = 1e-3
+        while (np.abs((err - past_err) / err) > 0.05) and (loop_iter < 10):
+            if len(pressure_ratio_ranges) == 1:  # Single stage, use minimize scalar
+                x = minimize_scalar(
+                    fun=balance_loop,
+                    args=(rows, self.inlet.P0, self.outlet.P0),
+                    bounds=pressure_ratio_ranges[0],
+                    tol=1e-4,
+                    method="bounded",
+                )
+                print(x)
+            else:  # Multiple stages, use slsqp
+                x = fmin_slsqp(
+                    func=balance_loop,
+                    args=(rows, self.inlet.P0, self.outlet.P0),
+                    bounds=pressure_ratio_ranges,
+                    x0=pressure_ratio_guess,
+                    epsilon=1e-4,
+                    iter=200,
+                )
+                pressure_ratio_guess = x.tolist()
+
+            self.inlet.massflow = np.linspace(0, 1, self.num_streamlines) * rows[1].total_massflow_no_coolant
+            self.inlet.total_massflow_no_coolant = rows[1].total_massflow_no_coolant
+            self.inlet.total_massflow = rows[1].total_massflow_no_coolant
+            self.inlet.calculated_massflow = self.inlet.total_massflow_no_coolant
+            inlet_calc(self.inlet)
+
+            if self.adjust_streamlines:
+                adjust_streamlines(rows[:-1], self.passage)
+
+            self.outlet.transfer_quantities(rows[-2])
+            self.outlet.P = self.outlet.get_static_pressure(self.outlet.percent_hub_shroud)
+
+            past_err = err
+            err = self.__massflow_std__(rows)
+            loop_iter += 1
+            print(f"Loop {loop_iter} massflow convergenced error:{err}")
+
+        compute_reynolds(rows, self.passage)
         
     # ------------------------------
     # Export / Plotting
