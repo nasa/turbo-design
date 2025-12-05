@@ -88,7 +88,9 @@ def stator_calc(row:BladeRow,upstream:BladeRow,downstream:Optional[BladeRow]=Non
         if downstream is not None:
             row.P0_P = float((row.P0/downstream.P).mean())
             row.rp = ((row.P-downstream.P)/(upstream.P0-downstream.P)).mean()
-            
+        deviation_func = getattr(row, "deviation_function", None)
+        deviation = deviation_func(row, upstream) if callable(deviation_func) else 0.0
+        row.deviation = deviation
         if calculate_vm:
             row.M = ((row.P0/row.P)**((row.gamma-1)/row.gamma) - 1) * 2/(row.gamma-1)
             row.M = np.sqrt(row.M)
@@ -98,17 +100,17 @@ def stator_calc(row:BladeRow,upstream:BladeRow,downstream:Optional[BladeRow]=Non
             row.Vm = row.V*np.cos(row.alpha2)
             row.Vx = row.Vm*np.cos(row.phi)
             row.Vr = row.Vm*np.sin(row.phi)
-            row.Vt = row.Vm*np.tan(row.alpha2)
+            row.Vt = row.Vm*np.tan(row.alpha2+row.deviation)
         else: # We know Vm, P0, T0, P
             row.Vx = row.Vm*np.cos(row.phi)
             row.Vr = row.Vm*np.sin(row.phi)
-            row.Vt = row.Vm*np.tan(row.alpha2)
+            row.Vt = row.Vm*np.tan(row.alpha2+row.deviation)
             row.V = np.sqrt(row.Vx**2 + row.Vr**2 + row.Vt**2)
             row.T = row.P/(row.R*row.rho)   # We know P, this is a guess
             row.M = row.V/np.sqrt(row.gamma*row.R*row.T)
             
         if upstream.row_type == RowType.Rotor:
-            row.alpha1 = upstream.alpha2 # Upstream rotor absolute frame flow angle
+            row.alpha1 = upstream.alpha2+upstream.deviation# Upstream rotor absolute frame flow angle
         row.beta1 = upstream.beta2
         row.rho = row.P/(row.R*row.T)
         row.U = row.omega*row.r
@@ -212,6 +214,10 @@ def rotor_calc(row:BladeRow,upstream:BladeRow,calculate_vm:bool=True,static_defi
         P0R_P = row.P0R / row.P
         T0R_T = P0R_P**((row.gamma-1)/row.gamma)
         row.T = (row.T0R/T0R_T)     # Exit static temperature
+        
+        deviation_func = getattr(row, "deviation_function", None)
+        deviation = deviation_func(row, upstream) if callable(deviation_func) else 0.0
+        row.deviation = deviation    
         if calculate_vm:    # Calculates the T0 at the exit
             row.W = np.sqrt(2*row.Cp*(row.T0R-row.T)) #! nan popups here a lot for radial machines 
             nan_in_velocity = np.isnan(np.sum(row.W))
@@ -227,7 +233,7 @@ def rotor_calc(row:BladeRow,upstream:BladeRow,calculate_vm:bool=True,static_defi
                 _log_rotor_failure(reason)
                 raise ValueError(f'nan detected')
             row.Vr = row.W*np.sin(row.phi)
-            row.Vm = row.W*np.cos(row.beta2)
+            row.Vm = row.W*np.cos(row.beta2 + row.deviation)
             row.Wt = row.W*np.sin(row.beta2)
             row.Vx = row.Vm*np.cos(row.phi)
             row.Vt = row.Wt + row.U 
@@ -241,7 +247,7 @@ def rotor_calc(row:BladeRow,upstream:BladeRow,calculate_vm:bool=True,static_defi
             row.Vx = row.Vm*np.cos(row.phi)
             
             row.W = np.sqrt(2*row.Cp*(row.T0R-row.T))
-            row.Wt = row.W*np.sin(row.beta2)
+            row.Wt = row.W*np.sin(row.beta2+row.deviation)
             row.U = row.omega * row.r 
             row.Vt = row.Wt+row.U
             

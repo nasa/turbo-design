@@ -49,20 +49,30 @@ class Inlet(BladeRow):
         self.static_defined = True
         self.percent_hub_shroud = convert_to_ndarray(percent_radii)
         
-    def init_total(self,P0:Union[float,List[float]],T0:Union[float,List[float]],M:Union[float,List[float]],percent_radii:Union[float,List[float]]=[0.5]):
+    def init_total(
+        self,
+        P0:Union[float,List[float]],
+        T0:Union[float,List[float]],
+        M:Union[float,List[float]],
+        percent_radii:Optional[Union[float,List[float]]]=None
+    ):
         """Initializes the inlet with total quantities at the inlet
 
         Args:
             P0 (Union[float,List[float]]): Total Pressure either as a float or array 
             T0 (Union[float,List[float]]): Total Temperature either as a float or array 
             M (Union[float,List[float]]): Mach Number either as a float or array 
-            percent_radii (Union[float,List[float]], optional): Percent radii where P0,T0, and M are defined. Defaults to [0.5].
+            percent_radii (Optional[Union[float,List[float]]], optional): Percent radii where P0, T0, and M are defined. Defaults to `None`, which uses evenly spaced radii when multiple values exist or `[0.5]` otherwise.
         """
         self.P0 = convert_to_ndarray(P0)
         self.T0 = convert_to_ndarray(T0) 
         self.M = convert_to_ndarray(M)
+        if percent_radii is None:
+            percent_radii = convert_to_ndarray([0.5]) # type: ignore
+        if len(self.M)>1: 
+            percent_radii = np.linspace(0,1,len(self.M))  # type: ignore
         self.static_defined = False
-        self.percent_hub_shroud = convert_to_ndarray(percent_radii)
+        self.percent_hub_shroud = percent_radii
         
     def __interpolate_quantities__(self,num_streamlines:int=5):
         """Initializes the inputs 
@@ -171,7 +181,7 @@ class Inlet(BladeRow):
                     self.Vm[i+1] = tube_massflow/(rho_mean*area)
             self.Vm[0] = 1/(len(self.Vm)-1)*self.Vm[1:].sum()
             
-            self.M = self.Vm /np.sqrt(self.gamma*self.R*self.T)
+            self.M = self.V /np.sqrt(self.gamma*self.R*self.T)
             Vm_err = np.max(abs(self.Vm-Vm_prev)/self.Vm)
             Vm_prev = self.Vm
             if Vm_err < 1E-4:

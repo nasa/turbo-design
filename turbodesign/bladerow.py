@@ -57,6 +57,7 @@ class BladeRow:
     beta1: npt.NDArray = field(default_factory=lambda: np.array([0]))                 # Blade inlet relative flow angle
     beta2: npt.NDArray = field(default_factory=lambda: np.array([0]))                 # Blade exit relative flow angle
     
+    deviation: npt.NDArray = field(default_factory=lambda: np.array([0])) 
     _beta1_metal:npt.NDArray = field(default_factory=lambda: np.array([0]))           # blade inlet metal angle
     beta1_metal_radii:npt.NDArray = field(default_factory=lambda: np.array([0]))      # radii where metal angle is defined
     

@@ -1,4 +1,5 @@
 from typing import List, Optional
+import warnings
 import numpy as np
 import numpy.typing as npt
 from .isentropic import IsenP, IsenT
@@ -378,8 +379,11 @@ def inlet_calc(row:BladeRow):
         row.P = row.P0 * (row.T/row.T0)**(row.gamma/(row.gamma-1))
         compute_gas_constants(row)
         
-    if np.mean(row.M)>0.5:
-        raise ValueError(f"High inlet mach can lead to errors iter:{iter} Mach:{avg_mach}")
+    if np.mean(row.M)>0.8:
+        warnings.warn(
+            f"High inlet mach can lead to errors iter:{iter} Mach:{avg_mach}",
+            RuntimeWarning,
+        )
     
     if np.mean(row.M)<0.01:
         print(f"Unusually slow flow:{iter} Mach:{avg_mach}")
