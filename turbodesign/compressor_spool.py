@@ -525,10 +525,10 @@ class CompressorSpool:
             row.R = upstream.R
 
             if row.row_type == RowType.Stator:
-                stator_calc(row, upstream, downstream,Is_static_defined)  # type: ignore[arg-type]
+                stator_calc(row, upstream, downstream,calculate_vm=True,static_defined=False)  # type: ignore[arg-type]
                 compute_massflow(row)
             elif row.row_type == RowType.Rotor:
-                rotor_calc(row, upstream,Is_static_defined)
+                rotor_calc(row, upstream,calculate_vm=True,static_defined=False)
                 compute_massflow(row)
                 compute_power(row, upstream)
 
