@@ -235,20 +235,20 @@ class CompressorSpool:
             interpolate_streamline_quantities(row, self.passage, self.num_streamlines)
 
         outlet: Outlet = self.outlet
-        rt = outlet.P0/inlet.P0 # Overall total pressure ratio
+        rt = outlet.P0.mean()/inlet.P0.mean() # Overall total pressure ratio
         n = int(len(rows)/2) # Number of stages 
         r = rt**(1/n) # Use this to define total pressure for each of the stator
         
         # Estimate percents
         percents = np.zeros(shape=(len(rows) - 2)) # don't take account inlet and outlet
-        P0 = inlet.P0
-        for i in range(1,len(rows)): # Inlet, stator, rotor, stator
+        P0 = inlet.P0.mean()
+        for i in range(1,len(rows)-1): # Inlet, stator, rotor, stator, ... , outlet
             if rows[i].row_type == RowType.Stator:
-                percents[i-1] = r * P0 / outlet.P0
+                percents[i-1] = r * P0 / outlet.P0.mean()
                 prev_P0 = P0
                 P0 *= r
             else:
-                percents[i-1] = 0.5 * (prev_P0 + r * P0) / outlet.P0
+                percents[i-1] = 0.5 * (prev_P0 + r * P0) / outlet.P0.mean()
         percents[-1] = 1 
         
         for j in range(self.num_streamlines):
