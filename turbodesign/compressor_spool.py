@@ -240,7 +240,7 @@ class CompressorSpool:
         
         # Estimate percents
         percents = np.zeros(shape=(len(rows) - 2)) # don't take account inlet and outlet
-        P0 = inlet.P0.mean()
+        P0 = inlet.P0.mean(); prev_P0 = P0
         for i in range(1,len(rows)-1): # Inlet, stator, rotor, stator, ... , outlet
             if rows[i].row_type == RowType.Stator:
                 percents[i-1] = r * P0 / outlet.P0.mean()

@@ -166,43 +166,57 @@ stator9.axial_chord = cax_arr[18]
 rotor10.axial_chord = cax_arr[19]
 stator10.axial_chord = cax_arr[20]
 
-# Metal exit angles pulled from Excel Beta column
-def set_beta2_metal(row: BladeRow, key: str):
+# Metal inlet/exit angles pulled from Excel Beta columns
+def set_beta_metal(row: BladeRow, key: str):
     df = excel_data.get(key)
     if df is None:
         return
-    beta_col = None
-    if "Beta.1" in df.columns:  # exit beta if duplicated
-        beta_col = "Beta.1"
+    beta_exit_col = None
+    beta_inlet_col = None
+    if "Beta.1" in df.columns:
+        beta_exit_col = "Beta.1"
+        if "Beta" in df.columns:
+            beta_inlet_col = "Beta"
     elif "Beta" in df.columns:
-        beta_col = "Beta"
-    if beta_col is None:
-        return
-    beta_vals = pd.to_numeric(df[beta_col], errors="coerce").tolist()
-    if len(beta_vals) >= n_streamlines:
-        row.beta2_metal = beta_vals[:n_streamlines]
+        beta_exit_col = "Beta"
 
-set_beta2_metal(IGV1, "inlet")
-set_beta2_metal(rotor1, "rotor1")
-set_beta2_metal(stator1, "stator1")
-set_beta2_metal(rotor2, "rotor2")
-set_beta2_metal(stator2, "stator2")
-set_beta2_metal(rotor3, "rotor3")
-set_beta2_metal(stator3, "stator3")
-set_beta2_metal(rotor4, "rotor4")
-set_beta2_metal(stator4, "stator4")
-set_beta2_metal(rotor5, "rotor5")
-set_beta2_metal(stator5, "stator5")
-set_beta2_metal(rotor6, "rotor6")
-set_beta2_metal(stator6, "stator6")
-set_beta2_metal(rotor7, "rotor7")
-set_beta2_metal(stator7, "stator7")
-set_beta2_metal(rotor8, "rotor8")
-set_beta2_metal(stator8, "stator8")
-set_beta2_metal(rotor9, "rotor9")
-set_beta2_metal(stator9, "stator9")
-set_beta2_metal(rotor10, "rotor10")
-set_beta2_metal(stator10, "stator10")
+    def _prepare_beta(values: pd.Series) -> list[float]:
+        beta_vals = pd.to_numeric(values, errors="coerce").dropna().tolist()
+        trimmed = beta_vals[:n_streamlines]
+        if row.row_type == RowType.Rotor:
+            return [-abs(val) for val in trimmed]
+        return trimmed
+
+    if beta_exit_col:
+        exit_vals = _prepare_beta(df[beta_exit_col])
+        if exit_vals:
+            row.beta2_metal = exit_vals
+    if beta_inlet_col:
+        inlet_vals = _prepare_beta(df[beta_inlet_col])
+        if inlet_vals:
+            row.beta1_metal = inlet_vals
+
+set_beta_metal(IGV1, "inlet")
+set_beta_metal(rotor1, "rotor1")
+set_beta_metal(stator1, "stator1")
+set_beta_metal(rotor2, "rotor2")
+set_beta_metal(stator2, "stator2")
+set_beta_metal(rotor3, "rotor3")
+set_beta_metal(stator3, "stator3")
+set_beta_metal(rotor4, "rotor4")
+set_beta_metal(stator4, "stator4")
+set_beta_metal(rotor5, "rotor5")
+set_beta_metal(stator5, "stator5")
+set_beta_metal(rotor6, "rotor6")
+set_beta_metal(stator6, "stator6")
+set_beta_metal(rotor7, "rotor7")
+set_beta_metal(stator7, "stator7")
+set_beta_metal(rotor8, "rotor8")
+set_beta_metal(stator8, "stator8")
+set_beta_metal(rotor9, "rotor9")
+set_beta_metal(stator9, "stator9")
+set_beta_metal(rotor10, "rotor10")
+set_beta_metal(stator10, "stator10")
 
 
 # Assign loss models from Excel Loss column where available
