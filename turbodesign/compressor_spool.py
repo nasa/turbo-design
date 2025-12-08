@@ -206,7 +206,6 @@ class CompressorSpool:
     def initialize(self) -> None:
         """Initialize massflow and thermodynamic state through rows (turbines)."""
         rows = self._all_rows()
-        Is_static_defined = self.outlet.static_defined # This is set when you initialize the outlet 
 
         # Inlet
         W0 = self.massflow
@@ -249,6 +248,7 @@ class CompressorSpool:
                 P0 *= r
             else:
                 percents[i-1] = 0.5 * (prev_P0 + r * P0) / outlet.P0.mean()
+            rows[i].inlet_to_outlet_pratio = (percents[i-2],percents[i-1])
         percents[-1] = 1 
         
         for j in range(self.num_streamlines):
@@ -356,50 +356,6 @@ class CompressorSpool:
             pressure_ratio_ranges.append(bounds)
             pressure_ratio_guess.append(float(np.mean(bounds)))
 
-        print("Looping to converge massflow")
-        past_err = -100.0
-        loop_iter = 0
-        err = 1e-3
-        while (np.abs((err - past_err) / err) > 0.05) and (loop_iter < 10):
-            if len(pressure_ratio_ranges) == 1:  # Single stage, use minimize scalar
-                x = minimize_scalar(
-                    fun=balance_loop,
-                    args=(rows, self.inlet.P0, self.outlet.P0),
-                    bounds=pressure_ratio_ranges[0],
-                    tol=1e-4,
-                    method="bounded",
-                )
-                print(x)
-            else:  # Multiple stages, use slsqp
-                x = fmin_slsqp(
-                    func=balance_loop,
-                    args=(rows, self.inlet.P0, self.outlet.P0),
-                    bounds=pressure_ratio_ranges,
-                    x0=pressure_ratio_guess,
-                    epsilon=1e-4,
-                    iter=200,
-                )
-                pressure_ratio_guess = x.tolist()
-
-            self.inlet.massflow = np.linspace(0, 1, self.num_streamlines) * rows[1].total_massflow_no_coolant
-            self.inlet.total_massflow_no_coolant = rows[1].total_massflow_no_coolant
-            self.inlet.total_massflow = rows[1].total_massflow_no_coolant
-            self.inlet.calculated_massflow = self.inlet.total_massflow_no_coolant
-            inlet_calc(self.inlet)
-
-            if self.adjust_streamlines:
-                adjust_streamlines(rows[:-1], self.passage)
-
-            self.outlet.transfer_quantities(rows[-2])
-            self.outlet.P = self.outlet.get_static_pressure(self.outlet.percent_hub_shroud)
-
-            past_err = err
-            err = self.__massflow_std__(rows)
-            loop_iter += 1
-            print(f"Loop {loop_iter} massflow convergenced error:{err}")
-
-        compute_reynolds(rows, self.passage)
-        
         def balance_loop(
             x0: List[float],
             rows: List[BladeRow],
@@ -479,6 +435,50 @@ class CompressorSpool:
                         compute_power(row, upstream)
             print(x0)
             return self.__massflow_std__(rows[1:-1])
+
+        print("Looping to converge massflow")
+        past_err = -100.0
+        loop_iter = 0
+        err = 1e-3
+        while (np.abs((err - past_err) / err) > 0.05) and (loop_iter < 10):
+            if len(pressure_ratio_ranges) == 1:  # Single stage, use minimize scalar
+                x = minimize_scalar(
+                    fun=balance_loop,
+                    args=(rows, self.inlet.P0, self.outlet.P0),
+                    bounds=pressure_ratio_ranges[0],
+                    tol=1e-4,
+                    method="bounded",
+                )
+                print(x)
+            else:  # Multiple stages, use slsqp
+                x = fmin_slsqp(
+                    func=balance_loop,
+                    args=(rows, self.inlet.P0, self.outlet.P0),
+                    bounds=pressure_ratio_ranges,
+                    x0=pressure_ratio_guess,
+                    epsilon=1e-4,
+                    iter=200,
+                )
+                pressure_ratio_guess = x.tolist()
+
+            self.inlet.massflow = np.linspace(0, 1, self.num_streamlines) * rows[1].total_massflow_no_coolant
+            self.inlet.total_massflow_no_coolant = rows[1].total_massflow_no_coolant
+            self.inlet.total_massflow = rows[1].total_massflow_no_coolant
+            self.inlet.calculated_massflow = self.inlet.total_massflow_no_coolant
+            inlet_calc(self.inlet)
+
+            if self.adjust_streamlines:
+                adjust_streamlines(rows[:-1], self.passage)
+
+            self.outlet.transfer_quantities(rows[-2])
+            self.outlet.P = self.outlet.get_static_pressure(self.outlet.percent_hub_shroud)
+
+            past_err = err
+            err = self.__massflow_std__(rows)
+            loop_iter += 1
+            print(f"Loop {loop_iter} massflow convergenced error:{err}")
+
+        compute_reynolds(rows, self.passage)
 
 
         
