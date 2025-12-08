@@ -1,6 +1,5 @@
 # type: ignore[arg-type, reportUnknownArgumentType]
 from __future__ import annotations
-
 from typing import Dict, List, Union, Optional
 import json
 
@@ -12,262 +11,25 @@ from cantera.composite import Solution
 from scipy.interpolate import interp1d
 from scipy.optimize import minimize_scalar, fmin_slsqp
 
-from turbodesign import loss
-from turbodesign.loss import losstype
-
 # --- Project-local imports
 from .bladerow import BladeRow, interpolate_streamline_quantities
-from .enums import RowType, MassflowConstraint, LossType, PassageType
+from .enums import RowType, MassflowConstraint, LossType
 from .loss.turbine import TD2
 from .passage import Passage
 from .inlet import Inlet
 from .outlet import Outlet
-from .td_math import (
+from .compressor_math import rotor_calc, stator_calc
+from .turbine_math import (
+    compute_streamline_areas,
     inlet_calc,
     compute_massflow,
     compute_power,
     compute_gas_constants,
     compute_reynolds,
-    T0_coolant_weighted_average
 )
 from .solve_radeq import adjust_streamlines, radeq
-from pyturbo.helper import line2D, convert_to_ndarray
+from pyturbo.helper import convert_to_ndarray
 
-
-
-def stator_calc(row:BladeRow,upstream:BladeRow,downstream:Optional[BladeRow]=None,calculate_vm:bool=True, static_defined:bool=False):
-    """Given P0, T0, P, alpha2 of stator calculate all other quantities
-
-    Usage:
-        Set row.P0 = upstream.P0 - any pressure loss
-        row.T0 = upstream.T0 - any cooling
-        row.P = row.rp*(row.P0 - rotor.P) + rotor.P 
-        Set alpha2 
-        
-    Args:
-        row (BladeRow): Stator Row
-        upstream (BladeRow): Stator or Rotor Row 
-        downstream (BladeRow): Stator or Rotor Row. Defaults to None
-        calculate_vm (bool): True to calculate the meridional velocity. False, do not calculate this and let radeq calculate it
-        static_defined (bool): True if static conditions defined at the outlet. False if total conditions defined at outlet
-    """
- 
-    # Static Pressure is assumed
-    T0_coolant = 0 
-    if row.coolant is not None:
-        T0_coolant = T0_coolant_weighted_average(row)
-    row.T0 = upstream.T0 - T0_coolant
-
-    def stator_calculation(Yp:npt.NDArray):
-        row.Yp = Yp
-        if static_defined:
-            row.P0 = upstream.P0 - row.Yp*(upstream.P0-row.P) # When static conditions are defined, use it to calculate P0
-        else:
-            row.P0 = row.P0_is - row.Yp*(upstream.P0 - upstream.P)
-            
-        if downstream is not None:
-            row.P0_P = float((row.P0/downstream.P).mean())
-            row.rp = ((row.P-downstream.P)/(upstream.P0-downstream.P)).mean()
-        deviation_func = getattr(row, "deviation_function", None)
-        deviation = deviation_func(row, upstream) if callable(deviation_func) else 0.0
-        row.deviation = deviation
-        if calculate_vm:
-            row.M = ((row.P0/row.P)**((row.gamma-1)/row.gamma) - 1) * 2/(row.gamma-1)
-            row.M = np.sqrt(row.M)
-            T0_T = (1+(row.gamma-1)/2 * row.M**2)
-            row.T = row.T0/T0_T
-            row.V = row.M*np.sqrt(row.gamma*row.R*row.T)
-            row.Vm = row.V*np.cos(row.alpha2)
-            row.Vx = row.Vm*np.cos(row.phi)
-            row.Vr = row.Vm*np.sin(row.phi)
-            row.Vt = row.Vm*np.tan(row.alpha2+row.deviation)
-        else: # We know Vm, P0, T0, P
-            row.Vx = row.Vm*np.cos(row.phi)
-            row.Vr = row.Vm*np.sin(row.phi)
-            row.Vt = row.Vm*np.tan(row.alpha2+row.deviation)
-            row.V = np.sqrt(row.Vx**2 + row.Vr**2 + row.Vt**2)
-            row.T = row.P/(row.R*row.rho)   # We know P, this is a guess
-            row.M = row.V/np.sqrt(row.gamma*row.R*row.T)
-            
-        if upstream.row_type == RowType.Rotor:
-            row.alpha1 = upstream.alpha2+upstream.deviation# Upstream rotor absolute frame flow angle
-        row.beta1 = upstream.beta2
-        row.rho = row.P/(row.R*row.T)
-        row.U = row.omega*row.r
-        row.Wt = row.Vt-row.U
-        row.P0_stator_inlet = upstream.P0
-        row.entropy_rise = 0.5*(row.Cp+upstream.Cp)*np.log(row.T/upstream.T) - row.R * np.log(row.P/upstream.P)    
-        return row.entropy_rise
-
-    loss_type = getattr(row.loss_function, "loss_type", None)
-    
-    if loss_type == LossType.Pressure:
-        row.Yp = row.loss_function(row,upstream)
-        stator_calculation(row.Yp)
-    elif loss_type == LossType.Entropy: 
-        desired_entropy_rise = convert_to_ndarray(row.loss_function(row,upstream))
-        if len(desired_entropy_rise) == 1: # If entropy rise is a bulk value
-            fun = lambda s: np.abs(desired_entropy_rise - stator_calculation(s))
-            x = minimize_scalar(fun,bounds=[0.01,0.4])
-            row.Yp = x
-        elif len(desired_entropy_rise) > 1: # In case entropy rise is an array 
-            fun = lambda s,j: np.abs(desired_entropy_rise[j] - stator_calculation(s)[j])
-            for j in range(len(desired_entropy_rise)):
-                x = minimize_scalar(fun,bounds=[0.01,0.4],args=(j))
-                row.Yp[j] = x
-            stator_calculation(row.Yp)
-    else: # loss_type == LossType.Enthalpy: 
-        # Enthalpy loss is typically calculated for a stage so I bulk the loss after the rotor. This is a really terrible way of doing loss but this is here for those legacy loss models. 
-        row.Yp = 0
-        stator_calculation(row.Yp)
-
-def solve_for_mach(M:float, row:BladeRow,area:float, massflow:float):
-    expo = -(row.gamma+1)/(2*(row.gamma-1))
-    return np.abs(massflow - area * row.P0/row.T0 * np.sqrt(row.gamma/row.R) * M * (1+(row.gamma-1)/2*M**2)**expo)
-
-def rotor_calc(row:BladeRow,upstream:BladeRow,calculate_vm:bool=True,static_defined:bool=False):
-    """Calculates quantities given beta2 
-
-    Args:
-        row (BladeRow): Rotor Row
-        upstream (BladeRow): Stator Row or Rotor Row
-        calculate_vm (bool): True to calculate the meridional velocity. False, do not calculate this and let radeq calculate it
-        static_defined (bool): True if static conditions defined at the outlet. False if total conditions defined at outlet
-    """
-    def _log_rotor_failure(reason:str):
-        def _fmt(val):
-            try:
-                return np.array2string(np.asarray(val), precision=5)
-            except Exception:
-                return str(val)
-
-        print(f"[RotorCalc] Failure detected: {reason}")
-        print(f"    row.T0R: {_fmt(row.T0R)}")
-        print(f"    row.T: {_fmt(row.T)}")
-        print(f"    row.W: {_fmt(row.W)}")
-        print(f"    row.M: {_fmt(getattr(row,'M', np.nan))}")
-        print(f"    row.M_rel: {_fmt(getattr(row,'M_rel', np.nan))}")
-        print(f"    row.Yp: {_fmt(getattr(row,'Yp', np.nan))}")
-        if np.any(row.T >= row.T0R):
-            print("    Note: T should be less than T0R.")
-        yp_val = getattr(row,'Yp', None)
-        if yp_val is not None and np.any(yp_val > 0.3):
-            print("    Note: row.Yp exceeded 0.3 which may indicate an issue with the design or loss model.")
-
-    row.P0_stator_inlet = upstream.P0_stator_inlet
-    ## P0_P is assumed 
-    # row.P = row.P0_stator_inlet*1/row.P0_P
-    
-    upstream_radius = upstream.r
-    # Upstream Relative Frame Calculations 
-    upstream.U = upstream.rpm*np.pi/30 * upstream_radius # rad/s 
-    upstream.Wt = upstream.Vt - upstream.U
-    upstream.W = np.sqrt(upstream.Vx**2 + upstream.Wt**2 + upstream.Vr**2)
-    upstream.beta2 = np.arctan2(upstream.Wt,upstream.Vm)
-    upstream.T0R = upstream.T+upstream.W**2/(2*upstream.Cp)
-    upstream.P0R = upstream.P * (upstream.T0R/upstream.T)**((upstream.gamma)/(upstream.gamma-1))      
-    upstream.M_rel = upstream.W/np.sqrt(upstream.gamma*upstream.R*upstream.T)
-    upstream_rothalpy = upstream.T0R*upstream.Cp - 0.5*upstream.U**2 # H01R - 1/2 U1^2 
-    row.U = row.omega*row.r
-    
-    if np.any(upstream_rothalpy < 0):
-        print('U is too high, reduce RPM or radius')
-    
-    # Rotor Exit Calculations
-    row.beta1 = upstream.beta2
-    
-    loss_type = getattr(row.loss_function, "loss_type", None)    
-    if loss_type == LossType.Pressure:
-        row.Yp = row.loss_function(row,upstream)
-        rotor_calculation(row.Yp)
-    elif loss_type == LossType.Entropy: 
-        desired_entropy_rise = convert_to_ndarray(row.loss_function(row,upstream))
-        if len(desired_entropy_rise) == 1: # If entropy rise is a bulk value
-            fun = lambda s: np.abs(desired_entropy_rise - rotor_calculation(s))
-            x = minimize_scalar(fun,bounds=[0.01,0.4])
-            row.Yp = x
-        elif len(desired_entropy_rise) > 1: # In case entropy rise is an array 
-            fun = lambda s,j: np.abs(desired_entropy_rise[j] - rotor_calculation(s)[j])
-            for j in range(len(desired_entropy_rise)):
-                x = minimize_scalar(fun,bounds=[0.01,0.4],args=(j))
-                row.Yp[j] = x
-            rotor_calculation(row.Yp)
-    else: # loss_type == LossType.Enthalpy: 
-        # Enthalpy loss is typically calculated for a stage so I bulk the loss after the rotor. This is a really terrible way of doing loss but this is here for those legacy loss models. 
-        rotor_calculation(row.Yp)
-    
-    def rotor_calculation(Yp:npt.NDArray): 
-        row.Yp = Yp
-        # Total Relative Temperature stays constant through the rotor. Adjust for change in radius from rotor inlet to exit
-        T0R_coolant = 0 
-        if row.coolant is not None:
-            T0R_coolant = T0_coolant_weighted_average(row)
-        row.T0R = upstream.T0R - T0R_coolant
-        # (upstream_rothalpy + 0.5*row.U**2)/row.Cp # - T0_coolant_weighted_average(row) 
-        
-        # ---- Compressor ----
-        row.P0R = upstream.P0R - row.Yp*(upstream.P0R-upstream.P)
-        M_rel = row.r*0
-        for j in range(1,row.r):
-            M_rel[j] = minimize_scalar(solve_for_mach,bounds=[0.01,1],args=(row,row.area*row.percent_hub_shroud,np.diff(upstream.massflow)))
-        M_rel[0] = 1 / (len(M_rel) - 1) * M_rel[1:].sum() # This way average stays the same 
-        # We basically need static pressure to do the rest of the calculations 
-        row.P = row.P0R/(1+(row.gamma-1)/2*M_rel**2)**(row.gamma/(row.gamma-1)) 
-        # ---- end compressor ----
-        
-        P0R_P = row.P0R / row.P
-        T0R_T = P0R_P**((row.gamma-1)/row.gamma)
-        row.T = (row.T0R/T0R_T)     # Exit static temperature
-        
-        deviation_func = getattr(row, "deviation_function", None)
-        deviation = deviation_func(row, upstream) if callable(deviation_func) else 0.0
-        row.deviation = deviation    
-        if calculate_vm:    # Calculates the T0 at the exit
-            row.W = np.sqrt(2*row.Cp*(row.T0R-row.T)) #! nan popups here a lot for radial machines 
-            nan_in_velocity = np.isnan(np.sum(row.W))
-            temp_issue = np.any(row.T >= row.T0R)
-            high_loss = np.any(getattr(row,'Yp',0) > 0.3)
-            if nan_in_velocity:
-                # Need to adjust T
-                reason = "nan detected in relative velocity"
-                if temp_issue:
-                    reason += "; T >= T0R shouldn't happen because of T-s diagram'"
-                if high_loss:
-                    reason += "; Yp > 0.3 This could be a problem with the loss model;"
-                _log_rotor_failure(reason)
-                raise ValueError(f'nan detected')
-            row.Vr = row.W*np.sin(row.phi)
-            row.Vm = row.W*np.cos(row.beta2 + row.deviation)
-            row.Wt = row.W*np.sin(row.beta2)
-            row.Vx = row.Vm*np.cos(row.phi)
-            row.Vt = row.Wt + row.U 
-            row.V = np.sqrt(row.Vr**2+row.Vt**2+row.Vx**2)
-            row.M = row.V/np.sqrt(row.gamma*row.R*row.T)
-            row.Vm = np.sqrt(row.Vx**2+row.Vr**2)
-            row.T0 = row.T + row.V**2/(2*row.Cp)
-            row.alpha2 = np.arctan2(row.Vt,row.Vm)
-        else: # We know Vm, P0, T0
-            row.Vr = row.Vm*np.sin(row.phi)
-            row.Vx = row.Vm*np.cos(row.phi)
-            
-            row.W = np.sqrt(2*row.Cp*(row.T0R-row.T))
-            row.Wt = row.W*np.sin(row.beta2+row.deviation)
-            row.U = row.omega * row.r 
-            row.Vt = row.Wt+row.U
-            
-            row.alpha2 = np.arctan2(row.Vt,row.Vm)
-            row.V = np.sqrt(row.Vm**2*(1+np.tan(row.alpha2)**2))
-            
-            row.M = row.V/np.sqrt(row.gamma*row.R*row.T)
-        T0_T = (1+(row.gamma-1)/2 * row.M**2)
-        row.P0 = row.P * T0_T**(row.gamma/(row.gamma-1))
-        row.P0_P = (row.P0_stator_inlet/row.P).mean()
-
-        row.M_rel = row.W/np.sqrt(row.gamma*row.R*row.T)
-        row.T0 = row.T+row.V**2/(2*row.Cp)
-        row.entropy_rise = 0.5*(row.Cp+upstream.Cp)*np.log(row.T/upstream.T) - row.R * np.log(row.P/upstream.P)    
-        return row.entropy_rise    
-    
 class CompressorSpool:
     """Used to design compressors 
 
@@ -443,7 +205,7 @@ class CompressorSpool:
     # ------------------------------
     def initialize(self) -> None:
         """Initialize massflow and thermodynamic state through rows (turbines)."""
-        blade_rows = self._all_rows()
+        rows = self._all_rows()
         Is_static_defined = self.outlet.static_defined # This is set when you initialize the outlet 
 
         # Inlet
@@ -453,9 +215,9 @@ class CompressorSpool:
             inlet.__initialize_fluid__(self.fluid)  # type: ignore[arg-type]
         else:
             inlet.__initialize_fluid__(  # type: ignore[call-arg]
-                R=blade_rows[1].R,
-                gamma=blade_rows[1].gamma,
-                Cp=blade_rows[1].Cp,
+                R=rows[1].R,
+                gamma=rows[1].gamma,
+                Cp=rows[1].Cp,
             )
 
         inlet.total_massflow = W0
@@ -469,25 +231,42 @@ class CompressorSpool:
         compute_gas_constants(inlet, self.fluid)
         inlet_calc(inlet)
 
-        for row in blade_rows:
+        for row in rows:
             interpolate_streamline_quantities(row, self.passage, self.num_streamlines)
 
         outlet: Outlet = self.outlet
+        rt = outlet.P0/inlet.P0 # Overall total pressure ratio
+        n = int(len(rows)/2) # Number of stages 
+        r = rt**(1/n) # Use this to define total pressure for each of the stator
+        
+        # Estimate percents
+        percents = np.zeros(shape=(len(rows) - 2)) # don't take account inlet and outlet
+        P0 = inlet.P0
+        for i in range(1,len(rows)): # Inlet, stator, rotor, stator
+            if rows[i].row_type == RowType.Stator:
+                percents[i-1] = r * P0 / outlet.P0
+                prev_P0 = P0
+                P0 *= r
+            else:
+                percents[i-1] = 0.5 * (prev_P0 + r * P0) / outlet.P0
+        percents[-1] = 1 
+        
         for j in range(self.num_streamlines):
             P0 = inlet.get_total_pressure(inlet.percent_hub_shroud[j])  # type: ignore[attr-defined]
-            percents = np.zeros(shape=(len(blade_rows) - 2)) + 0.3
-            percents[-1] = 1
-            P0_range = outlet_pressure(percents=percents, inletP0=inlet.P0[j], outletP=outlet.P[j])
-            for i in range(1, len(blade_rows) - 1):
-                blade_rows[i].P0_is[j] = P0_range[i - 1]
-                    
-
+            P0_range = outlet_pressure(percents=percents, inletP0=inlet.P0[j], outletP=outlet.P0[j])
+            
+            for i in range(1, len(rows) - 1):
+                if rows[i].row_type == RowType.Stator:
+                    rows[i].P0_is[j] = P0_range[i - 1]
+                else:
+                    rows[i].P0R_is[j] = P0_range[i - 1]
+        
         # Pass T0, P0 to downstream rows
-        for i in range(1, len(blade_rows) - 1):
-            upstream = blade_rows[i - 1]
-            downstream = blade_rows[i + 1] if i + 1 < len(blade_rows) else None
+        for i in range(1, len(rows) - 1):
+            upstream = rows[i - 1]
+            downstream = rows[i + 1] if i + 1 < len(rows) else None
 
-            row = blade_rows[i]
+            row = rows[i]
             if row.coolant is not None:
                 T0c = row.coolant.T0
                 P0c = row.coolant.P0
@@ -524,6 +303,9 @@ class CompressorSpool:
             row.gamma = upstream.gamma
             row.R = upstream.R
 
+            total_area, streamline_area = compute_streamline_areas(row)
+            row.total_area = total_area
+            row.area = streamline_area
             if row.row_type == RowType.Stator:
                 stator_calc(row, upstream, downstream,calculate_vm=True,static_defined=False)  # type: ignore[arg-type]
                 compute_massflow(row)

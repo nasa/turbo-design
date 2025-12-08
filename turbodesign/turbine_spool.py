@@ -22,7 +22,7 @@ from .loss.turbine import TD2
 from .passage import Passage
 from .inlet import Inlet
 from .outlet import Outlet
-from .td_math import (
+from .turbine_math import (
     inlet_calc,
     rotor_calc,
     stator_calc,
@@ -215,9 +215,9 @@ class TurbineSpool:
 
     def solve_for_static_pressure(self,upstream:BladeRow,row:BladeRow):
         if row.row_type == RowType.Stator:
-            b = row.area * row.P0 / np.sqrt(row.T0) * np.sqrt(row.gamma/row.R)
+            b = row.total_area * row.P0 / np.sqrt(row.T0) * np.sqrt(row.gamma/row.R)
         else:
-            b = row.area * row.P0R / np.sqrt(row.T0R) * np.sqrt(row.gamma/row.R)
+            b = row.total_area * row.P0R / np.sqrt(row.T0R) * np.sqrt(row.gamma/row.R)
 
         solve_for_M = upstream.total_massflow / b
         fun = lambda M : np.abs(solve_for_M - M*(1+(row.gamma-1)/2 * M**2) ** (-(row.gamma+1)/(2*(row.gamma-1))))
@@ -229,7 +229,7 @@ class TurbineSpool:
         else: 
             row.T = row.T0R/IsenT(M_subsonic,row.gamma)
         a = np.sqrt(row.T*row.gamma*row.R)
-        row.P = row.total_massflow * row.R*row.T / (row.area * row.M * a) 
+        row.P = row.total_massflow * row.R*row.T / (row.total_area * row.M * a) 
         # When total conditions are defined we calculate static pressure
         if row.row_type == RowType.Stator:
             row.P = upstream.P0 - (upstream.P0 - row.P0) / row.Yp 

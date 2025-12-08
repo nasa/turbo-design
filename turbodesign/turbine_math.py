@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import List, Optional, Tuple
 import warnings
 import numpy as np
 import numpy.typing as npt
@@ -11,31 +11,33 @@ from scipy.optimize import minimize
 from .passage import Passage
 from .isentropic import IsenP
 
+def compute_streamline_areas(row: BladeRow) -> Tuple[float, npt.NDArray]:
+    """Compute total annulus area and individual streamline cross sections."""
+    total_area = 0.0
+    streamline_area = np.zeros(len(row.percent_hub_shroud))
+    for j in range(1, len(row.percent_hub_shroud)):
+        if np.abs((row.x[j] - row.x[j - 1])) < 1e-5:  # Axial Machines
+            delta = np.pi * (row.r[j] ** 2 - row.r[j - 1] ** 2)
+            streamline_area[j] = delta
+            total_area += delta
+        else:  # Radial Machines
+            dx = row.x[j] - row.x[j - 1]
+            S = row.r[j] - row.r[j - 1]
+            C = np.sqrt(1 + ((row.r[j] - row.r[j - 1]) / dx) ** 2)
+            streamline_area[j] = 2 * np.pi * C * (S / 2 * dx ** 2 + row.r[j - 1] * dx)
+            total_area += streamline_area[j]
+    return total_area, streamline_area
+
+
 def compute_massflow(row:BladeRow) -> None:
-    """Populates row.massflow and row.calculated_massflow 
-
-    Calculated_massflow is massflow[-1]
-
-    Args:
-        row (BladeRow): current blade row. All quantities are at exit
-        upstream (BladeRow): upstream blade row. All quantities are at exit
-    """
+    """Populates row.massflow and row.calculated_massflow."""
     massflow_fraction =  np.linspace(0,1,len(row.percent_hub_shroud))
     massflow = row.percent_hub_shroud*0
-    total_area = 0 
+    total_area, streamline_area = compute_streamline_areas(row)
     for j in range(1,len(row.percent_hub_shroud)):
         Vm = (row.Vm[j]+row.Vm[j-1])/2
         rho = (row.rho[j]+row.rho[j-1])/2
-        if np.abs((row.x[j]-row.x[j-1]))<1E-5: # Axial Machines
-            total_area += np.pi*(row.r[j]**2-row.r[j-1]**2)
-            massflow[j] = Vm * rho * np.pi* (row.r[j]**2-row.r[j-1]**2) + massflow[j-1]
-        else:   # Radial Machines
-            dx = row.x[j]-row.x[j-1]
-            S = (row.r[j]-row.r[j-1])
-            C = np.sqrt(1+((row.r[j]-row.r[j-1])/dx)**2)
-            area = 2*np.pi*C*(S/2*dx**2+row.r[j-1]*dx)
-            total_area += area
-            massflow[j] = Vm * rho *area * (1-row.blockage)+ massflow[j-1] 
+        massflow[j] = Vm * rho * streamline_area[j] * (1-row.blockage)+ massflow[j-1] 
     
     row.total_massflow_no_coolant = massflow[-1]
     if row.coolant != None:
@@ -43,7 +45,9 @@ def compute_massflow(row:BladeRow) -> None:
     row.massflow = massflow
     row.calculated_massflow = massflow[-1]
     row.total_massflow = massflow[-1]
-    row.area = total_area
+    row.total_area = total_area
+    row.area = streamline_area
+    
 
 def compute_reynolds(rows:List[BladeRow],passage:Passage):
     """Calculates the Reynolds Number 
@@ -199,7 +203,7 @@ def stator_calc(row:BladeRow,upstream:BladeRow,downstream:Optional[BladeRow]=Non
        
 
     elif loss_type == LossType.Enthalpy:
-        b = row.area * row.P0 / np.sqrt(row.T0) * np.sqrt(row.gamma/row.R)
+        b = row.total_area * row.P0 / np.sqrt(row.T0) * np.sqrt(row.gamma/row.R)
         solve_for_M = upstream.total_massflow / b
         fun = lambda M : np.abs(solve_for_M - M*(1+(row.gamma-1)/2 * M**2) ** (-(row.gamma+1)/(2*(row.gamma-1))))
         M_subsonic = minimize(fun,0.1, method='L-BFGS-B', bounds=[0,1])
@@ -207,7 +211,7 @@ def stator_calc(row:BladeRow,upstream:BladeRow,downstream:Optional[BladeRow]=Non
         row.M = M_subsonic
         row.T = row.T0/IsenT(M_subsonic,row.gamma)
         a = np.sqrt(row.T*row.gamma*row.R)
-        row.P = row.total_massflow * row.R*row.T / (row.area * row.M * a) # Use the massflow to find static pressure 
+        row.P = row.total_massflow * row.R*row.T / (row.total_area * row.M * a) # Use the massflow to find static pressure 
         
     if downstream is not None:
         row.P0_P = float((row.P0/downstream.P).mean())

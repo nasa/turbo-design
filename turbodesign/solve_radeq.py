@@ -2,8 +2,8 @@ from typing import List, Tuple
 from .radeq import radeq
 from .enums import LossType, RowType, PowerType, MassflowConstraint
 from .bladerow import BladeRow
-from .td_math import compute_gas_constants
-from .td_math import compute_quantities, compute_power, compute_massflow
+from .turbine_math import compute_gas_constants
+from .turbine_math import compute_quantities, compute_power, compute_massflow
 import numpy.typing as npt
 import numpy as np
 from scipy.interpolate import interp1d

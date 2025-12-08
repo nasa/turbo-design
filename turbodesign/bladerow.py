@@ -42,7 +42,8 @@ class BladeRow:
     x: npt.NDArray = field(default_factory=lambda: np.array([0]))       # x - coordinates (useful for computing axial chord)
     r: npt.NDArray = field(default_factory=lambda: np.array([0]))       # Radius - coordinates 
     m: npt.NDArray = field(default_factory=lambda: np.array([0]))       # meridional 
-    area:float = 0
+    total_area:float = 0
+    area: npt.NDArray = field(default_factory=lambda: np.array([0]))
     # Calculated massflow is the massflow computed after radial eq solver
     calculated_massflow: float = 0
     
@@ -90,6 +91,7 @@ class BladeRow:
     T0: npt.NDArray = field(default_factory=lambda: np.array([0]))          
     T0_is:npt.NDArray = field(default_factory=lambda: np.array([0])) 
     P0R: npt.NDArray = field(default_factory=lambda: np.array([0]))             # Relative Total Pressure (Pa)
+    P0R_is:npt.NDArray = field(default_factory=lambda: np.array([0]))
     T0R: npt.NDArray = field(default_factory=lambda: np.array([0]))
     
     # Static Quantities
@@ -509,7 +511,8 @@ class BladeRow:
             "axial_chord":self.axial_chord,
             "aspect_ratio":self.aspect_ratio,
             "num_blades":self.num_blades,
-            "area": self.area,
+            "total_area": self.total_area,
+            "area": self.area.tolist(),
             "radius":self.r.tolist(),
             "x":self.x.tolist(),
             "dx":self.x[-1]-self.x[0],
@@ -583,6 +586,7 @@ def interpolate_streamline_quantities(row:BladeRow,passage:Passage,num_streamlin
     
     # Relative Quantities
     row.P0R = interpolate_quantities(row.P0R,row.percent_hub_shroud,streamline_percent_length)
+    row.P0R_is = interpolate_quantities(row.P0,row.percent_hub_shroud,streamline_percent_length)
     row.T0R = interpolate_quantities(row.T0R,row.percent_hub_shroud,streamline_percent_length)
 
     # Static Quantities 

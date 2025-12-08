@@ -44,7 +44,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../modules/bladerow.html">BladeRow</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../../../modules/bladerow.html#turbodesign.bladerow.BladeRow"><code class="docutils literal notranslate"><span class="pre">BladeRow</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../modules/bladerow.html#turbodesign.bladerow.interpolate_quantities"><code class="docutils literal notranslate"><span class="pre">interpolate_quantities()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../../../modules/bladerow.html#turbodesign.bladerow.interpolate_streamline_radii"><code class="docutils literal notranslate"><span class="pre">interpolate_streamline_radii()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../modules/bladerow.html#turbodesign.bladerow.interpolate_streamline_quantities"><code class="docutils literal notranslate"><span class="pre">interpolate_streamline_quantities()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../modules/bladerow.html#turbodesign.bladerow.sutherland"><code class="docutils literal notranslate"><span class="pre">sutherland()</span></code></a></li>
 </ul>
 </li>
@@ -105,15 +105,16 @@
 <li class="toctree-l2"><a class="reference internal" href="../../../../modules/spool.html#turbodesign.turbine_spool.TurbineSpool"><code class="docutils literal notranslate"><span class="pre">TurbineSpool</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../modules/td_math.html">Turbine Design Math</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="../../../../modules/td_math.html#turbodesign.td_math.T0_coolant_weighted_average"><code class="docutils literal notranslate"><span class="pre">T0_coolant_weighted_average()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../../../modules/td_math.html#turbodesign.td_math.compute_massflow"><code class="docutils literal notranslate"><span class="pre">compute_massflow()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../../../modules/td_math.html#turbodesign.td_math.compute_power"><code class="docutils literal notranslate"><span class="pre">compute_power()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../../../modules/td_math.html#turbodesign.td_math.compute_quantities"><code class="docutils literal notranslate"><span class="pre">compute_quantities()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../../../modules/td_math.html#turbodesign.td_math.compute_reynolds"><code class="docutils literal notranslate"><span class="pre">compute_reynolds()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../../../modules/td_math.html#turbodesign.td_math.inlet_calc"><code class="docutils literal notranslate"><span class="pre">inlet_calc()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../../../modules/td_math.html#turbodesign.td_math.rotor_calc"><code class="docutils literal notranslate"><span class="pre">rotor_calc()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../../../modules/td_math.html#turbodesign.td_math.stator_calc"><code class="docutils literal notranslate"><span class="pre">stator_calc()</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../modules/turbine_math.html">Turbine Design Math</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../modules/turbine_math.html#turbodesign.turbine_math.T0_coolant_weighted_average"><code class="docutils literal notranslate"><span class="pre">T0_coolant_weighted_average()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../modules/turbine_math.html#turbodesign.turbine_math.compute_massflow"><code class="docutils literal notranslate"><span class="pre">compute_massflow()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../modules/turbine_math.html#turbodesign.turbine_math.compute_power"><code class="docutils literal notranslate"><span class="pre">compute_power()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../modules/turbine_math.html#turbodesign.turbine_math.compute_quantities"><code class="docutils literal notranslate"><span class="pre">compute_quantities()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../modules/turbine_math.html#turbodesign.turbine_math.compute_reynolds"><code class="docutils literal notranslate"><span class="pre">compute_reynolds()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../modules/turbine_math.html#turbodesign.turbine_math.compute_streamline_areas"><code class="docutils literal notranslate"><span class="pre">compute_streamline_areas()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../modules/turbine_math.html#turbodesign.turbine_math.inlet_calc"><code class="docutils literal notranslate"><span class="pre">inlet_calc()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../modules/turbine_math.html#turbodesign.turbine_math.rotor_calc"><code class="docutils literal notranslate"><span class="pre">rotor_calc()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../modules/turbine_math.html#turbodesign.turbine_math.stator_calc"><code class="docutils literal notranslate"><span class="pre">stator_calc()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../modules/turbinespool.html">Turbine Spool</a><ul>
@@ -149,6 +150,7 @@
   <h1>Source code for turbodesign.loss.turbine.ainleymathieson</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span><span class="w"> </span><span class="nn">pickle</span><span class="o">,</span><span class="w"> </span><span class="nn">os</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Dict</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy.typing</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">npt</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">...bladerow</span><span class="w"> </span><span class="kn">import</span> <span class="n">BladeRow</span><span class="p">,</span> <span class="n">sutherland</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">...lossinterp</span><span class="w"> </span><span class="kn">import</span> <span class="n">LossInterp</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">...enums</span><span class="w"> </span><span class="kn">import</span> <span class="n">RowType</span><span class="p">,</span> <span class="n">LossType</span>
@@ -190,7 +192,7 @@
             
 <div class="viewcode-block" id="AinleyMathieson.__call__">
 <a class="viewcode-back" href="../../../../modules/loss.html#turbodesign.loss.turbine.ainleymathieson.AinleyMathieson.__call__">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">row</span><span class="p">:</span><span class="n">BladeRow</span><span class="p">,</span> <span class="n">upstream</span><span class="p">:</span><span class="n">BladeRow</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">row</span><span class="p">:</span><span class="n">BladeRow</span><span class="p">,</span> <span class="n">upstream</span><span class="p">:</span><span class="n">BladeRow</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Ainley Mathieson predicts the pressure loss of a turbine nozzle or rotor. Since these correlations are from Cascade experiments, the user should be familar with the reynolds and mach number requirements for each equation and figure. Using something outside the bounds can give inaccuare approximations of loss. Additionally these correlations were done on unoptimized blades so efficiencies maybe lower than what&#39;s attainable. Massflow can also be affected because exit P0 is affected. </span>
 <span class="sd">        </span>
 <span class="sd">        This code will attempt use the correct equations and warn the user if mach number is out of range.</span>
@@ -200,11 +202,11 @@
 <span class="sd">            beta: blade angle relative to axial direction </span>
 <span class="sd">            </span>
 <span class="sd">        Args:</span>
-<span class="sd">            upstream (BladeRow): Upstream blade row</span>
-<span class="sd">            row (BladeRow): downstream blade row</span>
+<span class="sd">            row (BladeRow): Blade row being evaluated.</span>
+<span class="sd">            upstream (BladeRow): Upstream blade row providing inlet conditions.</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            float: Pressure Loss at zero incidence </span>
+<span class="sd">            numpy.ndarray: Pressure loss at zero incidence matching ``row.r``.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">Kp</span> <span class="o">=</span> <span class="mi">12300</span> <span class="c1"># Ft / (pdl C); 1 pdl = 0.138254954376 N :(</span>
         <span class="n">At</span> <span class="o">=</span> <span class="n">row</span><span class="o">.</span><span class="n">throat</span>
@@ -272,7 +274,7 @@
         <span class="n">Yp_i0</span> <span class="o">=</span> <span class="p">(</span><span class="n">Yp_beta0</span> <span class="o">+</span> <span class="p">(</span><span class="n">beta1</span><span class="o">/</span><span class="n">alpha2</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span><span class="p">(</span><span class="n">Yp_beta1_eq_alpha2</span> <span class="o">-</span> <span class="n">Yp_beta0</span><span class="p">))</span> <span class="o">*</span><span class="p">(</span><span class="n">t_c</span><span class="o">/</span><span class="mf">0.2</span><span class="p">)</span><span class="o">**</span><span class="p">(</span><span class="o">-</span><span class="n">beta1</span><span class="o">/</span><span class="n">alpha2</span><span class="p">)</span> <span class="c1"># Fig 4 and Eqn 5</span>
         
         <span class="n">Yt</span> <span class="o">=</span> <span class="n">Yp_i0</span> <span class="o">+</span> <span class="n">Y_secondary_clearance</span> 
-        <span class="k">return</span> <span class="n">Yt</span>   <span class="c1"># Profile loss at zero incidence </span></div>
+        <span class="k">return</span> <span class="n">Yt</span><span class="o">+</span><span class="n">row</span><span class="o">.</span><span class="n">r</span><span class="o">*</span><span class="mi">0</span>   <span class="c1"># Profile loss at zero incidence </span></div>
 </div>
 
         
