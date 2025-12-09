@@ -38,6 +38,8 @@ def stator_calc(
         else:  # Compressor
             row.P0 = row.P0_is - row.Yp * (upstream.P0 - upstream.P)
 
+        residual_error = np.zeros(len(row.area)-1)
+
         if downstream is not None:
             row.P0_P = float((row.P0 / downstream.P).mean())
             row.rp = ((row.P - downstream.P) / (upstream.P0 - downstream.P)).mean()
@@ -45,24 +47,26 @@ def stator_calc(
         deviation_func = getattr(row, "deviation_function", None)
         deviation = deviation_func(row, upstream) if callable(deviation_func) else 0.0
         row.deviation[:] = deviation
+        
         if calculate_vm:
             # Get the static pressure from the massflow distribution.
             M = np.zeros(len(row.area))
             streamline_massflow = np.diff(row.massflow)
-            for i in range(1, len(row.area)):
+            for j in range(1, len(row.area)):
                 res = minimize_scalar(
                     solve_for_mach,
                     bounds=[0.01, 1.0],
                     args=(
-                        streamline_massflow[i - 1],
-                        row.P0[i],
-                        row.T0[i],
-                        row.area[i],
+                        streamline_massflow[j - 1],
+                        row.P0[j],
+                        row.T0[j],
+                        row.area[j],
                         row.gamma,
                         row.R,
                     ),
                 )
-                M[i] = res.x
+                M[j] = res.x
+                residual_error[j-1] = res.fun
             M[0] = 1.0 / (len(M) - 1) * M[1:].sum()  # Preserve the same average.
             row.M = M
             P0_P = IsenP(M, row.gamma)
@@ -93,7 +97,7 @@ def stator_calc(
         row.entropy_rise = 0.5 * (row.Cp + upstream.Cp) * np.log(
             row.T / upstream.T
         ) - row.R * np.log(row.P / upstream.P)
-        return row.entropy_rise
+        return row.entropy_rise, residual_error
 
     loss_type = getattr(row.loss_function, "loss_type", None)
 
@@ -159,26 +163,29 @@ def rotor_calc(
         else:  # Compressor
             row.P0R = row.P0R_is - row.Yp * (upstream.P0R - upstream.P)
 
+        residual_error = np.zeros(len(row.area)-1)
+
         deviation_func = getattr(row, "deviation_function", None)
         deviation = deviation_func(row, upstream) if callable(deviation_func) else 0.0
         row.deviation = deviation
         if calculate_vm:
             streamline_massflow = np.diff(row.massflow)
             M_rel = np.zeros(len(row.area))
-            for i in range(1, len(row.area)):
+            for j in range(1, len(row.area)):
                 res = minimize_scalar(
                     solve_for_mach,
                     bounds=[0.01, 1.0],
                     args=(
-                        streamline_massflow[i - 1],
-                        row.P0[i],
-                        row.T0[i],
-                        row.area[i],
+                        streamline_massflow[j - 1],
+                        row.P0[j],
+                        row.T0[j],
+                        row.area[j],
                         row.gamma,
                         row.R,
                     ),
                 )
-                M_rel[i] = res.x
+                M_rel[j] = res.x
+                residual_error[j-1] = res.fun
             M_rel[0] = 1.0 / (len(M_rel) - 1) * M_rel[1:].sum()
             row.M_rel = M_rel
             P0_P = IsenP(M_rel, row.gamma)
@@ -229,7 +236,7 @@ def rotor_calc(
         row.entropy_rise = 0.5 * (row.Cp + upstream.Cp) * np.log(
             row.T / upstream.T
         ) - row.R * np.log(row.P / upstream.P)
-        return row.entropy_rise
+        return row.entropy_rise, residual_error
 
     row.P0_stator_inlet = upstream.P0_stator_inlet
 
