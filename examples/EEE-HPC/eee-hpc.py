@@ -357,7 +357,7 @@ passage = Passage(hub_m[:,0],hub_m[:,1],
 
 spool = CompressorSpool(
             passage=passage,
-            massflow=54,
+            massflow=54.4,
             inlet=inlet,
             outlet=outlet,
             rows=rows,

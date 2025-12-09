@@ -51,11 +51,11 @@ def stator_calc(
         if calculate_vm:
             # Get the static pressure from the massflow distribution.
             M = np.zeros(len(row.area))
+            # Initial massflow fraction
             streamline_massflow = np.diff(row.massflow)
+            
             for j in range(1, len(row.area)):
-                res = minimize_scalar(
-                    solve_for_mach,
-                    bounds=[0.01, 1.0],
+                res = minimize_scalar(solve_for_mach,bounds=[0.01, 1.0],
                     args=(
                         streamline_massflow[j - 1],
                         row.P0[j],
@@ -89,14 +89,13 @@ def stator_calc(
 
         if upstream.row_type == RowType.Rotor:
             row.alpha1 = upstream.alpha2 + upstream.deviation
+            
         row.beta1 = upstream.beta2
         row.rho = row.P / (row.R * row.T)
         row.U = row.omega * row.r
         row.Wt = row.Vt - row.U
         row.P0_stator_inlet = upstream.P0
-        row.entropy_rise = 0.5 * (row.Cp + upstream.Cp) * np.log(
-            row.T / upstream.T
-        ) - row.R * np.log(row.P / upstream.P)
+        row.entropy_rise = 0.5 * (row.Cp + upstream.Cp) * np.log(row.T / upstream.T) - row.R * np.log(row.P / upstream.P)
         return row.entropy_rise, residual_error
 
     loss_type = getattr(row.loss_function, "loss_type", None)

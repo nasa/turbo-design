@@ -10,7 +10,7 @@ from scipy.interpolate import interp1d
 from scipy.optimize import minimize_scalar
 from .passage import Passage     
     
-def adjust_streamlines(blade_rows:List[BladeRow],passage:Passage):
+def adjust_streamlines(blade_rows:List[BladeRow],passage:Passage,massflow_fraction:npt.ArrayLike):
     """Adjust the streamlines to evenly divide the massflow
 
     Args:
@@ -20,12 +20,10 @@ def adjust_streamlines(blade_rows:List[BladeRow],passage:Passage):
     """
     for row_index,row in enumerate(blade_rows):
         print(f"Adjusting Streamlines to balance massflow Row: {row_index}")
-        massflow_fraction =  np.linspace(0,1,len(row.percent_hub_shroud))
         row.total_massflow = row.massflow[-1]
-        ideal_massflow_fraction = row.massflow[-1] * massflow_fraction
         
-        new_percent_streamline = interp1d(row.massflow,row.percent_hub_shroud)(ideal_massflow_fraction[1:-1])
-        row.percent_hub_shroud[1:-1] = new_percent_streamline
+        new_percent_streamline = interp1d(row.massflow,row.percent_hub_shroud)(massflow_fraction[1:-1])
+        row.percent_hub_shroud[1:-1] = new_percent_streamline 
 
         cut_line, thub,_ = passage.get_cutting_line(row.percent_hub)
         row.x,row.r = cut_line.get_point(row.percent_hub_shroud)

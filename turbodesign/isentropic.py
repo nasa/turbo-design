@@ -1,7 +1,7 @@
 from typing import Union
 import numpy as np
 import numpy.typing as npt
-
+import math
 
 ArrayLike = Union[float, npt.NDArray[np.float64]]
 
@@ -104,29 +104,29 @@ def Massflow(P0:ArrayLike,T0:ArrayLike,A:ArrayLike,M:ArrayLike,gamma:float,R:flo
     return _maybe_return_scalar(mdot, P0, T0, A, M)
 
 
-def solve_for_mach(
-    M: ArrayLike,
-    massflow: ArrayLike,
-    P0: ArrayLike,
-    T0: ArrayLike,
-    area: ArrayLike,
-    gamma: float,
-    R: float,
-) -> ArrayLike:
-    """Residual between desired and estimated massflow for a guessed Mach number."""
+def solve_for_mach(M: float, massflow: float, P0: float, T0: float, area: float, gamma: float, R: float) -> float:
+    """Residual between desired and estimated massflow for a guessed Mach number.
+
+    Args:
+        M (float): Mach number guess (dimensionless).
+        massflow (float): Target massflow [kg/s].
+        P0 (float): Total pressure [Pa].
+        T0 (float): Total temperature [K].
+        area (float): Flow area [m^2].
+        gamma (float): Specific heat ratio Cp/Cv [-].
+        R (float): Gas constant [J/(kg·K)].
+
+    Returns:
+        float: Absolute massflow residual [kg/s].
+    """
     expo = -(gamma + 1.0) / (2.0 * (gamma - 1.0))
-    M_arr = np.asarray(M, dtype=float)
-    massflow_arr = np.asarray(massflow, dtype=float)
-    P0_arr = np.asarray(P0, dtype=float)
-    T0_arr = np.asarray(T0, dtype=float)
-    area_arr = np.asarray(area, dtype=float)
     estimate = (
-        area_arr
-        * P0_arr
-        / np.sqrt(T0_arr)
+        area
+        * P0
+        / np.sqrt(T0)
         * np.sqrt(gamma / R)
-        * M_arr
-        * np.power(1.0 + (gamma - 1.0) / 2.0 * M_arr * M_arr, expo)
+        * M
+        * np.power(1.0 + (gamma - 1.0) / 2.0 * M * M, expo)
     )
-    residual = np.abs(massflow_arr - estimate)
-    return _maybe_return_scalar(residual, M, massflow, P0, T0, area)
+    residual = np.abs(massflow - estimate)
+    return residual
