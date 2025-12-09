@@ -2,6 +2,7 @@ from turbodesign.arrayfuncs import convert_to_ndarray
 from .losstype import LossBaseClass
 from ..enums import LossType
 import numpy.typing as npt 
+import numpy as np
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from ..bladerow import BladeRow  # for type hints only
@@ -19,7 +20,7 @@ class FixedPressureLoss(LossBaseClass):
         """Outputs the fixed pressure loss."""
         loss = self.pressure_loss
         if loss.size == 1:
-            loss = loss * npt.ones_like(row.r) # type: ignore
+            loss = loss * np.ones_like(row.r) # type: ignore
         elif loss.shape != row.r.shape:
             loss = npt.asarray(loss).reshape(row.r.shape) # type: ignore
         return loss

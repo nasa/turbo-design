@@ -126,7 +126,6 @@ class Inlet(BladeRow):
                 self.P = self.P0 * 1/(1 + (self.gamma-1) * self.M**2)**(self.gamma/(self.gamma-1))
             self.rho = self.P/(self.R*self.T)
 
-        self.rpm = 0
         self.beta1_metal = [0] 
         self.beta2_metal = [0]
         if len(self.percent_hub_shroud) == 1:

@@ -120,13 +120,7 @@ def solve_for_mach(M: float, massflow: float, P0: float, T0: float, area: float,
         float: Absolute massflow residual [kg/s].
     """
     expo = -(gamma + 1.0) / (2.0 * (gamma - 1.0))
-    estimate = (
-        area
-        * P0
-        / np.sqrt(T0)
-        * np.sqrt(gamma / R)
-        * M
-        * np.power(1.0 + (gamma - 1.0) / 2.0 * M * M, expo)
-    )
+    
+    estimate = area* P0/np.sqrt(T0)*np.sqrt(gamma / R)*M*np.power(1.0 + (gamma - 1.0) / 2.0 * M * M, expo)
     residual = np.abs(massflow - estimate)
     return residual

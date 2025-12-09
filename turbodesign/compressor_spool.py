@@ -107,7 +107,7 @@ class CompressorSpool:
         # Assign IDs, RPMs, and axial chords where appropriate
         for i, br in enumerate(self._all_rows()):
             br.id = i
-            if not isinstance(br, (Inlet, Outlet)):
+            if not isinstance(br, (Outlet)):
                 br.rpm = rpm
                 br.axial_chord = br.hub_location * self.passage.hub_length
             if isinstance(br, BladeRow) and br.row_type == RowType.Rotor:
@@ -261,13 +261,11 @@ class CompressorSpool:
         for i in range(1, len(rows) - 1):
             if rows[i].row_type == RowType.IGV:
                 # IGV functions as a nozzle so there shouldn't be total pressure rise but static pressure will go up
-                rows[i].P0_is = rows[i-1].P0
-            if rows[i].row_type == RowType.Stator:
-                rows[i].P0_is[:] = r * P0_mean
-                prev_P0_mean = P0_mean
-                P0_mean *= r
+                rows[i].P0 = rows[i-1].P0
+                rows[i].P0_ratio[:] = 1
             else:
-                rows[i].P0R_is[:] = (P0_mean+prev_P0_mean)/2
+                rows[i].P0_ratio[:] = r 
+            
         
         # Pass T0, P0 to downstream rows
         for i in range(1, len(rows) - 1):
