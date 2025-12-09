@@ -551,6 +551,7 @@ def interpolate_streamline_quantities(row:BladeRow,passage:Passage,num_streamlin
     row._beta2_metal = interpolate_quantities(row._beta2_metal,row.beta2_metal_radii,streamline_percent_length)
     row.beta1_metal_radii = streamline_percent_length
     row.beta2_metal_radii = streamline_percent_length
+    row.deviation = streamline_percent_length * 0
     
     row.mprime = interpolate_quantities(row.mprime,row.percent_hub_shroud,streamline_percent_length)
     

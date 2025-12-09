@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 
 from cantera.composite import Solution
 from scipy.interpolate import interp1d
-from scipy.optimize import minimize_scalar, fmin_slsqp
+from scipy.optimize import minimize_scalar
 
 # --- Project-local imports
 from .bladerow import BladeRow, interpolate_streamline_quantities
@@ -29,6 +29,9 @@ from .turbine_math import (
 )
 from .solve_radeq import adjust_streamlines, radeq
 from pyturbo.helper import convert_to_ndarray
+
+# Default fraction of the stator-to-stator pressure rise attributed to a rotor
+DEFAULT_ROTOR_PRESSURE_FRACTION = 0.5
 
 class CompressorSpool:
     """Used to design compressors 
@@ -71,6 +74,7 @@ class CompressorSpool:
         fluid: Optional[Solution] = None,
         rpm: float = -1,
         massflow_constraint: MassflowConstraint = MassflowConstraint.AngleMatch,
+        rotor_pressure_fraction: float = DEFAULT_ROTOR_PRESSURE_FRACTION,
     ) -> None:
         """Initialize a (turbine) spool
 
@@ -94,6 +98,7 @@ class CompressorSpool:
         self._fluid = fluid if fluid is not None else Solution("air.yaml")
         self.massflow_constraint = massflow_constraint
         self.rpm = rpm
+        self.rotor_pressure_fraction = float(np.clip(rotor_pressure_fraction, 0.0, 1.0))
 
         # Previously this used dataclasses.field on a non-dataclass; do it explicitly
         self.t_streamline = np.zeros((10,), dtype=float)
@@ -105,6 +110,8 @@ class CompressorSpool:
             if not isinstance(br, (Inlet, Outlet)):
                 br.rpm = rpm
                 br.axial_chord = br.hub_location * self.passage.hub_length
+            if isinstance(br, BladeRow) and br.row_type == RowType.Rotor:
+                setattr(br, "rotor_pressure_fraction", getattr(br, "rotor_pressure_fraction", self.rotor_pressure_fraction))
 
         # Propagate initial fluid to rows
         for br in self._all_rows():
@@ -118,6 +125,13 @@ class CompressorSpool:
     def blade_rows(self) -> List[BladeRow]:
         """Backwards-compatible combined row list."""
         return self._all_rows()
+
+    def set_rotor_pressure_fraction(self, value: float) -> None:
+        """Update default pressure split fraction for all rotor rows."""
+        self.rotor_pressure_fraction = float(np.clip(value, 0.0, 1.0))
+        for row in self.rows:
+            if row.row_type == RowType.Rotor:
+                setattr(row, "rotor_pressure_fraction", self.rotor_pressure_fraction)
 
     # ------------------------------
     # Properties
@@ -222,7 +236,7 @@ class CompressorSpool:
         inlet.total_massflow = W0
         inlet.total_massflow_no_coolant = W0
         inlet.massflow = np.linspace(0, 1, self.num_streamlines) * W0
-
+        
         inlet.__interpolate_quantities__(self.num_streamlines)  # type: ignore[attr-defined]
         inlet.__initialize_velocity__(self.passage, self.num_streamlines)  # type: ignore[attr-defined]
         interpolate_streamline_quantities(inlet, self.passage, self.num_streamlines)
@@ -234,32 +248,26 @@ class CompressorSpool:
             interpolate_streamline_quantities(row, self.passage, self.num_streamlines)
 
         outlet: Outlet = self.outlet
-        rt = outlet.P0.mean()/inlet.P0.mean() # Overall total pressure ratio
-        n = int(len(rows)/2) # Number of stages 
-        r = rt**(1/n) # Use this to define total pressure for each of the stator
         
-        # Estimate percents
-        percents = np.zeros(shape=(len(rows) - 2)) # don't take account inlet and outlet
-        P0 = inlet.P0.mean(); prev_P0 = P0
-        for i in range(1,len(rows)-1): # Inlet, stator, rotor, stator, ... , outlet
+        rt = outlet.P0.mean() / inlet.P0.mean()
+        n_igv = sum(1 for row in rows if row.row_type == RowType.IGV)
+        n_inlets = sum(1 for row in rows if row.row_type == RowType.Inlet)
+        n_outlets = sum(1 for row in rows if row.row_type == RowType.Outlet)
+        n = int((len(rows)-n_igv-n_inlets-n_outlets) / 2) # Remove the inlet and outlets from the row counts
+        r = rt ** (1 / n)
+
+        P0_mean = float(inlet.P0.mean())
+        prev_P0_mean = P0_mean
+        for i in range(1, len(rows) - 1):
+            if rows[i].row_type == RowType.IGV:
+                # IGV functions as a nozzle so there shouldn't be total pressure rise but static pressure will go up
+                rows[i].P0_is = rows[i-1].P0
             if rows[i].row_type == RowType.Stator:
-                percents[i-1] = r * P0 / outlet.P0.mean()
-                prev_P0 = P0
-                P0 *= r
+                rows[i].P0_is[:] = r * P0_mean
+                prev_P0_mean = P0_mean
+                P0_mean *= r
             else:
-                percents[i-1] = 0.5 * (prev_P0 + r * P0) / outlet.P0.mean()
-            rows[i].inlet_to_outlet_pratio = (percents[i-2],percents[i-1])
-        percents[-1] = 1 
-        
-        for j in range(self.num_streamlines):
-            P0 = inlet.get_total_pressure(inlet.percent_hub_shroud[j])  # type: ignore[attr-defined]
-            P0_range = outlet_pressure(percents=percents, inletP0=inlet.P0[j], outletP=outlet.P0[j])
-            
-            for i in range(1, len(rows) - 1):
-                if rows[i].row_type == RowType.Stator:
-                    rows[i].P0_is[j] = P0_range[i - 1]
-                else:
-                    rows[i].P0R_is[j] = P0_range[i - 1]
+                rows[i].P0R_is[:] = (P0_mean+prev_P0_mean)/2
         
         # Pass T0, P0 to downstream rows
         for i in range(1, len(rows) - 1):
@@ -306,7 +314,7 @@ class CompressorSpool:
             total_area, streamline_area = compute_streamline_areas(row)
             row.total_area = total_area
             row.area = streamline_area
-            if row.row_type == RowType.Stator:
+            if row.row_type == RowType.Stator or row.row_type == RowType.IGV:
                 stator_calc(row, upstream, downstream,calculate_vm=True,static_defined=False)  # type: ignore[arg-type]
                 compute_massflow(row)
             elif row.row_type == RowType.Rotor:
@@ -355,6 +363,17 @@ class CompressorSpool:
             bounds = tuple(float(v) for v in rows[i].inlet_to_outlet_pratio)
             pressure_ratio_ranges.append(bounds)
             pressure_ratio_guess.append(float(np.mean(bounds)))
+
+        def _ensure_monotonic(vals: List[float]) -> List[float]:
+            eps = 1e-6
+            constrained = vals[:]
+            for i in range(1, len(constrained)):
+                constrained[i] = max(constrained[i], constrained[i - 1] + eps)
+            for i in range(len(constrained) - 2, -1, -1):
+                constrained[i] = min(constrained[i], constrained[i + 1] - eps)
+            return constrained
+
+        pressure_ratio_guess = _ensure_monotonic(pressure_ratio_guess)
 
         def balance_loop(
             x0: List[float],
@@ -437,29 +456,31 @@ class CompressorSpool:
             return self.__massflow_std__(rows[1:-1])
 
         print("Looping to converge massflow")
-        past_err = -100.0
+        err = balance_loop(pressure_ratio_guess, rows, self.inlet.P0, self.outlet.P0)
         loop_iter = 0
-        err = 1e-3
-        while (np.abs((err - past_err) / err) > 0.05) and (loop_iter < 10):
-            if len(pressure_ratio_ranges) == 1:  # Single stage, use minimize scalar
-                x = minimize_scalar(
-                    fun=balance_loop,
-                    args=(rows, self.inlet.P0, self.outlet.P0),
-                    bounds=pressure_ratio_ranges[0],
-                    tol=1e-4,
-                    method="bounded",
-                )
-                print(x)
-            else:  # Multiple stages, use slsqp
-                x = fmin_slsqp(
-                    func=balance_loop,
-                    args=(rows, self.inlet.P0, self.outlet.P0),
-                    bounds=pressure_ratio_ranges,
-                    x0=pressure_ratio_guess,
-                    epsilon=1e-4,
-                    iter=200,
-                )
-                pressure_ratio_guess = x.tolist()
+        max_iter = 10
+        while loop_iter < max_iter:
+            prev_err = err
+            for idx, bounds in enumerate(pressure_ratio_ranges):
+                def _objective(val: float, pos: int = idx) -> float:
+                    trial = pressure_ratio_guess.copy()
+                    trial[pos] = val
+                    return balance_loop(trial, rows, self.inlet.P0, self.outlet.P0)
+
+                lower, upper = bounds
+                eps = 1e-4
+                if idx > 0:
+                    lower = max(lower, pressure_ratio_guess[idx - 1] + eps)
+                if idx < len(pressure_ratio_guess) - 1:
+                    upper = min(upper, pressure_ratio_guess[idx + 1] - eps)
+                if lower >= upper:
+                    continue
+                res = minimize_scalar(_objective, bounds=(lower, upper), method="bounded")
+                pressure_ratio_guess[idx] = float(res.x)
+
+            pressure_ratio_guess = _ensure_monotonic(pressure_ratio_guess)
+
+            err = balance_loop(pressure_ratio_guess, rows, self.inlet.P0, self.outlet.P0)
 
             self.inlet.massflow = np.linspace(0, 1, self.num_streamlines) * rows[1].total_massflow_no_coolant
             self.inlet.total_massflow_no_coolant = rows[1].total_massflow_no_coolant
@@ -473,10 +494,12 @@ class CompressorSpool:
             self.outlet.transfer_quantities(rows[-2])
             self.outlet.P = self.outlet.get_static_pressure(self.outlet.percent_hub_shroud)
 
-            past_err = err
-            err = self.__massflow_std__(rows)
             loop_iter += 1
             print(f"Loop {loop_iter} massflow convergenced error:{err}")
+
+            denom = max(err, 1e-6)
+            if abs((err - prev_err) / denom) <= 0.05:
+                break
 
         compute_reynolds(rows, self.passage)
 
@@ -813,10 +836,6 @@ def massflow_loss_function(
 
 
 def outlet_pressure(percents: List[float], inletP0: float, outletP: float) -> npt.NDArray:
-    """Map a list of percents [0..1] to each row's outlet static pressure."""
+    """Linearly interpolate total pressure values along the spool."""
     percents_arr = convert_to_ndarray(percents)
-    Ps = np.zeros((len(percents_arr),))
-    for i in range(len(percents_arr)):
-        Ps[i] = float(interp1d((0, 1), (inletP0, outletP))(percents_arr[i]))
-        inletP0 = Ps[i]
-    return Ps
+    return inletP0 + (outletP - inletP0) * percents_arr

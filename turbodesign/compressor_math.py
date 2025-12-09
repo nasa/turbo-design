@@ -44,7 +44,7 @@ def stator_calc(
 
         deviation_func = getattr(row, "deviation_function", None)
         deviation = deviation_func(row, upstream) if callable(deviation_func) else 0.0
-        row.deviation = deviation
+        row.deviation[:] = deviation
         if calculate_vm:
             # Get the static pressure from the massflow distribution.
             M = np.zeros(len(row.area))
@@ -105,7 +105,7 @@ def stator_calc(
         if len(desired_entropy_rise) == 1:  # bulk value
             fun = lambda s: np.abs(desired_entropy_rise - stator_calculation(s))
             x = minimize_scalar(fun, bounds=[0.01, 0.4])
-            row.Yp = x
+            row.Yp[:] = x
         elif len(desired_entropy_rise) > 1:  # entropy rise array
             fun = lambda s, j: np.abs(desired_entropy_rise[j] - stator_calculation(s)[j])
             for j in range(len(desired_entropy_rise)):
@@ -113,7 +113,7 @@ def stator_calc(
                 row.Yp[j] = x
             stator_calculation(row.Yp)
     else:  # LossType.Enthalpy
-        row.Yp = 0
+        row.Yp[:] = 0
         stator_calculation(row.Yp)
 
 

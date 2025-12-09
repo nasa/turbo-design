@@ -6,6 +6,8 @@ class LossType(Enum):
     Entropy = 3
 
 class RowType(Enum):
+    # Similar to a stator but for compressor calculations there is no Total Pressure rise
+    IGV = 0         
     Stator = 1
     Rotor = 2 
     CounterRotating = 2

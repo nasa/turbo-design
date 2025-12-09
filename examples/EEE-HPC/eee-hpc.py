@@ -8,13 +8,12 @@ Todo:
 
 """
 
-from turbodesign import TurbineSpool, Inlet, RowType, BladeRow, Passage, Outlet, PassageType
+from turbodesign import Inlet, RowType, BladeRow, Passage, Outlet, PassageType
 from turbodesign.compressor_spool import CompressorSpool
 from turbodesign.enums import MassflowConstraint
 from turbodesign import Coolant
 from turbodesign.loss.fixedpressureloss import FixedPressureLoss
 from turbodesign.deviation.fixed_deviation import FixedDeviation
-import numpy as np
 from cantera import Solution
 from pathlib import Path
 import pandas as pd
@@ -25,19 +24,62 @@ from read_overall_data import load_overall_data, load_blade_counts, compute_entr
 e3_hpc = pickle.load(open(Path(__file__).resolve().parent / 'e3_hpc_processed.pkl','rb'))
 hub = e3_hpc['hub']
 shroud = e3_hpc['shroud']
+workbook_path = Path(__file__).resolve().parent / 'E3_HPC_Overall_Data.xlsx'
 
 excel_data = load_overall_data(
-    Path(__file__).resolve().parent / 'E3_HPC_Overall_Data.xlsx',
+    workbook_path,
     sheet_name=None,
     loss_sheet_name="Detailed Report Data",
     convert_units=True,
 )
-blade_counts = load_blade_counts(Path(__file__).resolve().parent / 'E3_HPC_Overall_Data.xlsx')
+blade_counts = load_blade_counts(workbook_path)
+
+
+def load_beta_column_from_detailed_report(
+    workbook: Path, beta_occurrence: int = 0
+) -> dict[str, list[float]]:
+    """
+    Extract beta columns from the Detailed Report Data sheet.
+
+    Args:
+        workbook: Path to the workbook.
+        beta_occurrence: 0 for the first "Beta" column (col J), 1 for the second (col U).
+    """
+    sheet = pd.read_excel(workbook, sheet_name="Detailed Report Data", header=0)
+    header_row = sheet.iloc[0]
+    beta_cols = [
+        idx
+        for idx, value in enumerate(header_row)
+        if isinstance(value, str) and value.strip().lower() == "beta"
+    ]
+    if beta_occurrence >= len(beta_cols):
+        return {}
+    beta_idx = beta_cols[beta_occurrence]
+    sl_series = pd.to_numeric(sheet.iloc[:, 1], errors="coerce")
+    reset_indices = [i for i, val in enumerate(sl_series) if val == 1]
+    if not reset_indices:
+        return {}
+    reset_indices.append(len(sheet))
+    labels = ["inlet"]
+    for stage in range(1, 11):
+        labels.extend([f"rotor{stage}", f"stator{stage}"])
+
+    beta_lookup: dict[str, list[float]] = {}
+    for block_idx, start in enumerate(reset_indices[:-1]):
+        if block_idx >= len(labels):
+            break
+        end = reset_indices[block_idx + 1]
+        series = pd.to_numeric(sheet.iloc[start:end, beta_idx], errors="coerce").dropna()
+        if series.empty:
+            continue
+        beta_lookup[labels[block_idx]] = series.tolist()
+    return beta_lookup
 
 
 P0 = excel_data['inlet']["Inlet Pt"].mean()
 T0 = excel_data['inlet']["TT Exit"].mean()
 n_streamlines = 12
+beta1_lookup = load_beta_column_from_detailed_report(workbook_path, beta_occurrence=0)
 P0_Ratio = 1.0  # placeholder until defined from data
 
 # Fluid
@@ -78,7 +120,7 @@ hub_exit_locations.append((lastblade[0][0,:,0].max()  - hub[:,0].min()) / (hub[:
 shroud_exit_locations.append((lastblade[0][-1,:,0].max()  - shroud[:,0].min()) / (shroud[:,0].max() - shroud[:,0].min()))
 
 # Axial location is a percentage along the hub where row exit is defined
-IGV1 = BladeRow(row_type=RowType.Stator, hub_location=hub_exit_locations[0],shroud_location=shroud_exit_locations[0],stage_id=1)
+IGV1 = BladeRow(row_type=RowType.IGV, hub_location=hub_exit_locations[0],shroud_location=shroud_exit_locations[0],stage_id=1)
 IGV1.num_blades = blade_counts.get("igv", IGV1.num_blades)
 
 rotor1 = BladeRow(row_type=RowType.Rotor, hub_location=hub_exit_locations[1],shroud_location=shroud_exit_locations[1],stage_id=1)
@@ -169,32 +211,43 @@ stator10.axial_chord = cax_arr[20]
 # Metal inlet/exit angles pulled from Excel Beta columns
 def set_beta_metal(row: BladeRow, key: str):
     df = excel_data.get(key)
-    if df is None:
-        return
     beta_exit_col = None
     beta_inlet_col = None
-    if "Beta.1" in df.columns:
-        beta_exit_col = "Beta.1"
+    if df is not None:
         if "Beta" in df.columns:
             beta_inlet_col = "Beta"
-    elif "Beta" in df.columns:
-        beta_exit_col = "Beta"
+        if beta_inlet_col is None and "Unnamed: 9" in df.columns:
+            beta_inlet_col = "Unnamed: 9"
 
-    def _prepare_beta(values: pd.Series) -> list[float]:
-        beta_vals = pd.to_numeric(values, errors="coerce").dropna().tolist()
+        if "Beta.1" in df.columns:
+            beta_exit_col = "Beta.1"
+        elif beta_inlet_col is not None:
+            beta_exit_col = beta_inlet_col
+
+    def _prepare_beta(values, rotor_negative: bool = False) -> list[float]:
+        series = values if isinstance(values, pd.Series) else pd.Series(values)
+        beta_vals = pd.to_numeric(series, errors="coerce").dropna().tolist()
         trimmed = beta_vals[:n_streamlines]
-        if row.row_type == RowType.Rotor:
+        if rotor_negative and row.row_type == RowType.Rotor:
             return [-abs(val) for val in trimmed]
+        if row.row_type == RowType.IGV:
+            return trimmed
         return trimmed
 
-    if beta_exit_col:
-        exit_vals = _prepare_beta(df[beta_exit_col])
+    if df is not None and beta_exit_col:
+        exit_vals = _prepare_beta(df[beta_exit_col], rotor_negative=True)
         if exit_vals:
             row.beta2_metal = exit_vals
-    if beta_inlet_col:
+
+    inlet_vals = None
+    beta1_vals = beta1_lookup.get(key)
+    if beta1_vals:
+        inlet_vals = _prepare_beta(beta1_vals)
+    elif df is not None and beta_inlet_col:
         inlet_vals = _prepare_beta(df[beta_inlet_col])
-        if inlet_vals:
-            row.beta1_metal = inlet_vals
+
+    if inlet_vals:
+        row.beta1_metal = inlet_vals
 
 set_beta_metal(IGV1, "inlet")
 set_beta_metal(rotor1, "rotor1")
@@ -218,6 +271,11 @@ set_beta_metal(stator9, "stator9")
 set_beta_metal(rotor10, "rotor10")
 set_beta_metal(stator10, "stator10")
 
+# IGV behaves like a stator for absolute angles; copy the solved beta values
+if IGV1.beta1.size:
+    IGV1.alpha1 = IGV1.beta1.copy()
+if IGV1.beta2.size:
+    IGV1.alpha2 = IGV1.beta2.copy()
 
 # Assign loss models from Excel Loss column where available
 def set_loss_model(row: BladeRow, key: str):
@@ -262,26 +320,26 @@ def set_deviation_model(row: BladeRow, key: str):
     row.deviation_function = FixedDeviation(dev_vals)
 
 set_deviation_model(IGV1, "inlet")      # This sets the deviation value according to the spreadsheet
-set_deviation_model(rotor1, "rotor1")
-set_deviation_model(stator1, "stator1")
-set_deviation_model(rotor2, "rotor2")
-set_deviation_model(stator2, "stator2")
-set_deviation_model(rotor3, "rotor3")
-set_deviation_model(stator3, "stator3")
-set_deviation_model(rotor4, "rotor4")
-set_deviation_model(stator4, "stator4")
-set_deviation_model(rotor5, "rotor5")
-set_deviation_model(stator5, "stator5")
+set_deviation_model(rotor1, "rotor1")       
+set_deviation_model(stator1, "stator1")     # Stage 1
+set_deviation_model(rotor2, "rotor2")       
+set_deviation_model(stator2, "stator2")     # Stage 2
+set_deviation_model(rotor3, "rotor3")       
+set_deviation_model(stator3, "stator3")     # Stage 3
+set_deviation_model(rotor4, "rotor4")       
+set_deviation_model(stator4, "stator4")     # Stage 4
+set_deviation_model(rotor5, "rotor5")       
+set_deviation_model(stator5, "stator5")     # Stage 5
 set_deviation_model(rotor6, "rotor6")
-set_deviation_model(stator6, "stator6")
+set_deviation_model(stator6, "stator6")     # Stage 6
 set_deviation_model(rotor7, "rotor7")
-set_deviation_model(stator7, "stator7")
+set_deviation_model(stator7, "stator7")     # Stage 7
 set_deviation_model(rotor8, "rotor8")
-set_deviation_model(stator8, "stator8")
+set_deviation_model(stator8, "stator8")     # Stage 8
 set_deviation_model(rotor9, "rotor9")
-set_deviation_model(stator9, "stator9")
+set_deviation_model(stator9, "stator9")     # Stage 9 
 set_deviation_model(rotor10, "rotor10")
-set_deviation_model(stator10, "stator10")
+set_deviation_model(stator10, "stator10")   # Stage 10
 
 gamma = 1.4
 Cp = gamma/(gamma-1) * 287.15
