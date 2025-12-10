@@ -3,7 +3,8 @@ from .radeq import radeq
 from .enums import LossType, RowType, PowerType, MassflowConstraint
 from .bladerow import BladeRow
 from .turbine_math import compute_gas_constants
-from .turbine_math import compute_quantities, compute_power, compute_massflow
+from .turbine_math import compute_quantities, compute_power
+from .flow_math import compute_massflow
 import numpy.typing as npt
 import numpy as np
 from scipy.interpolate import interp1d

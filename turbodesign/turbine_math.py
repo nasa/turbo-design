@@ -10,44 +10,7 @@ from scipy.integrate import trapezoid
 from scipy.optimize import minimize 
 from .passage import Passage
 from .isentropic import IsenP
-
-def compute_streamline_areas(row: BladeRow) -> Tuple[float, npt.NDArray]:
-    """Compute total annulus area and individual streamline cross sections."""
-    total_area = 0.0
-    streamline_area = np.zeros(len(row.percent_hub_shroud))
-    for j in range(1, len(row.percent_hub_shroud)):
-        if np.abs((row.x[j] - row.x[j - 1])) < 1e-5:  # Axial Machines
-            delta = np.pi * (row.r[j] ** 2 - row.r[j - 1] ** 2)
-            streamline_area[j] = delta
-            total_area += delta
-        else:  # Radial Machines
-            dx = row.x[j] - row.x[j - 1]
-            S = row.r[j] - row.r[j - 1]
-            C = np.sqrt(1 + ((row.r[j] - row.r[j - 1]) / dx) ** 2)
-            streamline_area[j] = 2 * np.pi * C * (S / 2 * dx ** 2 + row.r[j - 1] * dx)
-            total_area += streamline_area[j]
-    return total_area, streamline_area
-
-
-def compute_massflow(row:BladeRow) -> None:
-    """Populates row.massflow and row.calculated_massflow."""
-    massflow_fraction =  np.linspace(0,1,len(row.percent_hub_shroud))
-    massflow = row.percent_hub_shroud*0
-    total_area, streamline_area = compute_streamline_areas(row)
-    for j in range(1,len(row.percent_hub_shroud)):
-        Vm = (row.Vm[j]+row.Vm[j-1])/2
-        rho = (row.rho[j]+row.rho[j-1])/2
-        massflow[j] = Vm * rho * streamline_area[j] * (1-row.blockage)+ massflow[j-1] 
-    
-    row.total_massflow_no_coolant = massflow[-1]
-    if row.coolant != None:
-        massflow += massflow_fraction*row.coolant.massflow_percentage*row.total_massflow_no_coolant    # Take into account the coolant massflow
-    row.massflow = massflow
-    row.calculated_massflow = massflow[-1]
-    row.total_massflow = massflow[-1]
-    row.total_area = total_area
-    row.area = streamline_area
-    
+from .flow_math import compute_massflow, compute_streamline_areas
 
 def compute_reynolds(rows:List[BladeRow],passage:Passage):
     """Calculates the Reynolds Number 
@@ -365,20 +328,15 @@ def inlet_calc(row:BladeRow):
     iter = 0
     avg_mach = -1
     
+    total_area, streamline_area = compute_streamline_areas(row)
+    row.total_area = total_area
+    row.area = streamline_area
+    
     for iter in range(2): # Lets converge the Mach and Total and Static pressures
         for j in range(1,len(row.percent_hub_shroud)):
             rho = row.rho[j]
             tube_massflow = row.massflow[j]-row.massflow[j-1]
-            if np.abs((row.x[j]-row.x[j-1]))<1E-6: # Axial Machines  
-                total_area += np.pi*(row.r[j]**2-row.r[j-1]**2)
-                row.Vm[j] = tube_massflow/(rho*np.pi*(row.r[j]**2-row.r[j-1]**2))
-            else:   # Radial Machines
-                dx = row.x[j]-row.x[j-1]
-                S = (row.r[j]-row.r[j-1])
-                C = np.sqrt(1+((row.r[j]-row.r[j-1])/dx)**2)
-                area[j] = 2*np.pi*C*(S/2*dx**2+row.r[j-1]*dx)
-                total_area += area[j]
-                row.Vm[j] = tube_massflow/(rho*area[j])
+            row.Vm[j] = tube_massflow/(rho*row.area[j])
         avg_mach = np.mean(row.M)
         row.Vm[0] = 1/(len(row.Vm)-1)*row.Vm[1:].sum() # Initialize the value at the hub to not upset the mean
         row.Vr = row.Vm*np.sin(row.phi)

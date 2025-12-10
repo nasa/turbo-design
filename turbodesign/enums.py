@@ -4,6 +4,7 @@ class LossType(Enum):
     Pressure = 1
     Enthalpy = 2
     Entropy = 3
+    Polytropic = 4
 
 class RowType(Enum):
     # Similar to a stator but for compressor calculations there is no Total Pressure rise

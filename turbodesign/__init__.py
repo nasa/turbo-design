@@ -17,6 +17,7 @@ __all__ = [
     "TurbineSpool", "Stage", "Inlet", "Outlet", "BladeRow", "Coolant",
     "Passage", "RowType", "PassageType", "MassflowConstraint", "LossType",
     "LossInterp", "DeviationBaseClass", "FixedDeviation",
+    "FixedPolytropicEfficiency",
     "AGF_Setup", "Inlet_bcs", "Outlet_bcs", "Settings", "Clearance", "Domain", "read_agf",
     "plot_airfoil_inputs", "plot_airfoil_inputs_2D",
 ]
@@ -34,6 +35,7 @@ _module_map = {
     "PassageType": ("turbodesign.enums", "PassageType"),
     "MassflowConstraint": ("turbodesign.enums", "MassflowConstraint"),
     "LossInterp": ("turbodesign.lossinterp", "LossInterp"),
+    "FixedPolytropicEfficiency": ("turbodesign.loss.fixedpolytropic", "FixedPolytropicEfficiency"),
     "DeviationBaseClass": ("turbodesign.deviation", "DeviationBaseClass"),
     "FixedDeviation": ("turbodesign.deviation", "FixedDeviation"),
     "AGF_Setup": ("turbodesign.agf", "AGF_Setup"),

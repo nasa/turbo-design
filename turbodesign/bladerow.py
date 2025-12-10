@@ -117,6 +117,7 @@ class BladeRow:
     Power_Type:PowerType
     euler_power:float = 0
     Reynolds:float = 0
+    eta_poly: float = 0.0            # Optional per-row polytropic efficiency target
     
     # Used for loss calculations
     _blade_to_blade_gap:float = 0.025 # Gap between blade in terms of percent chord.
@@ -507,6 +508,7 @@ class BladeRow:
             "P0_P": self.P0_P,
             "eta_total":self.eta_total,
             "eta_static":self.eta_static,
+            "eta_poly": self.eta_poly,
             "euler_power":self.euler_power,
             "axial_chord":self.axial_chord,
             "aspect_ratio":self.aspect_ratio,

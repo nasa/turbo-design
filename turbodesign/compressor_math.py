@@ -11,9 +11,29 @@ from pyturbo.helper import convert_to_ndarray
 from .bladerow import BladeRow
 from .enums import LossType, RowType
 from .isentropic import IsenP, IsenT, solve_for_mach
-from .turbine_math import T0_coolant_weighted_average, compute_massflow
+from .turbine_math import T0_coolant_weighted_average
+from .flow_math import compute_massflow, compute_streamline_areas
 
-__all__ = ["stator_calc", "rotor_calc"]
+__all__ = ["stator_calc", "rotor_calc", "polytropic_efficiency"]
+
+
+def polytropic_efficiency(pi: float, tau: float, gamma: float) -> float:
+    """Compute polytropic efficiency from pressure/temperature ratios.
+
+    Args:
+        pi: Total-pressure ratio (pt,out / pt,in).
+        tau: Total-temperature ratio (Tt,out / Tt,in).
+        gamma: Ratio of specific heats.
+
+    Returns:
+        Polytropic efficiency consistent with the provided ratios.
+    """
+    pi_safe = max(pi, 1e-8)
+    tau_safe = max(tau, 1e-8)
+    ln_tau = np.log(tau_safe)
+    if abs(ln_tau) < 1e-12:
+        return 1.0
+    return ((gamma - 1.0) / gamma) * np.log(pi_safe) / ln_tau
 
 
 def stator_calc(
@@ -23,7 +43,15 @@ def stator_calc(
     calculate_vm: bool = True,
     static_defined: bool = False,
 ) -> None:
-    """Solve compressor stator exit conditions."""
+    """Solve compressor stator exit conditions.
+
+    Args:
+        row: Current stator blade row being solved.
+        upstream: Upstream blade row providing inlet total conditions.
+        downstream: Optional downstream row used for reaction/P0_P bookkeeping.
+        calculate_vm: If True, iterates Mach to satisfy massflow; if False, assumes Vm known.
+        static_defined: Treat P as prescribed (turbine-like) when True; otherwise compressor mode.
+    """
 
     def stator_calculation(Yp: npt.NDArray) -> npt.NDArray:
         row.Yp = Yp
@@ -115,231 +143,123 @@ def stator_calc(
                 x = minimize_scalar(fun, bounds=[0.01, 0.4], args=(j))
                 row.Yp[j] = x
             stator_calculation(row.Yp)
+    elif loss_type == LossType.Polytropic:
+        target_eta_poly = float(row.loss_function(row, upstream))
+
+        def _objective(y: float) -> float:
+            yp_array = np.full_like(row.Yp, y)
+            stator_calculation(yp_array)
+            pi = float((row.P0 / upstream.P0).mean())
+            tau = float((row.T0 / upstream.T0).mean())
+            eta_poly = polytropic_efficiency(pi, tau, row.gamma)
+            return abs(eta_poly - target_eta_poly)
+
+        res = minimize_scalar(_objective, bounds=[0.0, 0.6], method="bounded")
+        row.Yp = np.full_like(row.Yp, res.x)
+        stator_calculation(row.Yp)
     else:  # LossType.Enthalpy
         row.Yp[:] = 0
         stator_calculation(row.Yp)
 
 
-def _log_rotor_failure(reason: str,row:BladeRow) -> None:
-    def _fmt(val):
-        try:
-            return np.array2string(np.asarray(val), precision=5)
-        except Exception:
-            return str(val)
-
-    print(f"[RotorCalc] Failure detected: {reason}")
-    print(f"    row.T0R: {_fmt(row.T0R)}")
-    print(f"    row.T: {_fmt(row.T)}")
-    print(f"    row.W: {_fmt(row.W)}")
-    print(f"    row.M: {_fmt(getattr(row, 'M', np.nan))}")
-    print(f"    row.M_rel: {_fmt(getattr(row, 'M_rel', np.nan))}")
-    print(f"    row.Yp: {_fmt(getattr(row, 'Yp', np.nan))}")
-    if np.any(row.T >= row.T0R):
-        print("    Note: T should be less than T0R.")
-    yp_val = getattr(row, "Yp", None)
-    if yp_val is not None and np.any(yp_val > 0.3):
-        print(
-            "    Note: row.Yp exceeded 0.3 which may indicate an issue with the design or loss model."
-        )
-        
-def rotor_streamline_calculation(Yp: npt.NDArray,row:BladeRow,upstream:BladeRow,calculate_vm:bool=True):
-    """Calculate the streamline quantities for the rotor
-
-    Args:
-        Yp (npt.NDArray): _description_
-
-    Raises:
-        ValueError: _description_
-
-    Returns:
-        npt.NDArray: _description_
-    """
-    row.Yp = Yp
-    
-    row.P0R = row.P0R_is - row.Yp * (upstream.P0R - upstream.P)
-    deviation_func = getattr(row, "deviation_function", None)
-    deviation = deviation_func(row, upstream) if callable(deviation_func) else 0.0
-    
-    # For compressors we use P0_ratio
-    row.P0_is = upstream.P0 * row.P0_ratio
-    row.P0 = row.P0_is - row.Yp * (upstream.P0 - upstream.P)
-    
-    M = np.linspace(0,1,10)
-    P0_P = IsenP(M,row.gamma) # Lets vary the mach number to adjust the static pressure
-    P = row.P0 / P0_P
-    
-    expo = -(row.gamma + 1.0) / (2.0 * (row.gamma - 1.0))
-    
-    estimate = row.area* row.P0/np.sqrt(T0)*np.sqrt(row.gamma / row.R)*M*np.power(1.0 + (row.gamma - 1.0) / 2.0 * M * M, expo)
-    
-    
-    # row.deviation = deviation
-    # residual_error = np.zeros(len(row.area)-1)
-    # if calculate_vm:
-    #     streamline_massflow = np.diff(row.massflow)
-    #     M_rel = np.zeros(len(row.area))
-    #     for j in range(1, len(row.area)):
-    #         res = minimize_scalar(
-    #             solve_for_mach,
-    #             bounds=[0.01, 1.0],
-    #             args=(
-    #                 streamline_massflow[j - 1],
-    #                 row.P0[j],
-    #                 row.T0[j],
-    #                 row.area[j],
-    #                 row.gamma,
-    #                 row.R,
-    #             ),
-    #         )
-    #         M_rel[j] = res.x
-    #         residual_error[j-1] = res.fun
-    #     M_rel[0] = 1.0 / (len(M_rel) - 1) * M_rel[1:].sum()
-    #     row.M_rel = M_rel
-    #     P0_P = IsenP(M_rel, row.gamma)
-    #     row.P = row.P0 / P0_P
-
-    #     P0R_P = row.P0R / row.P
-    #     T0R_T = P0R_P ** ((row.gamma - 1.0) / row.gamma)
-    #     row.T = row.T0R / T0R_T
-    #     row.W = np.sqrt(2.0 * row.Cp * (row.T0R - row.T))
-    #     nan_in_velocity = np.isnan(np.sum(row.W))
-    #     temp_issue = np.any(row.T >= row.T0R)
-    #     high_loss = np.any(getattr(row, "Yp", 0) > 0.3)
-    #     if nan_in_velocity:
-    #         reason = "nan detected in relative velocity"
-    #         if temp_issue:
-    #             reason += "; T >= T0R shouldn't happen because of T-s diagram"
-    #         if high_loss:
-    #             reason += "; Yp > 0.3 This could be a problem with the loss model;"
-    #         _log_rotor_failure(reason)
-    #         raise ValueError("nan detected")
-    #     row.Vr = row.W * np.sin(row.phi)
-    #     row.Vm = row.W * np.cos(row.beta2 + row.deviation)
-    #     row.Wt = row.W * np.sin(row.beta2)
-    #     row.Vx = row.Vm * np.cos(row.phi)
-    #     row.Vt = row.Wt + row.U
-    #     row.V = np.sqrt(row.Vr**2 + row.Vt**2 + row.Vx**2)
-    #     row.M = row.V / np.sqrt(row.gamma * row.R * row.T)
-    #     row.Vm = np.sqrt(row.Vx**2 + row.Vr**2)
-    #     row.T0 = row.T + row.V**2 / (2.0 * row.Cp)
-    #     row.alpha2 = np.arctan2(row.Vt, row.Vm)
-    # else:  # We know Vm, P0, T0
-    #     row.Vr = row.Vm * np.sin(row.phi)
-    #     row.Vx = row.Vm * np.cos(row.phi)
-    #     row.W = np.sqrt(2.0 * row.Cp * (row.T0R - row.T))
-    #     row.Wt = row.W * np.sin(row.beta2 + row.deviation)
-    #     row.U = row.omega * row.r
-    #     row.Vt = row.Wt + row.U
-    #     row.alpha2 = np.arctan2(row.Vt, row.Vm)
-    #     row.V = np.sqrt(row.Vm**2 * (1.0 + np.tan(row.alpha2) ** 2))
-    #     row.M = row.V / np.sqrt(row.gamma * row.R * row.T)
-
-    # T0_T = 1.0 + (row.gamma - 1.0) / 2.0 * row.M**2
-    # row.P0 = row.P * T0_T ** (row.gamma / (row.gamma - 1.0))
-    # row.P0_P = (row.P0_stator_inlet / row.P).mean()
-
-    # row.M_rel = row.W / np.sqrt(row.gamma * row.R * row.T)
-    # row.T0 = row.T + row.V**2 / (2.0 * row.Cp)
-    # row.entropy_rise = 0.5 * (row.Cp + upstream.Cp) * np.log(
-    #     row.T / upstream.T
-    # ) - row.R * np.log(row.P / upstream.P)
-    # return row.entropy_rise, residual_error
-
 def rotor_calc(
     row: BladeRow,
     upstream: BladeRow,
     calculate_vm: bool = True,
+    static_defined: bool = False,
 ) -> None:
-    """Calculates quantities given beta2 
+    """Solve compressor rotor exit conditions.
 
     Args:
-        row (BladeRow): Rotor Row
-        upstream (BladeRow): Stator Row or Rotor Row
+        row: Rotor blade row being solved.
+        upstream: Upstream blade row providing inlet relative/absolute conditions.
+        calculate_vm: If True, iterates Mach to satisfy massflow; if False, assumes Vm known.
+        static_defined: Treat P as prescribed (turbine-like) when True; otherwise compressor mode.
     """
-    def _log_rotor_failure(reason:str):
-        def _fmt(val):
-            try:
-                return np.array2string(np.asarray(val), precision=5)
-            except Exception:
-                return str(val)
-
-        print(f"[RotorCalc] Failure detected: {reason}")
-        print(f"    row.T0R: {_fmt(row.T0R)}")
-        print(f"    row.T: {_fmt(row.T)}")
-        print(f"    row.W: {_fmt(row.W)}")
-        print(f"    row.M: {_fmt(getattr(row,'M', np.nan))}")
-        print(f"    row.M_rel: {_fmt(getattr(row,'M_rel', np.nan))}")
-        print(f"    row.Yp: {_fmt(getattr(row,'Yp', np.nan))}")
-        if np.any(row.T >= row.T0R):
-            print("    Note: T should be less than T0R.")
-        yp_val = getattr(row,'Yp', None)
-        if yp_val is not None and np.any(yp_val > 0.3):
-            print("    Note: row.Yp exceeded 0.3 which may indicate an issue with the design or loss model.")
-    
     row.P0_is = upstream.P0*row.P0_ratio
     row.P0 = row.P0_is - row.Yp * (upstream.P0 - upstream.P)
     
-    def calculate_vm_func(M):
-        P0_P = IsenP(M,row.gamma) # Lets vary the mach number to adjust the static pressure
-        row.P = row.P0 / P0_P
+    # Upstream relative frame
+    upstream.U = upstream.rpm * np.pi / 30 * upstream.r
+    upstream.Wt = upstream.Vt - upstream.U
+    upstream.W = np.sqrt(upstream.Vx ** 2 + upstream.Wt ** 2 + upstream.Vr ** 2)
+    upstream.beta2 = np.arctan2(upstream.Wt, upstream.Vm)
+    upstream.T0R = upstream.T + upstream.W ** 2 / (2 * upstream.Cp)
+    upstream.P0R = upstream.P * (upstream.T0R / upstream.T) ** (upstream.gamma / (upstream.gamma - 1))
+    upstream.M_rel = upstream.W / np.sqrt(upstream.gamma * upstream.R * upstream.T)
+    upstream_rothalpy = upstream.T0R * upstream.Cp - 0.5 * upstream.U ** 2
+    
+    if np.any(upstream_rothalpy < 0):
+        print('U is too high, reduce RPM or radius')
+        
+    def calculate_vm_func(M_rel: float, apply: bool = False):
+        """Compute Vm of rotor locally guessing relative mach number at rotor exit. This calculation is done to balance the massflow
 
-        upstream_radius = upstream.r
-        row.U = row.omega*row.r
-        # Upstream Relative Frame Calculations 
-        upstream.U = upstream.rpm*np.pi/30 * upstream_radius # rad/s 
-        upstream.Wt = upstream.Vt - upstream.U
-        upstream.W = np.sqrt(upstream.Vx**2 + upstream.Wt**2 + upstream.Vr**2)
-        upstream.beta2 = np.arctan2(upstream.Wt,upstream.Vm)
-        upstream.T0R = upstream.T+upstream.W**2/(2*upstream.Cp)
-        upstream.P0R = upstream.P * (upstream.T0R/upstream.T)**((upstream.gamma)/(upstream.gamma-1))      
-        upstream.M_rel = upstream.W/np.sqrt(upstream.gamma*upstream.R*upstream.T)
+        Args:
+            M (float): Relative mach number at rotor exit 
+            apply (bool, optional): Apply calculations. Defaults to False.
+        """
+        # Use local scratch copies to avoid polluting row during optimizer iterations
+        P0R_local = upstream.P0R - row.Yp * (upstream.P0R - upstream.P)
+        T0R_local = upstream.T0R
         
-        upstream_rothalpy = upstream.T0R*upstream.Cp - 0.5*upstream.U**2 # H01R - 1/2 U1^2 
-        if np.any(upstream_rothalpy < 0):
-            print('U is too high, reduce RPM or radius')
-        # Rotor Exit Calculations
-        row.beta1 = upstream.beta2
-        #row.Yp # Evaluated earlier 
-        row.P0R = upstream.P0R - row.Yp*(upstream.P0R-row.P)
+        P_local = P0R_local / IsenP(M_rel, row.gamma)
+        U_local = row.omega * row.r
         
-        # Total Relative Temperature stays constant through the rotor. Adjust for change in radius from rotor inlet to exit
-        row.T0R = upstream.T0R # (upstream_rothalpy + 0.5*row.U**2)/row.Cp # - T0_coolant_weighted_average(row) 
-        P0R_P = row.P0R / row.P
-        T0R_T = P0R_P**((row.gamma-1)/row.gamma)
-        row.T = (row.T0R/T0R_T)     # Exit static temperature
-        row.W = np.sqrt(2*row.Cp*(row.T0R-row.T)) #! nan popups here a lot for radial machines 
-        nan_in_velocity = np.isnan(np.sum(row.W))
-        temp_issue = np.any(row.T >= row.T0R)
-        high_loss = np.any(getattr(row,'Yp',0) > 0.3)
-        if nan_in_velocity:
-            # Need to adjust T
-            reason = "nan detected in relative velocity"
-            if temp_issue:
-                reason += "; T >= T0R shouldn't happen because of T-s diagram'"
-            if high_loss:
-                reason += "; Yp > 0.3 This could be a problem with the loss model;"
-            _log_rotor_failure(reason)
-            raise ValueError(f'nan detected')
-        row.Vr = row.W*np.sin(row.phi)
-        row.Vm = row.W*np.cos(row.beta2)
-        row.Wt = row.W*np.sin(row.beta2)
-        row.Vx = row.Vm*np.cos(row.phi)
-        row.Vt = row.Wt + row.U 
-        row.V = np.sqrt(row.Vr**2+row.Vt**2+row.Vx**2)
-        row.M = row.V/np.sqrt(row.gamma*row.R*row.T)
-        row.Vm = np.sqrt(row.Vx**2+row.Vr**2)
-        row.T0 = row.T + row.V**2/(2*row.Cp)
-        row.P0 = row.P*(row.T0/row.T)**(row.gamma/(row.gamma-1))
-        row.alpha2 = np.arctan2(row.Vt,row.Vm)
-        
-        row.M_rel = row.W/np.sqrt(row.gamma*row.R*row.T)
-        row.T0 = row.T+row.V**2/(2*row.Cp)
-        compute_massflow(row)
-        return np.abs(upstream.total_massflow - row.total_massflow)
+        P0R_P = P0R_local / P_local
+        T0R_T = P0R_P ** ((row.gamma - 1) / row.gamma)
+        T_local = T0R_local / T0R_T
+        W_local = np.sqrt(2 * row.Cp * (T0R_local - T_local))
+
+        if np.isnan(W_local).any() or np.any(T_local >= T0R_local):
+            return np.inf
+
+        Vr_local = W_local * np.sin(row.phi)
+        Vm_local = W_local * np.cos(row.beta2)
+        Wt_local = W_local * np.sin(row.beta2)
+        Vx_local = Vm_local * np.cos(row.phi)
+        Vt_local = Wt_local + U_local
+        V_local = np.sqrt(Vr_local ** 2 + Vt_local ** 2 + Vx_local ** 2)
+        M_local = V_local / np.sqrt(row.gamma * row.R * T_local)
+        T0_local = T_local + V_local ** 2 / (2 * row.Cp)
+        P0_local = P_local * (T0_local / T_local) ** (row.gamma / (row.gamma - 1))
+
+        # compute massflow using locals
+        rho_local = P_local / (row.R * T_local)
+        total_area, streamline_area = compute_streamline_areas(row)
+        massflow_local = np.zeros_like(row.massflow)
+        for j in range(1, len(row.percent_hub_shroud)):
+            Vm_seg = 0.5 * (Vm_local[j] + Vm_local[j - 1])
+            rho_seg = 0.5 * (rho_local[j] + rho_local[j - 1])
+            massflow_local[j] = Vm_seg * rho_seg * streamline_area[j] * (1 - row.blockage) + massflow_local[j - 1]
+        total_massflow_local = massflow_local[-1]
+
+        if apply:
+            row.P = P_local
+            row.T = T_local
+            row.W = W_local
+            row.Vr = Vr_local
+            row.Vm = Vm_local
+            row.Wt = Wt_local
+            row.Vx = Vx_local
+            row.Vt = Vt_local
+            row.V = V_local
+            row.M = M_local
+            row.T0 = T0_local
+            row.P0 = P0_local
+            row.alpha2 = np.arctan2(row.Vt, row.Vm)
+            row.M_rel = W_local / np.sqrt(row.gamma * row.R * T_local)
+            row.total_massflow = total_massflow_local
+            row.total_massflow_no_coolant = total_massflow_local
+            row.massflow = massflow_local
+            row.total_area = total_area
+            row.area = streamline_area
+        return np.abs(upstream.total_massflow - total_massflow_local)
     
     if calculate_vm:
-        
-    
+        res = minimize_scalar(calculate_vm_func, bounds=[0.01,1])
+        # apply best solution to row
+        calculate_vm_func(res.x, apply=True)
     else: # We know Vm, P0, T0
         row.Vr = row.Vm*np.sin(row.phi)
         row.Vx = row.Vm*np.cos(row.phi)

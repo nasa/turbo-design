@@ -26,11 +26,11 @@ from .turbine_math import (
     inlet_calc,
     rotor_calc,
     stator_calc,
-    compute_massflow,
     compute_power,
     compute_gas_constants,
     compute_reynolds,
 )
+from .flow_math import compute_massflow, compute_streamline_areas
 from .solve_radeq import adjust_streamlines, radeq
 from pyturbo.helper import line2D, convert_to_ndarray
 
