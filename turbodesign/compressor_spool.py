@@ -256,27 +256,6 @@ class CompressorSpool:
         for row in rows:
             interpolate_streamline_quantities(row, self.passage, self.num_streamlines)
 
-        outlet: Outlet = self.outlet
-        
-        
-        # rt = outlet.P0.mean() / inlet.P0.mean()
-        # n_igv = sum(1 for row in rows if row.row_type == RowType.IGV)
-        # n_inlets = sum(1 for row in rows if row.row_type == RowType.Inlet)
-        # n_outlets = sum(1 for row in rows if row.row_type == RowType.Outlet)
-        # n = int((len(rows)-n_igv-n_inlets-n_outlets) / 2) # Remove the inlet and outlets from the row counts
-        # r = rt ** (1 / n)
-
-        # P0_mean = float(inlet.P0.mean())
-        # prev_P0_mean = P0_mean
-        # for i in range(1, len(rows) - 1):
-        #     if rows[i].row_type == RowType.IGV:
-        #         # IGV functions as a nozzle so there shouldn't be total pressure rise but static pressure will go up
-        #         rows[i].P0 = rows[i-1].P0
-        #         rows[i].P0_ratio[:] = 1
-        #     else:
-        #         rows[i].P0_ratio[:] = r 
-            
-        
         # Pass T0, P0 to downstream rows
         for i in range(1, len(rows) - 1):
             upstream = rows[i - 1]
@@ -323,10 +302,15 @@ class CompressorSpool:
             row.total_area = total_area
             row.area = streamline_area
             if row.row_type == RowType.Stator or row.row_type == RowType.IGV:
-                stator_calc(row, upstream, downstream,calculate_vm=True,static_defined=False)  # type: ignore[arg-type]
+                row.P0_is = upstream.P0 * row.P0_ratio
+                stator_calc(row, upstream, downstream,calculate_vm=True)  # type: ignore[arg-type]
                 compute_massflow(row)
             elif row.row_type == RowType.Rotor:
-                rotor_calc(row, upstream,calculate_vm=True,static_defined=False)
+                # Align rotor ideal P0 target with downstream stator if provided (stage-level target)
+                if downstream and downstream.row_type == RowType.Stator:
+                    row.P0_ratio = getattr(downstream, "P0_ratio", row.P0_ratio)
+                row.P0_is = upstream.P0 * row.P0_ratio
+                rotor_calc(row, upstream,calculate_vm=True)
                 compute_massflow(row)
                 compute_power(row, upstream)
 
@@ -466,11 +450,15 @@ class CompressorSpool:
                         row.Yp = row.loss_function(row, upstream)  # type: ignore[assignment]
                         for _ in range(2):
                             if row.row_type == RowType.Rotor:
+                                if downstream and downstream.row_type == RowType.Stator:
+                                    row.P0_ratio = getattr(downstream, "P0_ratio", row.P0_ratio)
+                                row.P0_is = upstream.P0 * row.P0_ratio
                                 rotor_calc(row, upstream, calculate_vm=True, static_defined=static_defined)
                                 row = radeq(row, upstream, downstream)
                                 compute_gas_constants(row, self.fluid)
                                 rotor_calc(row, upstream, calculate_vm=False, static_defined=static_defined)
                             elif row.row_type == RowType.Stator:
+                                row.P0_is = upstream.P0 * row.P0_ratio
                                 stator_calc(
                                     row,
                                     upstream,
@@ -494,6 +482,9 @@ class CompressorSpool:
                     elif row.loss_function.loss_type == LossType.Enthalpy:
                         if row.row_type == RowType.Rotor:
                             row.Yp = 0
+                            if downstream and downstream.row_type == RowType.Stator:
+                                row.P0_ratio = getattr(downstream, "P0_ratio", row.P0_ratio)
+                            row.P0_is = upstream.P0 * row.P0_ratio
                             rotor_calc(row, upstream, calculate_vm=True)
                             eta_total = float(row.loss_function(row, upstream))
 
@@ -509,6 +500,7 @@ class CompressorSpool:
                             row.Yp = res.x
                         elif row.row_type == RowType.Stator:
                             row.Yp = 0
+                            row.P0_is = upstream.P0 * row.P0_ratio
                             stator_calc(row, upstream, downstream, calculate_vm=True)
                             row = radeq(row, upstream)
                             compute_gas_constants(row, self.fluid)
@@ -519,6 +511,9 @@ class CompressorSpool:
                     elif row.loss_function.loss_type == LossType.Polytropic:
                         if row.row_type == RowType.Rotor:
                             row.Yp = 0
+                            if downstream and downstream.row_type == RowType.Stator:
+                                row.P0_ratio = getattr(downstream, "P0_ratio", row.P0_ratio)
+                            row.P0_is = upstream.P0 * row.P0_ratio
                             rotor_calc(row, upstream, calculate_vm=True, static_defined=static_defined)
                             eta_poly_target = float(row.loss_function(row, upstream))
 
@@ -535,6 +530,7 @@ class CompressorSpool:
                             row.Yp = res.x
                         elif row.row_type == RowType.Stator:
                             row.Yp = 0
+                            row.P0_is = upstream.P0 * row.P0_ratio
                             stator_calc(row, upstream, downstream, calculate_vm=True, static_defined=static_defined)
                             eta_poly_target = float(row.loss_function(row, upstream))
 
@@ -705,9 +701,16 @@ class CompressorSpool:
         )
         EnergyFunction = np.mean(EnergyFunction)
 
+        # English-unit conversions
+        massflow_kg_s = float(np.mean(massflow)) if massflow else 0.0
+        massflow_lbm_s = massflow_kg_s / 0.45359237
+        euler_power_hp = [p / 745.7 for p in euler_power]
+        enthalpy_power_hp = [p / 745.7 for p in enthalpy_power]
+
         data = {
             "blade_rows": blade_rows_out,
-            "massflow": float(np.mean(massflow)) if massflow else 0.0,
+            "massflow": massflow_kg_s,
+            "massflow_lbm_s": massflow_lbm_s,
             "rpm": self.rpm,
             "r_streamline": r_streamline.tolist(),
             "x_streamline": x_streamline.tolist(),
@@ -717,7 +720,9 @@ class CompressorSpool:
             "xshroud": self.passage.xshroud_pts.tolist(),
             "num_streamlines": self.num_streamlines,
             "euler_power": euler_power,
+            "euler_power_hp": euler_power_hp,
             "enthalpy_power": enthalpy_power,
+            "enthalpy_power_hp": enthalpy_power_hp,
             "total-total_efficiency": total_total_efficiency,
             "total-static_efficiency": total_static_efficiency,
             "stage_loading": stage_loading,
@@ -727,6 +732,17 @@ class CompressorSpool:
             "FlowFunction": float(FlowFunction),
             "CorrectedSpeed": float(CorrectedSpeed),
             "EnergyFunction": float(EnergyFunction),
+            "units": {
+                "massflow": {"metric": "kg/s", "english": "lbm/s"},
+                "rpm": {"metric": "rpm", "english": "rpm"},
+                "euler_power": {"metric": "W", "english": "hp"},
+                "enthalpy_power": {"metric": "W", "english": "hp"},
+                "Pratio_Total_Total": {"metric": "—", "english": "—"},
+                "Pratio_Total_Static": {"metric": "—", "english": "—"},
+                "FlowFunction": {"metric": "kg/s·K^0.5·Pa", "english": "lbm/s·R^0.5·psf"},
+                "CorrectedSpeed": {"metric": "rad/s·K^-0.5", "english": "rad/s·R^-0.5"},
+                "EnergyFunction": {"metric": "—", "english": "—"},
+            },
         }
 
         class NumpyEncoder(json.JSONEncoder):

@@ -15,7 +15,7 @@ def main() -> None:
     # Knowns (Mattingly Example 9.1)
     T01 = 518.7  # R
     P01 = 14.7  # psia
-    omega = 1000  # rad/s
+    omega = -1000  # rad/s
     r = 12  # in
     alpha1 = 40  # deg
     massflow = 50  # lbm/s
@@ -46,12 +46,11 @@ def main() -> None:
     rotor = BladeRow(hub_location=cax/max(xhub_arr), row_type=RowType.Rotor)
     rotor.beta2_metal = [23.87]
     rotor.loss_function = FixedPressureLoss(0)
-    rotor.P0_ratio = 1.3  # target rotor total-pressure ratio
 
     stator = BladeRow(hub_location=2*cax/max(xhub_arr), row_type=RowType.Stator)
     stator.beta2_metal = [alpha1]
     stator.loss_function = FixedPressureLoss(0)
-    stator.P0_ratio = 1.0
+    stator.P0_ratio = 1.3
 
     outlet = Outlet()
     outlet.init_total(1.3 * P01_Pa, 0.5)
@@ -64,11 +63,11 @@ def main() -> None:
         [rotor, stator],
         rpm=omega * 30 / np.pi,
     )
-    spool.massflow_constraint = 
-    spool.solve()
+    spool.solve_balance_pressure()
 
     print("Mattingly Example 9.1 (single stage)")
-    print(f"Massflow: {spool.massflow:0.3f} kg/s")
+    massflow_lbm_s = spool.massflow / 0.453592
+    print(f"Massflow: {spool.massflow:0.3f} kg/s ({massflow_lbm_s:0.2f} lbm/s)")
     print(f"Overall total pressure ratio (inlet/stator exit): {spool.overall_pressure_ratio():0.3f}")
     print(f"Rotor exit Mach (meanline): {rotor.M.mean():0.3f}")
     print(f"Stator exit Mach (meanline): {stator.M.mean():0.3f}")

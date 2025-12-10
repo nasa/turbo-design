@@ -596,9 +596,16 @@ class TurbineSpool:
         )
         EnergyFunction = np.mean(EnergyFunction)
 
+        # English-unit conversions
+        massflow_kg_s = float(np.mean(massflow)) if massflow else 0.0
+        massflow_lbm_s = massflow_kg_s / 0.45359237
+        euler_power_hp = [p / 745.7 for p in euler_power]
+        enthalpy_power_hp = [p / 745.7 for p in enthalpy_power]
+
         data = {
             "blade_rows": blade_rows_out,
-            "massflow": float(np.mean(massflow)) if massflow else 0.0,
+            "massflow": massflow_kg_s,
+            "massflow_lbm_s": massflow_lbm_s,
             "rpm": self.rpm,
             "r_streamline": r_streamline.tolist(),
             "x_streamline": x_streamline.tolist(),
@@ -608,7 +615,9 @@ class TurbineSpool:
             "xshroud": self.passage.xshroud_pts.tolist(),
             "num_streamlines": self.num_streamlines,
             "euler_power": euler_power,
+            "euler_power_hp": euler_power_hp,
             "enthalpy_power": enthalpy_power,
+            "enthalpy_power_hp": enthalpy_power_hp,
             "total-total_efficiency": total_total_efficiency,
             "total-static_efficiency": total_static_efficiency,
             "stage_loading": stage_loading,
@@ -618,6 +627,17 @@ class TurbineSpool:
             "FlowFunction": float(FlowFunction),
             "CorrectedSpeed": float(CorrectedSpeed),
             "EnergyFunction": float(EnergyFunction),
+            "units": {
+                "massflow": {"metric": "kg/s", "english": "lbm/s"},
+                "rpm": {"metric": "rpm", "english": "rpm"},
+                "euler_power": {"metric": "W", "english": "hp"},
+                "enthalpy_power": {"metric": "W", "english": "hp"},
+                "Pratio_Total_Total": {"metric": "—", "english": "—"},
+                "Pratio_Total_Static": {"metric": "—", "english": "—"},
+                "FlowFunction": {"metric": "kg/s·K^0.5·Pa", "english": "lbm/s·R^0.5·psf"},
+                "CorrectedSpeed": {"metric": "rad/s·K^-0.5", "english": "rad/s·R^-0.5"},
+                "EnergyFunction": {"metric": "—", "english": "—"},
+            },
         }
 
         class NumpyEncoder(json.JSONEncoder):

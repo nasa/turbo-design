@@ -100,12 +100,13 @@ def main() -> None:
 
     spool.solve()
     achieved_pr = spool.overall_pressure_ratio()
+    massflow_lbm_s = spool.massflow / 0.453592
 
     print("Mattingly Example 9.2 (multi-stage meanline)")
     print(f"Target overall PR: {target_overall_pr:0.2f}, per-stage PR (ideal): {per_stage_pr:0.3f}")
     print(f"Stage count used: {stage_count}")
     print(f"Achieved overall PR (inlet/stator-N exit): {achieved_pr:0.3f}")
-    print(f"Massflow: {spool.massflow:0.3f} kg/s")
+    print(f"Massflow: {spool.massflow:0.3f} kg/s ({massflow_lbm_s:0.2f} lbm/s)")
 
 
 if __name__ == "__main__":
