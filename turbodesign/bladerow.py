@@ -12,6 +12,7 @@ from pyturbo.aero.airfoil2D import Airfoil2D
 from .loss import LossBaseClass
 from .deviation.deviation_base import DeviationBaseClass
 from .passage import Passage
+from .arrayfuncs import safe_interpolate
     
 
 class BladeRow:
@@ -562,10 +563,10 @@ def interpolate_streamline_quantities(row:BladeRow,passage:Passage,num_streamlin
     else:
         row.percent_hub_shroud = streamline_percent_length # Reset the radii to streamline radii
 
-    row.alpha1 = interpolate_quantities(row.alpha1,row.percent_hub_shroud,streamline_percent_length)
-    row.alpha2 = interpolate_quantities(row.alpha2,row.percent_hub_shroud,streamline_percent_length)
-    row.beta1 = interpolate_quantities(row.beta1,row.percent_hub_shroud,streamline_percent_length)
-    row.beta2 = interpolate_quantities(row.beta2,row.percent_hub_shroud,streamline_percent_length)
+    row.alpha1 = safe_interpolate(row.alpha1, row.percent_hub_shroud, streamline_percent_length, radians=False)
+    row.alpha2 = safe_interpolate(row.alpha2, row.percent_hub_shroud, streamline_percent_length, radians=False)
+    row.beta1 = safe_interpolate(row.beta1, row.percent_hub_shroud, streamline_percent_length, radians=False)
+    row.beta2 = safe_interpolate(row.beta2, row.percent_hub_shroud, streamline_percent_length, radians=False)
     
     # Velocities 
     row.Vm = interpolate_quantities(row.Vm, row.percent_hub_shroud, streamline_percent_length)

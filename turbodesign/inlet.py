@@ -1,9 +1,11 @@
 from dataclasses import dataclass, field
 from optparse import Option
 from typing import List, Optional, Union
+
+from sympy import true
 from .enums import RowType
-from .bladerow import BladeRow, compute_gas_constants, interpolate_quantities
-from .arrayfuncs import convert_to_ndarray
+from .bladerow import BladeRow, compute_gas_constants
+from .arrayfuncs import convert_to_ndarray, safe_interpolate
 import numpy as np 
 from cantera import Solution
 from .passage import Passage
@@ -81,16 +83,18 @@ class Inlet(BladeRow):
             num_streamlines (int, optional): _description_. Defaults to 5.
             IsCompressor (bool, optional): This is if static pressure is defined at the inlet and total pressure at the outlet. Defaults to False.
         """
-        self.M = interpolate_quantities(self.M, self.percent_hub_shroud, np.linspace(0,1,num_streamlines))
+        dst = np.linspace(0,1,num_streamlines)
+        self.M = safe_interpolate(self.M, self.percent_hub_shroud, dst)
         if self.static_defined: # This comes from the initialization
-            self.P = interpolate_quantities(self.P,self.percent_hub_shroud, np.linspace(0,1,num_streamlines))
+            self.P = safe_interpolate(self.P, self.percent_hub_shroud, dst)
         else:
-            self.P0 = interpolate_quantities(self.P0,self.percent_hub_shroud, np.linspace(0,1,num_streamlines))
-        self.T0 = interpolate_quantities(self.T0,self.percent_hub_shroud, np.linspace(0,1,num_streamlines)) 
-        # if it's inlet alpha and beta are the same, relative flow angle = absolute. 
-        self.beta1 = interpolate_quantities(self.beta1,self.percent_hub_shroud, np.linspace(0,1,num_streamlines)) 
-        self.beta2 = np.radians(convert_to_ndarray(self.beta1))
-        self.alpha1 = np.radians(convert_to_ndarray(self.beta1))         
+            self.P0 = safe_interpolate(self.P0, self.percent_hub_shroud, dst)
+        self.T0 = safe_interpolate(self.T0, self.percent_hub_shroud, dst)
+        # Angles: default to 0 if unspecified
+        self.beta1 = safe_interpolate(self.beta1, self.percent_hub_shroud, dst, radians=True)
+        self.beta2 = safe_interpolate(self.beta2, self.percent_hub_shroud, dst, radians=True)
+        self.alpha1 = safe_interpolate(self.alpha1, self.percent_hub_shroud, dst, radians=True)
+        self.alpha2 = safe_interpolate(self.alpha2, self.percent_hub_shroud, dst, radians=True)
         
     def __initialize_fluid__(self,fluid:Optional[Solution]=None,R:float=287.15,gamma:float=1.4,Cp:float=1024):
         """Initialize the inlet using the fluid. This function should be called by a class that inherits from spool
@@ -152,9 +156,9 @@ class Inlet(BladeRow):
         self.x,self.r = cutline.get_point(np.linspace(0,1,num_streamlines))
         for _ in range(2):
             T0_T = (1+(self.gamma-1)/2 * self.M**2)
-
+            
             self.Vm = self.M**2 * self.gamma*self.R*self.T0/T0_T \
-                        / (1+np.cos(self.phi)**2 * np.tan(self.alpha1)**2)
+                        / (1+np.cos(self.phi)**2 * np.tan(self.alpha2)**2)
 
             self.Vm = np.sqrt(self.Vm)
             self.T = self.T0/T0_T
@@ -162,7 +166,7 @@ class Inlet(BladeRow):
             self.rho = self.P/(self.R*self.T)
             
             self.Vx = self.Vm * np.cos(self.phi)
-            self.Vt = self.Vm * np.cos(self.phi) * np.tan(self.beta1)
+            self.Vt = self.Vm * np.cos(self.phi) * np.tan(self.alpha2)
             self.V = np.sqrt(self.Vm**2 + self.Vt**2)        
             self.Vr = self.Vm * np.sin(self.phi) 
             

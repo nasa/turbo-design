@@ -30,7 +30,7 @@ class Passage:
     
     def __init__(self,xhub:Union[npt.NDArray,List[float]],rhub:Union[npt.NDArray,List[float]],
                  xshroud:Union[npt.NDArray,List[float]],rshroud:Union[npt.NDArray,List[float]],
-                 passageType:PassageType=PassageType.Axial):
+                 passageType:PassageType=PassageType.Axial, zero_phi: bool = False):
         """_summary_
 
         Args:
@@ -42,6 +42,7 @@ class Passage:
         """
         assert len(xhub) == len(xshroud), "xHub and xShroud should be the same length"
         assert len(rhub) == len(rshroud), "rHub and rShroud should be the same length"
+        self.zero_phi = zero_phi
 
         hub_arc_len = xr_to_mprime(np.vstack([xhub,rhub]).transpose())[1]
         self.hub_arc_len = hub_arc_len[-1]
@@ -88,8 +89,7 @@ class Passage:
             x_streamline[i] ,r_streamline[i] = line2D((xhub,rhub),(xshroud,rshroud)).get_point(t_radial)
         return t_streamline,x_streamline,r_streamline
 
-    @staticmethod
-    def streamline_curvature(x_streamline:npt.NDArray,r_streamline:npt.NDArray) -> Tuple[npt.NDArray,npt.NDArray,npt.NDArray]:
+    def streamline_curvature(self, x_streamline:npt.NDArray,r_streamline:npt.NDArray) -> Tuple[npt.NDArray,npt.NDArray,npt.NDArray]:
         """Hub and casing values of streamline angles of inclination and curvature 
 
             x_streamline[axial,radial]
@@ -113,6 +113,8 @@ class Passage:
         phi = np.zeros(shape=x_streamline.shape)
         r  = np.zeros(shape=x_streamline.shape)
         radius_curvature = np.zeros(shape=x_streamline.shape)
+        if self.zero_phi:
+            return phi, radius_curvature, r_streamline
         # Have to make sure there isn't a divide by zero which could happen if there is a vertical line somewhere
         indices = np.where(np.abs(np.diff(x_streamline))>np.finfo(float).eps)[0]
     

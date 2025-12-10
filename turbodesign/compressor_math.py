@@ -39,11 +39,6 @@ def polytropic_efficiency(pi: float, tau: float, gamma: float) -> float:
 def stator_calc(row: BladeRow, upstream: BladeRow, calculate_vm: bool = True) -> None:
     """Solve compressor stator exit conditions by matching exit massflow."""
 
-    loss_type = getattr(row.loss_function, "loss_type", None)
-    if loss_type == LossType.Pressure and callable(row.loss_function):
-        row.Yp = row.loss_function(row, upstream)  # type: ignore[arg-type]
-    else:
-        row.Yp[:] = 0
 
     def calculate_vm_func(M_guess: float, apply: bool = False) -> float:
         """Solve stator for a guessed Mach; returns massflow residual."""

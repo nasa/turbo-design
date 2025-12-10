@@ -15,7 +15,7 @@ def main() -> None:
     # Knowns (Mattingly Example 9.1)
     T01 = 518.7  # R
     P01 = 14.7  # psia
-    omega = -1000  # rad/s
+    omega = 1000  # rad/s
     r = 12  # in
     alpha1 = 40  # deg
     massflow = 50  # lbm/s
@@ -26,25 +26,30 @@ def main() -> None:
     P01_Pa = P01 * 6894.76
     massflow_kg_s = massflow * 0.453592
 
-    area = massflow_kg_s * np.sqrt(T01_K) / (P01_Pa * np.cos(np.radians(alpha1)) * MFP(M1))
-
+    area1 = 207.2 / 39.3701**2 
+    area2 = 179.1 / 39.3701**2 
+    area3 = 165.3 / 39.3701**2
     rmean = r * 0.0254  # convert inch to meter
-    h = area / (np.pi * 4 * rmean)
+    h1 = area1 / (np.pi * 4 * rmean)
+    h2 = area2 / (np.pi * 4 * rmean)
+    h3 = area3 / (np.pi * 4 * rmean)
     cax = 1 * 0.0254  # Assumed axial chord of 1 inch
+    
     xhub_arr = [0, cax, 2 * cax]
     xshroud_arr = [0, cax, 2 * cax]
     # Shift both hub and shroud outward to achieve u2/u1 via mean-radius increase
-    rmean2 = rmean * u2_u1
-    rhub_arr = [rmean - h, rmean2 - h, rmean2 - h]  # Inlet exit, rotor exit, stator exit
-    rshroud_arr = [rmean + h, rmean2 + h, rmean2 + h]
-
-    passage = Passage(xhub_arr, rhub_arr, xshroud_arr, rshroud_arr, passageType=PassageType.Axial)
+    
+    
+    rhub_arr = [rmean - h1, rmean - h2, rmean - h3]  # Inlet exit, rotor exit, stator exit
+    rshroud_arr = [rmean + h1, rmean + h2, rmean + h3]
+    
+    passage = Passage(xhub_arr, rhub_arr, xshroud_arr, rshroud_arr, passageType=PassageType.Axial, zero_phi=True)
     inlet = Inlet(hub_location=0)
     inlet.alpha2 = [alpha1]
     inlet.init_total(P01_Pa, T01_K, M=M1)
 
     rotor = BladeRow(hub_location=cax/max(xhub_arr), row_type=RowType.Rotor)
-    rotor.beta2_metal = [23.87]
+    rotor.beta2_metal = [-23.87]
     rotor.loss_function = FixedPressureLoss(0)
 
     stator = BladeRow(hub_location=2*cax/max(xhub_arr), row_type=RowType.Stator)
