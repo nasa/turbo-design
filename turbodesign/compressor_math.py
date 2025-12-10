@@ -4,7 +4,7 @@ from typing import Optional
 
 import numpy as np
 import numpy.typing as npt
-from scipy.optimize import minimize_scalar
+from scipy.optimize import minimize_scalar, minimize
 
 from pyturbo.helper import convert_to_ndarray
 
@@ -36,153 +36,91 @@ def polytropic_efficiency(pi: float, tau: float, gamma: float) -> float:
     return ((gamma - 1.0) / gamma) * np.log(pi_safe) / ln_tau
 
 
-def stator_calc(
-    row: BladeRow,
-    upstream: BladeRow,
-    downstream: Optional[BladeRow] = None,
-    calculate_vm: bool = True,
-    static_defined: bool = False,
-) -> None:
-    """Solve compressor stator exit conditions.
+def stator_calc(row: BladeRow, upstream: BladeRow, calculate_vm: bool = True) -> None:
+    """Solve compressor stator exit conditions by matching exit massflow."""
 
-    Args:
-        row: Current stator blade row being solved.
-        upstream: Upstream blade row providing inlet total conditions.
-        downstream: Optional downstream row used for reaction/P0_P bookkeeping.
-        calculate_vm: If True, iterates Mach to satisfy massflow; if False, assumes Vm known.
-        static_defined: Treat P as prescribed (turbine-like) when True; otherwise compressor mode.
-    """
+    loss_type = getattr(row.loss_function, "loss_type", None)
+    if loss_type == LossType.Pressure and callable(row.loss_function):
+        row.Yp = row.loss_function(row, upstream)  # type: ignore[arg-type]
+    else:
+        row.Yp[:] = 0
 
-    def _solve_with_loss(Yp: npt.NDArray) -> npt.NDArray:
-        """Run the stator calculation with a supplied loss array."""
-        row.Yp = Yp
-
+    def calculate_vm_func(M_guess: float, apply: bool = False) -> float:
+        """Solve stator for a guessed Mach; returns massflow residual."""
         T0_coolant_local = T0_coolant_weighted_average(row) if row.coolant is not None else 0.0
         T0_local = upstream.T0 - T0_coolant_local
-
-        if static_defined:
-            P0_local = upstream.P0 - row.Yp * (upstream.P0 - row.P)
-        else:  # Compressor
-            P0_local = row.P0_is - row.Yp * (upstream.P0 - upstream.P)
+        P0_local = row.P0_is - row.Yp * (upstream.P0 - upstream.P)
 
         deviation_func = getattr(row, "deviation_function", None)
         deviation = deviation_func(row, upstream) if callable(deviation_func) else 0.0
 
-        if calculate_vm:
-            M_local = np.zeros(len(row.area))
-            residual_error = np.zeros(len(row.area) - 1)
-            streamline_massflow = np.diff(row.massflow)
-
-            for j in range(1, len(row.area)):
-                res = minimize_scalar(
-                    solve_for_mach,
-                    bounds=(0.01, 1.0),
-                    args=(
-                        streamline_massflow[j - 1],
-                        P0_local[j],
-                        T0_local[j],
-                        row.area[j],
-                        row.gamma,
-                        row.R,
-                    ),
-                )
-                M_local[j] = res.x
-                residual_error[j - 1] = res.fun
-            M_local[0] = 1.0 / (len(M_local) - 1) * M_local[1:].sum()
-
-            P0_P = IsenP(M_local, row.gamma)
-            P_local = P0_local / P0_P
-            T0_T = IsenT(M_local, row.gamma)
-            T_local = T0_local / T0_T
-            V_local = M_local * np.sqrt(row.gamma * row.R * T_local)
-            Vm_local = V_local * np.cos(row.alpha2)
-            Vx_local = Vm_local * np.cos(row.phi)
-            Vr_local = Vm_local * np.sin(row.phi)
-            Vt_local = Vm_local * np.tan(row.alpha2 + deviation)
-        else:  # Vm known
-            Vm_local = row.Vm
-            Vx_local = Vm_local * np.cos(row.phi)
-            Vr_local = Vm_local * np.sin(row.phi)
-            Vt_local = Vm_local * np.tan(row.alpha2 + deviation)
-            V_local = np.sqrt(Vx_local**2 + Vr_local**2 + Vt_local**2)
-            T_local = row.P / (row.R * row.rho)
-            M_local = V_local / np.sqrt(row.gamma * row.R * T_local)
-            P_local = row.P
-            T0_local = row.T0
-
-        if downstream is not None:
-            row.P0_P = float((P0_local / downstream.P).mean())
-            row.rp = ((P_local - downstream.P) / (upstream.P0 - downstream.P)).mean()
+        M_local = np.full_like(row.area, M_guess, dtype=float)
+        P0_P = IsenP(M_local, row.gamma)
+        P_local = P0_local / P0_P
+        T0_T = IsenT(M_local, row.gamma)
+        T_local = T0_local / T0_T
+        V_local = M_local * np.sqrt(row.gamma * row.R * T_local)
+        Vm_local = V_local * np.cos(row.alpha2)
+        Vx_local = Vm_local * np.cos(row.phi)
+        Vr_local = Vm_local * np.sin(row.phi)
+        Vt_local = Vm_local * np.tan(row.alpha2 + deviation)
 
         rho_local = P_local / (row.R * T_local)
         U_local = row.omega * row.r
         Wt_local = Vt_local - U_local
-
-        if upstream.row_type == RowType.Rotor:
-            alpha1_local = upstream.alpha2 + upstream.deviation
-        else:
-            alpha1_local = row.alpha1
-
+        alpha1_local = upstream.alpha2 + upstream.deviation if upstream.row_type == RowType.Rotor else row.alpha1
         entropy_rise_local = 0.5 * (row.Cp + upstream.Cp) * np.log(T_local / upstream.T) - row.R * np.log(P_local / upstream.P)
 
-        # Apply
-        row.T0 = T0_local
-        row.P0 = P0_local
-        row.M = M_local
-        row.P = P_local
-        row.T = T_local
-        row.V = V_local
-        row.Vm = Vm_local
-        row.Vx = Vx_local
-        row.Vr = Vr_local
-        row.Vt = Vt_local
-        row.alpha1 = alpha1_local
-        row.beta1 = upstream.beta2
-        row.deviation[:] = deviation
-        row.rho = rho_local
-        row.U = U_local
-        row.Wt = Wt_local
-        row.P0_stator_inlet = upstream.P0
-        row.entropy_rise = entropy_rise_local
+        # massflow integration (include blockage and optional coolant)
+        total_area, streamline_area = compute_streamline_areas(row)
+        massflow_local = np.zeros_like(row.massflow)
+        massflow_fraction = np.linspace(0, 1, len(row.percent_hub_shroud))
+        for j in range(1, len(row.percent_hub_shroud)):
+            Vm_seg = 0.5 * (Vm_local[j] + Vm_local[j - 1])
+            rho_seg = 0.5 * (rho_local[j] + rho_local[j - 1])
+            massflow_local[j] = Vm_seg * rho_seg * streamline_area[j] * (1 - row.blockage) + massflow_local[j - 1]
+        total_massflow_no_coolant = massflow_local[-1]
+        if row.coolant is not None:
+            massflow_local += massflow_fraction * row.coolant.massflow_percentage * total_massflow_no_coolant
+        total_massflow_local = massflow_local[-1]
 
-        return entropy_rise_local
+        if apply:
+            row.T0 = T0_local
+            row.P0 = P0_local
+            row.M = M_local
+            row.P = P_local
+            row.T = T_local
+            row.V = V_local
+            row.Vm = Vm_local
+            row.Vx = Vx_local
+            row.Vr = Vr_local
+            row.Vt = Vt_local
+            row.alpha1 = alpha1_local
+            row.beta1 = upstream.beta2
+            row.deviation[:] = deviation
+            row.rho = rho_local
+            row.U = U_local
+            row.Wt = Wt_local
+            row.P0_stator_inlet = upstream.P0
+            row.entropy_rise = entropy_rise_local
+            row.total_area = total_area
+            row.area = streamline_area
+            row.massflow = massflow_local
+            row.total_massflow_no_coolant = total_massflow_no_coolant
+            row.total_massflow = total_massflow_local
+        target_massflow = getattr(upstream, "total_massflow", total_massflow_local)
+        return abs(target_massflow - total_massflow_local)
 
-    loss_type = getattr(row.loss_function, "loss_type", None)
-
-    if loss_type == LossType.Pressure:
-        row.Yp = row.loss_function(row, upstream)
-        _solve_with_loss(row.Yp)
-    elif loss_type == LossType.Entropy:
-        desired_entropy_rise = convert_to_ndarray(row.loss_function(row, upstream))
-        if len(desired_entropy_rise) == 1:  # bulk value
-            fun = lambda s: np.abs(desired_entropy_rise - _solve_with_loss(np.full_like(row.Yp, s)))
-            res = minimize_scalar(fun, bounds=[0.01, 0.4])
-            row.Yp[:] = res.x
-            _solve_with_loss(row.Yp)
-        elif len(desired_entropy_rise) > 1:  # entropy rise array
-            for j in range(len(desired_entropy_rise)):
-                fun = lambda s, j=j: np.abs(desired_entropy_rise[j] - _solve_with_loss(np.full_like(row.Yp, s))[j])
-                res = minimize_scalar(fun, bounds=[0.01, 0.4])
-                row.Yp[j] = res.x
-            _solve_with_loss(row.Yp)
-    elif loss_type == LossType.Polytropic:
-        target_eta_poly = float(row.loss_function(row, upstream))
-
-        def _objective(y: float) -> float:
-            yp_array = np.full_like(row.Yp, y)
-            _solve_with_loss(yp_array)
-            pi = float((row.P0 / upstream.P0).mean())
-            tau = float((row.T0 / upstream.T0).mean())
-            eta_poly = polytropic_efficiency(pi, tau, row.gamma)
-            return abs(eta_poly - target_eta_poly)
-
-        res = minimize_scalar(_objective, bounds=[0.0, 0.6], method="bounded")
-        row.Yp = np.full_like(row.Yp, res.x)
-        _solve_with_loss(row.Yp)
-    else:  # LossType.Enthalpy
-        row.Yp[:] = 0
-        _solve_with_loss(row.Yp)
-
+    if calculate_vm:
+        res = minimize_scalar(calculate_vm_func,bounds=[0.01,1])
+        calculate_vm_func(res.x, apply=True)
+    else: # We know Vm, P0, T0, P 
+        row.Vx = row.Vm*np.cos(row.phi)
+        row.Vr = row.Vm*np.sin(row.phi)
+        row.Vt = row.Vm*np.tan(row.alpha2)
+        row.V = np.sqrt(row.Vx**2 + row.Vr**2 + row.Vt**2)
+        row.T = row.P/(row.R*row.rho)   # We know P, this is a guess
+        row.M = row.V/np.sqrt(row.gamma*row.R*row.T)
 
 def rotor_calc(
     row: BladeRow,

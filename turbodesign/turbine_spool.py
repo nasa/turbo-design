@@ -30,7 +30,7 @@ from .turbine_math import (
     compute_gas_constants,
     compute_reynolds,
 )
-from .flow_math import compute_massflow, compute_streamline_areas
+from .flow_math import compute_massflow, compute_streamline_areas, compute_power
 from .solve_radeq import adjust_streamlines, radeq
 from pyturbo.helper import line2D, convert_to_ndarray
 

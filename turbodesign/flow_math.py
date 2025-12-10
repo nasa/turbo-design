@@ -4,7 +4,7 @@ import numpy as np
 import numpy.typing as npt
 
 from .bladerow import BladeRow
-
+from .enums import RowType
 
 def compute_streamline_areas(row: BladeRow) -> Tuple[float, npt.NDArray]:
     """Compute total annulus area and individual streamline cross sections."""
@@ -43,3 +43,27 @@ def compute_massflow(row: BladeRow) -> None:
     row.total_massflow = massflow[-1]
     row.total_area = total_area
     row.area = streamline_area
+
+
+def compute_power(row: BladeRow, upstream: BladeRow) -> None:
+    """Calculate power and efficiencies for a blade row using upstream reference."""
+    if row.row_type == RowType.Stator:
+        row.power = 0
+        row.eta_static = 0
+        row.eta_total = 0
+        row.stage_loading = 0
+        row.euler_power = 0
+        row.T_is = 0 * row.T0
+        row.T0_is = 0 * row.T0  # Make it an array
+    else:
+        P0_P = (upstream.P0 / row.P).mean()
+        row.P0_ratio = (row.P0 / upstream.P0).mean()
+        row.T_is = upstream.T0 * (1 / P0_P) ** ((row.gamma - 1) / row.gamma)
+        a = np.sqrt(row.gamma * row.R * row.T_is)
+        row.T0_is = row.T_is * (1 + (row.gamma - 1) / 2 * (row.V / a) ** 2)
+
+        row.power = row.massflow[-1] * (row.Cp * (upstream.T0 - row.T0)).mean()
+        row.eta_static = row.power / (row.massflow[-1] * row.Cp * (upstream.T0.mean() - row.T_is.mean()))
+        row.eta_total = (upstream.T0.mean() - row.T0.mean()) / (upstream.T0.mean() - row.T0_is.mean())
+        row.stage_loading = row.Cp * (upstream.T0.mean() - row.T0.mean()) / row.U.mean() ** 2
+        row.euler_power = row.massflow[-1] * (upstream.U * upstream.Vt - row.U * row.Vt).mean()
