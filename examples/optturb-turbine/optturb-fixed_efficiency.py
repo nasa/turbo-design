@@ -5,6 +5,7 @@
 """
 
 from turbodesign import PassageType, TurbineSpool, Inlet, RowType, BladeRow, Passage, Outlet
+from turbodesign.row_factory import make_rotor_row, make_stator_row
 from turbodesign.coolant import Coolant
 from turbodesign.loss.turbine import FixedEfficiency
 import numpy as np 
@@ -45,8 +46,8 @@ print(f"Coefficient of Pressure [J/Kg] {fluid.cp:0.4f}")
 
 # Coolant: Use Kelvin and Pascal
 station1 = Inlet(M=0.4, P0=[P0], T0=[T0], beta=[0], fluid=fluid, percent_radii=0.5)
-station2 = BladeRow(RowType.Stator, power=0)
-station3 = BladeRow(RowType.Rotor, power=power)
+station2 = make_stator_row(RowType.Stator, power=0)
+station3 = make_rotor_row(RowType.Rotor, power=power)
 outlet = Outlet(P=P0/3.96, percent_radii=0.5, num_streamlines=3)
 
 station2.coolant = Coolant(fluid, T0=616*0.555556, P0=50.6 * 6894.76, massflow_percentage=0)

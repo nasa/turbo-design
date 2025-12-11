@@ -1,4 +1,5 @@
 from turbodesign import TurbineSpool, Inlet, RowType, BladeRow, Passage, Outlet, PassageType, Coolant
+from turbodesign.row_factory import make_rotor_row, make_stator_row
 from turbodesign.enums import MassflowConstraint
 from turbodesign.loss.fixedpressureloss import FixedPressureLoss
 import numpy as np
@@ -71,10 +72,10 @@ beta_exit_flow = [73.6,-67.2,69.5,-63.9]
 P0_Loss = [0.057,0.088,0.069,0.014]         # (P01-P02)/(P01-P2)
 
 # Axial location is a percentage along the hub where row exit is defined
-stator1 = BladeRow(row_type=RowType.Stator, hub_location=location1)
-rotor1 = BladeRow(row_type=RowType.Rotor, hub_location=location2)
-stator2 = BladeRow(row_type=RowType.Stator, hub_location=location3)
-rotor2 = BladeRow(row_type=RowType.Rotor, hub_location=location4)
+stator1 = make_stator_row(row_type=RowType.Stator, hub_location=location1)
+rotor1 = make_rotor_row(row_type=RowType.Rotor, hub_location=location2)
+stator2 = make_stator_row(row_type=RowType.Stator, hub_location=location3)
+rotor2 = make_rotor_row(row_type=RowType.Rotor, hub_location=location4)
 
 stator1.axial_chord = cax1 # Set an axial chord
 rotor1.axial_chord = cax2

@@ -1,8 +1,10 @@
 import numpy as np
 
-from turbodesign import BladeRow, Inlet, Outlet, Passage, PassageType, RowType
+from turbodesign import Inlet, Outlet, Passage, PassageType
+from turbodesign.row_factory import make_rotor_row, make_stator_row
 from turbodesign.compressor_spool import CompressorSpool
 from turbodesign.loss.fixedpressureloss import FixedPressureLoss
+from turbodesign.row_factory import make_rotor_row, make_stator_row
 
 
 def MFP(M: float, gamma: float = 1.4, R: float = 287.15) -> float:
@@ -39,7 +41,6 @@ def main() -> None:
     xshroud_arr = [0, cax, 2 * cax]
     # Shift both hub and shroud outward to achieve u2/u1 via mean-radius increase
     
-    
     rhub_arr = [rmean - h1, rmean - h2, rmean - h3]  # Inlet exit, rotor exit, stator exit
     rshroud_arr = [rmean + h1, rmean + h2, rmean + h3]
     
@@ -48,14 +49,18 @@ def main() -> None:
     inlet.alpha2 = [alpha1]
     inlet.init_total(P01_Pa, T01_K, M=M1)
 
-    rotor = BladeRow(hub_location=cax/max(xhub_arr), row_type=RowType.Rotor)
-    rotor.beta2_metal = [-23.87]
-    rotor.loss_function = FixedPressureLoss(0)
+    rotor = make_rotor_row(
+        hub_location=cax / max(xhub_arr),
+        metal_exit_angle_deg=[-23.87],
+        loss_function=FixedPressureLoss(0),
+    )
 
-    stator = BladeRow(hub_location=2*cax/max(xhub_arr), row_type=RowType.Stator)
-    stator.beta2_metal = [alpha1]
-    stator.loss_function = FixedPressureLoss(0)
-    stator.P0_ratio = 1.3
+    stator = make_stator_row(
+        hub_location=2 * cax / max(xhub_arr),
+        metal_exit_angle_deg=[alpha1],
+        loss_function=FixedPressureLoss(0),
+        P0_ratio=1.3,
+    )
 
     outlet = Outlet()
     outlet.init_total(1.3 * P01_Pa, 0.5)

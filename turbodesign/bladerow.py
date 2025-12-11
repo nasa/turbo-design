@@ -1,4 +1,4 @@
-from dataclasses import field, Field
+from dataclasses import dataclass, field, Field
 from typing import Any, Callable, List, Optional, Sequence, Tuple, Union
 from .enums import RowType, PowerType
 import numpy as np 
@@ -15,44 +15,47 @@ from .passage import Passage
 from .arrayfuncs import safe_interpolate
     
 
+@dataclass(eq=False)
 class BladeRow:
-    id:int = 0
-    stage_id:int = 0
+    id: int = 0
+    stage_id: int = 0
     row_type: RowType = RowType.Stator
-    loss_function:Optional[LossBaseClass]
-    deviation_function: Optional[DeviationBaseClass]
-    cutting_line:line2D         # Line perpendicular to the streamline
-    rp:float = 0.4              # Degree of Reaction
-    
+    loss_function: Optional[LossBaseClass] = None
+    deviation_function: Optional[DeviationBaseClass] = None
+    cutting_line: Optional[line2D] = None         # Line perpendicular to the streamline
+    rp: float = 0.4              # Degree of Reaction
+    hub_location: float = 0.0
+    shroud_location: float = 0.0
+
     # Fluid
     R: float = 287.15           # Ideal Gas constant J/(Kg K)
     gamma: float = 1.33         # Ratio of Cp/Cv
     Cp: float = 1019            # Cp J/(Kg*K)
     Cv: float = 1019/1.14       # Cv J/(Kg*K)
-    _coolant:Coolant = None     # type: ignore # Coolant Fluid
-    mu:float = 0 
-    
-    total_massflow:float = 0    # Massflow spool + all upstream cooling flow [kg/s]
-    massflow:npt.NDArray = field(default_factory=lambda: np.array([0]))  # Massflow per radii
-    total_massflow_no_coolant:float = 0     # Inlet massflow
+    _coolant: Optional[Coolant] = None     # Coolant Fluid
+    mu: float = 0
+
+    total_massflow: float = 0    # Massflow spool + all upstream cooling flow [kg/s]
+    massflow: npt.NDArray = field(default_factory=lambda: np.array([0]))  # Massflow per radii
+    total_massflow_no_coolant: float = 0     # Inlet massflow
     # ----------------------------------
 
     # Streamline Properties 
-    percent_hub:float = 0 # Where blade row is defined along the hub. 
+    percent_hub: float = 0 # Where blade row is defined along the hub. 
     percent_hub_shroud: npt.NDArray = field(default_factory=lambda: np.array([0]))    # Percent streamline length from hub to shroud.
     x: npt.NDArray = field(default_factory=lambda: np.array([0]))       # x - coordinates (useful for computing axial chord)
     r: npt.NDArray = field(default_factory=lambda: np.array([0]))       # Radius - coordinates 
     m: npt.NDArray = field(default_factory=lambda: np.array([0]))       # meridional 
-    total_area:float = 0
+    total_area: float = 0
     area: npt.NDArray = field(default_factory=lambda: np.array([0]))
     # Calculated massflow is the massflow computed after radial eq solver
     calculated_massflow: float = 0
-    
+
     # Row Efficiency (calculated or specified)
-    eta_total:float = 0     # Total to Total
-    eta_static:float = 0    # Total to static
+    eta_total: float = 0     # Total to Total
+    eta_static: float = 0    # Total to static
     eta_poly: float = 0     # Polytropic efficiency (per row if applicable)
-    stage_loading:float = 0 # stage loading how much work done per stage
+    stage_loading: float = 0 # stage loading how much work done per stage
 
     alpha1: npt.NDArray = field(default_factory=lambda: np.array([0]))               # Blade inlet absolute flow angle
     alpha2: npt.NDArray = field(default_factory=lambda: np.array([0]))               # Blade exit absolute flow angle
@@ -61,20 +64,20 @@ class BladeRow:
     beta2: npt.NDArray = field(default_factory=lambda: np.array([0]))                 # Blade exit relative flow angle
     
     deviation: npt.NDArray = field(default_factory=lambda: np.array([0])) 
-    _beta1_metal:npt.NDArray = field(default_factory=lambda: np.array([0]))           # blade inlet metal angle
-    beta1_metal_radii:npt.NDArray = field(default_factory=lambda: np.array([0]))      # radii where metal angle is defined
+    _beta1_metal: npt.NDArray = field(default_factory=lambda: np.array([0]))           # blade inlet metal angle
+    beta1_metal_radii: npt.NDArray = field(default_factory=lambda: np.array([0]))      # radii where metal angle is defined
     
-    _beta2_metal:npt.NDArray = field(default_factory=lambda: np.array([0]))           # blade exit metal angle
-    beta2_metal_radii:npt.NDArray = field(default_factory=lambda: np.array([0]))      # radii where metal angle is defined
+    _beta2_metal: npt.NDArray = field(default_factory=lambda: np.array([0]))           # blade exit metal angle
+    beta2_metal_radii: npt.NDArray = field(default_factory=lambda: np.array([0]))      # radii where metal angle is defined
     
-    beta1_fixed:bool = False    # Geometry already defined. This affects the inlet flow angle
-    beta2_fixed:bool = False    # Geometry already defined. This affects the exit flow angle
+    beta1_fixed: bool = False    # Geometry already defined. This affects the inlet flow angle
+    beta2_fixed: bool = False    # Geometry already defined. This affects the exit flow angle
 
     # Velocities 
     Vm: npt.NDArray = field(default_factory=lambda: np.array([0]))               # Meridional velocity
     Vx: npt.NDArray = field(default_factory=lambda: np.array([0]))               # Axial Velocity
     Vt: npt.NDArray = field(default_factory=lambda: np.array([0]))               # Tangential Velocity
-    Vr:npt.NDArray = field(default_factory=lambda: np.array([0]))                # Radial velocity 
+    Vr: npt.NDArray = field(default_factory=lambda: np.array([0]))                # Radial velocity 
     V: npt.NDArray = field(default_factory=lambda: np.array([0]))                # Absolute Velocity in 3D coordinate system
     V2: npt.NDArray = field(default_factory=lambda: np.array([0]))               # Absolute Velocity in Theta-Axial plane
     M: npt.NDArray = field(default_factory=lambda: np.array([0]))                # Mach Number
@@ -83,17 +86,17 @@ class BladeRow:
     W: npt.NDArray = field(default_factory=lambda: np.array([0]))                # Relative Velocity in Theta-Axial plane
     Wt: npt.NDArray = field(default_factory=lambda: np.array([0]))               # Relative Tangential Velocity    
 
-    _rpm: float = 0 
-    omega:float = 0 # angular velocity rad/s
+    _rpm: float = field(default=0, init=False, repr=False)
+    omega: float = 0 # angular velocity rad/s
     
-    P0_stator_inlet = field(default_factory=lambda: np.array([0]))              # Every quantity is an exit quantity, This is used  for efficiency calcs
-    T0_stator_inlet = field(default_factory=lambda: np.array([0]))              # Every quantity is an exit quantity, This is used  for efficiency calcs
+    P0_stator_inlet: npt.NDArray = field(default_factory=lambda: np.array([0]))              # Every quantity is an exit quantity, This is used  for efficiency calcs
+    T0_stator_inlet: npt.NDArray = field(default_factory=lambda: np.array([0]))              # Every quantity is an exit quantity, This is used  for efficiency calcs
     P0: npt.NDArray = field(default_factory=lambda: np.array([0]))              # Total Quantities 
-    P0_is:npt.NDArray = field(default_factory=lambda: np.array([0]))
+    P0_is: npt.NDArray = field(default_factory=lambda: np.array([0]))
     T0: npt.NDArray = field(default_factory=lambda: np.array([0]))          
-    T0_is:npt.NDArray = field(default_factory=lambda: np.array([0])) 
+    T0_is: npt.NDArray = field(default_factory=lambda: np.array([0])) 
     P0R: npt.NDArray = field(default_factory=lambda: np.array([0]))             # Relative Total Pressure (Pa)
-    P0R_is:npt.NDArray = field(default_factory=lambda: np.array([0]))
+    P0R_is: npt.NDArray = field(default_factory=lambda: np.array([0]))
     T0R: npt.NDArray = field(default_factory=lambda: np.array([0]))
     
     # Static Quantities
@@ -101,41 +104,45 @@ class BladeRow:
     T: npt.NDArray = field(default_factory=lambda: np.array([0]))
     T_is: npt.NDArray = field(default_factory=lambda: np.array([0]))
     rho: npt.NDArray = field(default_factory=lambda: np.array([0]))
-    entropy_rise:npt.NDArray = field(default_factory=lambda: np.array([0]))
+    entropy_rise: npt.NDArray = field(default_factory=lambda: np.array([0]))
     
     # Related to streamline curvature
-    phi:npt.NDArray = field(default_factory=lambda: np.array([0]))                      # Inclination angle x,r plane. AY td2.f
+    phi: npt.NDArray = field(default_factory=lambda: np.array([0]))                      # Inclination angle x,r plane. AY td2.f
     rm: npt.NDArray = field(default_factory=lambda: np.array([0]))                      # Curvature
     incli_curve_radii: npt.NDArray = field(default_factory=lambda: np.array([0]))       # radius at which curvature was evaluated
-    mprime:npt.NDArray = field(default_factory=lambda: np.array([0]))                   # Mprime distance
+    mprime: npt.NDArray = field(default_factory=lambda: np.array([0]))                   # Mprime distance
     
     Yp: npt.NDArray = field(default_factory=lambda: np.array([0]))                       # Pressure loss
-    blockage:float = 0 
+    blockage: float = 0 
     flow_coefficient: float = 0     # Vm/U or similar nondimensional flow coefficient
-    power:float = 0                 # Watts 
-    power_mean:float = 0
-    power_distribution:npt.NDArray  # How power is divided by radius. Example: Equal distribution [0.33 0.33 0.33]. More at Tip [0.2,0.3,0.5]. More at Hub [0.6 0.5]
-    P0_P:float = 0                  # Total to Static Pressure Ratio
-    P0_ratio:float = 0              # Total to Total ratio
-    Power_Type:PowerType
-    euler_power:float = 0
-    Reynolds:float = 0
+    power: float = 0                 # Watts 
+    power_mean: float = 0
+    power_distribution: npt.NDArray = field(default_factory=lambda: np.array([0]))  # How power is divided by radius.
+    P0_P: float = 0                  # Total to Static Pressure Ratio
+    P0_ratio: float = 0              # Total to Total ratio
+    Power_Type: PowerType = PowerType.P0_P
+    euler_power: float = 0
+    Reynolds: float = 0
     eta_poly: float = 0.0            # Optional per-row polytropic efficiency target
+    num_blades: int = 0
     
     # Used for loss calculations
-    _blade_to_blade_gap:float = 0.025 # Gap between blade in terms of percent chord.
+    _blade_to_blade_gap: float = 0.025 # Gap between blade in terms of percent chord.
     
-    _aspect_ratio:float = 0.9 # 
-    _pitch_to_chord:float = 0.7 # Pitch to chord ratio, used to determine number of blades and compute loss 
+    _aspect_ratio: float = 0.9 # 
+    _pitch_to_chord: npt.NDArray = field(default_factory=lambda: np.array([0.7])) # Pitch to chord ratio, used to determine number of blades and compute loss 
     
-    _axial_chord:float = -1 
-    _chord:float = -1 
-    _stagger:float = 42
-    _te_s:float = 0.08
-    _tip_clearance:float = 0 # Clearance as a percentage of span or blade height
+    _axial_chord: float = -1 
+    _chord: npt.NDArray = field(default_factory=lambda: np.array([-1.0]))
+    _stagger: npt.NDArray = field(default_factory=lambda: np.array([42.0]))
+    _te_s: float = 0.08
+    _tip_clearance: float = 0 # Clearance as a percentage of span or blade height
 
-    _inlet_to_outlet_pratio = [0.06,0.95]
-    shroud_location:float = 0
+    _inlet_to_outlet_pratio: list = field(default_factory=lambda: [0.06,0.95])
+
+    def __post_init__(self):
+        if self.shroud_location == 0:
+            self.shroud_location = self.hub_location
     
     @property
     def inlet_to_outlet_pratio(self) -> Tuple[float,float]:
@@ -205,7 +212,7 @@ class BladeRow:
         
         
     @property
-    def pitch_to_chord(self) -> float:
+    def pitch_to_chord(self) -> npt.NDArray:
         """Gets the pitch to chord ratio 
 
         Returns:
@@ -220,10 +227,10 @@ class BladeRow:
         Args:
             val (float): new pitch to chord ratio. Typically stators are 0.8 to 0.95. Rotors 0.7 to 0.8 
         """
-        self._pitch_to_chord = val
+        self._pitch_to_chord = convert_to_ndarray(val)
     
     @property
-    def solidity(self) -> float:
+    def solidity(self) -> npt.NDArray:
         """Inverse of pitch to chord ratio
 
         Returns:
@@ -241,15 +248,27 @@ class BladeRow:
         Returns:
             float: solidity
         """
-        self._pitch_to_chord = 1/val
+        self._pitch_to_chord = 1/convert_to_ndarray(val)
 
     @property
-    def beta1_metal(self) -> npt.NDArray:
+    def metal_inlet_angle(self) -> npt.NDArray:
+        """Blade metal inlet angle (degrees)."""
         return np.degrees(self._beta1_metal)
     
     @property
-    def beta2_metal(self) -> npt.NDArray:
+    def beta1_metal(self) -> npt.NDArray:
+        """Backward-compatible alias for metal_inlet_angle."""
+        return self.metal_inlet_angle
+    
+    @property
+    def metal_exit_angle(self) -> npt.NDArray:
+        """Blade metal exit angle (degrees)."""
         return np.degrees(self._beta2_metal)
+    
+    @property
+    def beta2_metal(self) -> npt.NDArray:
+        """Backward-compatible alias for metal_exit_angle."""
+        return self.metal_exit_angle
     
     @property
     def stagger(self) -> float:
@@ -270,7 +289,7 @@ class BladeRow:
         self._stagger = val
     
     @property
-    def chord(self) -> float:
+    def chord(self) -> npt.NDArray:
         """Chord defined at mean radius
 
         Returns:
@@ -345,25 +364,6 @@ class BladeRow:
         """
         self._tip_clearance = val
         
-    def __init__(self, hub_location: float, row_type: RowType = RowType.Stator, stage_id: int = 0, shroud_location: Optional[float] = None):
-        """Initializes the blade row to be a particular type
-
-        Args:
-            hub_location (float): Location of the blade row as a percentage of hub length
-            row_type (RowType): Specifies the Type. Defaults to RowType.Stator
-            power (float, optional): power . Defaults to 0.
-            P0_P (float, optional): Total to Static Pressure Ratio
-            stage_id (int, optional): ID of the stage so if you have 9 stages, the id could be 9. It's used to separate the stages. Each stage will have it's own unique degree of reaction 
-        """
-        self.row_type = row_type
-        self.hub_location = hub_location
-        if shroud_location is not None:
-            self.shroud_location = shroud_location
-        else:
-            self.shroud_location = hub_location
-        self.Yp = np.array([0]) # Loss
-        self.stage_id = stage_id
-
     # Backwards-compatible alias
     @property
     def location(self) -> float:
@@ -373,39 +373,54 @@ class BladeRow:
     def location(self, val: float) -> None:
         self.hub_location = val
     
-    @beta1_metal.setter
-    def beta1_metal(self,beta1_metal:List[float],percent:List[float]=[]):
-        """Sets the leading edge metal angle for the blade
-
-        Args:
-            beta1_metal (List[float]): blade leading edge angle
-            percent (List[float]): percent location of metal angles from hub to shroud.
-        """
-        self._beta1_metal = np.radians(convert_to_ndarray(beta1_metal))
-        if len(percent) != len(beta1_metal):
-            percent = np.linspace(0,1,len(self._beta1_metal)).tolist() # type: ignore
+    @metal_inlet_angle.setter
+    def metal_inlet_angle(self, metal_inlet_angle: List[float], percent: List[float] = []):
+        """Sets the leading edge metal angle for the blade (degrees)."""
+        arr = np.radians(convert_to_ndarray(metal_inlet_angle))
+        if len(percent) != len(metal_inlet_angle):
+            percent = np.linspace(0, 1, len(arr)).tolist()  # type: ignore
+        self._beta1_metal = arr
         self.beta1_metal_radii = convert_to_ndarray(percent)
         self.beta1_fixed = True
-        self.beta1 = self.beta1_metal.copy()
+        self.beta1 = self.metal_inlet_angle.copy()
+    
+    @beta1_metal.setter
+    def beta1_metal(self, beta1_metal: List[float], percent: List[float] = []):
+        """Backward-compatible alias for metal_inlet_angle setter."""
+        self.metal_inlet_angle = beta1_metal
         
-    @beta2_metal.setter
-    def beta2_metal(self,beta2_metal:List[float],percent:List[float]=[]):
-        """Sets the trailing edge metal angle for the blade
-
-        Args:
-            beta2_metal (List[float]): Blade exit metal angle
-            percent (List[float]): percent location of metal angles from hub to shroud.
-
-        """
-        self._beta2_metal = np.radians(convert_to_ndarray(beta2_metal))
-        if len(percent) != len(beta2_metal):
-            percent = np.linspace(0,1,len(self._beta2_metal)).tolist() # type: ignore
+    @metal_exit_angle.setter
+    def metal_exit_angle(self, metal_exit_angle: List[float], percent: List[float] = []):
+        """Sets the trailing edge metal angle for the blade (degrees)."""
+        arr = np.radians(convert_to_ndarray(metal_exit_angle))
+        if len(percent) != len(metal_exit_angle):
+            percent = np.linspace(0, 1, len(arr)).tolist()  # type: ignore
+        self._beta2_metal = arr
         self.beta2_metal_radii = convert_to_ndarray(percent)
         self.beta2_fixed = True
-        self.beta2 = self._beta2_metal.copy()
-        
+
+        # Apply deviation if defined; deviation_function returns degrees
+        deviation_func = getattr(self, "deviation_function", None)
+        deviation_rad = 0.0
+        if callable(deviation_func):
+            try:
+                deviation_val = deviation_func(self, None)
+                deviation_rad = np.radians(deviation_val)
+            except Exception:
+                deviation_rad = 0.0
+
+        beta2_effective = self._beta2_metal + deviation_rad
         if self.row_type == RowType.Stator:
-            self.alpha2 = self._beta2_metal.copy()
+            self.alpha2 = beta2_effective.copy()
+            self.beta2 = beta2_effective.copy()
+        else:
+            self.beta2 = beta2_effective.copy()
+        self.deviation = np.full_like(self.beta2, deviation_rad)
+    
+    @beta2_metal.setter
+    def beta2_metal(self, beta2_metal: List[float], percent: List[float] = []):
+        """Backward-compatible alias for metal_exit_angle setter."""
+        self.metal_exit_angle = beta2_metal
         
     @property
     def rpm(self):
@@ -489,6 +504,7 @@ class BladeRow:
 
         chord = pitch / np.maximum(ptc, 1e-9)
         self._chord = chord
+        self._pitch_to_chord = ptc
 
         axial = self.axial_chord if self.axial_chord > 0 else float(np.mean(chord))
         if self.axial_chord <= 0:
@@ -496,8 +512,8 @@ class BladeRow:
 
         ratio = np.clip(axial / np.maximum(chord, 1e-9), -1.0, 1.0)
         stagger_rad = np.arccos(ratio)
-        # Store average stagger in degrees (matches default _stagger units)
-        self._stagger = float(np.degrees(np.mean(stagger_rad)))
+        # Store stagger distribution in degrees
+        self._stagger = np.degrees(stagger_rad)
     
     def to_dict(self):
         

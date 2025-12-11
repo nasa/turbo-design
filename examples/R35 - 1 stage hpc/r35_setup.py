@@ -5,6 +5,7 @@ Rotor 35 1 stage HPC
 """
 
 from turbodesign import TurbineSpool, Inlet, RowType, BladeRow, Passage, Outlet, PassageType
+from turbodesign.row_factory import make_blade_row
 from turbodesign.enums import MassflowConstraint
 from turbodesign import read_agf
 from turbodesign.loss.fixedpressureloss import FixedPressureLoss
@@ -50,10 +51,10 @@ shroud_exit_locations = [np.max(rotor['sections'][-1][:,0]), np.max(stator['sect
 
 
 # Axial location is a percentage along the hub where row exit is defined
-rotor1 = BladeRow(row_type=RowType.Rotor, hub_location=hub_exit_locations[1],shroud_location=shroud_exit_locations[1],stage_id=1)
+rotor1 = make_blade_row(row_type=RowType.Rotor, hub_location=hub_exit_locations[1],shroud_location=shroud_exit_locations[1],stage_id=1)
 rotor1.num_blades = blade_counts[0]
 
-stator1 = BladeRow(row_type=RowType.Stator, hub_location=hub_exit_locations[2],shroud_location=shroud_exit_locations[2],stage_id=1)
+stator1 = make_blade_row(row_type=RowType.Stator, hub_location=hub_exit_locations[2],shroud_location=shroud_exit_locations[2],stage_id=1)
 stator1.num_blades = blade_counts[1]
 
 # Set axial chord from geometry

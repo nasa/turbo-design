@@ -84,6 +84,7 @@ def offset_curve(x, y, offset_distance):
 
 from typing import Tuple
 from turbodesign import PassageType
+from turbodesign.row_factory import make_rotor_row, make_stator_row
 from turbodesign import TurbineSpool, Inlet, RowType, BladeRow, Passage, Outlet
 from turbodesign.enums import MassflowConstraint
 from turbodesign.coolant import Coolant
@@ -148,12 +149,12 @@ inlet.init_total(
 
 outlet = Outlet(P=P,percent_radii=[0.5],num_streamlines=5)
 
-stator = BladeRow(row_type=RowType.Stator, hub_location=blade_position[0])
+stator = make_stator_row(row_type=RowType.Stator, hub_location=blade_position[0])
 stator.R = 287.15
 stator.gamma = 1.35
 stator.Cp = stator.gamma*stator.R/(stator.gamma-1)
 
-rotor = BladeRow(row_type=RowType.Rotor, hub_location=blade_position[1])
+rotor = make_rotor_row(row_type=RowType.Rotor, hub_location=blade_position[1])
 rotor.R = 287.15
 rotor.gamma = 1.35
 rotor.Cp = stator.gamma*stator.R/(stator.gamma-1)

@@ -6,6 +6,7 @@
 #%% Import Library
 from typing import List
 from turbodesign import PassageType
+from turbodesign.row_factory import make_rotor_row, make_stator_row
 from turbodesign import TurbineSpool, Inlet, RowType, BladeRow, Passage, Outlet
 from turbodesign.enums import MassflowConstraint
 from turbodesign.coolant import Coolant
@@ -120,10 +121,10 @@ outlet = Outlet(P=Pexit,percent_radii=0.5,num_streamlines=3) # type: ignore
 
 #%% Define Blade Rows 
 # Axial location is a percentage along the hub where row exit is defined
-stator1 = BladeRow(row_type=RowType.Stator,hub_location=(max(stator1[0][:,0]) - min(hub[:,0]))/hub_len, stage_id=0)
-rotor1 = BladeRow(row_type=RowType.Rotor, hub_location=(max(rotor1[0][:,0]) - min(hub[:,0]))/hub_len,stage_id=0)
-stator2 = BladeRow(row_type=RowType.Stator,hub_location=(max(stator2[0][:,0]) - min(hub[:,0]))/hub_len,stage_id=1)
-rotor2 = BladeRow(row_type=RowType.Rotor, hub_location=(max(rotor2[0][:,0]) - min(hub[:,0]))/hub_len,stage_id=1)
+stator1 = make_stator_row(row_type=RowType.Stator,hub_location=(max(stator1[0][:,0]) - min(hub[:,0]))/hub_len, stage_id=0)
+rotor1 = make_rotor_row(row_type=RowType.Rotor, hub_location=(max(rotor1[0][:,0]) - min(hub[:,0]))/hub_len,stage_id=0)
+stator2 = make_stator_row(row_type=RowType.Stator,hub_location=(max(stator2[0][:,0]) - min(hub[:,0]))/hub_len,stage_id=1)
+rotor2 = make_rotor_row(row_type=RowType.Rotor, hub_location=(max(rotor2[0][:,0]) - min(hub[:,0]))/hub_len,stage_id=1)
 
 stator1.axial_chord = stator1_cax # Set an axial chord
 rotor1.axial_chord = rotor1_cax

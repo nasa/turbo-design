@@ -7,6 +7,7 @@
 '''
 #%% Import Library
 from turbodesign import PassageType
+from turbodesign.row_factory import make_rotor_row, make_stator_row
 from turbodesign import TurbineSpool, Inlet, RowType, BladeRow, Passage, Outlet
 from turbodesign.enums import MassflowConstraint
 from turbodesign.coolant import Coolant
@@ -64,9 +65,9 @@ outlet = Outlet(P=206.799*1000,percent_radii=0.5,num_streamlines=5)
 
 #%% Define Blade Rows 
 # Axial location is a percentage along the hub where row exit is defined
-stator1 = BladeRow(row_type=RowType.Stator,hub_location=cax1/axial_len)
-rotor1 = BladeRow(row_type=RowType.Rotor, hub_location=(cax1+cax2)/axial_len)
-stator2 = BladeRow(row_type=RowType.Stator,hub_location=1)
+stator1 = make_stator_row(row_type=RowType.Stator,hub_location=cax1/axial_len)
+rotor1 = make_rotor_row(row_type=RowType.Rotor, hub_location=(cax1+cax2)/axial_len)
+stator2 = make_stator_row(row_type=RowType.Stator,hub_location=1)
 
 # stator1.gamma = 1.38
 # stator1.Cp = 1042.8

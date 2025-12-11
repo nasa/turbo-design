@@ -8,7 +8,7 @@ import sys
 sys.path.insert(0,'../')
 from td3 import CoolingType, Units, Spool, Inlet, RowType, BladeRow
 from td3.coolant import Coolant
-from td3.loss
+# from td3.loss
 import numpy as np 
 from cantera import Solution
 
@@ -42,10 +42,10 @@ mean_radius = (annulus_radii[0,0]+annulus_radii[1,0])/2 # Mean radius
 
 station1 = Inlet(M=0.4,P0=[P0], T0=[T0], beta=[0], fluid=fluid, radii=mean_radius)
 
-station2 = BladeRow(RowType.Stator, power=0)
-station3 = BladeRow(RowType.Rotor, power=power*0.57)
-station4 = BladeRow(RowType.Stator,power=0)
-station5 = BladeRow(RowType.Rotor,power=power*0.43)
+station2 = make_stator_row(RowType.Stator, power=0)
+station3 = make_rotor_row(RowType.Rotor, power=power*0.57)
+station4 = make_stator_row(RowType.Stator,power=0)
+station5 = make_rotor_row(RowType.Rotor,power=power*0.43)
 
 station2.add_coolant(stator_coolant1)
 station3.add_coolant(rotor_coolant1)

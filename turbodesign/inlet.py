@@ -23,7 +23,7 @@ class Inlet(BladeRow):
     def __init__(self, 
                  hub_location:float=0,
                  shroud_location:Optional[float]=None,
-                 beta:Union[float,List[float]]=[0]):
+                 alpha:Union[float,List[float]]=[0]):
         """Initializes the inlet station. 
             Uses the beta and exit mach number to predict a value for Vm
 
@@ -33,7 +33,11 @@ class Inlet(BladeRow):
 
         """
         super().__init__(row_type=RowType.Inlet,hub_location=hub_location,shroud_location=shroud_location,stage_id=-1)
-        self.beta1 = convert_to_ndarray(beta)
+        self.beta1 = convert_to_ndarray([0.0])
+        # Default absolute angles to zero to avoid attribute errors during interpolation
+        self.alpha1 = convert_to_ndarray([0.0])
+        self.alpha2 = convert_to_ndarray(alpha)
+        self.beta2 = convert_to_ndarray([0.0])
                    
     
     def init_static(self,P:Union[float,List[float]],T:Union[float,List[float]],M:Union[float,List[float]],percent_radii:Union[float,List[float]]=[0.5]):

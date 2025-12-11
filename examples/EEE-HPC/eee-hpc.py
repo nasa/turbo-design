@@ -9,6 +9,7 @@ Todo:
 """
 
 from turbodesign import Inlet, RowType, BladeRow, Passage, Outlet, PassageType
+from turbodesign.row_factory import make_rotor_row, make_stator_row
 from turbodesign.compressor_spool import CompressorSpool
 from turbodesign.enums import MassflowConstraint
 from turbodesign import Coolant
@@ -120,60 +121,60 @@ hub_exit_locations.append((lastblade[0][0,:,0].max()  - hub[:,0].min()) / (hub[:
 shroud_exit_locations.append((lastblade[0][-1,:,0].max()  - shroud[:,0].min()) / (shroud[:,0].max() - shroud[:,0].min()))
 
 # Axial location is a percentage along the hub where row exit is defined
-IGV1 = BladeRow(row_type=RowType.IGV, hub_location=hub_exit_locations[0],shroud_location=shroud_exit_locations[0],stage_id=1)
+IGV1 = make_stator_row(row_type=RowType.IGV, hub_location=hub_exit_locations[0],shroud_location=shroud_exit_locations[0],stage_id=1)
 IGV1.num_blades = blade_counts.get("igv", IGV1.num_blades)
 
-rotor1 = BladeRow(row_type=RowType.Rotor, hub_location=hub_exit_locations[1],shroud_location=shroud_exit_locations[1],stage_id=1)
+rotor1 = make_rotor_row(row_type=RowType.Rotor, hub_location=hub_exit_locations[1],shroud_location=shroud_exit_locations[1],stage_id=1)
 rotor1.num_blades = blade_counts.get("rotor1", rotor1.num_blades)
 
-stator1 = BladeRow(row_type=RowType.Stator, hub_location=hub_exit_locations[2],shroud_location=shroud_exit_locations[2],stage_id=1)
+stator1 = make_stator_row(row_type=RowType.Stator, hub_location=hub_exit_locations[2],shroud_location=shroud_exit_locations[2],stage_id=1)
 stator1.num_blades = blade_counts.get("stator1", stator1.num_blades)
 
-rotor2 = BladeRow(row_type=RowType.Rotor, hub_location=hub_exit_locations[3],shroud_location=shroud_exit_locations[3],stage_id=2)
+rotor2 = make_rotor_row(row_type=RowType.Rotor, hub_location=hub_exit_locations[3],shroud_location=shroud_exit_locations[3],stage_id=2)
 rotor2.num_blades = blade_counts.get("rotor2", rotor2.num_blades)
 
-stator2 = BladeRow(row_type=RowType.Stator, hub_location=hub_exit_locations[4],shroud_location=shroud_exit_locations[4],stage_id=2)
+stator2 = make_stator_row(row_type=RowType.Stator, hub_location=hub_exit_locations[4],shroud_location=shroud_exit_locations[4],stage_id=2)
 stator2.num_blades = blade_counts.get("stator2", stator2.num_blades)
 
-rotor3 = BladeRow(row_type=RowType.Rotor, hub_location=hub_exit_locations[5],shroud_location=shroud_exit_locations[5],stage_id=3)
+rotor3 = make_rotor_row(row_type=RowType.Rotor, hub_location=hub_exit_locations[5],shroud_location=shroud_exit_locations[5],stage_id=3)
 rotor3.num_blades = blade_counts.get("rotor3", rotor3.num_blades)
 
-stator3 = BladeRow(row_type=RowType.Stator, hub_location=hub_exit_locations[6],shroud_location=shroud_exit_locations[6],stage_id=3)
+stator3 = make_stator_row(row_type=RowType.Stator, hub_location=hub_exit_locations[6],shroud_location=shroud_exit_locations[6],stage_id=3)
 stator3.num_blades = blade_counts.get("stator3", stator3.num_blades)
 
-rotor4 = BladeRow(row_type=RowType.Rotor, hub_location=hub_exit_locations[7],shroud_location=shroud_exit_locations[7],stage_id=4)
+rotor4 = make_rotor_row(row_type=RowType.Rotor, hub_location=hub_exit_locations[7],shroud_location=shroud_exit_locations[7],stage_id=4)
 rotor4.num_blades = blade_counts.get("rotor4", rotor4.num_blades)
-stator4 = BladeRow(row_type=RowType.Stator, hub_location=hub_exit_locations[8],shroud_location=shroud_exit_locations[8],stage_id=4)
+stator4 = make_stator_row(row_type=RowType.Stator, hub_location=hub_exit_locations[8],shroud_location=shroud_exit_locations[8],stage_id=4)
 stator4.num_blades = blade_counts.get("stator4", stator4.num_blades)
 
-rotor5 = BladeRow(row_type=RowType.Rotor, hub_location=hub_exit_locations[9],shroud_location=shroud_exit_locations[9],stage_id=5)
+rotor5 = make_rotor_row(row_type=RowType.Rotor, hub_location=hub_exit_locations[9],shroud_location=shroud_exit_locations[9],stage_id=5)
 rotor5.num_blades = blade_counts.get("rotor5", rotor5.num_blades)
-stator5 = BladeRow(row_type=RowType.Stator, hub_location=hub_exit_locations[10],shroud_location=shroud_exit_locations[10],stage_id=5)
+stator5 = make_stator_row(row_type=RowType.Stator, hub_location=hub_exit_locations[10],shroud_location=shroud_exit_locations[10],stage_id=5)
 stator5.num_blades = blade_counts.get("stator5", stator5.num_blades)
 
-rotor6 = BladeRow(row_type=RowType.Rotor, hub_location=hub_exit_locations[11],shroud_location=shroud_exit_locations[11],stage_id=6)
+rotor6 = make_rotor_row(row_type=RowType.Rotor, hub_location=hub_exit_locations[11],shroud_location=shroud_exit_locations[11],stage_id=6)
 rotor6.num_blades = blade_counts.get("rotor6", rotor6.num_blades)
-stator6 = BladeRow(row_type=RowType.Stator, hub_location=hub_exit_locations[12],shroud_location=shroud_exit_locations[12],stage_id=6)
+stator6 = make_stator_row(row_type=RowType.Stator, hub_location=hub_exit_locations[12],shroud_location=shroud_exit_locations[12],stage_id=6)
 stator6.num_blades = blade_counts.get("stator6", stator6.num_blades)
 
-rotor7 = BladeRow(row_type=RowType.Rotor, hub_location=hub_exit_locations[13],shroud_location=shroud_exit_locations[13],stage_id=7)
+rotor7 = make_rotor_row(row_type=RowType.Rotor, hub_location=hub_exit_locations[13],shroud_location=shroud_exit_locations[13],stage_id=7)
 rotor7.num_blades = blade_counts.get("rotor7", rotor7.num_blades)
-stator7 = BladeRow(row_type=RowType.Stator, hub_location=hub_exit_locations[14],shroud_location=shroud_exit_locations[14],stage_id=7)
+stator7 = make_stator_row(row_type=RowType.Stator, hub_location=hub_exit_locations[14],shroud_location=shroud_exit_locations[14],stage_id=7)
 stator7.num_blades = blade_counts.get("stator7", stator7.num_blades)
 
-rotor8 = BladeRow(row_type=RowType.Rotor, hub_location=hub_exit_locations[15],shroud_location=shroud_exit_locations[15],stage_id=8)
+rotor8 = make_rotor_row(row_type=RowType.Rotor, hub_location=hub_exit_locations[15],shroud_location=shroud_exit_locations[15],stage_id=8)
 rotor8.num_blades = blade_counts.get("rotor8", rotor8.num_blades)
-stator8 = BladeRow(row_type=RowType.Stator, hub_location=hub_exit_locations[16],shroud_location=shroud_exit_locations[16],stage_id=8)
+stator8 = make_stator_row(row_type=RowType.Stator, hub_location=hub_exit_locations[16],shroud_location=shroud_exit_locations[16],stage_id=8)
 stator8.num_blades = blade_counts.get("stator8", stator8.num_blades)
 
-rotor9 = BladeRow(row_type=RowType.Rotor, hub_location=hub_exit_locations[17],shroud_location=shroud_exit_locations[17],stage_id=9)
+rotor9 = make_rotor_row(row_type=RowType.Rotor, hub_location=hub_exit_locations[17],shroud_location=shroud_exit_locations[17],stage_id=9)
 rotor9.num_blades = blade_counts.get("rotor9", rotor9.num_blades)
-stator9 = BladeRow(row_type=RowType.Stator, hub_location=hub_exit_locations[18],shroud_location=shroud_exit_locations[18],stage_id=9)
+stator9 = make_stator_row(row_type=RowType.Stator, hub_location=hub_exit_locations[18],shroud_location=shroud_exit_locations[18],stage_id=9)
 stator9.num_blades = blade_counts.get("stator9", stator9.num_blades)
 
-rotor10 = BladeRow(row_type=RowType.Rotor, hub_location=hub_exit_locations[19],shroud_location=shroud_exit_locations[19],stage_id=10)
+rotor10 = make_rotor_row(row_type=RowType.Rotor, hub_location=hub_exit_locations[19],shroud_location=shroud_exit_locations[19],stage_id=10)
 rotor10.num_blades = blade_counts.get("rotor10", rotor10.num_blades)
-stator10 = BladeRow(row_type=RowType.Stator, hub_location=hub_exit_locations[20],shroud_location=shroud_exit_locations[20],stage_id=10)
+stator10 = make_stator_row(row_type=RowType.Stator, hub_location=hub_exit_locations[20],shroud_location=shroud_exit_locations[20],stage_id=10)
 stator10.num_blades = blade_counts.get("stator10", stator10.num_blades)
 
 # Set axial chord from geometry

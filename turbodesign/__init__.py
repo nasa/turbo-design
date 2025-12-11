@@ -8,6 +8,7 @@ from .lossinterp import LossInterp
 from .passage import Passage
 from .outlet import Outlet
 from .deviation import DeviationBaseClass, FixedDeviation
+from .row_factory import make_blade_row, make_rotor_row, make_stator_row
 from .agf import AGF_Setup, Inlet_bcs, Outlet_bcs, Settings, Clearance, Domain, read_agf, plot_airfoil_inputs, plot_airfoil_inputs_2D
 
 # turbodesign/__init__.py
@@ -17,6 +18,7 @@ __all__ = [
     "TurbineSpool", "Stage", "Inlet", "Outlet", "BladeRow", "Coolant",
     "Passage", "RowType", "PassageType", "MassflowConstraint", "LossType",
     "LossInterp", "DeviationBaseClass", "FixedDeviation",
+    "make_blade_row", "make_rotor_row", "make_stator_row",
     "FixedPolytropicEfficiency",
     "AGF_Setup", "Inlet_bcs", "Outlet_bcs", "Settings", "Clearance", "Domain", "read_agf",
     "plot_airfoil_inputs", "plot_airfoil_inputs_2D",
@@ -38,6 +40,9 @@ _module_map = {
     "FixedPolytropicEfficiency": ("turbodesign.loss.fixedpolytropic", "FixedPolytropicEfficiency"),
     "DeviationBaseClass": ("turbodesign.deviation", "DeviationBaseClass"),
     "FixedDeviation": ("turbodesign.deviation", "FixedDeviation"),
+    "make_blade_row": ("turbodesign.row_factory", "make_blade_row"),
+    "make_rotor_row": ("turbodesign.row_factory", "make_rotor_row"),
+    "make_stator_row": ("turbodesign.row_factory", "make_stator_row"),
     "AGF_Setup": ("turbodesign.agf", "AGF_Setup"),
     "Inlet_bcs": ("turbodesign.agf", "Inlet_bcs"),
     "Outlet_bcs": ("turbodesign.agf", "Outlet_bcs"),

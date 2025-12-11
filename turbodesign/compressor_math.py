@@ -68,6 +68,7 @@ def stator_calc(row: BladeRow, upstream: BladeRow, calculate_vm: bool = True) ->
 
         deviation_func = getattr(row, "deviation_function", None)
         deviation = deviation_func(row, upstream) if callable(deviation_func) else 0.0
+        deviation_rad = np.radians(deviation)
 
         M_local = np.full_like(row.area, M_guess, dtype=float)
         P0_P = IsenP(M_local, row.gamma)
@@ -78,7 +79,7 @@ def stator_calc(row: BladeRow, upstream: BladeRow, calculate_vm: bool = True) ->
         Vm_local = V_local * np.cos(row.alpha2)
         Vx_local = Vm_local * np.cos(row.phi)
         Vr_local = Vm_local * np.sin(row.phi)
-        Vt_local = Vm_local * np.tan(row.alpha2 + deviation)
+        Vt_local = Vm_local * np.tan(row.alpha2 + deviation_rad)
 
         rho_local = P_local / (row.R * T_local)
         U_local = row.omega * row.r
@@ -112,7 +113,7 @@ def stator_calc(row: BladeRow, upstream: BladeRow, calculate_vm: bool = True) ->
             row.Vt = Vt_local
             row.alpha1 = alpha1_local
             row.beta1 = upstream.beta2
-            row.deviation[:] = deviation
+            row.deviation[:] = deviation_rad
             row.rho = rho_local
             row.U = U_local
             row.Wt = Wt_local
@@ -225,6 +226,10 @@ def rotor_calc(
             apply (bool, optional): Apply calculations. Defaults to False.
         """
         # Use local scratch copies to avoid polluting row during optimizer iterations
+        deviation_func = getattr(row, "deviation_function", None)
+        deviation_val = deviation_func(row, upstream) if callable(deviation_func) else 0.0
+        deviation_rad = np.radians(deviation_val)
+
         P0R_local = upstream.P0R - row.Yp * (upstream.P0R - upstream.P)
         T0R_local = upstream.T0R
         
@@ -240,8 +245,9 @@ def rotor_calc(
             return np.inf
 
         Vr_local = W_local * np.sin(row.phi)
-        Vm_local = W_local * np.cos(row.beta2)
-        Wt_local = W_local * np.sin(row.beta2)
+        beta2_eff = row.beta2 + deviation_rad
+        Vm_local = W_local * np.cos(beta2_eff)
+        Wt_local = W_local * np.sin(beta2_eff)
         Vx_local = Vm_local * np.cos(row.phi)
         Vt_local = Wt_local + U_local
         V_local = np.sqrt(Vr_local ** 2 + Vt_local ** 2 + Vx_local ** 2)
@@ -286,6 +292,7 @@ def rotor_calc(
             row.total_area = total_area
             row.area = streamline_area
             row.entropy_rise = 0.5 * (row.Cp + upstream.Cp) * np.log(T_local / upstream.T) - row.R * np.log(P_local / upstream.P)
+            row.deviation[:] = deviation_rad
             # pi_local: stage total-pressure ratio (pt_out/pt_in); tau_local: total-temperature ratio (Tt_out/Tt_in)
             pi_local = float(np.mean(row.P0) / np.mean(upstream.P0)) if np.all(row.P0) else 1.0
             tau_local = float(np.mean(row.T0) / np.mean(upstream.T0)) if np.all(row.T0) else 1.0
@@ -323,10 +330,14 @@ def rotor_calc(
         else:
             solve_massflow_for_current_loss()
     else: # We know Vm, P0, T0
+        deviation_func = getattr(row, "deviation_function", None)
+        deviation_val = deviation_func(row, upstream) if callable(deviation_func) else 0.0
+        deviation_rad = np.radians(deviation_val)
+        beta2_eff = row.beta2 + deviation_rad
         row.Vr = row.Vm*np.sin(row.phi)
         row.Vx = row.Vm*np.cos(row.phi)
         row.W = np.sqrt(2*row.Cp*(row.T0R-row.T))
-        row.Wt = row.W*np.sin(row.beta2)
+        row.Wt = row.W*np.sin(beta2_eff)
         row.U = row.omega * row.r 
         row.Vt = row.Wt+row.U
         

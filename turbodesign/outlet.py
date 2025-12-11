@@ -22,7 +22,7 @@ class Outlet(BladeRow):
             num_streamlines (int, optional): _description_. Defaults to 3.
             location (float, optional): Location as percentage along hub curve. Defaults to 1.
         """
-        self.row_type = RowType.Outlet
+        super().__init__(hub_location=location, row_type=RowType.Outlet, stage_id=-1)
         self.loss_function = None
         self.location = location
         self.num_streamlines = num_streamlines
