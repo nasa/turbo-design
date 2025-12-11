@@ -482,25 +482,24 @@ class CompressorSpool:
                 else:
                     bounds = [0, 0]
 
-                if row.row_type != RowType.Inlet:
-                    for j in range(1, self.num_streamlines):
-                        res = minimize_scalar(
-                            match_massflow_objective,
-                            bounds=bounds,
-                            args=(j, row, upstream, downstream, self.fluid),
-                            tol=1e-3,
-                            method="bounded",
-                        )
-                        if row.row_type == RowType.Rotor:
-                            row.beta2[j] = np.radians(res.x)
-                            row.beta2[0] = 1 / (len(row.beta2) - 1) * row.beta2[1:].sum()
-                        elif row.row_type == RowType.Stator:
-                            row.alpha2[j] = np.radians(res.x)
-                            row.alpha2[0] = 1 / (len(row.alpha2) - 1) * row.alpha2[1:].sum()
-                    compute_gas_constants(upstream, self.fluid)
-                    compute_gas_constants(row, self.fluid)
-                    compute_massflow(row)
-                    compute_power(row, upstream)
+                for j in range(1, self.num_streamlines):
+                    res = minimize_scalar(
+                        match_massflow_objective,
+                        bounds=bounds,
+                        args=(j, row, upstream, downstream, self.fluid),
+                        tol=1e-3,
+                        method="bounded",
+                    )
+                    if row.row_type == RowType.Rotor:
+                        row.beta2[j] = np.radians(res.x)
+                        row.beta2[0] = 1 / (len(row.beta2) - 1) * row.beta2[1:].sum()
+                    elif row.row_type == RowType.Stator:
+                        row.alpha2[j] = np.radians(res.x)
+                        row.alpha2[0] = 1 / (len(row.alpha2) - 1) * row.alpha2[1:].sum()
+                compute_gas_constants(upstream, self.fluid)
+                compute_gas_constants(row, self.fluid)
+                compute_massflow(row)
+                compute_power(row, upstream)
 
 
         
@@ -752,33 +751,32 @@ def match_massflow_objective(exit_angle: float, index: int, row: BladeRow, upstr
     lt = getattr(row, "loss_function", None)
     loss_type = getattr(lt, "loss_type", None)
 
-    if row.row_type == RowType.Inlet:
-        row.Yp = 0
-    else:
-        if loss_type == LossType.Pressure:
-            row.Yp = lt(row, upstream)  # type: ignore[arg-type]
-        elif loss_type == LossType.Enthalpy:
-            row.Yp = 0
-        elif loss_type == LossType.Polytropic:
-            row.Yp = 0
+    if loss_type == LossType.Pressure and callable(lt):
+        row.Yp = lt(row, upstream)  # type: ignore[arg-type]
 
-        if row.row_type == RowType.Rotor:
-            row.beta2[index] = np.radians(exit_angle)
-            rotor_calc(row, upstream)
-        elif row.row_type == RowType.Stator:
-            row.alpha2[index] = np.radians(exit_angle)
-            stator_calc(row, upstream)
+    if row.row_type == RowType.Rotor:
+        row.beta2[index] = np.radians(exit_angle)
+        rotor_calc(row, upstream)
+    elif row.row_type == RowType.Stator:
+        row.alpha2[index] = np.radians(exit_angle)
+        stator_calc(row, upstream)
 
-        if fluid is not None:
-            compute_gas_constants(upstream, fluid)
-            compute_gas_constants(row, fluid)
+    if fluid is not None:
+        compute_gas_constants(upstream, fluid)
+        compute_gas_constants(row, fluid)
 
     compute_massflow(row)
     compute_power(row, upstream)
 
-    if row.row_type != RowType.Inlet:
-        # drive radial distribution of massflow linearly by index using upstream total as target
-        target_total = getattr(upstream, "total_massflow", row.total_massflow)
-        target = target_total * index / (len(row.massflow) - 1)
-        return float(np.abs(target - row.massflow[index]))
-    return 0.0
+    # drive radial distribution of massflow linearly by index using upstream total as target
+    target_total = None
+    for candidate in ("total_massflow_no_coolant", "total_massflow"):
+        val = getattr(upstream, candidate, None)
+        if val is not None and val != 0:
+            target_total = val
+            break
+    if target_total is None:
+        target_total = row.total_massflow if getattr(row, "total_massflow", 0) != 0 else row.massflow[-1]
+
+    target = target_total * index / max(len(row.massflow) - 1, 1)
+    return float(np.abs(target - row.massflow[index]))
