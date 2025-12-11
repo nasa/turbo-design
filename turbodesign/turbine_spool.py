@@ -189,6 +189,14 @@ class TurbineSpool:
             if not isinstance(row, (Inlet, Outlet)) and row.loss_function is None:
                 row.loss_function = TD2()
 
+        # With radii known, couple blade geometry (pitch/chord/stagger) if specified
+        for row in self._all_rows():
+            if isinstance(row, BladeRow) and row.row_type not in (RowType.Inlet, RowType.Outlet):
+                try:
+                    row.synchronize_blade_geometry()
+                except Exception:
+                    pass
+
     def calculate_streamline_curvature(
         self, row: BladeRow, t_hub_shroud: Union[List[float], npt.NDArray]
     ) -> None:

@@ -466,6 +466,38 @@ class BladeRow:
     
     def __repr__(self):
         return f"{self.row_type.name} P0:{np.mean(self.P0):0.2f} T0:{np.mean(self.T0):0.2f} P:{np.mean(self.P):0.2f} massflow:{np.mean(self.total_massflow_no_coolant):0.3f}"
+
+    def synchronize_blade_geometry(self) -> None:
+        """Couple num_blades, pitch-to-chord/solidity, chord, and stagger.
+
+        Uses mean radius from interpolated streamlines to derive pitch, chord,
+        and stagger (axial chord / chord).
+        """
+        if self.num_blades <= 0 or self.r.size == 0:
+            return
+
+        # Pitch from blade count and local radius
+        pitch = 2 * np.pi * self.r / self.num_blades
+
+        # Pitch-to-chord (or 1/solidity) may be scalar or spanwise; broadcast it
+        ptc = convert_to_ndarray(self.pitch_to_chord)
+        if ptc.size == 1:
+            ptc = ptc * np.ones_like(self.r, dtype=float)
+        else:
+            t_src = np.linspace(0, 1, ptc.size)
+            ptc = np.interp(self.percent_hub_shroud, t_src, ptc)
+
+        chord = pitch / np.maximum(ptc, 1e-9)
+        self._chord = chord
+
+        axial = self.axial_chord if self.axial_chord > 0 else float(np.mean(chord))
+        if self.axial_chord <= 0:
+            self.axial_chord = axial
+
+        ratio = np.clip(axial / np.maximum(chord, 1e-9), -1.0, 1.0)
+        stagger_rad = np.arccos(ratio)
+        # Store average stagger in degrees (matches default _stagger units)
+        self._stagger = float(np.degrees(np.mean(stagger_rad)))
     
     def to_dict(self):
         
