@@ -468,6 +468,10 @@ class CompressorSpool:
         blade_rows = self._all_rows()
         for _ in range(3):
             for i, row in enumerate(blade_rows):
+                # Only adjust blade rows; skip inlet/outlet and other utility rows
+                if row.row_type not in (RowType.Rotor, RowType.Stator):
+                    continue
+
                 upstream = blade_rows[i - 1] if i > 0 else blade_rows[i]
                 downstream = blade_rows[i + 1] if i < len(blade_rows) - 1 else None
 
@@ -742,6 +746,9 @@ def outlet_pressure(percents: List[float], inletP0: float, outletP: float) -> np
 
 def match_massflow_objective(exit_angle: float, index: int, row: BladeRow, upstream: BladeRow, downstream: Optional[BladeRow] = None, fluid: Optional[Solution] = None) -> float:
     """Objective for adjusting exit angle to match a target massflow slice."""
+    if row.row_type not in (RowType.Rotor, RowType.Stator):
+        return 0.0
+
     lt = getattr(row, "loss_function", None)
     loss_type = getattr(lt, "loss_type", None)
 

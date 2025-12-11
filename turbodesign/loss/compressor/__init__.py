@@ -24,3 +24,32 @@ from .otac import (
     NASA74A,
     RadialInput,
 )
+from .diffusion import DiffusionLoss
+
+__all__ = [
+    "AxialCompressorAungier",
+    "AxialCompressorEntropy",
+    "AxialCompressorWrightMiller",
+    "AxialTurbineAinleyMathiesonOTAC",
+    "AxialTurbineKackerOkapuuOTAC",
+    "DiffuserVanelessStanitz",
+    "ImpellerBladeLoadingAungier",
+    "ImpellerBladeLoadingCoppage",
+    "ImpellerClearanceJansen",
+    "ImpellerDiscFrictionDaily",
+    "ImpellerIncidenceAungier",
+    "ImpellerIncidenceConrad",
+    "ImpellerLeakageAungier",
+    "ImpellerMixingAungier",
+    "ImpellerMixingJohnston",
+    "ImpellerPrescribed",
+    "ImpellerRecirculationAungier",
+    "ImpellerRecirculationOh",
+    "ImpellerSkinFrictionCoppage",
+    "ImpellerSkinFrictionJansen",
+    "ImpellerVarious",
+    "NASA23B20",
+    "NASA74A",
+    "RadialInput",
+    "DiffusionLoss",
+]

@@ -75,6 +75,7 @@ def main() -> None:
     print(f"Massflow: {spool.massflow:0.3f} kg/s ({massflow_lbm_s:0.2f} lbm/s)")
     print(f"Overall total pressure ratio (inlet/stator exit): {spool.overall_pressure_ratio():0.3f}")
     print(f"Rotor exit Mach (meanline): {rotor.M.mean():0.3f}")
+    print(f"Rotor exit Relative Mach (meanline): {rotor.M_rel.mean():0.3f}")
     print(f"Stator exit Mach (meanline): {stator.M.mean():0.3f}")
 
 
