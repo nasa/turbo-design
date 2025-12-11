@@ -51,6 +51,7 @@ class BladeRow:
     # Row Efficiency (calculated or specified)
     eta_total:float = 0     # Total to Total
     eta_static:float = 0    # Total to static
+    eta_poly: float = 0     # Polytropic efficiency (per row if applicable)
     stage_loading:float = 0 # stage loading how much work done per stage
 
     alpha1: npt.NDArray = field(default_factory=lambda: np.array([0]))               # Blade inlet absolute flow angle

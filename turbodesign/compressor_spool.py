@@ -345,6 +345,18 @@ class CompressorSpool:
             return 1.0
         return float(np.mean(self.inlet.P0) / np.mean(rows[-2].P0))
 
+    def overall_polytropic_efficiency(self) -> float:
+        """Compute overall polytropic efficiency from inlet to last internal row."""
+        rows = self._all_rows()
+        if len(rows) < 2:
+            return 0.0
+        pi = float(np.mean(self.inlet.P0) / np.mean(rows[-2].P0))
+        tau = float(np.mean(self.inlet.T0) / np.mean(rows[-2].T0))
+        gamma = float(np.mean(self.inlet.gamma)) if hasattr(self.inlet, "gamma") else 1.4
+        if tau <= 0 or abs(np.log(tau)) < 1e-12 or pi <= 1.0:
+            return 0.0
+        return ((gamma - 1.0) / gamma) * np.log(pi) / np.log(tau)
+
     def solve_massflow_for_pressure_ratio(self, target_pr: float, bounds: tuple[float, float], meanline: bool = False) -> tuple[float, float]:
         """Solve inlet massflow to hit a target overall total-pressure ratio.
 
@@ -401,10 +413,6 @@ class CompressorSpool:
                     row.Yp = 0
                     continue
 
-                if row.row_type == RowType.Rotor and downstream and downstream.row_type == RowType.Stator:
-                    row.P0_ratio = getattr(downstream, "P0_ratio", row.P0_ratio)
-                row.P0_is = upstream.P0 * row.P0_ratio
-
                 if row.row_type == RowType.Rotor:
                     rotor_calc(row, upstream, calculate_vm=True)
                     row = radeq(row, upstream, downstream)
@@ -431,7 +439,7 @@ class CompressorSpool:
             self.outlet.transfer_quantities(rows[-2])
             self.outlet.P = self.outlet.get_static_pressure(self.outlet.percent_hub_shroud)
 
-            err = self.__massflow_std__(rows[1:-1])
+            err = self._massflow_std(rows[1:-1])
             loop_iter += 1
             print(f"Loop {loop_iter} massflow convergence error:{err}")
 
@@ -442,6 +450,16 @@ class CompressorSpool:
 
         compute_reynolds(rows, self.passage)
 
+    @staticmethod
+    def _massflow_std(blade_rows: List[BladeRow]) -> float:
+        """Compute standard deviation of massflow across rows for diagnostics."""
+        totals = []
+        for row in blade_rows:
+            if hasattr(row, "total_massflow_no_coolant"):
+                totals.append(row.total_massflow_no_coolant)
+            elif len(getattr(row, "massflow", [])) > 0:
+                totals.append(row.massflow[-1])
+        return float(np.std(totals)) if totals else 0.0
     # ------------------------------
     # Massflow / angle matching
     # ------------------------------
@@ -564,6 +582,7 @@ class CompressorSpool:
             "FlowFunction": float(FlowFunction),
             "CorrectedSpeed": float(CorrectedSpeed),
             "EnergyFunction": float(EnergyFunction),
+            "eta_polytropic_overall": float(self.overall_polytropic_efficiency()),
             "units": {
                 "massflow": {"metric": "kg/s", "english": "lbm/s"},
                 "rpm": {"metric": "rpm", "english": "rpm"},
