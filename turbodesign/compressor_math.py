@@ -127,6 +127,8 @@ def stator_calc(row: BladeRow, upstream: BladeRow, calculate_vm: bool = True) ->
             pi_local = float(np.mean(row.P0) / np.mean(upstream.P0)) if np.all(row.P0) else 1.0
             tau_local = float(np.mean(row.T0) / np.mean(upstream.T0)) if np.all(row.T0) else 1.0
             row.eta_poly = polytropic_efficiency(pi_local, tau_local, row.gamma)
+            tau_is = (row.P0_is / upstream.P0) ** ((row.gamma - 1.0) / row.gamma)
+            row.T0_is = upstream.T0 * tau_is
         target_massflow = getattr(upstream, "total_massflow", total_massflow_local)
         return abs(target_massflow - total_massflow_local)
 
@@ -288,6 +290,8 @@ def rotor_calc(
             pi_local = float(np.mean(row.P0) / np.mean(upstream.P0)) if np.all(row.P0) else 1.0
             tau_local = float(np.mean(row.T0) / np.mean(upstream.T0)) if np.all(row.T0) else 1.0
             row.eta_poly = polytropic_efficiency(pi_local, tau_local, row.gamma)
+            tau_is = (row.P0_is / upstream.P0) ** ((row.gamma - 1.0) / row.gamma)
+            row.T0_is = upstream.T0 * tau_is
     
         return np.abs(upstream.total_massflow - total_massflow_local)
     

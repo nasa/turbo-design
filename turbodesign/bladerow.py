@@ -111,6 +111,7 @@ class BladeRow:
     
     Yp: npt.NDArray = field(default_factory=lambda: np.array([0]))                       # Pressure loss
     blockage:float = 0 
+    flow_coefficient: float = 0     # Vm/U or similar nondimensional flow coefficient
     power:float = 0                 # Watts 
     power_mean:float = 0
     power_distribution:npt.NDArray  # How power is divided by radius. Example: Equal distribution [0.33 0.33 0.33]. More at Tip [0.2,0.3,0.5]. More at Hub [0.6 0.5]
@@ -506,6 +507,7 @@ class BladeRow:
             "rho":self.rho.tolist(),
             "mu":self.mu,
             "Yp":self.Yp,
+            "flow_coefficient": self.flow_coefficient,
             "Power":self.power,
             "P0_P": self.P0_P,
             "eta_total":self.eta_total,

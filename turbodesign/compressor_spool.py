@@ -312,7 +312,7 @@ class CompressorSpool:
                 else:
                     row.P0_is = row.P0_ratio * upstream.P0
                 rotor_calc(row, upstream,calculate_vm=True)
-                compute_power(row, upstream)
+                compute_power(row, upstream, is_compressor=True)
 
     def solve(self, mode: Optional[MassflowConstraint] = None) -> None:
         """Run streamline initialization and solve the compressor flow field.
@@ -425,7 +425,7 @@ class CompressorSpool:
                     stator_calc(row, upstream, calculate_vm=False)
 
                 compute_gas_constants(row, self.fluid)
-                compute_power(row, upstream)
+                compute_power(row, upstream, is_compressor=True)
 
             self.inlet.massflow = np.linspace(0, 1, self.num_streamlines) * rows[1].total_massflow_no_coolant
             self.inlet.total_massflow_no_coolant = rows[1].total_massflow_no_coolant
@@ -499,7 +499,7 @@ class CompressorSpool:
                 compute_gas_constants(upstream, self.fluid)
                 compute_gas_constants(row, self.fluid)
                 compute_massflow(row)
-                compute_power(row, upstream)
+                compute_power(row, upstream, is_compressor=True)
 
 
         
