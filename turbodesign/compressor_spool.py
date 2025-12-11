@@ -343,7 +343,7 @@ class CompressorSpool:
         rows = self._all_rows()
         if len(rows) < 2:
             return 1.0
-        return float(np.mean(self.inlet.P0) / np.mean(rows[-2].P0))
+        return float(np.mean(np.mean(rows[-2].P0 / self.inlet.P0) ))
 
     def overall_polytropic_efficiency(self) -> float:
         """Compute overall polytropic efficiency from inlet to last internal row."""

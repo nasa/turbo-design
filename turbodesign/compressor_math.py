@@ -38,12 +38,32 @@ def polytropic_efficiency(pi: float, tau: float, gamma: float) -> float:
 
 def stator_calc(row: BladeRow, upstream: BladeRow, calculate_vm: bool = True) -> None:
     """Solve compressor stator exit conditions by matching exit massflow."""
+    loss_fn = getattr(row, "loss_function", None)
+    loss_type = getattr(loss_fn, "loss_type", LossType.Pressure)
+    target_eta_poly = None
+    target_entropy = None
 
+    if loss_type == LossType.Pressure and callable(loss_fn):
+        row.Yp = loss_fn(row, upstream)  # type: ignore[arg-type]
+    else:
+        row.Yp[:] = 0
+        if loss_type == LossType.Polytropic:
+            if np.any(row.eta_poly):
+                target_eta_poly = float(np.mean(row.eta_poly))
+            elif callable(loss_fn):
+                target_eta_poly = float(loss_fn(row, upstream))  # type: ignore[arg-type]
+        elif loss_type == LossType.Entropy:
+            if np.any(row.entropy_rise):
+                target_entropy = float(np.mean(row.entropy_rise))
+            elif callable(loss_fn):
+                target_entropy = float(loss_fn(row, upstream))  # type: ignore[arg-type]
 
     def calculate_vm_func(M_guess: float, apply: bool = False) -> float:
         """Solve stator for a guessed Mach; returns massflow residual."""
         T0_coolant_local = T0_coolant_weighted_average(row) if row.coolant is not None else 0.0
         T0_local = upstream.T0 - T0_coolant_local
+        if row.P0_is is None or np.allclose(row.P0_is, 0):
+            row.P0_is = upstream.P0 * row.P0_ratio
         P0_local = row.P0_is - row.Yp * (upstream.P0 - upstream.P)
 
         deviation_func = getattr(row, "deviation_function", None)
@@ -103,19 +123,47 @@ def stator_calc(row: BladeRow, upstream: BladeRow, calculate_vm: bool = True) ->
             row.massflow = massflow_local
             row.total_massflow_no_coolant = total_massflow_no_coolant
             row.total_massflow = total_massflow_local
+            # pi_local: stage total-pressure ratio (pt_out/pt_in); tau_local: total-temperature ratio (Tt_out/Tt_in)
+            pi_local = float(np.mean(row.P0) / np.mean(upstream.P0)) if np.all(row.P0) else 1.0
+            tau_local = float(np.mean(row.T0) / np.mean(upstream.T0)) if np.all(row.T0) else 1.0
+            row.eta_poly = polytropic_efficiency(pi_local, tau_local, row.gamma)
         target_massflow = getattr(upstream, "total_massflow", total_massflow_local)
         return abs(target_massflow - total_massflow_local)
 
-    if calculate_vm:
-        res = minimize_scalar(calculate_vm_func,bounds=[0.01,1])
+    def solve_massflow_for_current_loss() -> None:
+        res = minimize_scalar(calculate_vm_func, bounds=[0.01, 1], method="bounded")
         calculate_vm_func(res.x, apply=True)
-    else: # We know Vm, P0, T0, P 
-        row.Vx = row.Vm*np.cos(row.phi)
-        row.Vr = row.Vm*np.sin(row.phi)
-        row.Vt = row.Vm*np.tan(row.alpha2)
-        row.V = np.sqrt(row.Vx**2 + row.Vr**2 + row.Vt**2)
-        row.T = row.P/(row.R*row.rho)   # We know P, this is a guess
-        row.M = row.V/np.sqrt(row.gamma*row.R*row.T)
+
+    if calculate_vm:
+        if loss_type == LossType.Polytropic and target_eta_poly is not None:
+            def obj(y: float) -> float:
+                row.Yp[:] = y
+                res_local = minimize_scalar(calculate_vm_func, bounds=[0.01, 1], method="bounded")
+                calculate_vm_func(res_local.x, apply=True)
+                return abs(float(row.eta_poly) - target_eta_poly)
+
+            res_y = minimize_scalar(obj, bounds=[0.0, 0.95], method="bounded")
+            row.Yp[:] = res_y.x
+            solve_massflow_for_current_loss()
+        elif loss_type == LossType.Entropy and target_entropy is not None:
+            def obj_entropy(y: float) -> float:
+                row.Yp[:] = y
+                res_local = minimize_scalar(calculate_vm_func, bounds=[0.01, 1], method="bounded")
+                calculate_vm_func(res_local.x, apply=True)
+                return abs(float(np.mean(row.entropy_rise)) - target_entropy)
+
+            res_y = minimize_scalar(obj_entropy, bounds=[0.0, 0.95], method="bounded")
+            row.Yp[:] = res_y.x
+            solve_massflow_for_current_loss()
+        else:
+            solve_massflow_for_current_loss()
+    else:  # We know Vm, P0, T0, P
+        row.Vx = row.Vm * np.cos(row.phi)
+        row.Vr = row.Vm * np.sin(row.phi)
+        row.Vt = row.Vm * np.tan(row.alpha2)
+        row.V = np.sqrt(row.Vx ** 2 + row.Vr ** 2 + row.Vt ** 2)
+        row.T = row.P / (row.R * row.rho)   # We know P, this is a guess
+        row.M = row.V / np.sqrt(row.gamma * row.R * row.T)
 
 def rotor_calc(
     row: BladeRow,
@@ -130,7 +178,28 @@ def rotor_calc(
         calculate_vm: If True, iterates Mach to satisfy massflow; if False, assumes Vm known.
         static_defined: Treat P as prescribed (turbine-like) when True; otherwise compressor mode.
     """
-    row.P0_is = upstream.P0*row.P0_ratio
+    loss_fn = getattr(row, "loss_function", None)
+    loss_type = getattr(loss_fn, "loss_type", LossType.Pressure)
+    target_eta_poly = None
+    target_entropy = None
+
+    if loss_type == LossType.Pressure and callable(loss_fn):
+        row.Yp = loss_fn(row, upstream)  # type: ignore[arg-type]
+    else:
+        row.Yp[:] = 0
+        if loss_type == LossType.Polytropic:
+            if np.any(row.eta_poly):
+                target_eta_poly = float(np.mean(row.eta_poly))
+            elif callable(loss_fn):
+                target_eta_poly = float(loss_fn(row, upstream))  # type: ignore[arg-type]
+        elif loss_type == LossType.Entropy:
+            if np.any(row.entropy_rise):
+                target_entropy = float(np.mean(row.entropy_rise))
+            elif callable(loss_fn):
+                target_entropy = float(loss_fn(row, upstream))  # type: ignore[arg-type]
+
+    if row.P0_is is None or np.allclose(row.P0_is, 0):
+        row.P0_is = upstream.P0 * row.P0_ratio
     row.P0 = row.P0_is - row.Yp * (upstream.P0 - upstream.P)
     
     # Upstream relative frame
@@ -215,13 +284,40 @@ def rotor_calc(
             row.total_area = total_area
             row.area = streamline_area
             row.entropy_rise = 0.5 * (row.Cp + upstream.Cp) * np.log(T_local / upstream.T) - row.R * np.log(P_local / upstream.P)
+            # pi_local: stage total-pressure ratio (pt_out/pt_in); tau_local: total-temperature ratio (Tt_out/Tt_in)
+            pi_local = float(np.mean(row.P0) / np.mean(upstream.P0)) if np.all(row.P0) else 1.0
+            tau_local = float(np.mean(row.T0) / np.mean(upstream.T0)) if np.all(row.T0) else 1.0
+            row.eta_poly = polytropic_efficiency(pi_local, tau_local, row.gamma)
     
         return np.abs(upstream.total_massflow - total_massflow_local)
     
-    if calculate_vm:
-        res = minimize_scalar(calculate_vm_func, bounds=[0.01,1])
-        # apply best solution to row
+    def solve_massflow_for_current_loss() -> None:
+        res = minimize_scalar(calculate_vm_func, bounds=[0.01, 1], method="bounded")
         calculate_vm_func(res.x, apply=True)
+
+    if calculate_vm:
+        if loss_type == LossType.Polytropic and target_eta_poly is not None:
+            def obj(y: float) -> float:
+                row.Yp[:] = y
+                res_local = minimize_scalar(calculate_vm_func, bounds=[0.01, 1], method="bounded")
+                calculate_vm_func(res_local.x, apply=True)
+                return abs(float(row.eta_poly) - target_eta_poly)
+
+            res_y = minimize_scalar(obj, bounds=[0.0, 0.95], method="bounded")
+            row.Yp[:] = res_y.x
+            solve_massflow_for_current_loss()
+        elif loss_type == LossType.Entropy and target_entropy is not None:
+            def obj_entropy(y: float) -> float:
+                row.Yp[:] = y
+                res_local = minimize_scalar(calculate_vm_func, bounds=[0.01, 1], method="bounded")
+                calculate_vm_func(res_local.x, apply=True)
+                return abs(float(np.mean(row.entropy_rise)) - target_entropy)
+
+            res_y = minimize_scalar(obj_entropy, bounds=[0.0, 0.95], method="bounded")
+            row.Yp[:] = res_y.x
+            solve_massflow_for_current_loss()
+        else:
+            solve_massflow_for_current_loss()
     else: # We know Vm, P0, T0
         row.Vr = row.Vm*np.sin(row.phi)
         row.Vx = row.Vm*np.cos(row.phi)
