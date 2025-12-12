@@ -270,7 +270,7 @@ def rotor_calc(row:BladeRow,upstream:BladeRow,calculate_vm:bool=True,static_defi
         row.W = np.sqrt(2*row.Cp*(row.T0R-row.T))
         row.Wt = row.W*np.sin(row.beta2)
         row.U = row.omega * row.r 
-        row.Vt = row.Wt+row.U
+        row.Vt = row.Wt + row.U
         
         row.alpha2 = np.arctan2(row.Vt,row.Vm)
         row.V = np.sqrt(row.Vm**2*(1+np.tan(row.alpha2)**2))
@@ -289,44 +289,33 @@ def inlet_calc(row:BladeRow):
     Args:
         row (BladeRow): _description_
     """
-    
-    area = row.Vm.copy()*0
     # Estimate the density
-    row.T = row.T0
-    row.P = row.P0
-    row.rho = row.P/(row.T*row.R)
-    total_area = 0
-    iter = 0
-    avg_mach = -1
-    
+    row.T = row.T0 * 1/(1+(row.gamma-1)/2*row.M**2)
+    row.P = row.P0 * (row.T/row.T0)**(row.gamma/(row.gamma-1))
+    compute_gas_constants(row)
+        
     total_area, streamline_area = compute_streamline_areas(row)
     row.total_area = total_area
     row.area = streamline_area
+    Vm_tube = np.zeros(len(row.percent_hub_shroud)-1)
     
-    for iter in range(2): # Lets converge the Mach and Total and Static pressures
-        for j in range(1,len(row.percent_hub_shroud)):
-            rho = row.rho[j]
-            tube_massflow = row.massflow[j]-row.massflow[j-1]
-            row.Vm[j] = tube_massflow/(rho*row.area[j])
-        avg_mach = np.mean(row.M)
-        row.Vm[0] = 1/(len(row.Vm)-1)*row.Vm[1:].sum() # Initialize the value at the hub to not upset the mean
-        row.Vr = row.Vm*np.sin(row.phi)
-        row.Vt = row.Vm*np.tan(row.alpha2)
-        row.V = np.sqrt(row.Vt**2+row.Vm**2)
-        # Fine tune the Temperature and Pressure and density
-        row.M = row.V/np.sqrt(row.gamma*row.R*row.T)
-        row.T = row.T0 * 1/(1+(row.gamma-1)/2*row.M**2)
-        row.P = row.P0 * (row.T/row.T0)**(row.gamma/(row.gamma-1))
-        compute_gas_constants(row)
-        
-    if np.mean(row.M)>0.8:
-        warnings.warn(
-            f"High inlet mach can lead to errors iter:{iter} Mach:{avg_mach}",
-            RuntimeWarning,
-        )
+    Vm_mean = row.total_massflow / (row.rho.mean()*row.total_area)
+    for j in range(1,len(row.percent_hub_shroud)):
+        rho = row.rho[j]
+        Vm_tube[j-1] = (row.massflow[j]-row.massflow[j-1])/(rho*row.area[j])
     
-    if np.mean(row.M)<0.01:
-        print(f"Unusually slow flow:{iter} Mach:{avg_mach}")
+    # Recover per-streamline Vm from tube-averaged Vm_tube assuming piecewise linear variation
+    row.Vm[0] = Vm_tube[0] if len(Vm_tube) else Vm_mean
+    for j in range(1, len(row.percent_hub_shroud)):
+        rho_bar = 0.5 * (row.rho[j] + row.rho[j-1])
+        Vm_tube_j = (row.massflow[j] - row.massflow[j-1]) / (rho_bar * row.area[j] + 1e-12)
+        row.Vm[j] = 2 * Vm_tube_j - row.Vm[j-1]
+
+    row.Vr = row.Vm*np.sin(row.phi)
+    row.V = row.M*np.sqrt(row.gamma*row.R*row.T)
+    row.Vt = row.V*np.sin(row.alpha2)
+    row.Vx = row.Vm*np.cos(row.phi)
+
 
 def T0_coolant_weighted_average(row:BladeRow) -> npt.NDArray:
     """Calculate the new weighted Total Temperature array considering coolant

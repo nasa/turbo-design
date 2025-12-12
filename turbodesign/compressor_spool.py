@@ -358,8 +358,8 @@ class CompressorSpool:
         rows = self._all_rows()
         if len(rows) < 2:
             return 0.0
-        pi = float(np.mean(self.inlet.P0) / np.mean(rows[-2].P0))
-        tau = float(np.mean(self.inlet.T0) / np.mean(rows[-2].T0))
+        pi = float(np.mean(rows[-2].P0) / np.mean(self.inlet.P0))
+        tau = float(np.mean(rows[-2].T0)/np.mean(self.inlet.T0))
         gamma = float(np.mean(self.inlet.gamma)) if hasattr(self.inlet, "gamma") else 1.4
         if tau <= 0 or abs(np.log(tau)) < 1e-12 or pi <= 1.0:
             return 0.0

@@ -89,7 +89,11 @@ def main() -> None:
     print(f"Rotor exit Mach (meanline): {rotor.M.mean():0.3f}")
     print(f"Rotor exit Relative Mach (meanline): {rotor.M_rel.mean():0.3f}")
     print(f"Stator exit Mach (meanline): {stator.M.mean():0.3f}")
-
+    print(f"Overall polytropic efficiency: {spool.overall_polytropic_efficiency():0.4f}")
+    print(f"Rotor flow coefficient (meanline): {rotor.flow_coefficient:0.4f}")
+    print(f"Stage loading (meanline): {rotor.stage_loading:0.4f}")
+    print(f"Rotor total-to-total efficiency: {rotor.eta_total:0.4f}")
+    
 
 if __name__ == "__main__":
     main()
