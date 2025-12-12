@@ -89,16 +89,24 @@ def stator_calc(row: BladeRow, upstream: BladeRow, calculate_vm: bool = True) ->
 
         # massflow integration (include blockage and optional coolant)
         total_area, streamline_area = compute_streamline_areas(row)
-        massflow_local = np.zeros_like(row.massflow)
-        massflow_fraction = np.linspace(0, 1, len(row.percent_hub_shroud))
-        for j in range(1, len(row.percent_hub_shroud)):
-            Vm_seg = 0.5 * (Vm_local[j] + Vm_local[j - 1])
-            rho_seg = 0.5 * (rho_local[j] + rho_local[j - 1])
-            massflow_local[j] = Vm_seg * rho_seg * streamline_area[j] * (1 - row.blockage) + massflow_local[j - 1]
-        total_massflow_no_coolant = massflow_local[-1]
-        if row.coolant is not None:
-            massflow_local += massflow_fraction * row.coolant.massflow_percentage * total_massflow_no_coolant
-        total_massflow_local = massflow_local[-1]
+        n_streams = len(row.percent_hub_shroud)
+        massflow_local = np.zeros(n_streams, dtype=float)
+        massflow_fraction = np.array([1.0]) if n_streams <= 1 else np.linspace(0, 1, n_streams)
+        if n_streams <= 1:
+            massflow_local[0] = Vm_local[0] * rho_local[0] * streamline_area[0] * (1 - row.blockage)
+            total_massflow_no_coolant = massflow_local[0]
+            if row.coolant is not None:
+                massflow_local += massflow_fraction * row.coolant.massflow_percentage * total_massflow_no_coolant
+            total_massflow_local = massflow_local[-1]
+        else:
+            for j in range(1, len(row.percent_hub_shroud)):
+                Vm_seg = 0.5 * (Vm_local[j] + Vm_local[j - 1])
+                rho_seg = 0.5 * (rho_local[j] + rho_local[j - 1])
+                massflow_local[j] = Vm_seg * rho_seg * streamline_area[j] * (1 - row.blockage) + massflow_local[j - 1]
+            total_massflow_no_coolant = massflow_local[-1]
+            if row.coolant is not None:
+                massflow_local += massflow_fraction * row.coolant.massflow_percentage * total_massflow_no_coolant
+            total_massflow_local = massflow_local[-1]
 
         if apply:
             row.T0 = T0_local
@@ -258,16 +266,24 @@ def rotor_calc(
         # compute massflow using locals (include blockage and optional coolant)
         rho_local = P_local / (row.R * T_local)
         total_area, streamline_area = compute_streamline_areas(row)
-        massflow_local = np.zeros_like(row.massflow)
-        massflow_fraction = np.linspace(0, 1, len(row.percent_hub_shroud))
-        for j in range(1, len(row.percent_hub_shroud)):
-            Vm_seg = 0.5 * (Vm_local[j] + Vm_local[j - 1])
-            rho_seg = 0.5 * (rho_local[j] + rho_local[j - 1])
-            massflow_local[j] = Vm_seg * rho_seg * streamline_area[j] * (1 - row.blockage) + massflow_local[j - 1]
-        total_massflow_no_coolant = massflow_local[-1]
-        if row.coolant is not None:
-            massflow_local += massflow_fraction * row.coolant.massflow_percentage * total_massflow_no_coolant
-        total_massflow_local = massflow_local[-1]
+        n_streams = len(row.percent_hub_shroud)
+        massflow_local = np.zeros(n_streams, dtype=float)
+        massflow_fraction = np.array([1.0]) if n_streams <= 1 else np.linspace(0, 1, n_streams)
+        if n_streams <= 1:
+            massflow_local[0] = Vm_local[0] * rho_local[0] * streamline_area[0] * (1 - row.blockage)
+            total_massflow_no_coolant = massflow_local[0]
+            if row.coolant is not None:
+                massflow_local += massflow_fraction * row.coolant.massflow_percentage * total_massflow_no_coolant
+            total_massflow_local = massflow_local[-1]
+        else:
+            for j in range(1, len(row.percent_hub_shroud)):
+                Vm_seg = 0.5 * (Vm_local[j] + Vm_local[j - 1])
+                rho_seg = 0.5 * (rho_local[j] + rho_local[j - 1])
+                massflow_local[j] = Vm_seg * rho_seg * streamline_area[j] * (1 - row.blockage) + massflow_local[j - 1]
+            total_massflow_no_coolant = massflow_local[-1]
+            if row.coolant is not None:
+                massflow_local += massflow_fraction * row.coolant.massflow_percentage * total_massflow_no_coolant
+            total_massflow_local = massflow_local[-1]
 
         if apply:
             row.P = P_local
@@ -280,6 +296,7 @@ def rotor_calc(
             row.Vt = Vt_local
             row.V = V_local
             row.M = M_local
+            row.U = U_local
             row.T0 = T0_local
             row.P0 = P0_local
             row.P0R = P0R_local
@@ -338,7 +355,6 @@ def rotor_calc(
         row.Vx = row.Vm*np.cos(row.phi)
         row.W = np.sqrt(2*row.Cp*(row.T0R-row.T))
         row.Wt = row.W*np.sin(beta2_eff)
-        row.U = row.omega * row.r 
         row.Vt = row.Wt+row.U
         
         row.alpha2 = np.arctan2(row.Vt,row.Vm)

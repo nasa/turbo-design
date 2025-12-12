@@ -4,7 +4,6 @@ from turbodesign import Inlet, Outlet, Passage, PassageType
 from turbodesign.row_factory import make_rotor_row, make_stator_row
 from turbodesign.compressor_spool import CompressorSpool
 from turbodesign.loss.fixedpressureloss import FixedPressureLoss
-from turbodesign.row_factory import make_rotor_row, make_stator_row
 
 
 def MFP(M: float, gamma: float = 1.4, R: float = 287.15) -> float:
@@ -78,7 +77,7 @@ def main() -> None:
         inlet,
         outlet,
         [rotor, stator],
-        rpm=omega * 30 / np.pi,
+        rpm=omega * 30 / np.pi,num_streamlines=1
     )
     spool.solve_balance_pressure()
 

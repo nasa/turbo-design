@@ -10,6 +10,11 @@ def compute_streamline_areas(row: BladeRow) -> Tuple[float, npt.NDArray]:
     """Compute total annulus area and individual streamline cross sections."""
     total_area = 0.0
     streamline_area = np.zeros(len(row.percent_hub_shroud))
+    if len(row.percent_hub_shroud) <= 1:
+        if hasattr(row, "total_area") and row.total_area:
+            total_area = float(row.total_area)
+            streamline_area = np.array([total_area])
+        return total_area, streamline_area
     for j in range(1, len(row.percent_hub_shroud)):
         if np.abs((row.x[j] - row.x[j - 1])) < 1e-5:  # Axial machines
             delta = np.pi * (row.r[j] ** 2 - row.r[j - 1] ** 2)
@@ -26,10 +31,27 @@ def compute_streamline_areas(row: BladeRow) -> Tuple[float, npt.NDArray]:
 
 def compute_massflow(row: BladeRow) -> None:
     """Populate row.massflow, total_massflow, and area fields."""
-    massflow_fraction = np.linspace(0, 1, len(row.percent_hub_shroud))
-    massflow = row.percent_hub_shroud * 0
+    n = len(row.percent_hub_shroud)
+    massflow_fraction = np.linspace(0, 1, n)
     total_area, streamline_area = compute_streamline_areas(row)
-    for j in range(1, len(row.percent_hub_shroud)):
+
+    if n <= 1:
+        Vm = float(row.Vm[0]) if len(row.Vm) else 0.0
+        rho = float(row.rho[0]) if len(row.rho) else 0.0
+        mass = Vm * rho * (total_area if total_area else 0.0) * (1 - row.blockage)
+        massflow = np.array([mass])
+        row.total_massflow_no_coolant = mass
+        if row.coolant is not None:
+            massflow += row.coolant.massflow_percentage * mass
+        row.massflow = massflow
+        row.calculated_massflow = massflow[-1]
+        row.total_massflow = massflow[-1]
+        row.total_area = total_area
+        row.area = streamline_area
+        return
+
+    massflow = np.zeros_like(row.percent_hub_shroud, dtype=float)
+    for j in range(1, n):
         Vm = (row.Vm[j] + row.Vm[j - 1]) / 2
         rho = (row.rho[j] + row.rho[j - 1]) / 2
         massflow[j] = Vm * rho * streamline_area[j] * (1 - row.blockage) + massflow[j - 1]

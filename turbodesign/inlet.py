@@ -87,7 +87,7 @@ class Inlet(BladeRow):
             num_streamlines (int, optional): _description_. Defaults to 5.
             IsCompressor (bool, optional): This is if static pressure is defined at the inlet and total pressure at the outlet. Defaults to False.
         """
-        dst = np.linspace(0,1,num_streamlines)
+        dst = np.array([0.5]) if num_streamlines <= 1 else np.linspace(0,1,num_streamlines)
         self.M = safe_interpolate(self.M, self.percent_hub_shroud, dst)
         if self.static_defined: # This comes from the initialization
             self.P = safe_interpolate(self.P, self.percent_hub_shroud, dst)
@@ -157,7 +157,8 @@ class Inlet(BladeRow):
         Vm_prev = 0; Vm_err = 0 
 
         cutline,_,_ = passage.get_cutting_line(t_hub=self.location,t_shroud=self.shroud_location)
-        self.x,self.r = cutline.get_point(np.linspace(0,1,num_streamlines))
+        t_span = np.array([0.5]) if num_streamlines <= 1 else np.linspace(0,1,num_streamlines)
+        self.x,self.r = cutline.get_point(t_span)
         for _ in range(2):
             T0_T = (1+(self.gamma-1)/2 * self.M**2)
             
@@ -176,17 +177,29 @@ class Inlet(BladeRow):
             
             compute_gas_constants(self)
             rho_mean = self.rho.mean()
-            for i in range(len(self.massflow)-1):    
-                tube_massflow = self.massflow[i+1]-self.massflow[i]
+            Vm_tube = np.zeros(max(len(self.massflow)-1, 1))
+            if len(self.massflow) <= 1:
+                Vm_tube[0] = float(self.Vm.mean())
+            # Compute tube-averaged Vm from massflow differences
+            for i in range(1, len(self.massflow)):
+                tube_massflow = self.massflow[i]-self.massflow[i-1]
+                rho_bar = rho_mean if len(self.rho) == 1 else 0.5 * (self.rho[i] + self.rho[i-1])
                 if np.abs((self.x[-1]-self.x[0]))<1E-5: # Axial Machines
-                    self.Vm[i+1] = tube_massflow/(rho_mean*np.pi*(self.r[i+1]**2-self.r[i]**2))
+                    area = np.pi*(self.r[i]**2-self.r[i-1]**2)
                 else:   # Radial Machines
                     dx = self.x[i]-self.x[i-1]
                     S = (self.r[i]-self.r[i-1])
                     C = np.sqrt(1+((self.r[i]-self.r[i-1])/dx)**2)
                     area = 2*np.pi*C*(S/2*dx**2+self.r[i-1]*dx)
-                    self.Vm[i+1] = tube_massflow/(rho_mean*area)
-            self.Vm[0] = 1/(len(self.Vm)-1)*self.Vm[1:].sum()
+                Vm_tube[i-1] = tube_massflow/(rho_bar*area + 1e-12)
+
+            # Recover per-streamline Vm; handle single-streamline as meanline
+            if len(self.Vm) <= 1:
+                self.Vm = np.array([Vm_tube[0] if len(Vm_tube) else rho_mean*0])
+            else:
+                self.Vm[0] = Vm_tube[0]
+                for i in range(1, len(self.Vm)):
+                    self.Vm[i] = 2 * Vm_tube[i-1] - self.Vm[i-1]
             
             self.M = self.V /np.sqrt(self.gamma*self.R*self.T)
             Vm_err = np.max(abs(self.Vm-Vm_prev)/self.Vm)
@@ -194,16 +207,18 @@ class Inlet(BladeRow):
             if Vm_err < 1E-4:
                 break
         
-        Area = 0
-        for j in range(1,num_streamlines):
-            if np.abs((self.x[j]-self.x[j-1]))<1E-12: # Axial Machines  
-                Area += np.pi*(self.r[j]**2-self.r[j-1]**2)
-            else:   # Radial Machines
-                dx = self.x[j]-self.x[j-1]
-                S = (self.r[j]-self.r[j-1])
-                C = np.sqrt(1+((self.r[j]-self.r[j-1])/dx)**2)
-                Area += 2*np.pi*C*(S/2*dx**2+self.r[j-1]*dx)
-                
+        if num_streamlines <= 1:
+            Area = passage.get_area(self.location)
+        else:
+            Area = 0
+            for j in range(1,num_streamlines):
+                if np.abs((self.x[j]-self.x[j-1]))<1E-12: # Axial Machines  
+                    Area += np.pi*(self.r[j]**2-self.r[j-1]**2)
+                else:   # Radial Machines
+                    dx = self.x[j]-self.x[j-1]
+                    S = (self.r[j]-self.r[j-1])
+                    C = np.sqrt(1+((self.r[j]-self.r[j-1])/dx)**2)
+                    Area += 2*np.pi*C*(S/2*dx**2+self.r[j-1]*dx)
         self.calculated_massflow = self.rho.mean()*self.Vm.mean() * Area
 
 

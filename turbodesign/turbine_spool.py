@@ -182,8 +182,12 @@ class TurbineSpool:
             row.r = np.zeros((self.num_streamlines,))
             row.m = np.zeros((self.num_streamlines,))
 
-            t_radial = np.linspace(0, 1, self.num_streamlines)
+            t_radial = np.array([0.5]) if self.num_streamlines == 1 else np.linspace(0, 1, self.num_streamlines)
             self.calculate_streamline_curvature(row, t_radial)
+            if self.num_streamlines == 1:
+                area = self.passage.get_area(row.hub_location)
+                row.total_area = area
+                row.area = np.array([area])
 
             # Ensure a loss model exists on blade rows
             if not isinstance(row, (Inlet, Outlet)) and row.loss_function is None:
@@ -216,10 +220,12 @@ class TurbineSpool:
                 interp1d(t_s, self.passage.get_m(tr, resolution=len(t_s)))(row.hub_location)
             )
         # Back-compute pitch_to_chord if blade count is specified and chord is nonzero
-        if row.num_blades and row.chord != 0:
-            mean_r = float(row.r.mean())
+        chord = np.asarray(row.chord, dtype=float)
+        mean_chord = float(np.mean(chord)) if chord.size else 0.0
+        if row.num_blades and mean_chord != 0:
+            mean_r = float(np.mean(row.r))
             pitch = 2 * np.pi * mean_r / row.num_blades
-            row.pitch_to_chord = pitch / row.chord
+            row.pitch_to_chord = pitch / mean_chord
 
     def solve_for_static_pressure(self,upstream:BladeRow,row:BladeRow):
         if row.row_type == RowType.Stator:
@@ -265,7 +271,7 @@ class TurbineSpool:
 
         inlet.total_massflow = W0
         inlet.total_massflow_no_coolant = W0
-        inlet.massflow = np.linspace(0, 1, self.num_streamlines) * W0
+        inlet.massflow = np.array([W0]) if self.num_streamlines == 1 else np.linspace(0, 1, self.num_streamlines) * W0
 
         inlet.__interpolate_quantities__(self.num_streamlines)  # type: ignore[attr-defined]
         inlet.__initialize_velocity__(self.passage, self.num_streamlines)  # type: ignore[attr-defined]
@@ -322,7 +328,7 @@ class TurbineSpool:
             # row.P0 = P0
             row.Cp = Cp
             row.total_massflow = W0
-            row.massflow = np.linspace(0, 1, self.num_streamlines) * row.total_massflow
+            row.massflow = np.array([row.total_massflow]) if self.num_streamlines == 1 else np.linspace(0, 1, self.num_streamlines) * row.total_massflow
 
             # Pass gas constants
             row.rho = upstream.rho
@@ -456,17 +462,19 @@ class TurbineSpool:
                             if row.row_type == RowType.Rotor:
                                 rotor_calc(row, upstream, 
                                         calculate_vm=True,static_defined=static_defined)
-                                row = radeq(row, upstream, downstream)
-                                compute_gas_constants(row, self.fluid)
-                                rotor_calc(row, upstream, 
-                                        calculate_vm=False,static_defined=static_defined)
+                                if self.num_streamlines > 1:
+                                    row = radeq(row, upstream, downstream)
+                                    compute_gas_constants(row, self.fluid)
+                                    rotor_calc(row, upstream, 
+                                            calculate_vm=False,static_defined=static_defined)
                             elif row.row_type == RowType.Stator:
                                 stator_calc(row, upstream, downstream, 
                                             calculate_vm=True,static_defined=static_defined)
-                                row = radeq(row, upstream, downstream)
-                                compute_gas_constants(row, self.fluid)
-                                stator_calc(row, upstream, downstream, 
-                                            calculate_vm=False,static_defined=static_defined)
+                                if self.num_streamlines > 1:
+                                    row = radeq(row, upstream, downstream)
+                                    compute_gas_constants(row, self.fluid)
+                                    stator_calc(row, upstream, downstream, 
+                                                calculate_vm=False,static_defined=static_defined)
                             compute_gas_constants(row, self.fluid)
                             compute_massflow(row)
                             compute_power(row, upstream)
@@ -490,9 +498,10 @@ class TurbineSpool:
                         elif row.row_type == RowType.Stator:
                             row.Yp = 0
                             stator_calc(row,upstream,downstream,calculate_vm=True)
-                            row = radeq(row,upstream) 
-                            compute_gas_constants(row,self.fluid)
-                            stator_calc(row,upstream,downstream,calculate_vm=False)
+                            if self.num_streamlines > 1:
+                                row = radeq(row,upstream) 
+                                compute_gas_constants(row,self.fluid)
+                                stator_calc(row,upstream,downstream,calculate_vm=False)
                         compute_gas_constants(row,self.fluid)
                         compute_massflow(row)
                         compute_power(row,upstream)
@@ -533,7 +542,8 @@ class TurbineSpool:
                 pressure_ratio_guess = x.tolist()
                 
             # Adjust inlet to match massflow found at first blade row
-            self.inlet.massflow = (np.linspace(0, 1, self.num_streamlines) * rows[1].total_massflow_no_coolant)
+            target = rows[1].total_massflow_no_coolant
+            self.inlet.massflow = np.array([target]) if self.num_streamlines == 1 else (np.linspace(0, 1, self.num_streamlines) * target)
             self.inlet.total_massflow_no_coolant = rows[1].total_massflow_no_coolant
             self.inlet.total_massflow = rows[1].total_massflow_no_coolant
             self.inlet.calculated_massflow = self.inlet.total_massflow_no_coolant

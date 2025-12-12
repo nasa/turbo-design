@@ -592,8 +592,14 @@ def interpolate_streamline_quantities(row:BladeRow,passage:Passage,num_streamlin
         (BladeRow): new row object with quantities interpolated
     """
     row.cutting_line,_,_ = passage.get_cutting_line(row.location)
-    row.x,row.r = row.cutting_line.get_point(np.linspace(0,1,num_streamlines))
-    streamline_percent_length = np.sqrt((row.r-row.r[0])**2+(row.x-row.x[0])**2)/row.cutting_line.length
+    t_span = np.array([0.5]) if num_streamlines <= 1 else np.linspace(0, 1, num_streamlines)
+    row.x, row.r = row.cutting_line.get_point(t_span)
+    if num_streamlines <= 1:
+        streamline_percent_length = np.array([0.5])
+        row.total_area = passage.get_area(row.location)
+        row.area = np.array([row.total_area])
+    else:
+        streamline_percent_length = np.sqrt((row.r-row.r[0])**2+(row.x-row.x[0])**2)/row.cutting_line.length
     
     # Flow angles 
     row._beta1_metal = row._beta1_metal.default_factory() if type(row._beta1_metal) == Field else row._beta1_metal
