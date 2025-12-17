@@ -123,32 +123,26 @@ shroud_exit_locations.append((lastblade[0][-1,:,0].max()  - shroud[:,0].min()) /
 # Axial location is a percentage along the hub where row exit is defined
 IGV1 = make_stator_row(hub_location=hub_exit_locations[0])
 IGV1.row_type = RowType.IGV
-IGV1.shroud_location = shroud_exit_locations[0]
 IGV1.stage_id = 1
 IGV1.num_blades = blade_counts.get("igv", IGV1.num_blades)
 
 rotor1 = make_rotor_row(hub_location=hub_exit_locations[1])
-rotor1.shroud_location = shroud_exit_locations[1]
 rotor1.stage_id = 1
 rotor1.num_blades = blade_counts.get("rotor1", rotor1.num_blades)
 
 stator1 = make_stator_row(hub_location=hub_exit_locations[2])
-stator1.shroud_location = shroud_exit_locations[2]
 stator1.stage_id = 1
 stator1.num_blades = blade_counts.get("stator1", stator1.num_blades)
 
 rotor2 = make_rotor_row(hub_location=hub_exit_locations[3])
-rotor2.shroud_location = shroud_exit_locations[3]
 rotor2.stage_id = 2
 rotor2.num_blades = blade_counts.get("rotor2", rotor2.num_blades)
 
 stator2 = make_stator_row(hub_location=hub_exit_locations[4])
-stator2.shroud_location = shroud_exit_locations[4]
 stator2.stage_id = 2
 stator2.num_blades = blade_counts.get("stator2", stator2.num_blades)
 
 rotor3 = make_rotor_row(hub_location=hub_exit_locations[5])
-rotor3.shroud_location = shroud_exit_locations[5]
 rotor3.stage_id = 3
 rotor3.num_blades = blade_counts.get("rotor3", rotor3.num_blades)
 
@@ -158,29 +152,26 @@ stator3.stage_id = 3
 stator3.num_blades = blade_counts.get("stator3", stator3.num_blades)
 
 rotor4 = make_rotor_row(hub_location=hub_exit_locations[7])
-rotor4.shroud_location = shroud_exit_locations[7]
 rotor4.stage_id = 4
 rotor4.num_blades = blade_counts.get("rotor4", rotor4.num_blades)
+
 stator4 = make_stator_row(hub_location=hub_exit_locations[8])
-stator4.shroud_location = shroud_exit_locations[8]
 stator4.stage_id = 4
 stator4.num_blades = blade_counts.get("stator4", stator4.num_blades)
 
 rotor5 = make_rotor_row(hub_location=hub_exit_locations[9])
-rotor5.shroud_location = shroud_exit_locations[9]
 rotor5.stage_id = 5
 rotor5.num_blades = blade_counts.get("rotor5", rotor5.num_blades)
+
 stator5 = make_stator_row(hub_location=hub_exit_locations[10])
-stator5.shroud_location = shroud_exit_locations[10]
 stator5.stage_id = 5
 stator5.num_blades = blade_counts.get("stator5", stator5.num_blades)
 
 rotor6 = make_rotor_row(hub_location=hub_exit_locations[11])
-rotor6.shroud_location = shroud_exit_locations[11]
 rotor6.stage_id = 6
 rotor6.num_blades = blade_counts.get("rotor6", rotor6.num_blades)
+
 stator6 = make_stator_row(hub_location=hub_exit_locations[12])
-stator6.shroud_location = shroud_exit_locations[12]
 stator6.stage_id = 6
 stator6.num_blades = blade_counts.get("stator6", stator6.num_blades)
 
@@ -188,17 +179,16 @@ rotor7 = make_rotor_row(hub_location=hub_exit_locations[13])
 rotor7.shroud_location = shroud_exit_locations[13]
 rotor7.stage_id = 7
 rotor7.num_blades = blade_counts.get("rotor7", rotor7.num_blades)
+
 stator7 = make_stator_row(hub_location=hub_exit_locations[14])
-stator7.shroud_location = shroud_exit_locations[14]
 stator7.stage_id = 7
 stator7.num_blades = blade_counts.get("stator7", stator7.num_blades)
 
 rotor8 = make_rotor_row(hub_location=hub_exit_locations[15])
-rotor8.shroud_location = shroud_exit_locations[15]
 rotor8.stage_id = 8
 rotor8.num_blades = blade_counts.get("rotor8", rotor8.num_blades)
+
 stator8 = make_stator_row(hub_location=hub_exit_locations[16])
-stator8.shroud_location = shroud_exit_locations[16]
 stator8.stage_id = 8
 stator8.num_blades = blade_counts.get("stator8", stator8.num_blades)
 
@@ -212,11 +202,10 @@ stator9.stage_id = 9
 stator9.num_blades = blade_counts.get("stator9", stator9.num_blades)
 
 rotor10 = make_rotor_row(hub_location=hub_exit_locations[19])
-rotor10.shroud_location = shroud_exit_locations[19]
 rotor10.stage_id = 10
 rotor10.num_blades = blade_counts.get("rotor10", rotor10.num_blades)
+
 stator10 = make_stator_row(hub_location=hub_exit_locations[20])
-stator10.shroud_location = shroud_exit_locations[20]
 stator10.stage_id = 10
 stator10.num_blades = blade_counts.get("stator10", stator10.num_blades)
 

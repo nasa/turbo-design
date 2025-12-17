@@ -37,6 +37,8 @@ def safe_interpolate(values, src_r, dst_r, default: float = 0.0, radians: bool =
     dst = convert_to_ndarray(dst_r)
     if src.size == 0:
         src = np.linspace(0, 1, len(arr))
+    if arr.size > 1 and src.size != arr.size:
+        src = np.linspace(0, 1, len(arr))
     if arr.size == 1:
         arr = arr[0] * np.ones_like(dst)
     else:

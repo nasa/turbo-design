@@ -595,6 +595,8 @@ def interpolate_streamline_quantities(row:BladeRow,passage:Passage,num_streamlin
     Returns:
         (BladeRow): new row object with quantities interpolated
     """
+    src_percent = convert_to_ndarray(row.percent_hub_shroud)
+
     row.cutting_line,_,_ = passage.get_cutting_line(row.location)
     t_span = np.array([0.5]) if num_streamlines <= 1 else np.linspace(0, 1, num_streamlines)
     row.x, row.r = row.cutting_line.get_point(t_span)
@@ -617,49 +619,46 @@ def interpolate_streamline_quantities(row:BladeRow,passage:Passage,num_streamlin
     row.beta2_metal_radii = streamline_percent_length
     row.deviation = streamline_percent_length * 0
     
-    row.mprime = interpolate_quantities(row.mprime,row.percent_hub_shroud,streamline_percent_length)
-    
-    if type(row.percent_hub_shroud) == Field: 
-        row.percent_hub_shroud = streamline_percent_length
-    else:
-        row.percent_hub_shroud = streamline_percent_length # Reset the radii to streamline radii
+    row.mprime = interpolate_quantities(row.mprime, src_percent, streamline_percent_length)
 
-    row.alpha1 = safe_interpolate(row.alpha1, row.percent_hub_shroud, streamline_percent_length, radians=False)
-    row.alpha2 = safe_interpolate(row.alpha2, row.percent_hub_shroud, streamline_percent_length, radians=False)
-    row.beta1 = safe_interpolate(row.beta1, row.percent_hub_shroud, streamline_percent_length, radians=False)
-    row.beta2 = safe_interpolate(row.beta2, row.percent_hub_shroud, streamline_percent_length, radians=False)
+    row.alpha1 = safe_interpolate(row.alpha1, src_percent, streamline_percent_length, radians=False)
+    row.alpha2 = safe_interpolate(row.alpha2, src_percent, streamline_percent_length, radians=False)
+    row.beta1 = safe_interpolate(row.beta1, src_percent, streamline_percent_length, radians=False)
+    row.beta2 = safe_interpolate(row.beta2, src_percent, streamline_percent_length, radians=False)
     
     # Velocities 
-    row.Vm = interpolate_quantities(row.Vm, row.percent_hub_shroud, streamline_percent_length)
-    row.Vx = interpolate_quantities(row.Vx, row.percent_hub_shroud, streamline_percent_length)
-    row.Vt = interpolate_quantities(row.Vt, row.percent_hub_shroud, streamline_percent_length)
-    row.Vr = interpolate_quantities(row.Vr, row.percent_hub_shroud, streamline_percent_length)
-    row.V = interpolate_quantities(row.V, row.percent_hub_shroud, streamline_percent_length)
-    row.V2 = interpolate_quantities(row.V2, row.percent_hub_shroud, streamline_percent_length)
-    row.M = interpolate_quantities(row.M, row.percent_hub_shroud, streamline_percent_length)
-    row.M_rel = interpolate_quantities(row.M_rel, row.percent_hub_shroud, streamline_percent_length)
-    row.U = interpolate_quantities(row.U, row.percent_hub_shroud, streamline_percent_length)
-    row.W = interpolate_quantities(row.W, row.percent_hub_shroud, streamline_percent_length)
-    row.Wt = interpolate_quantities(row.Wt, row.percent_hub_shroud, streamline_percent_length)
+    row.Vm = interpolate_quantities(row.Vm, src_percent, streamline_percent_length)
+    row.Vx = interpolate_quantities(row.Vx, src_percent, streamline_percent_length)
+    row.Vt = interpolate_quantities(row.Vt, src_percent, streamline_percent_length)
+    row.Vr = interpolate_quantities(row.Vr, src_percent, streamline_percent_length)
+    row.V = interpolate_quantities(row.V, src_percent, streamline_percent_length)
+    row.V2 = interpolate_quantities(row.V2, src_percent, streamline_percent_length)
+    row.M = interpolate_quantities(row.M, src_percent, streamline_percent_length)
+    row.M_rel = interpolate_quantities(row.M_rel, src_percent, streamline_percent_length)
+    row.U = interpolate_quantities(row.U, src_percent, streamline_percent_length)
+    row.W = interpolate_quantities(row.W, src_percent, streamline_percent_length)
+    row.Wt = interpolate_quantities(row.Wt, src_percent, streamline_percent_length)
 
     # Total Quantities
-    row.T0 = interpolate_quantities(row.T0,row.percent_hub_shroud,streamline_percent_length)
-    row.T0_is = interpolate_quantities(row.T0,row.percent_hub_shroud,streamline_percent_length) # For Turbines
-    row.P0 = interpolate_quantities(row.P0,row.percent_hub_shroud,streamline_percent_length)
-    row.P0_is = interpolate_quantities(row.P0,row.percent_hub_shroud,streamline_percent_length) # For Compressors 
-    row.P0_stator_inlet = interpolate_quantities(row.P0_stator_inlet,row.percent_hub_shroud,streamline_percent_length)
+    row.T0 = interpolate_quantities(row.T0, src_percent, streamline_percent_length)
+    row.T0_is = interpolate_quantities(row.T0, src_percent, streamline_percent_length) # For Turbines
+    row.P0 = interpolate_quantities(row.P0, src_percent, streamline_percent_length)
+    row.P0_is = interpolate_quantities(row.P0, src_percent, streamline_percent_length) # For Compressors 
+    row.P0_stator_inlet = interpolate_quantities(row.P0_stator_inlet, src_percent, streamline_percent_length)
     
     # Relative Quantities
-    row.P0R = interpolate_quantities(row.P0R,row.percent_hub_shroud,streamline_percent_length)
-    row.P0R_is = interpolate_quantities(row.P0,row.percent_hub_shroud,streamline_percent_length)
-    row.T0R = interpolate_quantities(row.T0R,row.percent_hub_shroud,streamline_percent_length)
+    row.P0R = interpolate_quantities(row.P0R, src_percent, streamline_percent_length)
+    row.P0R_is = interpolate_quantities(row.P0, src_percent, streamline_percent_length)
+    row.T0R = interpolate_quantities(row.T0R, src_percent, streamline_percent_length)
 
     # Static Quantities 
-    row.P = interpolate_quantities(row.P,row.percent_hub_shroud,streamline_percent_length)
-    row.T = interpolate_quantities(row.T,row.percent_hub_shroud,streamline_percent_length)
-    row.T_is = interpolate_quantities(row.T_is,row.percent_hub_shroud,streamline_percent_length)
-    row.rho = interpolate_quantities(row.rho,row.percent_hub_shroud,streamline_percent_length)
-    row.entropy_rise = interpolate_quantities(row.entropy_rise,row.percent_hub_shroud,streamline_percent_length)
+    row.P = interpolate_quantities(row.P, src_percent, streamline_percent_length)
+    row.T = interpolate_quantities(row.T, src_percent, streamline_percent_length)
+    row.T_is = interpolate_quantities(row.T_is, src_percent, streamline_percent_length)
+    row.rho = interpolate_quantities(row.rho, src_percent, streamline_percent_length)
+    row.entropy_rise = interpolate_quantities(row.entropy_rise, src_percent, streamline_percent_length)
+
+    row.percent_hub_shroud = streamline_percent_length
 
     return row
 
@@ -696,6 +695,8 @@ def interpolate_quantities(q:npt.NDArray,r:npt.NDArray,r2:npt.NDArray):
         q2 = np.zeros(shape=r2.shape)
         return q[0]+q2
     else:
+        if len(r) != len(q):
+            r = np.linspace(0, 1, len(q))
         return interp1d(r,q,kind='linear')(r2)
     
 def compute_gas_constants(row:BladeRow,fluid:Optional[Solution]=None) -> None:
