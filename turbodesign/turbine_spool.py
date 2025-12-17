@@ -358,6 +358,94 @@ class TurbineSpool:
         elif self.massflow_constraint == MassflowConstraint.PressureBalance:
             self._balance_pressure()
 
+    def solve_balance_pressure(self) -> None:
+        """Explicit pressure-balance solve (angles fixed)."""
+        prev = self.massflow_constraint
+        self.massflow_constraint = MassflowConstraint.PressureBalance
+        try:
+            self.solve()
+        finally:
+            self.massflow_constraint = prev
+
+    def solve_angle_match(self) -> None:
+        """Explicit angle-matching solve (angles may change)."""
+        prev = self.massflow_constraint
+        self.massflow_constraint = MassflowConstraint.AngleMatch
+        try:
+            self.solve()
+        finally:
+            self.massflow_constraint = prev
+
+    def total_power(self) -> float:
+        """Return total turbine power extracted (sum over rotor rows)."""
+        total = 0.0
+        for row in self._all_rows():
+            if getattr(row, "row_type", None) == RowType.Rotor:
+                total += float(getattr(row, "power", 0.0) or 0.0)
+        return total
+
+    def solve_massflow_for_power(self, target_power: float, massflow_guess: Optional[float] = None, tol_rel: float = 1e-3, max_iter: int = 8, relax: float = 0.7, bounds: tuple[float, float] = (1e-6, 1e9)) -> tuple[float, float]:
+        """Power-driven closure: iterate inlet massflow to hit a target turbine power.
+
+        This uses a simple algebraic update (no additional nested optimizer):
+            mdot_next = mdot_current * (P_target / P_current)
+
+        The inner flow solution still uses the existing pressure-balance method to
+        maintain a consistent massflow between rows for the current guess.
+
+        Args:
+            target_power: Desired turbine power [W]. Use a positive value for power extracted.
+            massflow_guess: Optional starting guess for inlet massflow [kg/s]. Defaults to `self.massflow`.
+            tol_rel: Relative tolerance on power error.
+            max_iter: Maximum outer iterations.
+            relax: Under-relaxation factor (0–1) for massflow updates.
+            bounds: (lower, upper) bounds for massflow during updates.
+
+        Returns:
+            Tuple of (achieved_massflow_kg_s, achieved_power_W).
+        """
+        target = float(target_power)
+        if target <= 0:
+            raise ValueError("target_power must be positive for turbine power-based solve.")
+
+        lower, upper = bounds
+        if lower <= 0 or upper <= 0 or lower >= upper:
+            raise ValueError("Massflow bounds must be positive and (lower < upper).")
+
+        mdot = float(self.massflow if massflow_guess is None else massflow_guess)
+        mdot = float(np.clip(mdot, lower, upper))
+
+        prev_constraint = self.massflow_constraint
+        self.massflow_constraint = MassflowConstraint.PressureBalance
+        try:
+            for _ in range(max_iter):
+                # Important: prevent a previous computed `row.power` from being treated as an input
+                # in `initialize()` when power is not a design target.
+                for r in self.rows:
+                    if r.row_type == RowType.Rotor:
+                        r.power = 0.0
+                        r.power_mean = 0.0
+
+                self.massflow = mdot
+                self.solve()
+
+                achieved_power = self.total_power()
+                achieved_mdot = float(getattr(self._all_rows()[1], "total_massflow_no_coolant", mdot) or mdot)
+
+                if achieved_power <= 0 or not np.isfinite(achieved_power):
+                    raise ValueError(f"Non-physical power encountered during solve (power={achieved_power}).")
+
+                err_rel = abs(achieved_power - target) / target
+                if err_rel <= tol_rel:
+                    return achieved_mdot, achieved_power
+
+                mdot_update = achieved_mdot * (target / achieved_power)
+                mdot = float(np.clip(relax * mdot_update + (1.0 - relax) * achieved_mdot, lower, upper))
+
+            return float(getattr(self._all_rows()[1], "total_massflow_no_coolant", self.massflow) or self.massflow), self.total_power()
+        finally:
+            self.massflow_constraint = prev_constraint
+
     # ------------------------------
     # Massflow matching/balancing
     # ------------------------------

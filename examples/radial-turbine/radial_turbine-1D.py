@@ -138,23 +138,19 @@ massflow = 0.1 # Guessed value for initialization
 alpha2 = -51.5
 
 passage = Passage(hub[:,0],hub[:,1],shroud[:,0],shroud[:,1],passageType=PassageType.Centrifugal) # type: ignore
-#%% Defining the Inlet
-inlet = Inlet(beta=[0], hub_location=0)
-inlet.init_total(
-    P0=[P0],
-    T0=[T0],
-    M=[0.1],
-    percent_radii=[0.5],
-)
+#%% Defining the Inlet/Outlet
+inlet = Inlet(hub_location=0, alpha=[0])
+inlet.init_total(P0=[P0], T0=[T0], M=[0.1], percent_radii=[0.5])
 
-outlet = Outlet(P=P,percent_radii=[0.5],num_streamlines=5)
+outlet = Outlet(num_streamlines=5)
+outlet.init_static(P=P, percent_radii=[0.5])
 
-stator = make_stator_row(row_type=RowType.Stator, hub_location=blade_position[0])
+stator = make_stator_row(hub_location=blade_position[0])
 stator.R = 287.15
 stator.gamma = 1.35
 stator.Cp = stator.gamma*stator.R/(stator.gamma-1)
 
-rotor = make_rotor_row(row_type=RowType.Rotor, hub_location=blade_position[1])
+rotor = make_rotor_row(hub_location=blade_position[1])
 rotor.R = 287.15
 rotor.gamma = 1.35
 rotor.Cp = stator.gamma*stator.R/(stator.gamma-1)

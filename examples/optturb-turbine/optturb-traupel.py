@@ -22,6 +22,7 @@ rhub = [rmean - H1 / 2, rmean - H1 / 2, rmean - H2 / 2, rmean - H3 / 2]
 rshroud = [rmean + H1 / 2, rmean + H1 / 2, rmean + H2 / 2, rmean + H3 / 2]
 xhub = np.array([-cax, 0.0, cax, 2 * cax])
 xshroud = np.array([-cax, 0.0, cax, 2 * cax])
+axial_len = xhub[-1] - xhub[0]
 
 passage = Passage(
     xhub,
@@ -46,10 +47,15 @@ print(f"Coefficient of Pressure [J/Kg] {fluid.cp:0.4f}")
 # Coolant: Use Kelvin and Pascal
 
 
-station1 = Inlet(M=0.4, P0=[P0], T0=[T0], beta=[0], fluid=fluid, percent_radii=0.5)
-station2 = make_stator_row(RowType.Stator, power=0)
-station3 = make_rotor_row(RowType.Rotor, power=power)
-outlet = Outlet(P=P0/3.96, percent_radii=0.5, num_streamlines=3)
+station1 = Inlet(hub_location=0, alpha=[0])
+station1.init_total(P0=[P0], T0=[T0], M=[0.4], percent_radii=[0.5])
+
+station2 = make_stator_row(hub_location=2 * cax / axial_len)
+station3 = make_rotor_row(hub_location=3 * cax / axial_len)
+station3.power = power
+
+outlet = Outlet(num_streamlines=3)
+outlet.init_static(P=P0 / 3.96, percent_radii=[0.5])
 
 
 station2.coolant = Coolant(T0=616*0.55, P0=50.6*6894.76, massflow_percentage=0, Cp=1012)

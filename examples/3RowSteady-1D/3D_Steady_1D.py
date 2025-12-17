@@ -52,22 +52,18 @@ air = Solution('air.yaml')
 air.TP = T0, P0 # Use pascal for cantera
 print(f"Coefficient of Pressure [J/Kg] {air.cp:0.4f}")
 
-#%% Defining the Inlet
-inlet = Inlet(beta=[0], hub_location=0)
-inlet.init_total(
-    P0=[P0],
-    T0=[T0],
-    M=[0.02],
-    percent_radii=[0.5],
-)
+#%% Defining the Inlet/Outlet
+inlet = Inlet(hub_location=0, alpha=[0])
+inlet.init_total(P0=[P0], T0=[T0], M=[0.02], percent_radii=[0.5])
 
-outlet = Outlet(P=206.799*1000,percent_radii=0.5,num_streamlines=5)
+outlet = Outlet(num_streamlines=5)
+outlet.init_static(P=206.799 * 1000, percent_radii=[0.5])
 
 #%% Define Blade Rows 
 # Axial location is a percentage along the hub where row exit is defined
-stator1 = make_stator_row(row_type=RowType.Stator,hub_location=cax1/axial_len)
-rotor1 = make_rotor_row(row_type=RowType.Rotor, hub_location=(cax1+cax2)/axial_len)
-stator2 = make_stator_row(row_type=RowType.Stator,hub_location=1)
+stator1 = make_stator_row(hub_location=cax1 / axial_len)
+rotor1 = make_rotor_row(hub_location=(cax1 + cax2) / axial_len)
+stator2 = make_stator_row(hub_location=1)
 
 # stator1.gamma = 1.38
 # stator1.Cp = 1042.8

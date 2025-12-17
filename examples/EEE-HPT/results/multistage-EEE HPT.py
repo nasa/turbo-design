@@ -10,7 +10,7 @@ from turbodesign.row_factory import make_rotor_row, make_stator_row
 from turbodesign import TurbineSpool, Inlet, RowType, BladeRow, Passage, Outlet
 from turbodesign.enums import MassflowConstraint
 from turbodesign.coolant import Coolant
-from turbodesign.loss.turbine import FixedPressureLoss
+from turbodesign.loss import FixedPressureLoss
 import numpy as np 
 from cantera import Solution
 import pickle, math
@@ -107,24 +107,26 @@ fluid = Solution('air.yaml')
 fluid.TP = T0, P0 # Use pascal for cantera
 print(f"Coefficient of Pressure [J/Kg] {fluid.cp:0.4f}")
 
-#%% Defining the Inlet
+#%% Defining the Inlet/Outlet
 hub_len = max(hub[:,0])-min(hub[:,0])
 inlet_location = (min(stator1[0][:,0]) - min(hub[:,0]))/hub_len
-inlet = Inlet(beta=[0], hub_location=inlet_location)
-inlet.init_total(
-    P0=[P0],
-    T0=[T0],
-    M=[0.1],
-    percent_radii=[0.5],
-)
-outlet = Outlet(P=Pexit,percent_radii=0.5,num_streamlines=3) # type: ignore
+inlet = Inlet(hub_location=inlet_location, alpha=[0])
+inlet.init_total(P0=[P0], T0=[T0], M=[0.1], percent_radii=[0.5])
+
+outlet = Outlet(num_streamlines=3)
+outlet.init_static(P=Pexit, percent_radii=[0.5])  # type: ignore
 
 #%% Define Blade Rows 
 # Axial location is a percentage along the hub where row exit is defined
-stator1 = make_stator_row(row_type=RowType.Stator,hub_location=(max(stator1[0][:,0]) - min(hub[:,0]))/hub_len, stage_id=0)
-rotor1 = make_rotor_row(row_type=RowType.Rotor, hub_location=(max(rotor1[0][:,0]) - min(hub[:,0]))/hub_len,stage_id=0)
-stator2 = make_stator_row(row_type=RowType.Stator,hub_location=(max(stator2[0][:,0]) - min(hub[:,0]))/hub_len,stage_id=1)
-rotor2 = make_rotor_row(row_type=RowType.Rotor, hub_location=(max(rotor2[0][:,0]) - min(hub[:,0]))/hub_len,stage_id=1)
+stator1 = make_stator_row(hub_location=(max(stator1[0][:,0]) - min(hub[:,0]))/hub_len)
+rotor1 = make_rotor_row(hub_location=(max(rotor1[0][:,0]) - min(hub[:,0]))/hub_len)
+stator2 = make_stator_row(hub_location=(max(stator2[0][:,0]) - min(hub[:,0]))/hub_len)
+rotor2 = make_rotor_row(hub_location=(max(rotor2[0][:,0]) - min(hub[:,0]))/hub_len)
+
+stator1.stage_id = 0
+rotor1.stage_id = 0
+stator2.stage_id = 1
+rotor2.stage_id = 1
 
 stator1.axial_chord = stator1_cax # Set an axial chord
 rotor1.axial_chord = rotor1_cax

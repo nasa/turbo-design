@@ -43,7 +43,7 @@ Turbine Design (Default)
 
 Fixed Pressure Loss
 --------------------------
-.. autoclass:: turbodesign.loss.turbine.fixedpressureloss.FixedPressureLoss
+.. autoclass:: turbodesign.loss.fixedpressureloss.FixedPressureLoss
     :members:
     :special-members:
 

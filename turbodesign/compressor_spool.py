@@ -320,6 +320,8 @@ class CompressorSpool:
             row.total_area = total_area
             row.area = streamline_area
             if row.row_type == RowType.Stator or row.row_type == RowType.IGV:
+                if row.row_type == RowType.IGV:
+                    row.P0_is = upstream.P0
                 stator_calc(row, upstream, calculate_vm=True)  # type: ignore[arg-type]
             elif row.row_type == RowType.Rotor:
                 # Align rotor ideal P0 target with downstream stator if provided (stage-level target)
@@ -438,7 +440,9 @@ class CompressorSpool:
                         row = radeq(row, upstream, downstream)
                         compute_gas_constants(row, self.fluid)
                         rotor_calc(row, upstream, calculate_vm=False)
-                elif row.row_type == RowType.Stator:
+                elif row.row_type == RowType.Stator or row.row_type == RowType.IGV:
+                    if row.row_type == RowType.IGV:
+                        row.P0_is = upstream.P0
                     stator_calc(row, upstream, calculate_vm=True)
                     if self.num_streamlines > 1:
                         row = radeq(row, upstream, downstream)

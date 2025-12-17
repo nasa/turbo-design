@@ -55,7 +55,7 @@ fluid = Solution('air.yaml')
 fluid.TP = T0, P0 # Use pascal for cantera
 print(f"Coefficient of Pressure [J/Kg] {fluid.cp:0.4f}")
 #%% Defining the Inlet
-inlet = Inlet(beta=[0,0], hub_location=0)
+inlet = Inlet(hub_location=0, alpha=[0, 0])
 inlet.init_total(P0=[P0,P0],T0=[T0,T0],M=0.1)
 outlet = Outlet(num_streamlines=n_streamlines)
 outlet.init_static(P=P,percent_radii=[0.5])
@@ -72,10 +72,10 @@ beta_exit_flow = [73.6,-67.2,69.5,-63.9]
 P0_Loss = [0.057,0.088,0.069,0.014]         # (P01-P02)/(P01-P2)
 
 # Axial location is a percentage along the hub where row exit is defined
-stator1 = make_stator_row(row_type=RowType.Stator, hub_location=location1)
-rotor1 = make_rotor_row(row_type=RowType.Rotor, hub_location=location2)
-stator2 = make_stator_row(row_type=RowType.Stator, hub_location=location3)
-rotor2 = make_rotor_row(row_type=RowType.Rotor, hub_location=location4)
+stator1 = make_stator_row(hub_location=location1)
+rotor1 = make_rotor_row(hub_location=location2)
+stator2 = make_stator_row(hub_location=location3)
+rotor2 = make_rotor_row(hub_location=location4)
 
 stator1.axial_chord = cax1 # Set an axial chord
 rotor1.axial_chord = cax2

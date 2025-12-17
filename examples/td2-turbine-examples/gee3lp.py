@@ -4,6 +4,11 @@
 
 '''
 
+raise SystemExit(
+    "Legacy example: `examples/td2-turbine-examples/*.py` targets the deprecated `td3` API and is not maintained. "
+    "Use the `turbodesign` turbine examples under `examples/EEE-HPT` or `examples/optturb-turbine` instead."
+)
+
 import sys
 sys.path.insert(0,'../')
 from td3 import CoolingType, Units, Spool, Inlet, RowType, BladeRow

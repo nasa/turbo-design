@@ -64,7 +64,10 @@ def stator_calc(row: BladeRow, upstream: BladeRow, calculate_vm: bool = True) ->
         T0_local = upstream.T0 - T0_coolant_local
         
         P0_local = row.P0
-        row.P0_is = P0_local + row.Yp * (upstream.P0 - upstream.P)
+        if row.row_type == RowType.IGV:
+            row.P0 = row.P0_is - row.Yp * (upstream.P0 - upstream.P)
+        else:
+            row.P0_is = P0_local + row.Yp * (upstream.P0 - upstream.P)
 
         deviation_func = getattr(row, "deviation_function", None)
         deviation = deviation_func(row, upstream) if callable(deviation_func) else 0.0
