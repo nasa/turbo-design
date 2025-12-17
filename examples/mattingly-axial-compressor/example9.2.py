@@ -77,7 +77,7 @@ def main() -> None:
         inlet,
         outlet,
         [rotor, stator],
-        rpm=omega * 30 / np.pi,num_streamlines=1
+        rpm=omega * 30 / np.pi,num_streamlines=3
     )
     spool.solve_balance_pressure()
 

@@ -62,9 +62,9 @@ def stator_calc(row: BladeRow, upstream: BladeRow, calculate_vm: bool = True) ->
         """Solve stator for a guessed Mach; returns massflow residual."""
         T0_coolant_local = T0_coolant_weighted_average(row) if row.coolant is not None else 0.0
         T0_local = upstream.T0 - T0_coolant_local
-        if row.P0_is is None or np.allclose(row.P0_is, 0):
-            row.P0_is = upstream.P0 * row.P0_ratio
-        P0_local = row.P0_is - row.Yp * (upstream.P0 - upstream.P)
+        
+        P0_local = row.P0
+        row.P0_is = P0_local + row.Yp * (upstream.P0 - upstream.P)
 
         deviation_func = getattr(row, "deviation_function", None)
         deviation = deviation_func(row, upstream) if callable(deviation_func) else 0.0
@@ -209,9 +209,8 @@ def rotor_calc(
             elif callable(loss_fn):
                 target_entropy = float(loss_fn(row, upstream))  # type: ignore[arg-type]
 
-    if row.P0_is is None or np.allclose(row.P0_is, 0):
-        row.P0_is = upstream.P0 * row.P0_ratio
-    row.P0 = row.P0_is - row.Yp * (upstream.P0 - upstream.P)
+    row.P0 = upstream.P0 * row.P0_ratio
+    row.P0_is = row.P0 + row.Yp * (upstream.P0 - upstream.P)
     
     # Upstream relative frame
     upstream.U = upstream.rpm * np.pi / 30 * upstream.r

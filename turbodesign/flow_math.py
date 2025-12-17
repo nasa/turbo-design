@@ -114,7 +114,9 @@ def compute_power(row: BladeRow, upstream: BladeRow | None = None, downstream: B
             row.power = mdot * row.Cp * deltaT
             row.eta_static = row.power / (mdot * row.Cp * (ref.T0.mean() - row.T_is.mean()))
             row.eta_total = (ref.T0.mean() - row.T0.mean()) / (ref.T0.mean() - row.T0_is.mean())
-
+        
         row.stage_loading = row.Cp * (ref.T0.mean() - row.T0.mean()) / max(row.U.mean() ** 2, 1e-9)
+        if is_compressor:
+            row.stage_loading *= -1 # Stage_loading will be negative 
         row.euler_power = mdot * (ref.U * ref.Vt - row.U * row.Vt).mean()
         row.flow_coefficient = float(np.mean(row.Vm) / max(row.U.mean(), 1e-9))

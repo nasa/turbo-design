@@ -321,11 +321,12 @@ class CompressorSpool:
             elif row.row_type == RowType.Rotor:
                 # Align rotor ideal P0 target with downstream stator if provided (stage-level target)
                 if downstream and downstream.row_type == RowType.Stator:
-                    downstream.P0_is = upstream.P0*downstream.P0_ratio
+                    downstream.P0 = upstream.P0*downstream.P0_ratio
                     downstream.Yp = downstream.loss_function(row, upstream)
-                    row.P0_is = downstream.P0_is - downstream.Yp * (upstream.P0-upstream.P)
+                    downstream.P0_is = downstream.P0 + downstream.Yp * (upstream.P0-upstream.P)
+                    row.P0_ratio = downstream.P0_ratio
                 else:
-                    row.P0_is = row.P0_ratio * upstream.P0
+                    row.P0 = row.P0_ratio * upstream.P0
                 rotor_calc(row, upstream,calculate_vm=True)
                 compute_power(row, upstream, is_compressor=True)
 
