@@ -119,7 +119,8 @@ class BladeRow:
     power_mean: float = 0
     power_distribution: npt.NDArray = field(default_factory=lambda: np.array([0]))  # How power is divided by radius.
     P0_P: float = 0                  # Total to Static Pressure Ratio
-    P0_ratio: float = 0              # Total to Total ratio
+    P0_ratio: float = 0              # Total-to-total pressure ratio target (design input; may be overwritten in legacy diagnostics)
+    P0_ratio_target: float = 0       # Frozen design target for P0_ratio (never overwritten; used for initial guesses)
     Power_Type: PowerType = PowerType.P0_P
     euler_power: float = 0
     Reynolds: float = 0
@@ -143,6 +144,9 @@ class BladeRow:
     def __post_init__(self):
         if self.shroud_location == 0:
             self.shroud_location = self.hub_location
+        # Preserve any user-specified target ratio so later diagnostics can safely overwrite P0_ratio.
+        if self.P0_ratio_target == 0 and self.P0_ratio != 0:
+            self.P0_ratio_target = self.P0_ratio
     
     @property
     def inlet_to_outlet_pratio(self) -> Tuple[float,float]:

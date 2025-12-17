@@ -92,8 +92,15 @@ def compute_power(row: BladeRow, upstream: BladeRow | None = None, downstream: B
         row.T_is = 0 * row.T0
         row.T0_is = 0 * row.T0  # Make it an array
     else:
+        # Preserve any user-configured target ratio. compute_power historically overwrote row.P0_ratio,
+        # which makes it hard to treat P0_ratio as a design input elsewhere.
+        if getattr(row, "P0_ratio_target", 0.0) == 0 and getattr(row, "P0_ratio", 0.0) != 0:
+            row.P0_ratio_target = row.P0_ratio
+
         P0_P = (ref.P0 / row.P).mean()
-        row.P0_ratio = (row.P0 / ref.P0).mean()
+        P0_ratio_actual = (row.P0 / ref.P0).mean()
+        row.P0_ratio = P0_ratio_actual
+        setattr(row, "P0_ratio_actual", float(P0_ratio_actual))
         row.T_is = ref.T0 * (1 / P0_P) ** ((row.gamma - 1) / row.gamma)
         a = np.sqrt(row.gamma * row.R * row.T_is)
         row.T0_is = row.T_is * (1 + (row.gamma - 1) / 2 * (row.V / a) ** 2)

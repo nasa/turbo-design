@@ -79,6 +79,7 @@ def make_rotor_row(
     """
     row = BladeRow(hub_location=hub_location, row_type=RowType.Rotor)
     row.P0_ratio = P0_ratio
+    row.P0_ratio_target = P0_ratio
     _maybe_set_pitch(row, pitch_to_chord, solidity)
     if num_blades is not None:
         row.num_blades = num_blades
@@ -115,6 +116,7 @@ def make_stator_row(
     """
     row = BladeRow(hub_location=hub_location, row_type=RowType.Stator)
     row.P0_ratio = P0_ratio
+    row.P0_ratio_target = P0_ratio
     _maybe_set_pitch(row, pitch_to_chord, solidity)
     if num_blades is not None:
         row.num_blades = num_blades

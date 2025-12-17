@@ -209,7 +209,10 @@ def rotor_calc(
             elif callable(loss_fn):
                 target_entropy = float(loss_fn(row, upstream))  # type: ignore[arg-type]
 
-    row.P0 = upstream.P0 * row.P0_ratio
+    # Use the frozen target (if available) so diagnostic code can overwrite row.P0_ratio
+    # without changing the initial guess used by this solver.
+    P0_ratio_target = getattr(row, "P0_ratio_target", 0.0) or row.P0_ratio
+    row.P0 = upstream.P0 * P0_ratio_target
     row.P0_is = row.P0 + row.Yp * (upstream.P0 - upstream.P)
     
     # Upstream relative frame

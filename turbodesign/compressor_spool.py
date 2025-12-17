@@ -109,6 +109,9 @@ class CompressorSpool:
             if not isinstance(br, (Outlet)):
                 br.rpm = rpm
                 br.axial_chord = br.hub_location * self.passage.hub_length
+            # Freeze any configured P0_ratio targets for later use (diagnostics may overwrite P0_ratio).
+            if getattr(br, "P0_ratio_target", 0.0) == 0 and getattr(br, "P0_ratio", 0.0) != 0:
+                br.P0_ratio_target = br.P0_ratio
             if isinstance(br, BladeRow) and br.row_type == RowType.Rotor:
                 setattr(br, "rotor_pressure_fraction", getattr(br, "rotor_pressure_fraction", self.rotor_pressure_fraction))
 
