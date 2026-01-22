@@ -104,7 +104,6 @@ stator.loss_function = AinleyMathieson()
 | Model | Description | Best For | Reference |
 |-------|-------------|----------|-----------|
 | **Lieblein** | Diffusion factor based loss | Axial compressors | NACA RM E57A28 (1957) |
-| **OTAC** | Off-the-shelf compressor correlation | Industrial compressors | - |
 | **Diffusion Factor** | Simplified diffusion loss | Preliminary design | - |
 
 ### Loss Model Data Files
@@ -112,6 +111,16 @@ stator.loss_function = AinleyMathieson()
 Some correlations (Ainley-Mathieson, Kacker-Okapuu, etc.) rely on digitized charts stored as `.pkl` files:
 - Auto-downloaded from GitHub on first use to `~/.cache/TD3_LossModels/`
 - Can be regenerated locally by running `python build_dataset.py` in `references/Turbines/<ModelName>/`
+- **Note:** Depending on your Python version, pickle binaries may have compatibility issues. If auto-download fails, regenerate locally.
+
+**Building Loss Model Correlations:**
+
+The turbine loss correlations were estimated using axial steam turbine data. Correlation figures are extracted and surface fitted:
+
+- [Ainley Mathieson](https://colab.research.google.com/github/nasa/turbo-design/blob/main/references/Turbines/AinleyMathieson/ainley_mathieson.ipynb)
+- [Craig Cox](https://colab.research.google.com/github/nasa/turbo-design/blob/main/references/Turbines/CraigCox/craig_cox.ipynb)
+- [Traupel](https://colab.research.google.com/github/nasa/turbo-design/blob/main/references/Turbines/Traupel/traupel.ipynb)
+- [KackerOkapuu](https://colab.research.google.com/github/nasa/turbo-design/blob/main/references/Turbines/KackerOkapuu/kacker_okapuu.ipynb)
 
 ### Custom Loss Models
 
@@ -234,7 +243,7 @@ print(f"Total power: {spool.total_power()} W")
 
 ## Tutorials
 
-[Turbine Design: EEE High-Pressure Turbine](https://colab.research.google.com/github/nasa/turbo-design/blob/main/examples/EEE-HPT/eee_hpt.ipynb)
+[Turbine Design: EEE High-Pressure Turbine](https://colab.research.google.com/github/nasa/turbo-design/blob/main/examples/EEE-HPT/eee_hpt.ipynb) - Based on GE's 2-stage HPT design [[3]](#ref-eee-hpt). Full CFD results available on [data.nasa.gov](https://data.nasa.gov/dataset/Geometry-Grid-and-Boundary-Condition-Data-for-EEE-/u8xw-fc6h).
 
 [Compressor Design: EEE High-Pressure Compressor](https://colab.research.google.com/github/nasa/turbo-design/blob/main/examples/EEE-HPC/eee_hpc.ipynb)
 
@@ -246,12 +255,18 @@ print(f"Total power: {spool.total_power()} W")
 
 [Multi-stage turbine optimization](https://colab.research.google.com/github/nasa/turbo-design/blob/main/examples/optturb-multistage/optturb-multistage.ipynb)
 
-> **Note on EEE-HPC:** The massflow predicted will not exactly match published EEE data. The original design work (circa 1980s) and detailed geometry files are lost to history, aside from Mark Turner's public code release. The geometry has been reconstructed from available publications and may contain discrepancies like different radii which explains non-matching massflow. The geometry may be scale to match massflow but I have no idea. All of these designs/publications was done before I was born. 
+> **Note on EEE-HPC Geometry and Results:** The massflow and performance predictions may not exactly match the original 1982 publications [[1]](#ref-eee-hpc). The EEE program's original design work (1970s-1980s) used computational tools and geometry definitions that differ from modern reconstructions. The geometry used in this example is based on publicly released data [[2]](#ref-eee-geom), which was reconstructed from contractor reports and may contain discrepancies in blade radii, twist distributions, and exact airfoil coordinates compared to the test hardware described in the original GE publications. Without access to the original CAD files or manufacturing drawings, exact matching is not possible.
+>
+> **References:**
+> - <a name="ref-eee-hpc"></a>[1] Holloway, P. R., et al. (1984). [*Energy Efficient Engine: High Pressure Compressor Detail Design Report*](https://ntrs.nasa.gov/citations/19850002690). NASA CR-165558, General Electric Company.
+> - <a name="ref-eee-geom"></a>[2] Claus, R. W., Beach, T., Turner, M., Siddappaji, K., & Hendricks, E. S. (2015). [*Geometry and Simulation Results for a Gas Turbine Representative of the Energy Efficient Engine (EEE)*](https://ntrs.nasa.gov/citations/20150003286). NASA/TM-2015-218408.
+> - <a name="ref-eee-hpt"></a>[3] Halila, E. E., Lenahan, D. T., & Thomas, T. T. (1982). [*Energy Efficient Engine High Pressure Turbine Test Hardware Detailed Design Report*](https://ntrs.nasa.gov/citations/19850002687). NASA CR-167955, General Electric Company.
 
-## Turbines and Compressors
-Below is an example of a velocity triangle for a Turbine. Work is computed using `Work = U*(Vt1-Vt2) [Joules]`; Note: `Power = massflow * Work [Watts]`. For a turbine you want to have a huge Tangential velocity exiting the stator and a minimal tangental velocity leaving the rotor in order to extract the most work as possible.
+## Understanding Velocity Triangles
 
-Turbodesign keeps track of the all flow properties leaving the stator and leaving the rotor. The word "leaving" and "all" are key. The picture below shows the velocity triangles and each semi-transparent block shows the data that is contained in each `BladeRow` class. BladeRow for stator has rowtype of stator so it knows it's the data leaving the stator. It also keeps track the peripherial velocity `U` that the flow will see as it leaves the stator.
+Turbodesign tracks all flow properties leaving each blade row. Work is computed using `Work = U*(Vt1-Vt2)` [J/kg]; `Power = massflow * Work` [W].
+
+For turbines, maximize tangential velocity exiting the stator and minimize it leaving the rotor to extract maximum work. The diagram below shows how velocity data is stored in each `BladeRow` object:
 
 <img src="references/turbine_velocity_triangles.jpg" alt="Velocity Triangle for a Turbine" style="width:400px;"/>
 
@@ -287,42 +302,6 @@ Documentation builds are automated using GitHub Actions. The workflow:
 - Uses Python 3.12 and Sphinx
 
 See [.github/workflows/README.md](.github/workflows/README.md) for setup details.
-
-# Getting Loss Models working
-Loss models need to be built. I have stored set of models on github as .pkl files. They should automatically download but depending on your python version, the pickle binaries may have issues reading. 
-
-Another way to generate them is to navigate to *turbo-design/references/Turbines/AinleyMathieson* (KackerOkapuu, Traupel, CraigCox) and run `python build_dataset.py`. This will create the loss models and save it to the .cache folder for Linux and Mac and for windows it will save to a different .cache folder in your home directory.  
-https://colab.research.google.com/github/nasa/turbo-design/blob/main/examples/
-# Examples 
-## Turbines
-[OptTurb](https://colab.research.google.com/github/nasa/turbo-design/blob/main/examples/optturb-turbine/optturb.ipynb) OptTurb is part of Paht's PhD work. It's a single stage HPT Turbine designed for Purdue's Experimental aeroThermal LAb (PETAL). It's an excellent candidate for verification because it can be easily modeled using a spreadsheet [OptTurb-SingleStage.xlsx](https://github.com/nasa/turbo-design/blob/main/examples/optturb-turbine/optturb-fixed_pressure_loss2.xlsm) 
-
-[OptTurb-multistage](https://colab.research.google.com/github/nasa/turbo-design/blob/main/examples/optturb-multistage/optturb-multistage.ipynb) Multi-stage example of OptTurb. This is based off a meanline spreadsheet model [OptTurb-MultiStage.xlsx](https://github.com/nasa/turbo-design/blob/main/examples/optturb-multistage/multistage-fixed_pressure_loss2.xlsx) 
-
-[Radial Turbine](https://colab.research.google.com/github/nasa/turbo-design/blob/main/examples/radial-turbine/radial_turbine-1D.ipynb) Radial Turbine example comparison with CFD Solution. This is a NASA internally developed turbine. It is not optimal but it works.  
-
-[3 Row Steady](https://colab.research.google.com/github/nasa/turbo-design/blob/main/examples/3RowSteady-1D/3RowSteady.ipynb) 3 Row Steady comparison with a CFD Example from Aerodynamic Solutions.  
-
-[NASA EEE 2-Stage HPT](https://colab.research.google.com/github/nasa/turbo-design/blob/main/examples/EEE-HPT/eee_hpt.ipynb) GE Design of NASA EEE Engine with 2 stage HPT. Full CFD results here https://data.nasa.gov/dataset/eee-2-stage-hpt-cfd-tecplot-results
-
-
-## Building Turbine Loss Models from Correlations
-The loss correlations below were estimated using Axial steam turbines. Correlation figures are extracted and surface fitted. Each of these tutorials shows how to create and save the correlation files. 
-
-[Ainley Mathieson](https://colab.research.google.com/github/nasa/turbo-design/blob/main/references/Turbines/AinleyMathieson/ainley_mathieson.ipynb)
-
-[Craig Cox](https://colab.research.google.com/github/nasa/turbo-design/blob/main/references/Turbines/CraigCox/craig_cox.ipynb)
-
-[Traupel](https://colab.research.google.com/github/nasa/turbo-design/blob/main/references/Turbines/Traupel/traupel.ipynb)
-
-[KackerOkapuu](https://colab.research.google.com/github/nasa/turbo-design/blob/main/references/Turbines/KackerOkapuu/kacker_okapuu.ipynb)
-
-Need to add Dunham-Came, Moustapha-Kacker
-
-## Compressor
-
-Need to add Koch & Smith, Wright & Miller
-
 
 # Contributors
 
