@@ -246,13 +246,9 @@ print(f"Total power: {spool.total_power()} W")
 
 [Multi-stage turbine optimization](https://colab.research.google.com/github/nasa/turbo-design/blob/main/examples/optturb-multistage/optturb-multistage.ipynb)
 
-> **Note on EEE-HPC:** The massflow predicted will not exactly match published EEE data. The original design work (circa 1980s) and detailed geometry files are lost to history, aside from Mark Turner's public code release. The geometry has been reconstructed from available publications and may contain discrepancies.
+> **Note on EEE-HPC:** The massflow predicted will not exactly match published EEE data. The original design work (circa 1980s) and detailed geometry files are lost to history, aside from Mark Turner's public code release. The geometry has been reconstructed from available publications and may contain discrepancies like different radii which explains non-matching massflow. The geometry may be scale to match massflow but I have no idea. All of these designs/publications was done before I was born. 
 
-# Data Stucture and Velocity Triangles
-## Compressors
-Coming soon! 
-
-## Turbines
+## Turbines and Compressors
 Below is an example of a velocity triangle for a Turbine. Work is computed using `Work = U*(Vt1-Vt2) [Joules]`; Note: `Power = massflow * Work [Watts]`. For a turbine you want to have a huge Tangential velocity exiting the stator and a minimal tangental velocity leaving the rotor in order to extract the most work as possible.
 
 Turbodesign keeps track of the all flow properties leaving the stator and leaving the rotor. The word "leaving" and "all" are key. The picture below shows the velocity triangles and each semi-transparent block shows the data that is contained in each `BladeRow` class. BladeRow for stator has rowtype of stator so it knows it's the data leaving the stator. It also keeps track the peripherial velocity `U` that the flow will see as it leaves the stator.
