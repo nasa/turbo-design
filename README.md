@@ -232,6 +232,22 @@ spool.export_properties('results.json')
 print(f"Total power: {spool.total_power()} W")
 ```
 
+## Tutorials
+
+[Turbine Design: EEE High-Pressure Turbine](https://colab.research.google.com/github/nasa/turbo-design/blob/main/examples/EEE-HPT/eee_hpt.ipynb)
+
+[Compressor Design: EEE High-Pressure Compressor](https://colab.research.google.com/github/nasa/turbo-design/blob/main/examples/EEE-HPC/eee_hpc.ipynb)
+
+[Simple 1-stage compressor validation](https://colab.research.google.com/github/nasa/turbo-design/blob/main/examples/3RowSteady-1D/3RowSteady.ipynb)
+
+[Radial inflow turbine design](https://colab.research.google.com/github/nasa/turbo-design/blob/main/examples/radial-turbine/radial_turbine-1D.ipynb)
+
+[Turbine optimization with scipy](https://colab.research.google.com/github/nasa/turbo-design/blob/main/examples/optturb-turbine/optturb.ipynb)
+
+[Multi-stage turbine optimization](https://colab.research.google.com/github/nasa/turbo-design/blob/main/examples/optturb-multistage/optturb-multistage.ipynb)
+
+> **Note on EEE-HPC:** The massflow predicted will not exactly match published EEE data. The original design work (circa 1980s) and detailed geometry files are lost to history, aside from Mark Turner's public code release. The geometry has been reconstructed from available publications and may contain discrepancies.
+
 # Data Stucture and Velocity Triangles
 ## Compressors
 Coming soon! 
