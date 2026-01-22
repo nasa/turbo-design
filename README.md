@@ -245,7 +245,15 @@ print(f"Total power: {spool.total_power()} W")
 
 [Turbine Design: EEE High-Pressure Turbine](https://colab.research.google.com/github/nasa/turbo-design/blob/main/examples/EEE-HPT/eee_hpt.ipynb) - Based on GE's 2-stage HPT design [[3]](#ref-eee-hpt). Full CFD results available on https://data.nasa.gov/dataset/eee-2-stage-hpt-cfd-tecplot-results.
 
+
 [Compressor Design: EEE High-Pressure Compressor](https://colab.research.google.com/github/nasa/turbo-design/blob/main/examples/EEE-HPC/eee_hpc.ipynb)
+> **Note on EEE-HPC Geometry and Results:** The massflow and performance predictions may not exactly match the original 1982 publications [[1]](#ref-eee-hpc). The EEE program's original design work (1970s-1980s) used computational tools and geometry definitions that differ from modern reconstructions. The geometry used in this example is based on publicly released data [[2]](#ref-eee-geom), which was reconstructed from contractor reports and may contain discrepancies in blade radii, twist distributions, and exact airfoil coordinates compared to the test hardware described in the original GE publications. Without access to the original CAD files or manufacturing drawings, exact matching is not possible.
+>
+> **References:**
+> - <a name="ref-eee-hpc"></a>[1] Holloway, P. R., et al. (1984). [*Energy Efficient Engine: High Pressure Compressor Detail Design Report*](https://ntrs.nasa.gov/citations/19850002690). NASA CR-165558, General Electric Company.
+> - <a name="ref-eee-geom"></a>[2] Claus, R. W., Beach, T., Turner, M., Siddappaji, K., & Hendricks, E. S. (2015). [*Geometry and Simulation Results for a Gas Turbine Representative of the Energy Efficient Engine (EEE)*](https://ntrs.nasa.gov/citations/20150003286). NASA/TM-2015-218408.
+> - <a name="ref-eee-hpt"></a>[3] Halila, E. E., Lenahan, D. T., & Thomas, T. T. (1982). [*Energy Efficient Engine High Pressure Turbine Test Hardware Detailed Design Report*](https://ntrs.nasa.gov/citations/19850002687). NASA CR-167955, General Electric Company.
+
 
 [Simple 1-stage compressor validation](https://colab.research.google.com/github/nasa/turbo-design/blob/main/examples/3RowSteady-1D/3RowSteady.ipynb)
 
@@ -254,13 +262,6 @@ print(f"Total power: {spool.total_power()} W")
 [Turbine optimization with scipy](https://colab.research.google.com/github/nasa/turbo-design/blob/main/examples/optturb-turbine/optturb.ipynb)
 
 [Multi-stage turbine optimization](https://colab.research.google.com/github/nasa/turbo-design/blob/main/examples/optturb-multistage/optturb-multistage.ipynb)
-
-> **Note on EEE-HPC Geometry and Results:** The massflow and performance predictions may not exactly match the original 1982 publications [[1]](#ref-eee-hpc). The EEE program's original design work (1970s-1980s) used computational tools and geometry definitions that differ from modern reconstructions. The geometry used in this example is based on publicly released data [[2]](#ref-eee-geom), which was reconstructed from contractor reports and may contain discrepancies in blade radii, twist distributions, and exact airfoil coordinates compared to the test hardware described in the original GE publications. Without access to the original CAD files or manufacturing drawings, exact matching is not possible.
->
-> **References:**
-> - <a name="ref-eee-hpc"></a>[1] Holloway, P. R., et al. (1984). [*Energy Efficient Engine: High Pressure Compressor Detail Design Report*](https://ntrs.nasa.gov/citations/19850002690). NASA CR-165558, General Electric Company.
-> - <a name="ref-eee-geom"></a>[2] Claus, R. W., Beach, T., Turner, M., Siddappaji, K., & Hendricks, E. S. (2015). [*Geometry and Simulation Results for a Gas Turbine Representative of the Energy Efficient Engine (EEE)*](https://ntrs.nasa.gov/citations/20150003286). NASA/TM-2015-218408.
-> - <a name="ref-eee-hpt"></a>[3] Halila, E. E., Lenahan, D. T., & Thomas, T. T. (1982). [*Energy Efficient Engine High Pressure Turbine Test Hardware Detailed Design Report*](https://ntrs.nasa.gov/citations/19850002687). NASA CR-167955, General Electric Company.
 
 ## Understanding Velocity Triangles
 
