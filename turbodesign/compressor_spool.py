@@ -99,6 +99,7 @@ class CompressorSpool:
         # Previously this used dataclasses.field on a non-dataclass; do it explicitly
         self.t_streamline = np.zeros((10,), dtype=float)
         self._adjust_streamlines = True
+        self.convergence_history: List[Dict] = []
 
         # Assign IDs, RPMs, and axial chords where appropriate
         for i, br in enumerate(self._all_rows()):
@@ -437,6 +438,7 @@ class CompressorSpool:
         loop_iter = 0
         max_iter = 10
         prev_err = 1e9
+        self.convergence_history = []  # Reset convergence history
         while loop_iter < max_iter:
             for i in range(1, len(rows) - 1):
                 row = rows[i]
@@ -481,6 +483,15 @@ class CompressorSpool:
             err = self._massflow_std(rows[1:-1])
             loop_iter += 1
             print(f"Loop {loop_iter} massflow convergence error:{err}")
+
+            # Store convergence history
+            self.convergence_history.append({
+                'iteration': loop_iter,
+                'massflow_std': float(err),
+                'massflow_change': float(abs(err - prev_err)),
+                'relative_change': float(abs((err - prev_err) / max(err, 1e-6))),
+                'massflow': float(rows[1].total_massflow_no_coolant)
+            })
 
             denom = max(err, 1e-6)
             if abs((err - prev_err) / denom) <= 0.05:
@@ -790,6 +801,85 @@ class CompressorSpool:
             plt.xlabel("Vm [m/s]")
             plt.title(f"Velocity Triangles for Streamline {j}")
             plt.savefig(f"streamline_{j:04d}.png", transparent=False, dpi=150)
+
+    def save_convergence_history(self, filename: str = "convergence_history.jsonl") -> None:
+        """Save convergence history to JSONL file.
+
+        Writes the convergence history collected during solve() to a JSON Lines file,
+        where each line is a JSON object representing one iteration.
+
+        Args:
+            filename: Output JSONL file path (default: "convergence_history.jsonl")
+
+        Returns:
+            None. Writes JSONL file to specified path.
+
+        Example:
+            >>> spool.solve()
+            >>> spool.save_convergence_history("compressor_convergence.jsonl")
+        """
+        import json
+        from pathlib import Path
+
+        output_path = Path(filename)
+        with open(output_path, 'w') as f:
+            for entry in self.convergence_history:
+                f.write(json.dumps(entry) + '\n')
+        print(f"Convergence history saved to {output_path}")
+
+    def plot_convergence(self, save_to_file: Optional[Union[bool, str]] = None) -> None:
+        """Plot convergence history showing massflow error vs iteration.
+
+        Displays a semi-log plot of the massflow standard deviation error across
+        iterations. If convergence history is empty, warns user.
+
+        Args:
+            save_to_file: If True, saves to "convergence.png". If string, saves to that filename.
+                         If None/False, displays plot without saving.
+
+        Returns:
+            None. Either displays plot or saves to file.
+
+        Example:
+            >>> spool.solve()
+            >>> spool.plot_convergence()  # Display plot
+            >>> spool.plot_convergence(save_to_file=True)  # Save to convergence.png
+            >>> spool.plot_convergence(save_to_file="my_convergence.png")  # Save to custom file
+        """
+        if not self.convergence_history:
+            print("Warning: No convergence history available. Run solve() first.")
+            return
+
+        iterations = [entry['iteration'] for entry in self.convergence_history]
+        massflow_std = [entry['massflow_std'] for entry in self.convergence_history]
+        relative_change = [entry['relative_change'] for entry in self.convergence_history]
+
+        fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(10, 8))
+
+        # Plot massflow std deviation
+        ax1.semilogy(iterations, massflow_std, 'o-', linewidth=2, markersize=8)
+        ax1.set_xlabel('Iteration', fontsize=12)
+        ax1.set_ylabel('Massflow Std Dev [kg/s]', fontsize=12)
+        ax1.set_title('Convergence History: Massflow Standard Deviation', fontsize=14, fontweight='bold')
+        ax1.grid(True, alpha=0.3)
+
+        # Plot relative change
+        ax2.semilogy(iterations, relative_change, 's-', color='orange', linewidth=2, markersize=8)
+        ax2.set_xlabel('Iteration', fontsize=12)
+        ax2.set_ylabel('Relative Change', fontsize=12)
+        ax2.set_title('Convergence History: Relative Change', fontsize=14, fontweight='bold')
+        ax2.axhline(y=0.05, color='r', linestyle='--', label='Convergence Threshold (0.05)')
+        ax2.legend()
+        ax2.grid(True, alpha=0.3)
+
+        plt.tight_layout()
+
+        if save_to_file:
+            filename = "convergence.png" if save_to_file is True else str(save_to_file)
+            plt.savefig(filename, dpi=150, bbox_inches='tight')
+            print(f"Convergence plot saved to {filename}")
+        else:
+            plt.show()
 
 
 def outlet_pressure(percents: List[float], inletP0: float, outletP: float) -> npt.NDArray:
