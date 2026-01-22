@@ -14,7 +14,6 @@ import matplotlib.pyplot as plt
 from cantera.composite import Solution
 from scipy.interpolate import interp1d
 from scipy.optimize import minimize_scalar, fmin_slsqp
-from sympy import true
 
 # --- Project-local imports
 from .bladerow import BladeRow, interpolate_streamline_quantities
