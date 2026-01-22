@@ -546,6 +546,22 @@ class CompressorSpool:
     # Export / Plotting
     # ------------------------------
     def export_properties(self, filename: str = "compressor_spool.json") -> None:
+        """Export compressor spool properties and blade row data to JSON file.
+
+        Exports comprehensive compressor design data including blade row properties,
+        streamline coordinates, efficiency metrics, pressure ratios, stage loading,
+        and power calculations for each stage. Useful for post-processing and result
+        archiving.
+
+        Args:
+            filename: Output JSON file path (default: "compressor_spool.json")
+
+        Returns:
+            None. Writes JSON file to specified path.
+
+        Example:
+            >>> spool.export_properties("r35_compressor_results.json")
+        """
         blade_rows = self._all_rows()
         blade_rows_out = []
         degree_of_reaction = []

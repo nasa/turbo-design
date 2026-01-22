@@ -226,6 +226,19 @@ class TurbineSpool:
             row.pitch_to_chord = pitch / mean_chord
 
     def solve_for_static_pressure(self,upstream:BladeRow,row:BladeRow):
+        """Solve for static pressure at blade row exit using isentropic flow relations.
+
+        Uses massflow-area-Mach number relation to find static pressure from known
+        total conditions. Attempts both subsonic and supersonic solutions and selects
+        the subsonic solution.
+
+        Args:
+            upstream: Upstream blade row providing inlet conditions
+            row: Current blade row where static pressure is being solved
+
+        Returns:
+            None. Updates row.M, row.T, and row.P in-place.
+        """
         if row.row_type == RowType.Stator:
             b = row.total_area * row.P0 / np.sqrt(row.T0) * np.sqrt(row.gamma/row.R)
         else:
@@ -476,6 +489,18 @@ class TurbineSpool:
 
     @staticmethod
     def __massflow_std__(blade_rows: List[BladeRow]) -> float:
+        """Calculate massflow standard deviation across blade rows.
+
+        Computes the standard deviation of total massflow (without coolant) across
+        all blade rows. Used as a convergence criterion for pressure balance and
+        angle matching iterations. Warns if deviation exceeds 1.0 kg/s.
+
+        Args:
+            blade_rows: List of all blade rows (inlet, stators, rotors, outlet)
+
+        Returns:
+            float: Two times the standard deviation of massflow [kg/s]
+        """
         total_massflow = []
         massflow_stage = []
         stage_ids = list({row.stage_id for row in blade_rows if row.stage_id >= 0})
@@ -643,6 +668,22 @@ class TurbineSpool:
     # Export / Plotting
     # ------------------------------
     def export_properties(self, filename: str = "turbine_spool.json") -> None:
+        """Export turbine spool properties and blade row data to JSON file.
+
+        Exports comprehensive turbine design data including blade row properties,
+        streamline coordinates, efficiency metrics, degree of reaction, stage loading,
+        and power calculations for each stage. Useful for post-processing and result
+        archiving.
+
+        Args:
+            filename: Output JSON file path (default: "turbine_spool.json")
+
+        Returns:
+            None. Writes JSON file to specified path.
+
+        Example:
+            >>> spool.export_properties("eee_hpt_results.json")
+        """
         blade_rows = self._all_rows()
         blade_rows_out = []
         degree_of_reaction = []

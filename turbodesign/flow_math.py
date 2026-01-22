@@ -7,7 +7,20 @@ from .bladerow import BladeRow
 from .enums import RowType
 
 def compute_streamline_areas(row: BladeRow) -> Tuple[float, npt.NDArray]:
-    """Compute total annulus area and individual streamline cross sections."""
+    """Compute total annulus area and individual streamline cross-sectional areas.
+
+    Calculates the total annulus area and the cross-sectional area for each streamtube
+    based on the radial (r) and axial (x) coordinates of the blade row. Handles both
+    axial machines (constant x) and radial machines (varying x).
+
+    Args:
+        row: BladeRow object containing percent_hub_shroud, x, r coordinates
+
+    Returns:
+        tuple: (total_area, streamline_area) where
+            - total_area (float): Total annulus cross-sectional area [m²]
+            - streamline_area (ndarray): Array of streamtube areas [m²] matching row.r shape
+    """
     total_area = 0.0
     streamline_area = np.zeros(len(row.percent_hub_shroud))
     if len(row.percent_hub_shroud) <= 1:
@@ -30,7 +43,24 @@ def compute_streamline_areas(row: BladeRow) -> Tuple[float, npt.NDArray]:
 
 
 def compute_massflow(row: BladeRow) -> None:
-    """Populate row.massflow, total_massflow, and area fields."""
+    """Calculate massflow distribution across streamlines and populate row attributes.
+
+    Computes the cumulative massflow through each streamtube based on density, meridional
+    velocity, and streamtube cross-sectional areas. Accounts for blockage and optional
+    coolant injection. Updates row attributes in-place.
+
+    Args:
+        row: BladeRow object with Vm, rho, percent_hub_shroud, blockage defined
+
+    Returns:
+        None. Updates the following row attributes in-place:
+            - row.massflow: Cumulative massflow array [kg/s]
+            - row.total_massflow: Total massflow including coolant [kg/s]
+            - row.total_massflow_no_coolant: Massflow without coolant [kg/s]
+            - row.calculated_massflow: Final massflow value [kg/s]
+            - row.total_area: Total annulus area [m²]
+            - row.area: Streamtube areas array [m²]
+    """
     n = len(row.percent_hub_shroud)
     massflow_fraction = np.linspace(0, 1, n)
     total_area, streamline_area = compute_streamline_areas(row)
