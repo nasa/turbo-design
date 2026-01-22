@@ -67,10 +67,10 @@ stator1.stage_id = 0; rotor1.stage_id = 0
 stator2.stage_id = 1; rotor2.stage_id = 1
 
 # Coolant Definition: Use Kelvin and Pascal. Coolant only needs P0, T0, massflow, and Cp
-stator1.coolant = Coolant(T0=T0*0.555556, P0= P0 * 6894.76, massflow_percentage=0,Cp=fluid.cp) 
-rotor1.coolant = Coolant(T0*0.555556, P0 * 6894.76,massflow_percentage=0,Cp=fluid.cp)
-stator2.coolant = Coolant(T0=T0*0.555556, P0= P0 * 6894.76, massflow_percentage=0,Cp=fluid.cp) 
-rotor2.coolant = Coolant(T0*0.555556, P0 * 6894.76,massflow_percentage=0,Cp=fluid.cp)
+stator1.coolant = Coolant(T0=T0*0.555556, P0=P0 * 6894.76, massflow_percentage=0, Cp=fluid.cp)
+rotor1.coolant = Coolant(T0=T0*0.555556, P0=P0 * 6894.76, massflow_percentage=0, Cp=fluid.cp)
+stator2.coolant = Coolant(T0=T0*0.555556, P0=P0 * 6894.76, massflow_percentage=0, Cp=fluid.cp)
+rotor2.coolant = Coolant(T0=T0*0.555556, P0=P0 * 6894.76, massflow_percentage=0, Cp=fluid.cp)
 
 # Add in turning angles
 stator1.beta2_metal = [72,72,72,72,72]        # Angle, hub,mean,tip

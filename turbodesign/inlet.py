@@ -2,7 +2,6 @@ from dataclasses import dataclass, field
 from optparse import Option
 from typing import List, Optional, Union
 
-from sympy import true
 from .enums import RowType
 from .bladerow import BladeRow, compute_gas_constants
 from .arrayfuncs import convert_to_ndarray, safe_interpolate

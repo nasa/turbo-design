@@ -56,8 +56,8 @@ station3.power = power
 outlet = Outlet(num_streamlines=3)
 outlet.init_static(P=P0 / 3.96, percent_radii=[0.5])
 
-station2.coolant = Coolant(fluid, T0=616*0.555556, P0=50.6 * 6894.76, massflow_percentage=0)
-station3.coolant = Coolant(fluid, 622*0.555556, 50.3 * 6894.76, massflow_percentage=0)
+station2.coolant = Coolant(T0=616*0.555556, P0=50.6 * 6894.76, massflow_percentage=0, Cp=fluid.cp)
+station3.coolant = Coolant(T0=622*0.555556, P0=50.3 * 6894.76, massflow_percentage=0, Cp=fluid.cp)
 
 # Add in turning angles
 station2.beta2_metal = [73,73,73] # Angle, hub,mean,tip
