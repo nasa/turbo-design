@@ -243,7 +243,7 @@ print(f"Total power: {spool.total_power()} W")
 
 ## Tutorials
 
-[Turbine Design: EEE High-Pressure Turbine](https://colab.research.google.com/github/nasa/turbo-design/blob/main/examples/EEE-HPT/eee_hpt.ipynb) - Based on GE's 2-stage HPT design [[3]](#ref-eee-hpt). Full CFD results available on https://data.nasa.gov/dataset/eee-2-stage-hpt-cfd-tecplot-results).
+[Turbine Design: EEE High-Pressure Turbine](https://colab.research.google.com/github/nasa/turbo-design/blob/main/examples/EEE-HPT/eee_hpt.ipynb) - Based on GE's 2-stage HPT design [[3]](#ref-eee-hpt). Full CFD results available on https://data.nasa.gov/dataset/eee-2-stage-hpt-cfd-tecplot-results.
 
 [Compressor Design: EEE High-Pressure Compressor](https://colab.research.google.com/github/nasa/turbo-design/blob/main/examples/EEE-HPC/eee_hpc.ipynb)
 
