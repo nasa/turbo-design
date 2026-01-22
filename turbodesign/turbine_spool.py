@@ -3,6 +3,7 @@ from __future__ import annotations
 
 from multiprocessing import Value
 import stat
+from turtle import down
 from typing import Dict, List, Union, Optional
 import json
 
@@ -17,7 +18,8 @@ from sympy import true
 
 # --- Project-local imports
 from .bladerow import BladeRow, interpolate_streamline_quantities
-from .enums import RowType, MassflowConstraint, LossType, PassageType
+from .enums import RowType, LossType
+from .outlet import OutletType
 from .loss.turbine import TD2
 from .passage import Passage
 from .inlet import Inlet
@@ -62,7 +64,6 @@ class TurbineSpool:
     num_streamlines: int
 
     _fluid: Solution
-    massflow_constraint: MassflowConstraint
     _adjust_streamlines: bool
 
     def __init__(
@@ -75,7 +76,6 @@ class TurbineSpool:
         num_streamlines: int = 3,
         fluid: Optional[Solution] = None,
         rpm: float = -1,
-        massflow_constraint: MassflowConstraint = MassflowConstraint.AngleMatch,
     ) -> None:
         """Initialize a (turbine) spool
 
@@ -88,18 +88,16 @@ class TurbineSpool:
             num_streamlines: number of streamlines used through the meridional passage
             fluid: cantera gas solution; defaults to air.yaml if None
             rpm: RPM for the entire spool. Individual rows can override later.
-            massflow_constraint: AngleMatch (adjust turning) or PressureBalance (radial eq).
         """
         self.passage = passage
         self.massflow = massflow
         self.num_streamlines = num_streamlines
         self._fluid = fluid if fluid is not None else Solution("air.yaml")
-        self.massflow_constraint = massflow_constraint
         self.rpm = rpm
 
         self.inlet = inlet
         self.outlet = outlet
-        if not self.outlet.static_defined:
+        if self.outlet.outlet_type != OutletType.static_pressure:
             assert "Outlet needs to be statically defined for turbine calculation"
         self.rows = rows
         self.t_streamline = np.zeros((10,), dtype=float)
@@ -255,7 +253,7 @@ class TurbineSpool:
     def initialize(self) -> None:
         """Initialize massflow and thermodynamic state through rows (turbines)."""
         blade_rows = self._all_rows()
-        Is_static_defined = self.outlet.static_defined
+        Is_static_defined = (self.outlet.outlet_type == OutletType.static_pressure) or (self.outlet.outlet_type == OutletType.massflow_static_pressure)
 
         # Inlet
         W0 = self.massflow
@@ -353,28 +351,13 @@ class TurbineSpool:
         self.initialize_streamlines()
         self.initialize()
 
-        if self.massflow_constraint == MassflowConstraint.AngleMatch:
+        if self.outlet.outlet_type == OutletType.massflow_static_pressure:
+            print("Using angle matching mode: blade exit angles will be adjusted to match specified massflow")
             self._angle_match()
-        elif self.massflow_constraint == MassflowConstraint.PressureBalance:
+        else:
+            print("Using pressure balance mode: blade exit angles are fixed, static pressures will be adjusted")
             self._balance_pressure()
 
-    def solve_balance_pressure(self) -> None:
-        """Explicit pressure-balance solve (angles fixed)."""
-        prev = self.massflow_constraint
-        self.massflow_constraint = MassflowConstraint.PressureBalance
-        try:
-            self.solve()
-        finally:
-            self.massflow_constraint = prev
-
-    def solve_angle_match(self) -> None:
-        """Explicit angle-matching solve (angles may change)."""
-        prev = self.massflow_constraint
-        self.massflow_constraint = MassflowConstraint.AngleMatch
-        try:
-            self.solve()
-        finally:
-            self.massflow_constraint = prev
 
     def total_power(self) -> float:
         """Return total turbine power extracted (sum over rotor rows)."""
@@ -415,8 +398,11 @@ class TurbineSpool:
         mdot = float(self.massflow if massflow_guess is None else massflow_guess)
         mdot = float(np.clip(mdot, lower, upper))
 
-        prev_constraint = self.massflow_constraint
-        self.massflow_constraint = MassflowConstraint.PressureBalance
+        # Temporarily store original outlet type and ensure pressure balance mode
+        prev_outlet_type = self.outlet.outlet_type
+        prev_massflow = getattr(self.outlet, 'total_massflow', None)
+        self.outlet.outlet_type = OutletType.static_pressure
+
         try:
             for _ in range(max_iter):
                 # Important: prevent a previous computed `row.power` from being treated as an input
@@ -444,46 +430,49 @@ class TurbineSpool:
 
             return float(getattr(self._all_rows()[1], "total_massflow_no_coolant", self.massflow) or self.massflow), self.total_power()
         finally:
-            self.massflow_constraint = prev_constraint
+            self.outlet.outlet_type = prev_outlet_type
+            if prev_massflow is not None:
+                self.outlet.total_massflow = prev_massflow
 
     # ------------------------------
     # Massflow matching/balancing
     # ------------------------------
     def _angle_match(self) -> None:
         """Match massflow between streamtubes by tweaking exit angles."""
-        blade_rows = self._all_rows()
+        rows = self._all_rows()
+        massflow_target = np.linspace(0,rows[-1].total_massflow,self.num_streamlines)
         for _ in range(3):
-            for i, row in enumerate(blade_rows):
-                upstream = blade_rows[i - 1] if i > 0 else blade_rows[i]
-                downstream = blade_rows[i + 1] if i < len(blade_rows) - 1 else None
+            for i in range(1,len(rows)-1):
+                upstream = rows[i - 1] if i > 0 else rows[i]
+                downstream = rows[i + 1] if i < len(rows) - 1 else None
 
-                if row.row_type == RowType.Stator:
+                if rows[i].row_type == RowType.Stator:
                     bounds = [0, 80]
-                elif row.row_type == RowType.Rotor:
+                elif rows[i].row_type == RowType.Rotor:
                     bounds = [-80, 0]
                 else:
                     bounds = [0, 0]
 
-                if row.row_type != RowType.Inlet:
-                    for j in range(1, self.num_streamlines):
-                        res = minimize_scalar(
-                            massflow_loss_function,
-                            bounds=bounds,
-                            args=(j, row, upstream, downstream),
-                            tol=1e-3,
-                            method="bounded",
-                        )
-                        if row.row_type == RowType.Rotor:
-                            row.beta2[j] = np.radians(res.x)
-                            row.beta2[0] = 1 / (len(row.beta2) - 1) * row.beta2[1:].sum()
-                        elif row.row_type == RowType.Stator:
-                            row.alpha2[j] = np.radians(res.x)
-                            row.alpha2[0] = 1 / (len(row.alpha2) - 1) * row.alpha2[1:].sum()
-                    compute_gas_constants(upstream, self.fluid)
-                    compute_gas_constants(row, self.fluid)
-
-            adjust_streamlines(blade_rows, self.passage)
-        compute_reynolds(blade_rows, self.passage)
+                for j in range(1, self.num_streamlines):
+                    res = minimize_scalar(
+                        massflow_loss_function,
+                        bounds=bounds,
+                        args=(j, rows[i], upstream, massflow_target[j], downstream),
+                        tol=1e-4,
+                        method="bounded",
+                    )
+                    if rows[i].row_type == RowType.Rotor:
+                        rows[i].beta2[j] = np.radians(res.x)
+                        rows[i].beta2[0] = 1 / (len(rows[i].beta2) - 1) * rows[i].beta2[1:].sum()
+                    elif rows[i].row_type == RowType.Stator:
+                        rows[i].alpha2[j] = np.radians(res.x)
+                        rows[i].alpha2[0] = 1 / (len(rows[i].alpha2) - 1) * rows[i].alpha2[1:].sum()
+                compute_gas_constants(upstream, self.fluid)
+                compute_gas_constants(rows[i], self.fluid)
+            
+            if self.adjust_streamlines:
+                adjust_streamlines(rows, self.passage)
+        compute_reynolds(rows, self.passage)
 
     @staticmethod
     def __massflow_std__(blade_rows: List[BladeRow]) -> float:
@@ -527,7 +516,7 @@ class TurbineSpool:
             Returns:
                 float: _description_
             """
-            static_defined = self.outlet.static_defined
+            static_defined = (self.outlet.outlet_type == OutletType.static_pressure)
             P_exit = P_or_P0
             for j in range(self.num_streamlines):
                 Ps_guess = step_pressures(x0, P0[j], P_exit[j])
@@ -549,20 +538,20 @@ class TurbineSpool:
                         for _ in range(2):
                             if row.row_type == RowType.Rotor:
                                 rotor_calc(row, upstream, 
-                                        calculate_vm=True,static_defined=static_defined)
+                                        calculate_vm=True,outlet_type=OutletType.static_pressure if static_defined else OutletType.total_pressure)
                                 if self.num_streamlines > 1:
                                     row = radeq(row, upstream, downstream)
                                     compute_gas_constants(row, self.fluid)
                                     rotor_calc(row, upstream, 
-                                            calculate_vm=False,static_defined=static_defined)
+                                            calculate_vm=False,outlet_type=OutletType.static_pressure if static_defined else OutletType.total_pressure)
                             elif row.row_type == RowType.Stator:
                                 stator_calc(row, upstream, downstream, 
-                                            calculate_vm=True,static_defined=static_defined)
+                                            calculate_vm=True,outlet_type=OutletType.static_pressure if static_defined else OutletType.total_pressure)
                                 if self.num_streamlines > 1:
                                     row = radeq(row, upstream, downstream)
                                     compute_gas_constants(row, self.fluid)
                                     stator_calc(row, upstream, downstream, 
-                                                calculate_vm=False,static_defined=static_defined)
+                                                calculate_vm=False,outlet_type=OutletType.static_pressure if static_defined else OutletType.total_pressure)
                             compute_gas_constants(row, self.fluid)
                             compute_massflow(row)
                             compute_power(row, upstream)
@@ -603,7 +592,7 @@ class TurbineSpool:
             pressure_ratio_ranges.append(bounds)
             pressure_ratio_guess.append(float(np.mean(bounds)))
 
-        if not self.outlet.static_defined:
+        if self.outlet.outlet_type != OutletType.static_pressure:
             raise ValueError("For turbine calculations, please define outlet using init_static")
         
         print("Looping to converge massflow")
@@ -887,16 +876,14 @@ class TurbineSpool:
 # ------------------------------
 # Helper functions (kept module-level)
 # ------------------------------
-
-
-
 def massflow_loss_function(
     exit_angle: float,
     index: int,
     row: BladeRow,
     upstream: BladeRow,
+    massflow_target:float,
     downstream: Optional[BladeRow] = None,
-    fluid: Optional[Solution] = None,
+    fluid: Optional[Solution] = None
 ) -> float:
     if row.row_type == RowType.Inlet:
         row.Yp = 0
@@ -909,8 +896,8 @@ def massflow_loss_function(
             elif row.row_type == RowType.Stator:
                 row.alpha2[index] = np.radians(exit_angle)
                 stator_calc(row, upstream, downstream)
-            upstream = compute_gas_constants(upstream, fluid)
-            row = compute_gas_constants(row, fluid)
+            compute_gas_constants(upstream, fluid)
+            compute_gas_constants(row, fluid)
         elif row.loss_function.loss_type == LossType.Enthalpy:  # type: ignore[union-attr]
             if row.row_type == RowType.Rotor:
                 row.Yp = 0
@@ -944,9 +931,7 @@ def massflow_loss_function(
         T03_is = T3_is * (1 + (row.gamma - 1) / 2 * (row.V / a) ** 2)
         row.eta_total = (upstream.T0.mean() - row.T0.mean()) / (upstream.T0.mean() - T03_is.mean())
 
-    # drive radial distribution of massflow linearly by index
-    target = row.total_massflow * index / (len(row.massflow) - 1)
-    return float(np.abs(target - row.massflow[index]))
+    return float(np.abs(massflow_target - row.massflow[index]))
 
 
 def step_pressures(percents: List[float], inletP0: float, outletP: float) -> npt.NDArray:

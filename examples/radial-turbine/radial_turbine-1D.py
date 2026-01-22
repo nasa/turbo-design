@@ -86,7 +86,6 @@ from typing import Tuple
 from turbodesign import PassageType
 from turbodesign.row_factory import make_rotor_row, make_stator_row
 from turbodesign import TurbineSpool, Inlet, RowType, BladeRow, Passage, Outlet
-from turbodesign.enums import MassflowConstraint
 from turbodesign.coolant import Coolant
 from turbodesign.loss import FixedPressureLoss
 from cantera import Solution
@@ -177,8 +176,7 @@ spool = TurbineSpool(
                 fluid=None)
 
 spool.adjust_streamlines = False
-spool.massflow_constraint = MassflowConstraint.PressureBalance # type: ignore
-    
+
 spool.solve() # This also initializes streamlines
 spool.plot_velocity_triangles()
 spool.export_properties("output.json")

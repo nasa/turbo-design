@@ -8,16 +8,16 @@ from typing import List
 from turbodesign import PassageType
 from turbodesign.row_factory import make_rotor_row, make_stator_row
 from turbodesign import TurbineSpool, Inlet, RowType, BladeRow, Passage, Outlet
-from turbodesign.enums import MassflowConstraint
 from turbodesign.coolant import Coolant
 from turbodesign.loss import FixedPressureLoss
-import numpy as np 
+import numpy as np
 from cantera import Solution
 import pickle, math
 import numpy.typing as npt
 import matplotlib.pyplot as plt
 from pyturbo.helper import line2D
 from scipy.interpolate import interp1d
+from pathlib import Path
 
 # Convert to meters 
 def convert_to_meters(array:List[npt.NDArray]):
@@ -62,8 +62,9 @@ def plot_profile(blade):
     plt.axis('scaled')
     plt.show()
     
-hub_shroud = pickle.load(open('examples/EEE/hub_shroud.pkl','rb'))       # Units are in in inches
-stator_rotor = pickle.load(open('examples/EEE/stator_rotor.pkl','rb'))   
+script_dir = Path(__file__).resolve().parent
+hub_shroud = pickle.load(open(str(script_dir.parent / 'hub_shroud.pkl'),'rb'))       # Units are in in inches
+stator_rotor = pickle.load(open(str(script_dir.parent / 'stator_rotor.pkl'),'rb'))   
 
 hub = hub_shroud['Hub']*0.0254; shroud = hub_shroud['Shroud']*0.0254
 hub2 = shroud*0
@@ -166,7 +167,6 @@ spool = TurbineSpool(passage=passage,
             rpm=Design_RPM,
             num_streamlines=3)
 spool.fluid = fluid
-spool.massflow_constraint = MassflowConstraint.PressureBalance # Fixes the exit angle and changes degree of reaction
 # spool.plot_geometry()
 spool.solve() # This also initializes streamlines
 spool.export_properties("examples/EEE/EEE-HPT.json")

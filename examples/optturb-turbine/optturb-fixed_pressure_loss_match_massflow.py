@@ -9,7 +9,6 @@
 from turbodesign import PassageType
 from turbodesign.row_factory import make_rotor_row, make_stator_row
 from turbodesign import TurbineSpool, Inlet, RowType, BladeRow, Passage, Outlet
-from turbodesign.enums import MassflowConstraint
 from turbodesign.coolant import Coolant
 from turbodesign.loss import FixedPressureLoss
 import numpy as np 
@@ -53,7 +52,7 @@ inlet.init_total(
     percent_radii=[0.5],
 )
 outlet = Outlet(num_streamlines=3)
-outlet.init_static(P=P0 / 3.96, percent_radii=[0.5])
+outlet.init_static(P=P0 / 3.96, percent_radii=[0.5], massflow=75.33)
 
 #%% Define Blade Rows 
 # Axial location is a percentage along the hub where row exit is defined
@@ -83,7 +82,6 @@ spool = TurbineSpool(
     num_streamlines=3,
 )
 spool.fluid = fluid
-spool.massflow_constraint = MassflowConstraint.AngleMatch # changes the exit angle
 # spool.plot_geometry()
 spool.solve() # This also initializes streamlines
 spool.export_properties("optturb.json")

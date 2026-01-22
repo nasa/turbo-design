@@ -8,12 +8,14 @@ from pyiges.geometry import RationalBSplineCurve  # <-- import the class
 from scipy.interpolate import PchipInterpolator
 from scipy.signal import savgol_filter
 from scipy.interpolate import splprep, splev
+from pathlib import Path
 
 def Process_HubShroud_IGES():
     """Exports hub and shroud curves in inches
     """
-    iges_case = pyiges.read('geometry/case.igs')
-    iges_hub = pyiges.read('geometry/hub.igs')
+    script_dir = Path(__file__).resolve().parent
+    iges_case = pyiges.read(str(script_dir / 'geometry/case.igs'))
+    iges_hub = pyiges.read(str(script_dir / 'geometry/hub.igs'))
 
     # print an invidiual entity (boring)
     curve = iges_case.items[0].to_geomdl()
@@ -22,25 +24,29 @@ def Process_HubShroud_IGES():
     curve = iges_hub.items[0].to_geomdl()
     curve.delta=0.001
     hub_pts = np.array(curve.evalpts)
-    os.makedirs('csv',exist_ok=True)
+    csv_dir = script_dir / 'csv'
+    csv_dir.mkdir(exist_ok=True)
 
-    np.savetxt('csv/shroud.csv',case_pts,fmt="%f",delimiter=',',header='x,r,theta')
-    np.savetxt('csv/hub.csv',hub_pts,fmt="%f",delimiter=',',header='x,r,theta')
+    np.savetxt(str(csv_dir / 'shroud.csv'),case_pts,fmt="%f",delimiter=',',header='x,r,theta')
+    np.savetxt(str(csv_dir / 'hub.csv'),hub_pts,fmt="%f",delimiter=',',header='x,r,theta')
 
     plt.figure(num=0,figsize=(10,6))
     plt.plot(case_pts[:,0],case_pts[:,1])
     plt.plot(hub_pts[:,0],hub_pts[:,1])
     plt.axis('scaled')
-    plt.savefig('flowpath.png',transparent=None,dpi=300)
+    plt.savefig(str(script_dir / 'flowpath.png'),transparent=None,dpi=300)
     # Hub and Shroud are in inches
-    pickle.dump({'Hub':hub_pts,'Shroud':case_pts},open('hub_shroud.pkl','wb'))
+    pickle.dump({'Hub':hub_pts,'Shroud':case_pts},open(str(script_dir / 'hub_shroud.pkl'),'wb'))
 
 def ProcessBlades_IGES():
     """Exports stator and rotor curves in inches
     """
+    script_dir = Path(__file__).resolve().parent
+    csv_dir = script_dir / 'csv'
+    csv_dir.mkdir(exist_ok=True)
+
     def extract_curves(name:str, iges:pyiges.Iges) -> List[npt.NDArray]:
         curve_delta=0.001
-        os.makedirs('csv', exist_ok=True)
         sections = list() # These are the cuts at different radius
         for i in range(len(iges.items)): # these are the cut section
             if isinstance(iges.items[i], RationalBSplineCurve):
@@ -48,47 +54,47 @@ def ProcessBlades_IGES():
                 curve.delta=curve_delta
                 points = np.array(curve.evalpts)
                 sections.append(points)
-                np.savetxt(f'csv/{name}.csv',points,fmt="%f",delimiter=',',header='x,rtheta,r')
+                np.savetxt(str(csv_dir / f'{name}.csv'),points,fmt="%f",delimiter=',',header='x,rtheta,r')
         return sections
             
-        
-    # load an example impeller
-    igv = extract_curves("igv", pyiges.read('geometry/compr_igv.igs'))
-    rotor1 = extract_curves("rotor1", pyiges.read('geometry/compr_rotor1.igs'))
-    stator1 = extract_curves("stator1", pyiges.read('geometry/compr_stator1.igs'))
 
-    rotor2 = extract_curves("rotor2", pyiges.read('geometry/compr_rotor2.igs'))
-    stator2 = extract_curves("stator2", pyiges.read('geometry/compr_stator2.igs'))
-    
-    rotor3 = extract_curves("rotor3", pyiges.read('geometry/compr_rotor3.igs'))
-    stator3 = extract_curves("stator3", pyiges.read('geometry/compr_stator3.igs'))
-    
-    rotor4 = extract_curves("rotor4", pyiges.read('geometry/compr_rotor4.igs'))
-    stator4 = extract_curves("stator4", pyiges.read('geometry/compr_stator4.igs'))
-    
-    rotor5 = extract_curves("rotor5", pyiges.read('geometry/compr_rotor5.igs'))
-    stator5 = extract_curves("stator5", pyiges.read('geometry/compr_stator5.igs'))
-    
-    rotor6 = extract_curves("rotor6", pyiges.read('geometry/compr_rotor6.igs'))
-    stator6 = extract_curves("stator6", pyiges.read('geometry/compr_stator6.igs'))
-    
-    rotor7 = extract_curves("rotor7", pyiges.read('geometry/compr_rotor7.igs'))
-    stator7 = extract_curves("stator7", pyiges.read('geometry/compr_stator7.igs'))
-    
-    rotor8 = extract_curves("rotor8", pyiges.read('geometry/compr_rotor8.igs'))
-    stator8 = extract_curves("stator8", pyiges.read('geometry/compr_stator8.igs'))
-    
-    rotor9 = extract_curves("rotor9", pyiges.read('geometry/compr_rotor9.igs'))
-    stator9 = extract_curves("stator9", pyiges.read('geometry/compr_stator9.igs'))
-    
-    rotor10 = extract_curves("rotor10", pyiges.read('geometry/compr_rotor10.igs'))
-    stator10 = extract_curves("stator10", pyiges.read('geometry/compr_stator10.igs'))
-    
+    # load an example impeller
+    igv = extract_curves("igv", pyiges.read(str(script_dir / 'geometry/compr_igv.igs')))
+    rotor1 = extract_curves("rotor1", pyiges.read(str(script_dir / 'geometry/compr_rotor1.igs')))
+    stator1 = extract_curves("stator1", pyiges.read(str(script_dir / 'geometry/compr_stator1.igs')))
+
+    rotor2 = extract_curves("rotor2", pyiges.read(str(script_dir / 'geometry/compr_rotor2.igs')))
+    stator2 = extract_curves("stator2", pyiges.read(str(script_dir / 'geometry/compr_stator2.igs')))
+
+    rotor3 = extract_curves("rotor3", pyiges.read(str(script_dir / 'geometry/compr_rotor3.igs')))
+    stator3 = extract_curves("stator3", pyiges.read(str(script_dir / 'geometry/compr_stator3.igs')))
+
+    rotor4 = extract_curves("rotor4", pyiges.read(str(script_dir / 'geometry/compr_rotor4.igs')))
+    stator4 = extract_curves("stator4", pyiges.read(str(script_dir / 'geometry/compr_stator4.igs')))
+
+    rotor5 = extract_curves("rotor5", pyiges.read(str(script_dir / 'geometry/compr_rotor5.igs')))
+    stator5 = extract_curves("stator5", pyiges.read(str(script_dir / 'geometry/compr_stator5.igs')))
+
+    rotor6 = extract_curves("rotor6", pyiges.read(str(script_dir / 'geometry/compr_rotor6.igs')))
+    stator6 = extract_curves("stator6", pyiges.read(str(script_dir / 'geometry/compr_stator6.igs')))
+
+    rotor7 = extract_curves("rotor7", pyiges.read(str(script_dir / 'geometry/compr_rotor7.igs')))
+    stator7 = extract_curves("stator7", pyiges.read(str(script_dir / 'geometry/compr_stator7.igs')))
+
+    rotor8 = extract_curves("rotor8", pyiges.read(str(script_dir / 'geometry/compr_rotor8.igs')))
+    stator8 = extract_curves("stator8", pyiges.read(str(script_dir / 'geometry/compr_stator8.igs')))
+
+    rotor9 = extract_curves("rotor9", pyiges.read(str(script_dir / 'geometry/compr_rotor9.igs')))
+    stator9 = extract_curves("stator9", pyiges.read(str(script_dir / 'geometry/compr_stator9.igs')))
+
+    rotor10 = extract_curves("rotor10", pyiges.read(str(script_dir / 'geometry/compr_rotor10.igs')))
+    stator10 = extract_curves("stator10", pyiges.read(str(script_dir / 'geometry/compr_stator10.igs')))
+
     pickle.dump([igv,rotor1,stator1,rotor2,stator2,
                  rotor3,stator3,rotor4,stator4,
                  rotor5,stator5,rotor6,stator6,
                  rotor7,stator7,rotor8,stator8,
-                 rotor9,stator9,rotor10,stator10],open('rotor_stator.pkl','wb'))
+                 rotor9,stator9,rotor10,stator10],open(str(script_dir / 'rotor_stator.pkl'),'wb'))
 
 def fit_blade(hub:npt.NDArray,shroud:npt.NDArray,blades:List[Tuple[npt.NDArray,npt.NDArray]]):
     func_hub = PchipInterpolator(hub[:,0],hub[:,1]*0.99)
@@ -230,6 +236,7 @@ def split_airfoil_by_angle_distance(coords, npts=100, window_length=11, polyorde
     return suction, pressure
 
 def plot_blade(ss:npt.NDArray,ps:npt.NDArray,name:str):
+    script_dir = Path(__file__).resolve().parent
     plt.figure(num=0,clear=True,figsize=(10,6))
     plt.plot(ss[:,0],ss[:,1],'-',label='Suction Side')
     plt.plot(ps[:,0],ps[:,1],'-',label='Pressure Side')
@@ -239,17 +246,19 @@ def plot_blade(ss:npt.NDArray,ps:npt.NDArray,name:str):
     plt.ylabel('y')
     plt.title(f'{name}')
     plt.axis('scaled')
-    plt.savefig(f'{name}.png',dpi=300)
+    plt.savefig(str(script_dir / f'{name}.png'),dpi=300)
     
     
 if __name__ == "__main__":
+    script_dir = Path(__file__).resolve().parent
+
     Process_HubShroud_IGES()
     ProcessBlades_IGES()
-    
+
     rotor_stator = []
-    with open('rotor_stator.pkl','rb') as fp:
+    with open(str(script_dir / 'rotor_stator.pkl'),'rb') as fp:
         rotor_stator = pickle.load(fp)
-    with open('hub_shroud.pkl','rb') as fp:
+    with open(str(script_dir / 'hub_shroud.pkl'),'rb') as fp:
         hub_shroud = pickle.load(fp)
 
     processed_data = []
@@ -272,10 +281,10 @@ if __name__ == "__main__":
         print(f'Blade-{i} has {nsections} sections')
         processed_data.append((ss, ps))
 
-    hub_shroud = pickle.load(open('hub_shroud.pkl','rb'))
+    hub_shroud = pickle.load(open(str(script_dir / 'hub_shroud.pkl'),'rb'))
     hub = resample_curve(hub_shroud['Hub'],200) * 25.4          # Convert in to mm
     shroud = resample_curve(hub_shroud['Shroud'],200) * 25.4
-    
+
     labels = ['IGV',
               'R1','S1','R2','S2',
               'R3','S3','R4','S4',
@@ -283,7 +292,7 @@ if __name__ == "__main__":
               'R7','S7','R8','S8',
               'R9','S9','R10','S10']
     colors = distinct_hsv_colors(len(labels), seed=42)
-    
+
     plt.figure(num=1)
     for i, sections in enumerate(processed_data):
         first = True
@@ -303,7 +312,7 @@ if __name__ == "__main__":
     plt.ylabel('rtheta')
     plt.axis('equal')
     plt.show()
-    
+
     plt.figure(num=2)
     plt.plot(hub[:,0],hub[:,1])
     plt.plot(shroud[:,0],shroud[:,1])
@@ -329,8 +338,8 @@ if __name__ == "__main__":
 
     # Lets fit the blade
     fit_blade(hub,shroud,processed_data)
-    
-    # Re-Plot 
+
+    # Re-Plot
     plt.figure(num=3)
     plt.plot(hub[:,0],hub[:,1])
     plt.plot(shroud[:,0],shroud[:,1])
@@ -353,9 +362,9 @@ if __name__ == "__main__":
     plt.axis('equal')
     plt.title('Blades fitted to the passage')
     plt.show()
-    
+
     data = {}
     data['hub'] = hub
     data['shroud'] = shroud
     data['blades'] = processed_data
-    pickle.dump(data,open('e3_hpc_processed.pkl','wb'))
+    pickle.dump(data,open(str(script_dir / 'e3_hpc_processed.pkl'),'wb'))

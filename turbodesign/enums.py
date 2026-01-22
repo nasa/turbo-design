@@ -8,16 +8,12 @@ class LossType(Enum):
 
 class RowType(Enum):
     # Similar to a stator but for compressor calculations there is no Total Pressure rise
-    IGV = 0         
+    IGV = 0
     Stator = 1
-    Rotor = 2 
+    Rotor = 2
     CounterRotating = 2
     Inlet = 3
     Outlet = 4
-
-class MassflowConstraint(Enum):
-    AngleMatch = 1 # Changes the exit angles to match the massflow
-    PressureBalance = 2 # Keeps the exit angle but balances the massflow between the stages as best it can. This will affect the static pressure at the stage exit
 
 class PowerType(Enum):
     """The code for BladeRow will assume a PowerType automatically depending on what you specify. If you specify the blade row to have P0_P which is the stator inlet total pressure to rotor exit static pressure then that will be used to calculate all the quantities.

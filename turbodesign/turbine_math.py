@@ -6,8 +6,9 @@ from .isentropic import IsenP, IsenT
 from turbodesign.loss import losstype
 from .bladerow import BladeRow, compute_gas_constants
 from .enums import RowType, LossType
+from .outlet import OutletType
 from scipy.integrate import trapezoid
-from scipy.optimize import minimize 
+from scipy.optimize import minimize
 from .passage import Passage
 from .isentropic import IsenP
 from .flow_math import compute_massflow, compute_streamline_areas, compute_power
@@ -108,21 +109,21 @@ def compute_quantities(row:BladeRow,upstream:BladeRow):
         row.T0R = row.T + row.W**2 / (2*row.Cp)
         row.P0R = row.P*(row.T0R/row.T)**((row.gamma)/(row.gamma-1))
    
-def stator_calc(row:BladeRow,upstream:BladeRow,downstream:Optional[BladeRow]=None,calculate_vm:bool=True, static_defined:bool=False):
+def stator_calc(row:BladeRow,upstream:BladeRow,downstream:Optional[BladeRow]=None,calculate_vm:bool=True, outlet_type:OutletType=OutletType.static_pressure):
     """Given P0, T0, P, alpha2 of stator calculate all other quantities
 
     Usage:
         Set row.P0 = upstream.P0 - any pressure loss
         row.T0 = upstream.T0 - any cooling
-        row.P = row.rp*(row.P0 - rotor.P) + rotor.P 
-        Set alpha2 
-        
+        row.P = row.rp*(row.P0 - rotor.P) + rotor.P
+        Set alpha2
+
     Args:
         row (BladeRow): Stator Row
-        upstream (BladeRow): Stator or Rotor Row 
+        upstream (BladeRow): Stator or Rotor Row
         downstream (BladeRow): Stator or Rotor Row. Defaults to None
         calculate_vm (bool): True to calculate the meridional velocity. False, do not calculate this and let radeq calculate it
-        static_defined (bool): True if static conditions defined at the outlet. False if total conditions defined at outlet
+        outlet_type (OutletType): OutletType.static_pressure if static conditions defined at outlet, OutletType.total_pressure if total conditions defined
     """
  
     # Static Pressure is assumed
@@ -177,14 +178,14 @@ def stator_calc(row:BladeRow,upstream:BladeRow,downstream:Optional[BladeRow]=Non
     row.Wt = row.Vt-row.U
     row.P0_stator_inlet = upstream.P0
 
-def rotor_calc(row:BladeRow,upstream:BladeRow,calculate_vm:bool=True,static_defined:bool=False):
-    """Calculates quantities given beta2 
+def rotor_calc(row:BladeRow,upstream:BladeRow,calculate_vm:bool=True,outlet_type:OutletType=OutletType.static_pressure):
+    """Calculates quantities given beta2
 
     Args:
         row (BladeRow): Rotor Row
         upstream (BladeRow): Stator Row or Rotor Row
         calculate_vm (bool): True to calculate the meridional velocity. False, do not calculate this and let radeq calculate it
-        static_defined (bool): True if static conditions defined at the outlet. False if total conditions defined at outlet
+        outlet_type (OutletType): OutletType.static_pressure if static conditions defined at outlet, OutletType.total_pressure if total conditions defined
     """
     def _log_rotor_failure(reason:str):
         def _fmt(val):

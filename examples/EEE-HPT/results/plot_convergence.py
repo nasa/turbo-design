@@ -1,9 +1,10 @@
-import matplotlib.pyplot as plt 
-import os.path as osp 
+import matplotlib.pyplot as plt
+import os.path as osp
 import glob
 import re
-import numpy as np 
-import pandas as pd 
+import numpy as np
+import pandas as pd
+from pathlib import Path 
 
 
 def split_floats(text):
@@ -17,6 +18,7 @@ def split_floats(text):
     return [float(num) for num in numbers]
 
 def read_convergence(file:str):
+    script_dir = Path(file).resolve().parent
     convergence=list()
     with open(file,'r') as f:
         for line in f:
@@ -32,7 +34,7 @@ def read_convergence(file:str):
     plot_dir = osp.dirname(file)
     iterations = df.iloc[:, 0]
 
-    # Check the plots 
+    # Check the plots
     for h in headers: # type: ignore
         plt.figure(num=1,clear=True,figsize=(10,5))
         plt.plot(iterations, df[h], marker='o', label=h)
@@ -42,8 +44,8 @@ def read_convergence(file:str):
         plt.grid(True)
         plt.yscale('log')
         h = h.replace('*','-')
-        plt.savefig(f'convergence-{h}.png',dpi=150)
-    
+        plt.savefig(str(script_dir / f'convergence-{h}.png'),dpi=150)
+
     # Determine convergence by looking at the last 1000 iterations, check mean and standard deviation
     last_iterations = int(1000/20)
     rho = df['RHO'].iloc[-last_iterations:]
@@ -57,11 +59,12 @@ def read_convergence(file:str):
                 (rhow.mean(),rhow.std()),
                 (rhoe.mean(),rhoe.std())])
     if np.max(mean_std[:,0])<1E-4 and np.max(mean_std[:,1])<1E-4:
-        with open('converged.txt', 'w') as f: # Just create the file, do nothing
+        with open(str(script_dir / 'converged.txt'), 'w') as f: # Just create the file, do nothing
             pass  
     
 
 if __name__=="__main__":
-    overall_files = list(glob.glob('*.OVERALL'))
-    convergene_files = list(glob.glob('*.CONVERGENCE'))
+    script_dir = Path(__file__).resolve().parent
+    overall_files = list(glob.glob(str(script_dir / '*.OVERALL')))
+    convergene_files = list(glob.glob(str(script_dir / '*.CONVERGENCE')))
     read_convergence(convergene_files[0])

@@ -1,6 +1,7 @@
 from typing import List
 import matplotlib.pyplot as plt
 import numpy.typing as npt
+from pathlib import Path
 
 def plot_xz(hub:npt.NDArray,shroud:npt.NDArray,blades:List[npt.NDArray],plot_name:str=''):
     """_summary_
@@ -39,5 +40,6 @@ def plot_xz(hub:npt.NDArray,shroud:npt.NDArray,blades:List[npt.NDArray],plot_nam
     plt.legend()
     plt.grid(True)
     plt.axis('equal')  # Equal aspect ratio
-    plt.savefig(f'XZ - {plot_name}.jpg',dpi=300)
+    script_dir = Path(__file__).resolve().parent
+    plt.savefig(str(script_dir / f'XZ - {plot_name}.jpg'),dpi=300)
     plt.show()

@@ -10,7 +10,6 @@ import sys
 from turbodesign import PassageType
 from turbodesign.row_factory import make_rotor_row, make_stator_row
 from turbodesign import TurbineSpool, Inlet, RowType, BladeRow, Passage, Outlet
-from turbodesign.enums import MassflowConstraint
 from turbodesign.coolant import Coolant
 from turbodesign.loss import FixedPressureLoss
 import numpy as np 
@@ -78,7 +77,6 @@ spool = TurbineSpool(passage=passage,
             rpm=Design_RPM,
             num_streamlines=3)
 spool.fluid = fluid
-spool.massflow_constraint = MassflowConstraint.PressureBalance # Fixes the exit angle and changes degree of reaction
 # spool.plot_geometry()
 spool.solve() # This also initializes streamlines
 spool.export_properties("optturb.json")

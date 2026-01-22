@@ -6,7 +6,6 @@ Rotor 35 1 stage HPC
 
 from turbodesign import TurbineSpool, Inlet, RowType, BladeRow, Passage, Outlet, PassageType
 from turbodesign.row_factory import make_blade_row
-from turbodesign.enums import MassflowConstraint
 from turbodesign import read_agf
 from turbodesign.loss.fixedpressureloss import FixedPressureLoss
 from turbodesign.deviation.fixed_deviation import FixedDeviation
@@ -84,10 +83,10 @@ spool = TurbineSpool(
             fluid=fluid)
 
 
-spool.massflow_constraint = MassflowConstraint.PressureBalance # Fixes the exit angle and changes degree of reaction
 # spool.plot_geometry()
 spool.adjust_streamlines = False
 spool.solve() # This also initializes streamlines
-spool.export_properties("R35-Results.json")
+script_dir = Path(__file__).resolve().parent
+spool.export_properties(str(script_dir / "R35-Results.json"))
 spool.plot()
 spool.plot_velocity_triangles()

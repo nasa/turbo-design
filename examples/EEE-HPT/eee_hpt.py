@@ -1,6 +1,5 @@
 from turbodesign import TurbineSpool, Inlet, RowType, BladeRow, Passage, Outlet, PassageType, Coolant
 from turbodesign.row_factory import make_rotor_row, make_stator_row
-from turbodesign.enums import MassflowConstraint
 from turbodesign.loss.fixedpressureloss import FixedPressureLoss
 import numpy as np
 from cantera import Solution
@@ -9,6 +8,9 @@ from pathlib import Path
 from scipy.interpolate import PchipInterpolator
 # Geometry Import 
 from get_ss_ps import split_airfoil_by_angle_distance, resample_curve, plot_blade
+
+# Set this to false to use the default blade angles; True means the blade angles are determined by matching the massflow 
+FindBladeAngles = True
 
 blades = pickle.load(open(Path(__file__).resolve().parent / 'stator_rotor.pkl','rb'))
 
@@ -58,7 +60,11 @@ print(f"Coefficient of Pressure [J/Kg] {fluid.cp:0.4f}")
 inlet = Inlet(hub_location=0, alpha=[0, 0])
 inlet.init_total(P0=[P0,P0],T0=[T0,T0],M=0.1)
 outlet = Outlet(num_streamlines=n_streamlines)
-outlet.init_static(P=P,percent_radii=[0.5])
+if FindBladeAngles:
+    # Find blade angles that meet a specific massflow requirement 
+    outlet.init_static(P=P,percent_radii=[0.5],massflow=29.4)
+else:
+    outlet.init_static(P=P,percent_radii=[0.5])
 #%% Define Blade Rows, processed data is already in mm, hub is already in mm 
 cax1 = ( processed_data[0][0][0,:,0].max()-processed_data[0][0][0,:,0].min() )/1000
 cax2 = ( processed_data[1][0][0,:,0].max()-processed_data[1][0][0,:,0].min() )/1000
@@ -68,7 +74,11 @@ location1 = (processed_data[0][0][0,:,0].max() - hub[:,0].min()) / (hub[:,0].max
 location2 = (processed_data[1][0][0,:,0].max() - hub[:,0].min()) / (hub[:,0].max()-hub[:,0].min())
 location3 = (processed_data[2][0][0,:,0].max() - hub[:,0].min()) / (hub[:,0].max()-hub[:,0].min())
 location4 = (processed_data[3][0][0,:,0].max() - hub[:,0].min()) / (hub[:,0].max()-hub[:,0].min())
-beta_exit_flow = [73.6,-67.2,69.5,-63.9]
+
+if FindBladeAngles:
+    beta_exit_flow = [65,-65,65,-65] # These are guessed blade angles that should match whats in the else statement 
+else:
+    beta_exit_flow = [73.6,-67.2,69.5,-63.9] 
 P0_Loss = [0.057,0.088,0.069,0.014]         # (P01-P02)/(P01-P2)
 
 # Axial location is a percentage along the hub where row exit is defined
@@ -129,10 +139,10 @@ spool = TurbineSpool(passage=passage,
             rpm=12400,
             num_streamlines=n_streamlines,
             fluid=None)
-spool.massflow_constraint = MassflowConstraint.PressureBalance # Fixes the exit angle and changes degree of reaction
+
 # spool.plot_geometry()
 spool.adjust_streamlines = False
 spool.solve() # This also initializes streamlines
-spool.export_properties(str(data_dir / "eee_results_P0.json"))
+spool.export_properties(str(data_dir / "eee_results.json"))
 spool.plot()
 spool.plot_velocity_triangles()

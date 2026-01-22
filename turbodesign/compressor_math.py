@@ -13,6 +13,7 @@ from .enums import LossType, RowType
 from .isentropic import IsenP, IsenT, solve_for_mach
 from .turbine_math import T0_coolant_weighted_average
 from .flow_math import compute_massflow, compute_streamline_areas
+from .outlet import OutletType
 
 __all__ = ["stator_calc", "rotor_calc", "polytropic_efficiency"]
 
@@ -190,7 +191,6 @@ def rotor_calc(
         row: Rotor blade row being solved.
         upstream: Upstream blade row providing inlet relative/absolute conditions.
         calculate_vm: If True, iterates Mach to satisfy massflow; if False, assumes Vm known.
-        static_defined: Treat P as prescribed (turbine-like) when True; otherwise compressor mode.
     """
     loss_fn = getattr(row, "loss_function", None)
     loss_type = getattr(loss_fn, "loss_type", LossType.Pressure)

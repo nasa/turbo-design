@@ -1,6 +1,6 @@
 from .turbine_spool import TurbineSpool
 from .stage import Stage
-from .enums import LossType, RowType, PassageType, MassflowConstraint
+from .enums import LossType, RowType, PassageType
 from .inlet import Inlet
 from .bladerow import BladeRow
 from .coolant import Coolant
@@ -16,7 +16,7 @@ from importlib import import_module
 
 __all__ = [
     "TurbineSpool", "Stage", "Inlet", "Outlet", "BladeRow", "Coolant",
-    "Passage", "RowType", "PassageType", "MassflowConstraint", "LossType",
+    "Passage", "RowType", "PassageType", "LossType",
     "LossInterp", "DeviationBaseClass", "FixedDeviation",
     "make_blade_row", "make_rotor_row", "make_stator_row",
     "FixedPolytropicEfficiency",
@@ -35,7 +35,6 @@ _module_map = {
     "LossType": ("turbodesign.enums", "LossType"),
     "RowType": ("turbodesign.enums", "RowType"),
     "PassageType": ("turbodesign.enums", "PassageType"),
-    "MassflowConstraint": ("turbodesign.enums", "MassflowConstraint"),
     "LossInterp": ("turbodesign.lossinterp", "LossInterp"),
     "FixedPolytropicEfficiency": ("turbodesign.loss.fixedpolytropic", "FixedPolytropicEfficiency"),
     "DeviationBaseClass": ("turbodesign.deviation", "DeviationBaseClass"),

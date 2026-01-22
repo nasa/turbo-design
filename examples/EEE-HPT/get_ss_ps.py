@@ -1,15 +1,16 @@
 '''
-    Read blade into suction and pressure sides 
+    Read blade into suction and pressure sides
 '''
 
 import pickle
 from typing import Tuple
 import numpy as np
-import matplotlib.pyplot as plt 
+import matplotlib.pyplot as plt
 import numpy.typing as npt
 from pyturbo.helper import pspline, resample_by_curvature, order_points_nearest_neighbor
 from scipy.signal import savgol_filter
 from scipy.interpolate import splprep, splev
+from pathlib import Path
 
 import numpy as np
 from scipy.signal import savgol_filter
@@ -288,6 +289,7 @@ def resample_curve(curve, M):
     return np.stack(splev(u_new, tck), axis=1) # type: ignore
     
 def plot_blade(ss:npt.NDArray,ps:npt.NDArray,name:str):
+    script_dir = Path(__file__).resolve().parent
     plt.figure(num=0,clear=True,figsize=(10,6))
     plt.plot(ss[:,0],ss[:,1],'-',label='Suction Side')
     plt.plot(ps[:,0],ps[:,1],'-',label='Pressure Side')
@@ -297,9 +299,10 @@ def plot_blade(ss:npt.NDArray,ps:npt.NDArray,name:str):
     plt.ylabel('y')
     plt.title(f'{name}')
     plt.axis('scaled')
-    plt.savefig(f'{name}.png',dpi=300)
-    
+    plt.savefig(str(script_dir / f'{name}.png'),dpi=300)
+
 if __name__ == "__main__":
-    data = pickle.load(open('stator_rotor.pkl','rb'))
+    script_dir = Path(__file__).resolve().parent
+    data = pickle.load(open(str(script_dir / 'stator_rotor.pkl'),'rb'))
     ss,ps = split_ss_ps(data['Stator1'][0])
     print('check')

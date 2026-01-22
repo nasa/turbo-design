@@ -14,11 +14,11 @@ from scipy.optimize import minimize_scalar
 
 # --- Project-local imports
 from .bladerow import BladeRow, interpolate_streamline_quantities
-from .enums import RowType, MassflowConstraint, LossType
+from .enums import RowType, LossType
 from .loss.turbine import TD2
 from .passage import Passage
 from .inlet import Inlet
-from .outlet import Outlet
+from .outlet import Outlet, OutletType
 from .compressor_math import rotor_calc, stator_calc, polytropic_efficiency
 from .flow_math import compute_massflow, compute_streamline_areas, compute_power
 from .turbine_math import (
@@ -59,7 +59,6 @@ class CompressorSpool:
     num_streamlines: int
 
     _fluid: Solution
-    massflow_constraint: MassflowConstraint
     _adjust_streamlines: bool
 
     def __init__(
@@ -72,10 +71,9 @@ class CompressorSpool:
         num_streamlines: int = 3,
         fluid: Optional[Solution] = None,
         rpm: float = -1,
-        massflow_constraint: MassflowConstraint = MassflowConstraint.AngleMatch,
         rotor_pressure_fraction: float = DEFAULT_ROTOR_PRESSURE_FRACTION,
     ) -> None:
-        """Initialize a (turbine) spool
+        """Initialize a compressor spool
 
         Args:
             passage: Passage defining hub and shroud
@@ -86,7 +84,7 @@ class CompressorSpool:
             num_streamlines: number of streamlines used through the meridional passage
             fluid: cantera gas solution; defaults to air.yaml if None
             rpm: RPM for the entire spool. Individual rows can override later.
-            massflow_constraint: AngleMatch (adjust turning) or PressureBalance (radial eq).
+            rotor_pressure_fraction: Fraction of total pressure rise in rotors (0.0 to 1.0)
         """
         self.passage = passage
         self.massflow = massflow
@@ -95,7 +93,6 @@ class CompressorSpool:
         self.rows = rows
         self.num_streamlines = num_streamlines
         self._fluid = fluid if fluid is not None else Solution("air.yaml")
-        self.massflow_constraint = massflow_constraint
         self.rpm = rpm
         self.rotor_pressure_fraction = float(np.clip(rotor_pressure_fraction, 0.0, 1.0))
 
@@ -335,29 +332,45 @@ class CompressorSpool:
                 rotor_calc(row, upstream,calculate_vm=True)
                 compute_power(row, upstream, is_compressor=True)
 
-    def solve(self, mode: Optional[MassflowConstraint] = None) -> None:
+    def solve(self) -> None:
         """Run streamline initialization and solve the compressor flow field.
 
-        Args:
-            mode: Optional override for the massflow constraint. If None, uses
-                `self.massflow_constraint`. When set, it does not persist.
+        The solution method is determined by the outlet configuration:
+        - If outlet.outlet_type is massflow_static_pressure: use angle matching
+        - Otherwise: use pressure balance
         """
         self.initialize_streamlines()
         self.initialize()
 
-        constraint = mode if mode is not None else self.massflow_constraint
-        if constraint == MassflowConstraint.AngleMatch:
+        if self.outlet.outlet_type == OutletType.massflow_static_pressure:
+            print("Using angle matching mode: blade exit angles will be adjusted to match specified massflow")
             self._angle_match()
-        elif constraint == MassflowConstraint.PressureBalance:  # Balances the static pressure
+        else:
+            print("Using pressure balance mode: blade exit angles are fixed, total pressures will be adjusted")
             self.balance_pressure()
 
     def solve_angle_match(self) -> None:
-        """Explicit angle-matching solve."""
-        self.solve(mode=MassflowConstraint.AngleMatch)
+        """Explicit angle-matching solve by temporarily setting outlet type."""
+        prev_type = self.outlet.outlet_type
+        prev_massflow = getattr(self.outlet, 'total_massflow', None)
+        try:
+            if prev_massflow is None:
+                self.outlet.total_massflow = self.massflow
+            self.outlet.outlet_type = OutletType.massflow_static_pressure
+            self.solve()
+        finally:
+            self.outlet.outlet_type = prev_type
+            if prev_massflow is None and hasattr(self.outlet, 'total_massflow'):
+                delattr(self.outlet, 'total_massflow')
 
     def solve_balance_pressure(self) -> None:
-        """Explicit pressure-balance solve."""
-        self.solve(mode=MassflowConstraint.PressureBalance)
+        """Explicit pressure-balance solve by temporarily setting outlet type."""
+        prev_type = self.outlet.outlet_type
+        try:
+            self.outlet.outlet_type = OutletType.total_pressure
+            self.solve()
+        finally:
+            self.outlet.outlet_type = prev_type
 
     def overall_pressure_ratio(self) -> float:
         """Compute overall total pressure ratio (inlet to last internal row)."""

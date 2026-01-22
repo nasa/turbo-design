@@ -1,6 +1,6 @@
 from typing import List, Tuple
 from .radeq import radeq
-from .enums import LossType, RowType, PowerType, MassflowConstraint
+from .enums import LossType, RowType, PowerType
 from .bladerow import BladeRow
 from .turbine_math import compute_gas_constants
 from .turbine_math import compute_quantities, compute_power
@@ -11,13 +11,13 @@ from scipy.interpolate import interp1d
 from scipy.optimize import minimize_scalar
 from .passage import Passage     
     
-def adjust_streamlines(blade_rows:List[BladeRow],passage:Passage,massflow_fraction:npt.ArrayLike):
+def adjust_streamlines(blade_rows:List[BladeRow],passage:Passage,massflow_fraction:np.ndarray):
     """Adjust the streamlines to evenly divide the massflow
 
     Args:
         blade_rows (List[BladeRow]): List of blade rows
         passage (Passage): passage object describing the hub and shroud 
-
+        massflow_fraction (np.ndarray): array from 0 to 1 of how the massflow should be distributed from hub to shroud
     """
     for row_index,row in enumerate(blade_rows):
         print(f"Adjusting Streamlines to balance massflow Row: {row_index}")
