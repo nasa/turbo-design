@@ -8,10 +8,10 @@
 #%% Import Library
 from pathlib import Path
 from turbodesign import PassageType
-from turbodesign import TurbineSpool, Inlet, RowType, BladeRow, Passage,Outlet
-from turbodesign.enums import MassflowConstraint
-from turbodesign.coolant import Coolant
-from turbodesign.loss.turbine import FixedPressureLoss, KackerOkapuu
+from turbodesign.row_factory import make_rotor_row, make_stator_row
+from turbodesign import TurbineSpool, Inlet, RowType, BladeRow, Passage, Outlet
+from turbodesign import Coolant
+from turbodesign.loss.turbine import KackerOkapuu
 import numpy as np 
 from cantera import Solution
 
@@ -44,19 +44,17 @@ fluid.TP = T0, P0 # Use pascal for cantera
 print(f"Coefficient of Pressure [J/Kg] {fluid.cp:0.4f}")
 
 
-#%% Defining the Inlet
-inlet = Inlet(M=0.2, 
-                 P0=[P0],
-                 T0=[T0], 
-                 beta=[0], 
-                 percent_radii=0.5,
-                 location=0)
-outlet = Outlet(P=P0/3.96,percent_radii=0.5,num_streamlines=3)
+#%% Defining the Inlet/Outlet
+inlet = Inlet(hub_location=0, alpha=[0])
+inlet.init_total(P0=[P0], T0=[T0], M=[0.2], percent_radii=[0.5])
+
+outlet = Outlet(num_streamlines=3)
+outlet.init_static(P=P0 / 3.96, percent_radii=[0.5])
 
 #%% Define Blade Rows 
 # Axial location is a percentage along the hub where row exit is defined
-stator1 = BladeRow(row_type=RowType.Stator,location=2*cax/axial_len)
-rotor1 = BladeRow(row_type=RowType.Rotor, location=3*cax/axial_len)
+stator1 = make_stator_row(hub_location=2 * cax / axial_len)
+rotor1 = make_rotor_row(hub_location=3 * cax / axial_len)
 
 stator1.axial_chord = cax # Set an axial chord
 rotor1.axial_chord = cax
@@ -71,14 +69,15 @@ stator1.loss_model = KackerOkapuu()
 rotor1.loss_model = KackerOkapuu()
 rotor1.beta2_metal = [-67.6,-67.6,-67.6] # Angle, hub,mean,tip
 
-#%% Initialize the Spool
+#%% Initialize the TurbineSpool
 spool = TurbineSpool(passage=passage,
-            rpm=Design_RPM, 
-            num_streamlines=3, 
-            massflow=massflow, 
-            rows=[inlet,stator1,rotor1,outlet])
+            massflow=massflow,
+            inlet=inlet,
+            outlet=outlet,
+            rows=[stator1,rotor1],
+            rpm=Design_RPM,
+            num_streamlines=3)
 spool.fluid = fluid
-spool.massflow_constraint = MassflowConstraint.BalanceMassFlow # Fixes the exit angle and changes degree of reaction
 # spool.plot_geometry()
 spool.solve() # This also initializes streamlines
 export_path = Path(__file__).resolve().parent / "optturb.json"

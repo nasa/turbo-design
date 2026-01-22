@@ -19,7 +19,7 @@
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Spool" href="spool.html" />
+    <link rel="next" title="TurbineSpool" href="spool.html" />
     <link rel="prev" title="Rotor" href="rotor.html" /> 
 </head>
 
@@ -46,16 +46,12 @@
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="bladerow.html">BladeRow</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="bladerow.html#turbodesign.bladerow.BladeRow"><code class="docutils literal notranslate"><span class="pre">BladeRow</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="bladerow.html#turbodesign.bladerow.compute_gas_constants"><code class="docutils literal notranslate"><span class="pre">compute_gas_constants()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="bladerow.html#turbodesign.bladerow.interpolate_quantities"><code class="docutils literal notranslate"><span class="pre">interpolate_quantities()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="bladerow.html#turbodesign.bladerow.interpolate_streamline_radii"><code class="docutils literal notranslate"><span class="pre">interpolate_streamline_radii()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="bladerow.html#turbodesign.bladerow.interpolate_streamline_quantities"><code class="docutils literal notranslate"><span class="pre">interpolate_streamline_quantities()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="bladerow.html#turbodesign.bladerow.sutherland"><code class="docutils literal notranslate"><span class="pre">sutherland()</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="coolant.html">Coolant</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="coolant.html#turbodesign.coolant.Coolant"><code class="docutils literal notranslate"><span class="pre">Coolant</span></code></a></li>
-</ul>
-</li>
+<li class="toctree-l1"><a class="reference internal" href="coolant.html">Coolant</a></li>
 <li class="toctree-l1"><a class="reference internal" href="enums.html">Enums</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="enums.html#turbodesign.enums.LossType"><code class="docutils literal notranslate"><span class="pre">LossType</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="enums.html#turbodesign.enums.MassflowConstraint"><code class="docutils literal notranslate"><span class="pre">MassflowConstraint</span></code></a></li>
@@ -103,31 +99,29 @@
 <li class="toctree-l2"><a class="reference internal" href="radeq.html#turbodesign.radeq.radeq"><code class="docutils literal notranslate"><span class="pre">radeq()</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="rotor.html">Rotor</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="rotor.html#turbodesign.rotor.Rotor"><code class="docutils literal notranslate"><span class="pre">Rotor</span></code></a></li>
-</ul>
-</li>
+<li class="toctree-l1"><a class="reference internal" href="rotor.html">Rotor</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Solve Radial Equilibrium</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#turbodesign.solve_radeq.adjust_streamlines"><code class="docutils literal notranslate"><span class="pre">adjust_streamlines()</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="spool.html">Spool</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="spool.html#turbodesign.spool.Spool"><code class="docutils literal notranslate"><span class="pre">Spool</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="spool.html">TurbineSpool</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="spool.html#turbodesign.turbine_spool.TurbineSpool"><code class="docutils literal notranslate"><span class="pre">TurbineSpool</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="td_math.html">Turbine Design Math</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="td_math.html#turbodesign.td_math.T0_coolant_weighted_average"><code class="docutils literal notranslate"><span class="pre">T0_coolant_weighted_average()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="td_math.html#turbodesign.td_math.compute_massflow"><code class="docutils literal notranslate"><span class="pre">compute_massflow()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="td_math.html#turbodesign.td_math.compute_power"><code class="docutils literal notranslate"><span class="pre">compute_power()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="td_math.html#turbodesign.td_math.compute_quantities"><code class="docutils literal notranslate"><span class="pre">compute_quantities()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="td_math.html#turbodesign.td_math.compute_reynolds"><code class="docutils literal notranslate"><span class="pre">compute_reynolds()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="td_math.html#turbodesign.td_math.inlet_calc"><code class="docutils literal notranslate"><span class="pre">inlet_calc()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="td_math.html#turbodesign.td_math.rotor_calc"><code class="docutils literal notranslate"><span class="pre">rotor_calc()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="td_math.html#turbodesign.td_math.stator_calc"><code class="docutils literal notranslate"><span class="pre">stator_calc()</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="turbine_math.html">Turbine Design Math</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="turbine_math.html#turbodesign.turbine_math.T0_coolant_weighted_average"><code class="docutils literal notranslate"><span class="pre">T0_coolant_weighted_average()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="turbine_math.html#turbodesign.turbine_math.compute_massflow"><code class="docutils literal notranslate"><span class="pre">compute_massflow()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="turbine_math.html#turbodesign.turbine_math.compute_power"><code class="docutils literal notranslate"><span class="pre">compute_power()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="turbine_math.html#turbodesign.turbine_math.compute_quantities"><code class="docutils literal notranslate"><span class="pre">compute_quantities()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="turbine_math.html#turbodesign.turbine_math.compute_reynolds"><code class="docutils literal notranslate"><span class="pre">compute_reynolds()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="turbine_math.html#turbodesign.turbine_math.compute_streamline_areas"><code class="docutils literal notranslate"><span class="pre">compute_streamline_areas()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="turbine_math.html#turbodesign.turbine_math.inlet_calc"><code class="docutils literal notranslate"><span class="pre">inlet_calc()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="turbine_math.html#turbodesign.turbine_math.rotor_calc"><code class="docutils literal notranslate"><span class="pre">rotor_calc()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="turbine_math.html#turbodesign.turbine_math.stator_calc"><code class="docutils literal notranslate"><span class="pre">stator_calc()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="turbinespool.html">Turbine Spool</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="turbinespool.html#turbodesign.turbinespool.TurbineSpool"><code class="docutils literal notranslate"><span class="pre">TurbineSpool</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="turbinespool.html#turbodesign.turbine_spool.TurbineSpool"><code class="docutils literal notranslate"><span class="pre">TurbineSpool</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -179,7 +173,7 @@
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="rotor.html" class="btn btn-neutral float-left" title="Rotor" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="spool.html" class="btn btn-neutral float-right" title="Spool" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="spool.html" class="btn btn-neutral float-right" title="TurbineSpool" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

@@ -1,9 +1,9 @@
 from typing import Tuple
 from turbodesign import PassageType
+from turbodesign.row_factory import make_rotor_row, make_stator_row
 from turbodesign import TurbineSpool, Inlet, RowType, BladeRow, Passage, Outlet
-from turbodesign.enums import MassflowConstraint
 from turbodesign.coolant import Coolant
-from turbodesign.loss.turbine import FixedPressureLoss
+from turbodesign.loss import FixedPressureLoss
 from cantera import Solution
 from scipy.optimize import minimize_scalar
 from scipy.interpolate import pchip
@@ -45,4 +45,3 @@ def radial_turbine(P0:float,P0_P:float,
     
     # spool.plot()
     
-

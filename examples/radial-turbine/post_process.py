@@ -4,8 +4,9 @@ from tecplot.exception import *
 from tecplot.constant import *
 import pandas as pd
 import math, json
-import matplotlib.pyplot as plt 
-import numpy as np 
+import matplotlib.pyplot as plt
+import numpy as np
+from pathlib import Path 
 
 R = 287.15
 gamma = 1.35
@@ -264,11 +265,13 @@ def plot_velocity_triangles(station01:Dict[str,float],station02:Dict[str,float])
     plt.ylabel("Tangental Velocity [m/s]")
     plt.xlabel("Vm [m/s]")
     plt.title(f"Velocity Triangles")
-    plt.savefig(f"velocity_triangles.png",transparent=False,dpi=150)
-    
+    script_dir = Path(__file__).resolve().parent
+    plt.savefig(str(script_dir / "velocity_triangles.png"),transparent=False,dpi=150)
+
 
 # Read .FORCES File
-df = read_forces('CFD/radial-turbine.FORCES')
+script_dir = Path(__file__).resolve().parent
+df = read_forces(str(script_dir / 'CFD/radial-turbine.FORCES'))
 Torque = df['TQ-PF'].iloc[-1] + df['TQ-VF'].iloc[-1]
 Power_torque_def = Torque * rpm*math.pi/30
 Total_power_torque = Power_torque_def * n_blades # kW
@@ -278,7 +281,7 @@ tp.active_page().name='Untitled'
 tp.add_page()
 tp.new_layout()
 
-dataset = tp.data.load_tecplot_szl('CFD/radial-turbine.szplt')
+dataset = tp.data.load_tecplot_szl(str(script_dir / 'CFD/radial-turbine.szplt'))
 tp.macro.execute_command('$!RedrawAll')
 tp.active_frame().plot().fieldmaps(0,1,2,3,4).surfaces.surfaces_to_plot=SurfacesToPlot.BoundaryFaces
 tp.active_frame().plot().show_mesh=True
@@ -324,5 +327,5 @@ data = {
 plot_velocity_triangles(inlet_data,outlet_data)
 
 # Write to JSON file
-with open('results.json', 'w') as json_file:
+with open(str(script_dir / 'results.json'), 'w') as json_file:
     json.dump(data, json_file, indent=4)

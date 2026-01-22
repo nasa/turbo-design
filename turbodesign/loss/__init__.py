@@ -1,1 +1,3 @@
-from .losstype import LossType, LossBaseClass, CompositeLossModel
+from .losstype import LossType, LossBaseClass
+from .fixedpressureloss import FixedPressureLoss
+from .fixedpolytropic import FixedPolytropicEfficiency

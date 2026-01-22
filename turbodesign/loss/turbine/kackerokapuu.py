@@ -4,6 +4,7 @@ from ...bladerow import BladeRow, sutherland
 from ...lossinterp import LossInterp
 from ...enums import RowType, LossType
 import numpy as np
+import numpy.typing as npt
 import pathlib
 from ..losstype import LossBaseClass
 import requests
@@ -15,6 +16,7 @@ def _mean_value(value):
 
 class KackerOkapuu(LossBaseClass):
     UseCFM:bool = False
+    
     def __init__(self,UseCFM:bool=False):
         """KackerOkapuu model is an improvement to the Ainley Mathieson model. 
         
@@ -44,7 +46,7 @@ class KackerOkapuu(LossBaseClass):
         self.UseCFM = UseCFM
         
     
-    def __call__(self,row:BladeRow, upstream:BladeRow) -> float:
+    def __call__(self,row:BladeRow, upstream:BladeRow) -> npt.NDArray:
         """Kacker Okapuu is an updated version of Ainley Mathieson and Dunham Came. This tool uses the pressure loss definition. 
 
         Note: 
@@ -54,11 +56,11 @@ class KackerOkapuu(LossBaseClass):
             Kacker, S. C., and U. Okapuu. "A mean line prediction method for axial flow turbine efficiency." (1982): 111-119.
         
         Args:
-            upstream (BladeRow): Upstream blade row
-            row (BladeRow): downstream blade row
+            row (BladeRow): Blade row being evaluated.
+            upstream (BladeRow): Upstream blade row providing inlet conditions.
 
         Returns:
-            float: Pressure Loss 
+            numpy.ndarray: Pressure loss coefficient array matching ``row.r``.
         """
         # Get the Inlet incoming mach number relative to the blade
         c = row.chord
@@ -162,5 +164,5 @@ class KackerOkapuu(LossBaseClass):
             f_re = (Rec/1E6)**-0.2
         
         Yt = Yp*f_re + Ys + Ytet + Ytc 
-        return Yt
+        return Yt+row.r*0
         

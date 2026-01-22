@@ -1,4 +1,4 @@
-from typing import List, Tuple, Union
+from typing import List, Optional, Tuple, Union
 import numpy as np
 import numpy.typing as npt
 from scipy.interpolate import PchipInterpolator, interp1d
@@ -30,7 +30,7 @@ class Passage:
     
     def __init__(self,xhub:Union[npt.NDArray,List[float]],rhub:Union[npt.NDArray,List[float]],
                  xshroud:Union[npt.NDArray,List[float]],rshroud:Union[npt.NDArray,List[float]],
-                 passageType:PassageType=PassageType.Axial):
+                 passageType:PassageType=PassageType.Axial, zero_phi: bool = False):
         """_summary_
 
         Args:
@@ -42,6 +42,7 @@ class Passage:
         """
         assert len(xhub) == len(xshroud), "xHub and xShroud should be the same length"
         assert len(rhub) == len(rshroud), "rHub and rShroud should be the same length"
+        self.zero_phi = zero_phi
 
         hub_arc_len = xr_to_mprime(np.vstack([xhub,rhub]).transpose())[1]
         self.hub_arc_len = hub_arc_len[-1]
@@ -81,15 +82,14 @@ class Passage:
         r_streamline = t_streamline.copy()*0
         x_streamline = t_streamline.copy()*0
         for i,t in enumerate(t_streamline):
-            xhub = self.xhub(t)
-            rhub = self.rhub(t)
-            xshroud = self.xshroud(t)
-            rshroud = self.rshroud(t)
-            x_streamline[i] ,r_streamline[i] = line2D([xhub,rhub],[xshroud,rshroud]).get_point(t_radial)
+            xhub = float(self.xhub(t))
+            rhub = float(self.rhub(t))
+            xshroud = float(self.xshroud(t))
+            rshroud = float(self.rshroud(t))
+            x_streamline[i] ,r_streamline[i] = line2D((xhub,rhub),(xshroud,rshroud)).get_point(t_radial)
         return t_streamline,x_streamline,r_streamline
 
-    @staticmethod
-    def streamline_curvature(x_streamline:npt.NDArray,r_streamline:npt.NDArray) -> Tuple[npt.NDArray,npt.NDArray,npt.NDArray]:
+    def streamline_curvature(self, x_streamline:npt.NDArray,r_streamline:npt.NDArray) -> Tuple[npt.NDArray,npt.NDArray,npt.NDArray]:
         """Hub and casing values of streamline angles of inclination and curvature 
 
             x_streamline[axial,radial]
@@ -113,14 +113,16 @@ class Passage:
         phi = np.zeros(shape=x_streamline.shape)
         r  = np.zeros(shape=x_streamline.shape)
         radius_curvature = np.zeros(shape=x_streamline.shape)
+        if self.zero_phi:
+            return phi, radius_curvature, r_streamline
         # Have to make sure there isn't a divide by zero which could happen if there is a vertical line somewhere
         indices = np.where(np.abs(np.diff(x_streamline))>np.finfo(float).eps)[0]
     
         d_dx = FinDiff(0,x_streamline[indices[0]:indices[-1]],1)
         d2_dx2 = FinDiff(0,x_streamline[indices[0]:indices[-1]],2)
         
-        dr_dx = d_dx(r_streamline[indices[0]:indices[-1]])
-        d2r_dx2 = d2_dx2(r_streamline[indices[0]:indices[-1]])    
+        dr_dx = d_dx(r_streamline[indices[0]:indices[-1]]) # type: ignore
+        d2r_dx2 = d2_dx2(r_streamline[indices[0]:indices[-1]])     # type: ignore
             
         radius_curvature[indices[0]:indices[-1]] = np.power((1+np.power(dr_dx,2)),1.5)
         radius_curvature[indices[0]:indices[-1]] = np.divide(radius_curvature[indices[0]:indices[-1]], np.abs(d2r_dx2))
@@ -170,7 +172,7 @@ class Passage:
                 total_area += area
         return total_area
         
-    def get_cutting_line(self, t_hub:float) -> Tuple[line2D,float,float]:
+    def get_cutting_line(self, t_hub:float,t_shroud:Optional[float]=None) -> Tuple[line2D,float,float]:
         """Gets the cutting line perpendicular to hub and shroud 
 
         Args:
@@ -181,65 +183,90 @@ class Passage:
         
                 cut (line2D): line from hub to shroud
                 t_hub (float): Percentage along hub arc length
-                t_shroud (float): t corresponding to intersection of bisector of hub 
+                t_shroud (Optional[float]): t corresponding to intersection of bisector of hub. Defaults to None
                                 
         """
-        xhub = self.xhub(t_hub)
-        rhub = self.rhub(t_hub)
-        
-        if t_hub>0 and t_hub<1:
-            dx = self.xhub(t_hub+0.0001) - self.xhub(t_hub-0.0001) 
-            dr = self.rhub(t_hub+0.0001) - self.rhub(t_hub-0.0001)
-        elif t_hub>0:
-            dx = self.xhub(t_hub) - self.xhub(t_hub-0.0001) 
-            dr = self.rhub(t_hub) - self.rhub(t_hub-0.0001)
-        elif t_hub<1:
-            dx = self.xhub(t_hub+0.0001) - self.xhub(t_hub)
-            dr = self.rhub(t_hub+0.0001) - self.rhub(t_hub)
-        
-        if self.passageType == PassageType.Centrifugal:
-            if np.abs(dr)>1e-6:
-                # Draw a line perpendicular to the hub. 
-                # Find the intersection point to the shroud. 
-                h = -dx/dr # Slope of perpendicular line
+        xhub = float(self.xhub(t_hub))
+        rhub = float(self.rhub(t_hub))
+        if t_shroud is None:            
+            if t_hub>0 and t_hub<1:
+                dx = self.xhub(t_hub+0.0001) - self.xhub(t_hub-0.0001) 
+                dr = self.rhub(t_hub+0.0001) - self.rhub(t_hub-0.0001)
+            elif t_hub>0:
+                dx = self.xhub(t_hub) - self.xhub(t_hub-0.0001) 
+                dr = self.rhub(t_hub) - self.rhub(t_hub-0.0001)
+            else: # t_hub<1:
+                dx = self.xhub(t_hub+0.0001) - self.xhub(t_hub)
+                dr = self.rhub(t_hub+0.0001) - self.rhub(t_hub)
             
-                f = lambda t: h*(self.xshroud(t) - xhub)+rhub # line from hub to shroud 
-                fun = lambda t: np.abs(f(t)-self.rshroud(t)) # find where it intersects
-                res = minimize_scalar(fun,bounds=[0,1],tol=1E-3) 
-                t_shroud = res.x
+            if self.passageType == PassageType.Centrifugal:
+                if np.abs(dr)>1e-6:
+                    # Draw a line perpendicular to the hub. 
+                    # Find the intersection point to the shroud. 
+                    h = -dx/dr # Slope of perpendicular line
+                
+                    f = lambda t: h*(self.xshroud(t) - xhub)+rhub # line from hub to shroud 
+                    fun = lambda t: np.abs(f(t)-self.rshroud(t)) # find where it intersects
+                    res = minimize_scalar(fun,bounds=[0,1],tol=1E-3) 
+                    t_shroud = res.x # type: ignore
+                else:
+                    t_shroud = t_hub # Vertical line 
             else:
-                t_shroud = t_hub # Vertical line 
-        else:
-            t_shroud = t_hub
+                t_shroud = t_hub
+                
+        xshroud = float(self.xshroud(t_shroud))
+        rshroud = float(self.rshroud(t_shroud))
         
-        xshroud = self.xshroud(t_shroud)
-        rshroud = self.rshroud(t_shroud)
-        return line2D([xhub,rhub],[xshroud,rshroud]), t_hub, t_shroud
+        return line2D((xhub,rhub),(xshroud,rshroud)), t_hub, t_shroud # type: ignore
     
-    def get_xr_slice(self,t_span:float,percent_hub:Tuple[float,float],resolution:int=100):
-        """Returns the xr coordinates of a streamline, a line that is parallel to both hub and shroud
-            
+    def get_xr_slice(self, t_span: float, percent_hub: Tuple[float, float], 
+                     percent_shroud: Optional[Tuple[float, float]] = None, resolution: int = 100) -> npt.NDArray[np.float64]:
+        """
+        Return the (x, r) coordinates of a *straight* streamline segment that
+        connects corresponding hub and shroud points, sampled uniformly along
+        each surface between the given percent limits.
+
+        The point returned on each connecting line is at parametric position
+        `t_span` in [0, 1], where 0 = hub point and 1 = shroud point.
+
         Args:
-            t_span (float): _description_
-            meridional_location (float): _description_
-            resolution (int): number of points to resolve 
+            t_span: Interpolation parameter along each hub→shroud connector (0..1).
+            percent_hub: (start, end) fractional arc-length positions along the hub (0..1).
+            percent_shroud: Optional (start, end) along the shroud (0..1). If None,
+                the shroud uses the same normalized range as `percent_hub`.
+            resolution: Number of sample points along the streamwise direction.
 
         Returns:
-            np.NDArray: _description_
+            (resolution, 2) array of [x, r] coordinates.
         """
-        t_hub = np.linspace(percent_hub[0],percent_hub[1],resolution)
-        t_hub = convert_to_ndarray(t_hub)*self.hub_length
-        
-        shroud_pts_cyl = np.vstack([self.xshroud(t_hub),self.rshroud(t_hub)]).transpose()
-        hub_pts_cyl = np.vstack([self.xhub(t_hub),self.rhub(t_hub)]).transpose()
-        n = len(t_hub)
-            
-        xr = np.zeros((n,2))
-        for j in range(n):
-            l = line2D(hub_pts_cyl[j,:],shroud_pts_cyl[j,:])
-            xr[j,0],xr[j,1] = l.get_point(t_span)
-            
-        return xr
+        # ---- validation
+        if not (0.0 <= t_span <= 1.0):
+            raise ValueError("t_span must be in [0, 1].")
+        if resolution < 2:
+            raise ValueError("resolution must be >= 2.")
+        if not (0.0 <= percent_hub[0] <= 1.0 and 0.0 <= percent_hub[1] <= 1.0):
+            raise ValueError("percent_hub values must be in [0, 1].")
+        if percent_shroud is not None and not (
+            0.0 <= percent_shroud[0] <= 1.0 and 0.0 <= percent_shroud[1] <= 1.0
+        ):
+            raise ValueError("percent_shroud values must be in [0, 1].")
+
+        # ---- parameterize along hub and shroud (use each surface's own length!)
+        t_hub = np.linspace(percent_hub[0], percent_hub[1], resolution) * self.hub_length
+        if percent_shroud is None:
+            t_shroud = np.linspace(percent_hub[0], percent_hub[1], resolution) * self.shroud_length
+        else:
+            t_shroud = np.linspace(percent_shroud[0], percent_shroud[1], resolution) * self.shroud_length
+
+        # ---- sample hub & shroud curves (x, r)
+        hub_pts = np.column_stack([self.xhub(t_hub), self.rhub(t_hub)])          # (N, 2)
+        shroud_pts = np.column_stack([self.xshroud(t_shroud), self.rshroud(t_shroud)])  # (N, 2)
+
+        # ---- vectorized interpolation along each connector: hub + t*(shroud - hub)
+        xr = hub_pts + (shroud_pts - hub_pts) * float(t_span)  # (N, 2)
+
+        return xr.astype(np.float64, copy=False)
+
     
     def get_m(self,t_span:float,resolution:int=100) -> npt.NDArray:
         """Meridional cooridnates
@@ -251,7 +278,7 @@ class Passage:
         Returns:
             npt.NDArray: _description_
         """
-        xr = self.get_xr_slice(t_span,(0,1),resolution)
+        xr = self.get_xr_slice(t_span=t_span,percent_hub=(0,1),resolution=resolution)
         dx = np.diff(xr[:,0])
         dr = np.diff(xr[:,1])
         m = np.concat([[0],np.cumsum(np.sqrt(dx**2 + dr**2))])
@@ -269,7 +296,7 @@ class Passage:
             (float) : returns the derivative 
         """
         m = self.get_m(t_span,resolution)
-        return PchipInterpolator(np.linspace(0,1,resolution),np.diff(m))(location)
+        return PchipInterpolator(np.linspace(0,1,resolution),np.diff(m))(location) # type: ignore
     
     @property
     def hub_length(self):
@@ -278,6 +305,14 @@ class Passage:
             _type_: _description_
         """
         return np.sum(np.sqrt(np.diff(self.xhub_pts)**2 + np.diff(self.rhub_pts)**2))
+    
+    @property
+    def shroud_length(self):
+        """returns the computed length of the shroud 
+        Returns:
+            _type_: _description_
+        """
+        return np.sum(np.sqrt(np.diff(self.xshroud_pts)**2 + np.diff(self.rshroud_pts)**2))
     
     def plot_cuts(self,percent_axial:List[float]=[]):
         """_summary_

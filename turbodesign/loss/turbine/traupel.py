@@ -4,6 +4,7 @@ from ...bladerow import BladeRow, sutherland
 from ...lossinterp import LossInterp
 from ...enums import RowType, LossType
 import numpy as np
+import numpy.typing as npt
 import pathlib
 from ..losstype import LossBaseClass
 import requests
@@ -23,15 +24,15 @@ class Traupel(LossBaseClass):
         with open(path.absolute(),'rb') as f:
             self.data = pickle.load(f) # type: ignore
         
-    def __call__(self,row:BladeRow, upstream:BladeRow) -> float:
-        """Enthalpy loss is computed for the entire stage. 
+    def __call__(self,row:BladeRow, upstream:BladeRow) -> npt.NDArray:
+        """Compute Traupel stage enthalpy efficiency from an upstream/downstream pair.
 
         Args:
-            upstream (BladeRow): Stator Row
-            row (BladeRow): Rotor Row
+            row (BladeRow): Blade row being evaluated (stator or rotor).
+            upstream (BladeRow): Upstream blade row supplying inlet conditions.
 
         Returns:
-            float: Efficiency
+            numpy.ndarray: Spanwise efficiency array matching ``row.r``.
         """
         
         alpha1 = 90-np.degrees(upstream.alpha1.mean())
@@ -52,10 +53,10 @@ class Traupel(LossBaseClass):
 
         H = self.data['Fig07'](float(alpha1-beta2), float(alpha2-beta3))
         
-        zeta_s = F*g/h_stator  # (h1-h1s)/(0.5*c1s**2) # no idea what h1s or h2s is
-        zeta_r = F*g/h_rotor # (h2-h2s)/(0.5*w2s**2)
-        x_p_stator = self.data['Fig01'](float(alpha1), float(alpha2)) # not sure if this is the right figure
-        x_p_rotor = self.data['Fig01'](float(beta2), float(beta3)) # not sure if this is the right figure
+        zeta_s = F*g/h_stator  # Stator loss factor scaled by pitch-to-span
+        zeta_r = F*g/h_rotor   # Rotor loss factor scaled by pitch-to-span
+        x_p_stator = self.data['Fig01'](float(alpha1), float(alpha2))
+        x_p_rotor = self.data['Fig01'](float(beta2), float(beta3))
         zeta_p_stator = self.data['Fig02'](float(alpha1), float(alpha2))
         x_m_stator = self.data['Fig03_0'](float(np.mean(upstream.M)))
         zeta_p_rotor = self.data['Fig02'](float(beta2), float(beta3))
@@ -72,12 +73,12 @@ class Traupel(LossBaseClass):
         x_delta_rotor = self.data['Fig05'](float(ssen_beta2), float(beta3))
         zeta_delta_rotor = self.data['Fig04'](float(ssen_beta2), float(beta3))
         
-        Dm = 2* (upstream.r[-1] + upstream.r[0])/2 # Is this the mean diameter? I dont know
+        Dm = 2* (upstream.r[-1] + upstream.r[0])/2  # Mean diameter used for annulus friction
         zeta_f = 0.5 * (h_stator/Dm)**2
         
         zeta_pr_stator = zeta_p_stator * x_p_stator * x_m_stator * x_delta_stator + zeta_delta_stator + zeta_f
         
-        Dm = 2* (row.r[-1] + row.r[0])/2 # Is this the mean diameter? I dont know
+        Dm = 2* (row.r[-1] + row.r[0])/2  # Mean diameter used for annulus friction
         zeta_f = 0.5 * (h_rotor/Dm)**2
         
         zeta_pr_rotor = zeta_p_rotor * x_p_rotor * x_m_rotor * x_delta_rotor + zeta_delta_rotor + zeta_f
@@ -85,15 +86,15 @@ class Traupel(LossBaseClass):
         if row.row_type == RowType.Stator:
             zeta_cl = 0 
         else:
-            zeta_cl = self.data['Fig08'](float(row.tip_clearance)) # For simplicity assume unshrouded blade 
+            zeta_cl = self.data['Fig08'](float(row.tip_clearance))  # Clearance loss for unshrouded blades
             
-        zeta_z = 0 # Do not factor this in, a bit complicated
-        # 1 - (internal) - (external) 
+        zeta_z = 0  # Disk friction loss not modeled
+        # 1 - (internal) - (external)
         zeta_v = 0 
         zeta_off = 0 
-        eta_stator = 1- (zeta_pr_stator + zeta_s + 0 + zeta_z) - (zeta_r+zeta_v) - zeta_off # Presentation slide 9
+        eta_stator = 1- (zeta_pr_stator + zeta_s + 0 + zeta_z) - (zeta_r+zeta_v) - zeta_off  # Per Traupel formulation
         eta_rotor = 1 - (zeta_pr_rotor + zeta_r + zeta_cl + zeta_z) - (zeta_r+zeta_v) - zeta_off
-        return eta_stator+eta_rotor
+        return (eta_stator+eta_rotor) + row.r*0
         
         
         

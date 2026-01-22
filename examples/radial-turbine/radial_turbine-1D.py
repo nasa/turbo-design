@@ -84,10 +84,10 @@ def offset_curve(x, y, offset_distance):
 
 from typing import Tuple
 from turbodesign import PassageType
+from turbodesign.row_factory import make_rotor_row, make_stator_row
 from turbodesign import TurbineSpool, Inlet, RowType, BladeRow, Passage, Outlet
-from turbodesign.enums import MassflowConstraint
 from turbodesign.coolant import Coolant
-from turbodesign.loss.turbine import FixedPressureLoss
+from turbodesign.loss import FixedPressureLoss
 from cantera import Solution
 from scipy.optimize import minimize_scalar
 from scipy.interpolate import pchip
@@ -137,22 +137,19 @@ massflow = 0.1 # Guessed value for initialization
 alpha2 = -51.5
 
 passage = Passage(hub[:,0],hub[:,1],shroud[:,0],shroud[:,1],passageType=PassageType.Centrifugal) # type: ignore
-#%% Defining the Inlet
-inlet = Inlet(M=0.1,
-                P0=[P0],
-                T0=[T0],
-                beta=[0],
-                percent_radii=0.5,
-                location=0)
+#%% Defining the Inlet/Outlet
+inlet = Inlet(hub_location=0, alpha=[0])
+inlet.init_total(P0=[P0], T0=[T0], M=[0.1], percent_radii=[0.5])
 
-outlet = Outlet(P=P,percent_radii=[0.5],num_streamlines=5)
+outlet = Outlet(num_streamlines=5)
+outlet.init_static(P=P, percent_radii=[0.5])
 
-stator = BladeRow(row_type=RowType.Stator, location=blade_position[0])
+stator = make_stator_row(hub_location=blade_position[0])
 stator.R = 287.15
 stator.gamma = 1.35
 stator.Cp = stator.gamma*stator.R/(stator.gamma-1)
 
-rotor = BladeRow(row_type=RowType.Rotor, location=blade_position[1])
+rotor = make_rotor_row(hub_location=blade_position[1])
 rotor.R = 287.15
 rotor.gamma = 1.35
 rotor.Cp = stator.gamma*stator.R/(stator.gamma-1)
@@ -168,16 +165,18 @@ stator.loss_model = FixedPressureLoss(0.0) # type: ignore
 rotor.beta2_metal = [45,47,52,57,60] # Angle, hub,mean,tip
 rotor.loss_model = FixedPressureLoss(0.15669278543371953) # type: ignore # <- From CFD.
 
-spool = TurbineSpool(passage=passage,
-                rpm=RPM, 
-                num_streamlines=5,
+spool = TurbineSpool(
+                passage=passage,
                 massflow=massflow,
-                rows=[inlet,stator,rotor,outlet],
+                inlet=inlet,
+                outlet=outlet,
+                rows=[stator, rotor],
+                rpm=RPM,
+                num_streamlines=5,
                 fluid=None)
 
 spool.adjust_streamlines = False
-spool.massflow_constraint = MassflowConstraint.BalanceMassFlow # type: ignore
-    
+
 spool.solve() # This also initializes streamlines
 spool.plot_velocity_triangles()
 spool.export_properties("output.json")

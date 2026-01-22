@@ -7,10 +7,10 @@
 '''
 #%% Import Library
 from turbodesign import PassageType
+from turbodesign.row_factory import make_rotor_row, make_stator_row
 from turbodesign import TurbineSpool, Inlet, RowType, BladeRow, Passage, Outlet
-from turbodesign.enums import MassflowConstraint
 from turbodesign.coolant import Coolant
-from turbodesign.loss.turbine import FixedPressureLoss
+from turbodesign.loss import FixedPressureLoss
 from pyturbo.helper import line2D
 import numpy as np 
 from cantera import Solution
@@ -51,21 +51,18 @@ air = Solution('air.yaml')
 air.TP = T0, P0 # Use pascal for cantera
 print(f"Coefficient of Pressure [J/Kg] {air.cp:0.4f}")
 
-#%% Defining the Inlet
-inlet = Inlet(M=0.02, 
-                 P0=[P0],
-                 T0=[T0], 
-                 beta=[0],
-                 percent_radii=0.5,
-                 location=0)
+#%% Defining the Inlet/Outlet
+inlet = Inlet(hub_location=0, alpha=[0])
+inlet.init_total(P0=[P0], T0=[T0], M=[0.02], percent_radii=[0.5])
 
-outlet = Outlet(P=206.799*1000,percent_radii=0.5,num_streamlines=5)
+outlet = Outlet(num_streamlines=5)
+outlet.init_static(P=206.799 * 1000, percent_radii=[0.5])
 
 #%% Define Blade Rows 
 # Axial location is a percentage along the hub where row exit is defined
-stator1 = BladeRow(row_type=RowType.Stator,location=cax1/axial_len)
-rotor1 = BladeRow(row_type=RowType.Rotor, location=(cax1+cax2)/axial_len)
-stator2 = BladeRow(row_type=RowType.Stator,location=1)
+stator1 = make_stator_row(hub_location=cax1 / axial_len)
+rotor1 = make_rotor_row(hub_location=(cax1 + cax2) / axial_len)
+stator2 = make_stator_row(hub_location=1)
 
 # stator1.gamma = 1.38
 # stator1.Cp = 1042.8
@@ -87,9 +84,9 @@ stator1.stage_id = 0; rotor1.stage_id = 0
 stator2.stage_id = 0; 
 
 # Coolant Definition: Use Kelvin and Pascal. Coolant only needs P0, T0, massflow, and Cp
-stator1.coolant = Coolant(T0=T0*0.5, P0 = P0 * 6894.76, massflow_percentage=0, Cp=air.cp) 
-rotor1.coolant = Coolant(T0*0.5, P0 = P0 * 6894.76, massflow_percentage=0, Cp=air.cp)
-stator2.coolant = Coolant(T0=T0*0.5, P0 = P0 * 6894.76, massflow_percentage=0, Cp=air.cp) 
+stator1.coolant = Coolant(T0=T0*0.5, P0=P0 * 6894.76, massflow_percentage=0, Cp=air.cp) 
+rotor1.coolant = Coolant(T0=T0*0.5, P0=P0 * 6894.76, massflow_percentage=0, Cp=air.cp)
+stator2.coolant = Coolant(T0=T0*0.5, P0=P0 * 6894.76, massflow_percentage=0, Cp=air.cp) 
 
 # Add in turning angles
 stator1.beta2_metal = [-67.1,-67.1,-67.1,-67.1,-67.1]                  # Alpha2
@@ -107,14 +104,15 @@ stator1.inlet_to_outlet_pratio = (0.01,0.9)
 rotor1.inlet_to_outlet_pratio = (0.01,0.9)
 stator2.inlet_to_outlet_pratio = (0.01,0.9)
 
-#%% Initialize the Spool
+#%% Initialize the TurbineSpool
 spool = TurbineSpool(passage=passage,
-            rpm=Design_RPM, 
-            num_streamlines=5, 
-            massflow=massflow, 
-            fluid=air,
-            rows=[inlet,stator1,rotor1,stator2,outlet])
-spool.massflow_constraint = MassflowConstraint.BalanceMassFlow # Fixes the exit angle and changes degree of reaction
+            massflow=massflow,
+            inlet=inlet,
+            outlet=outlet,
+            rows=[stator1,rotor1,stator2],
+            rpm=Design_RPM,
+            num_streamlines=5,
+            fluid=air)
 # spool.plot_geometry()
 spool.solve() # This also initializes streamlines
 spool.export_properties("3RowSteady.json")

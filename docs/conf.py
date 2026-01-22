@@ -12,8 +12,34 @@
 #
 import os
 import sys
+import types
 sys.path.insert(0, os.path.abspath('_ext'))
 import sphinx_rtd_theme
+
+# Ensure project root is on sys.path so turbodesign can be imported when building docs
+sys.path.insert(0, os.path.abspath(".."))
+
+# Minimal mocks for optional heavy dependencies used during autodoc import
+mock_modules = {
+    "pyturbo": types.ModuleType("pyturbo"),
+    "pyturbo.helper": types.ModuleType("pyturbo.helper"),
+    "pyturbo.aero": types.ModuleType("pyturbo.aero"),
+    "pyturbo.aero.airfoil2D": types.ModuleType("pyturbo.aero.airfoil2D"),
+    "cantera": types.ModuleType("cantera"),
+    "cantera.composite": types.ModuleType("cantera.composite"),
+}
+for name, module in mock_modules.items():
+    sys.modules.setdefault(name, module)
+
+# Provide minimal attributes used in code paths during import
+sys.modules["pyturbo.helper"].line2D = lambda *args, **kwargs: None
+sys.modules["pyturbo.helper"].convert_to_ndarray = lambda x, *_, **__: x
+sys.modules["pyturbo.helper"].xr_to_mprime = lambda *args, **kwargs: None
+sys.modules["pyturbo.aero.airfoil2D"].Airfoil2D = type("Airfoil2D", (), {})
+mock_solution = type("Solution", (), {})
+sys.modules["cantera"].Solution = mock_solution  # type: ignore[attr-defined]
+sys.modules["cantera.composite"].Solution = mock_solution  # type: ignore[attr-defined]
+
 import turbodesign
 
 # -- Project information -----------------------------------------------------
@@ -41,6 +67,7 @@ extensions = [
     'sphinx.ext.viewcode',
     'sphinx.ext.napoleon'
 ]
+autodoc_mock_imports = ["pyturbo", "cantera"]
 autosummary_generate = True
 
 napoleon_google_docstring = True

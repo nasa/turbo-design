@@ -2,14 +2,14 @@
 # Create bspline surface with points
 import sys, os, pathlib
 sys.path.insert(0,"../../../")
-from turbodesign import LossInterp
+from turbodesign import LossInterp, turbine_spool
 import pickle
 
 from turbodesign import BladeRow
 from turbodesign.loss.turbine import CraigCox, AinleyMathieson, FixedEfficiency, KrackerOkapuu, Traupel, TD2, FixedPressureLoss
-from turbodesign import TurbineSpool, Inlet, RowType, BladeRow, Passage, Outlet, PassageType
+from turbodesign import Inlet, RowType, BladeRow, Passage, Outlet, PassageType
 
-stator1 = BladeRow(row_type=RowType.Stator,meridional_location=2)
+stator1 = BladeRow(row_type=RowType.Stator, hub_location=2)
 stator1.loss_model = CraigCox()
 
 if __name__=="__main__": 

@@ -27,7 +27,7 @@ Turbo Design Documentation
    modules/rotor
    modules/solve_radeq
    modules/spool
-   modules/td_math
+   modules/turbine_math
    modules/turbinespool
 
 
@@ -37,4 +37,3 @@ Indices and tables
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`
-
