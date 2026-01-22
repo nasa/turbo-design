@@ -6,7 +6,7 @@
     In this example the blade exit angles are fixed and only degree of reaction changes between the stage to match the massflow
 '''
 #%% Import Library
-import sys
+from pathlib import Path
 from turbodesign import PassageType
 from turbodesign.row_factory import make_rotor_row, make_stator_row
 from turbodesign import TurbineSpool, Inlet, RowType, BladeRow, Passage, Outlet
@@ -79,7 +79,8 @@ spool = TurbineSpool(passage=passage,
 spool.fluid = fluid
 # spool.plot_geometry()
 spool.solve() # This also initializes streamlines
-spool.export_properties("optturb.json")
+export_path = Path(__file__).resolve().parent / "optturb.json"
+spool.export_properties(str(export_path))
 spool.plot()
 spool.plot_velocity_triangles()
 print('check')

@@ -43,9 +43,11 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install sphinx sphinx-rtd-theme
-          # Install minimal dependencies needed for doc generation
+          # Install dependencies from pyproject.toml
           pip install numpy scipy matplotlib pandas
-          pip install requests  # For loss model downloads
+          pip install findiff shapely requests
+          pip install pyturbo-aero plot3d
+          # Note: cantera is mocked in conf.py (hard to install in CI)
 
       - name: Build documentation
         working-directory: docs
