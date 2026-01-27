@@ -311,6 +311,13 @@ def plot_xz(hub: npt.NDArray, shroud: npt.NDArray,
         ax: Matplotlib axis to plot on (if None, creates new figure)
         plot_name: Optional name suffix for the plot title
     """
+    # Create figure if ax not provided
+    if ax is None:
+        fig, ax = plt.subplots(figsize=(14, 7))
+        standalone = True
+    else:
+        standalone = False
+
     # Plot hub and shroud with fill
     ax.plot(hub[:, 0], hub[:, 1], 'b-', linewidth=2.5, label='Hub')
     ax.plot(shroud[:, 0], shroud[:, 1], 'r-', linewidth=2.5, label='Shroud (Casing)')
@@ -354,16 +361,23 @@ def plot_xz(hub: npt.NDArray, shroud: npt.NDArray,
     ax.minorticks_on()
     ax.grid(which='minor', linestyle=':', alpha=0.3)
 
+    # Save and show if standalone
+    if standalone:
+        fig.tight_layout()
+        plt.savefig(f'XZ_{plot_name.replace(" ", "_")}.png', dpi=300, bbox_inches='tight')
+        plt.show()
 
-def plot_blade(ss: npt.NDArray, ps: npt.NDArray, output_path: Path, name: str, base_color: str = 'blue') -> None:
+
+def plot_blade(ss: npt.NDArray, ps: npt.NDArray, name: str,
+               base_color: str = 'blue', output_path: Path = None) -> None:
     """Plot all spanwise sections of a blade with color gradient indicating percent span.
 
     Args:
         ss: Suction side points (nsections, npts, 3)
         ps: Pressure side points (nsections, npts, 3)
-        output_path: Directory to save the plot
         name: Name for the plot file
         base_color: Base color for the gradient ('blue', 'orange', 'purple', 'green', 'red')
+        output_path: Directory to save the plot (if None, saves to current directory)
     """
     import matplotlib.colors as mcolors
 
@@ -407,21 +421,25 @@ def plot_blade(ss: npt.NDArray, ps: npt.NDArray, output_path: Path, name: str, b
     ax.axis('scaled')
 
     fig.tight_layout()
-    fig.savefig(str(output_path / f'{name}_all_sections.png'), dpi=300, bbox_inches='tight')
+    if output_path:
+        save_path = output_path / f'{name}_all_sections.png'
+    else:
+        save_path = f'{name}_all_sections.png'
+    fig.savefig(str(save_path), dpi=300, bbox_inches='tight')
     plt.close()
 
 
 def plot_all_blades_combined(blades: List[Tuple[npt.NDArray, npt.NDArray]],
-                             output_path: Path,
                              blade_names: List[str],
-                             blade_colors: List[str]) -> None:
+                             blade_colors: List[str],
+                             output_path: Path = None) -> None:
     """Plot all blade rows together on a single figure with color gradients for percent span.
 
     Args:
         blades: List of (suction_side, pressure_side) tuples for all blade rows
-        output_path: Directory to save the plot
         blade_names: Names for each blade row (e.g., ['Stator1', 'Rotor1', ...])
         blade_colors: Color names for each blade row (e.g., ['green', 'red', 'purple', 'orange'])
+        output_path: Directory to save the plot (if None, saves to current directory)
     """
     import matplotlib.colors as mcolors
     from matplotlib.lines import Line2D
@@ -487,8 +505,12 @@ def plot_all_blades_combined(blades: List[Tuple[npt.NDArray, npt.NDArray]],
     ax.grid(which='minor', linestyle=':', alpha=0.2)
 
     fig.tight_layout()
-    fig.savefig(str(output_path / 'all_blades_combined.png'), dpi=300, bbox_inches='tight')
-    plt.close()
+    if output_path:
+        save_path = output_path / 'all_blades_combined.png'
+    else:
+        save_path = 'all_blades_combined.png'
+    fig.savefig(str(save_path), dpi=300, bbox_inches='tight')
+    plt.show()
 
 
 def process_geometry(script_dir: Path, npts: int = 400) -> dict:
@@ -565,11 +587,11 @@ def process_geometry(script_dir: Path, npts: int = 400) -> dict:
     colors = ['green', 'red', 'purple', 'orange']
     print("Creating blade profile plots with percent span gradients...")
     for i, (ss, ps) in enumerate(processed_data):
-        plot_blade(ss, ps, script_dir, labels[i], base_color=colors[i])
+        plot_blade(ss, ps, labels[i], base_color=colors[i], output_path=script_dir)
 
     # Step 7b: Plot all blades combined on one figure
     print("Creating combined plot with all blade rows...")
-    plot_all_blades_combined(processed_data, script_dir, labels, colors)
+    plot_all_blades_combined(processed_data, labels, colors, output_path=script_dir)
 
     # Step 8: Save processed data
     data = {
