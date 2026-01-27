@@ -363,7 +363,7 @@ def plot_blade(ss: npt.NDArray, ps: npt.NDArray, output_path: Path, name: str, b
         ps: Pressure side points (nsections, npts, 3)
         output_path: Directory to save the plot
         name: Name for the plot file
-        base_color: Base color for the gradient ('blue', 'orange', 'purple', 'green')
+        base_color: Base color for the gradient ('blue', 'orange', 'purple', 'green', 'red')
     """
     import matplotlib.colors as mcolors
 
@@ -374,7 +374,8 @@ def plot_blade(ss: npt.NDArray, ps: npt.NDArray, output_path: Path, name: str, b
         'blue': plt.cm.Blues,
         'orange': plt.cm.Oranges,
         'purple': plt.cm.Purples,
-        'green': plt.cm.Greens
+        'green': plt.cm.Greens,
+        'red': plt.cm.Reds
     }
 
     cmap = color_maps.get(base_color, plt.cm.Blues)
@@ -420,19 +421,24 @@ def plot_all_blades_combined(blades: List[Tuple[npt.NDArray, npt.NDArray]],
         blades: List of (suction_side, pressure_side) tuples for all blade rows
         output_path: Directory to save the plot
         blade_names: Names for each blade row (e.g., ['Stator1', 'Rotor1', ...])
-        blade_colors: Color names for each blade row (e.g., ['blue', 'orange', ...])
+        blade_colors: Color names for each blade row (e.g., ['green', 'red', 'purple', 'orange'])
     """
     import matplotlib.colors as mcolors
+    from matplotlib.lines import Line2D
 
-    fig, ax = plt.subplots(figsize=(16, 10))
+    fig, ax = plt.subplots(figsize=(18, 11))
 
     # Define color maps for different blades
     color_maps = {
         'blue': plt.cm.Blues,
         'orange': plt.cm.Oranges,
         'purple': plt.cm.Purples,
-        'green': plt.cm.Greens
+        'green': plt.cm.Greens,
+        'red': plt.cm.Reds
     }
+
+    # Custom legend elements
+    legend_elements = []
 
     for blade_idx, (ss, ps) in enumerate(blades):
         blade_name = blade_names[blade_idx]
@@ -440,35 +446,40 @@ def plot_all_blades_combined(blades: List[Tuple[npt.NDArray, npt.NDArray]],
         cmap = color_maps.get(base_color, plt.cm.Blues)
         n_sections = ss.shape[0]
 
-        # Create color gradient from light to dark (hub to tip)
+        # Create color gradient from dark to light (hub to tip)
         colors = [cmap(0.3 + 0.7 * i / (n_sections - 1)) for i in range(n_sections)]
 
+        # Store hub and tip colors for legend
+        hub_color = colors[0]  # Dark = hub (0%)
+        tip_color = colors[-1]  # Light = tip (100%)
+
         for section_idx in range(n_sections):
-            percent_span = (section_idx / (n_sections - 1)) * 100 if n_sections > 1 else 50
             color = colors[section_idx]
 
-            # Add blade name to first section only
-            if section_idx == 0:
-                label_ss = f'{blade_name} SS {percent_span:.0f}%'
-                label_ps = f'{blade_name} PS {percent_span:.0f}%'
-            else:
-                label_ss = f'{blade_name} SS {percent_span:.0f}%'
-                label_ps = f'{blade_name} PS {percent_span:.0f}%'
-
-            # Plot suction side (solid line)
+            # Plot suction side (solid line) - no labels
             ax.plot(ss[section_idx, :, 0], ss[section_idx, :, 1],
-                   '-', color=color, linewidth=1.8, alpha=0.85, label=label_ss)
+                   '-', color=color, linewidth=2, alpha=0.85)
 
-            # Plot pressure side (dashed line)
+            # Plot pressure side (dashed line) - no labels
             ax.plot(ps[section_idx, :, 0], ps[section_idx, :, 1],
-                   '--', color=color, linewidth=1.8, alpha=0.85, label=label_ps)
+                   '--', color=color, linewidth=2, alpha=0.85)
 
-    ax.set_xlabel('Axial Position, x [mm]', fontsize=16)
-    ax.set_ylabel('Tangential Position, r×θ [mm]', fontsize=16)
-    ax.set_title('All Blade Rows - Spanwise Sections with Percent Span', fontsize=18, fontweight='bold')
-    ax.legend(fontsize=8, ncol=4, loc='best', framealpha=0.9)
+        # Add custom legend entries for this blade (hub and tip only)
+        legend_elements.append(Line2D([0], [0], color=hub_color, linewidth=3,
+                                     label=f'{blade_name} Hub (0%)'))
+        legend_elements.append(Line2D([0], [0], color=tip_color, linewidth=3,
+                                     label=f'{blade_name} Shroud (100%)'))
+
+    ax.set_xlabel('Axial Position, x [mm]', fontsize=22)
+    ax.set_ylabel('Tangential Position, r×θ [mm]', fontsize=22)
+    ax.set_title('All Blade Rows - Spanwise Sections with Percent Span', fontsize=24, fontweight='bold')
+
+    # Create custom legend with only hub and tip entries
+    ax.legend(handles=legend_elements, fontsize=16, ncol=2,
+             loc='lower right', framealpha=0.95, borderaxespad=1)
+
     ax.grid(True, linestyle='--', alpha=0.4)
-    ax.tick_params(axis='both', labelsize=12)
+    ax.tick_params(axis='both', labelsize=16)
     ax.axis('scaled')
 
     # Add minor gridlines
@@ -549,8 +560,9 @@ def process_geometry(script_dir: Path, npts: int = 400) -> dict:
     plt.close(fig)
 
     # Step 7: Plot all spanwise sections for each blade with color gradients
+    # Colors match the meridional view: Green, Red, Purple, Orange
     labels = ['Stator1', 'Rotor1', 'Stator2', 'Rotor2']
-    colors = ['blue', 'orange', 'purple', 'green']
+    colors = ['green', 'red', 'purple', 'orange']
     print("Creating blade profile plots with percent span gradients...")
     for i, (ss, ps) in enumerate(processed_data):
         plot_blade(ss, ps, script_dir, labels[i], base_color=colors[i])
