@@ -125,13 +125,37 @@ stator1.loss_model = FixedPressureLoss(P0_Loss[0])  # type: ignore
 rotor1.loss_model = FixedPressureLoss(P0_Loss[1])   # type: ignore
 stator2.loss_model = FixedPressureLoss(P0_Loss[2])  # type: ignore
 rotor2.loss_model = FixedPressureLoss(P0_Loss[3])   # type: ignore
+
+# Custom massflow distribution for angle matching mode
+if FindBladeAngles:
+    # Define custom cumulative massflow distribution at each streamline [kg/s]
+    # This allows non-uniform massflow distribution across the span
+    target_massflow = 29.4
+    # Example: slightly non-uniform distribution (more flow toward tip)
+    custom_distribution = np.array([0, 5.5, 11.5, 18.0, target_massflow])
+
+    # Assign custom distribution to each blade row
+    stator1.massflow_target = custom_distribution
+    rotor1.massflow_target = custom_distribution
+    stator2.massflow_target = custom_distribution
+    rotor2.massflow_target = custom_distribution
+
 hub_m = hub/1000
 shroud_m = shroud/1000
 passage = Passage(hub_m[:,0],hub_m[:,1],
                  shroud_m[:,0],shroud_m[:,1],
                  passageType=PassageType.Axial) # type: ignore
-
-spool = TurbineSpool(passage=passage,
+if FindBladeAngles:
+    spool = TurbineSpool(passage=passage,
+            massflow=29.4,
+            inlet=inlet,
+            outlet=outlet,
+            rows=[stator1,rotor1,stator2,rotor2],
+            rpm=12400,
+            num_streamlines=n_streamlines,
+            fluid=None)
+else:
+    spool = TurbineSpool(passage=passage,
             massflow=20,
             inlet=inlet,
             outlet=outlet,
@@ -146,3 +170,4 @@ spool.solve() # This also initializes streamlines
 spool.export_properties(str(data_dir / "eee_results.json"))
 spool.plot()
 spool.plot_velocity_triangles()
+spool.plot_convergence(save_to_file=str(data_dir / "convergence.png"))

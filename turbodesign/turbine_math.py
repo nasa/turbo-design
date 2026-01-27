@@ -21,7 +21,7 @@ def compute_reynolds(rows:List[BladeRow],passage:Passage):
         passage (Passage): Passage 
     """
     
-    for i in range(1,len(rows)):
+    for i in range(1,len(rows)-1):
         row = rows[i]
         xr = passage.get_xr_slice(0.5,(rows[i-1].location,row.percent_hub))
         dx = np.diff(xr[:,0])
@@ -36,7 +36,7 @@ def compute_reynolds(rows:List[BladeRow],passage:Passage):
             V = row.V.mean()
         rho = row.rho.mean()
         mu = row.mu
-        row.Reynolds = c*V*rho/mu
+        row.Reynolds = row.axial_chord*V*rho/mu
         row.mprime = mp
         row.axial_chord = max(c,1E-12) # Axial chord
         # row.num_blades = int(2*np.pi*row.r.mean() / row.pitch_to_chord * row.axial_chord)

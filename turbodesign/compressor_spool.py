@@ -516,7 +516,10 @@ class CompressorSpool:
     def _angle_match(self) -> None:
         """Match massflow between streamtubes by tweaking exit angles."""
         blade_rows = self._all_rows()
-        for _ in range(3):
+        self.convergence_history = []  # Reset convergence history
+        prev_err = 1e9
+
+        for iter_num in range(3):
             for i, row in enumerate(blade_rows):
                 # Only adjust blade rows; skip inlet/outlet and other utility rows
                 if row.row_type not in (RowType.Rotor, RowType.Stator):
@@ -537,7 +540,7 @@ class CompressorSpool:
                         match_massflow_objective,
                         bounds=bounds,
                         args=(j, row, upstream, downstream, self.fluid),
-                        tol=1e-3,
+                        options={'xatol': 1e-3},
                         method="bounded",
                     )
                     if row.row_type == RowType.Rotor:
@@ -551,8 +554,19 @@ class CompressorSpool:
                 compute_massflow(row)
                 compute_power(row, upstream, is_compressor=True)
 
+            # Track convergence history
+            err = self._massflow_std(blade_rows[1:-1])
+            self.convergence_history.append({
+                'iteration': iter_num + 1,
+                'massflow_std': float(err),
+                'massflow_change': float(abs(err - prev_err)),
+                'relative_change': float(abs((err - prev_err) / max(err, 1e-6))),
+                'massflow': float(blade_rows[1].total_massflow_no_coolant)
+            })
+            prev_err = err
+            print(f"Angle match iteration {iter_num + 1}, massflow std: {err:.6f}")
 
-        
+
     # ------------------------------
     # Export / Plotting
     # ------------------------------
