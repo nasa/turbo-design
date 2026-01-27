@@ -38,6 +38,7 @@ class BladeRow:
     total_massflow: float = 0    # Massflow spool + all upstream cooling flow [kg/s]
     massflow: npt.NDArray = field(default_factory=lambda: np.array([0]))  # Massflow per radii
     total_massflow_no_coolant: float = 0     # Inlet massflow
+    massflow_target: Optional[npt.NDArray] = None  # Custom massflow distribution for angle matching [kg/s]
     # ----------------------------------
 
     # Streamline Properties 

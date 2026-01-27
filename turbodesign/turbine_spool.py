@@ -101,6 +101,7 @@ class TurbineSpool:
         self.rows = rows
         self.t_streamline = np.zeros((10,), dtype=float)
         self._adjust_streamlines = True
+        self.convergence_history: List[Dict] = []
 
         # Assign IDs, RPMs, and axial chords where appropriate
         for i, br in enumerate(self._all_rows()):
@@ -453,10 +454,20 @@ class TurbineSpool:
         """Match massflow between streamtubes by tweaking exit angles."""
         rows = self._all_rows()
         massflow_target = np.linspace(0,rows[-1].total_massflow,self.num_streamlines)
-        for _ in range(3):
+
+        self.convergence_history = []  # Reset convergence history
+        prev_err = 1e9
+
+        for iter_num in range(3):
             for i in range(1,len(rows)-1):
                 upstream = rows[i - 1] if i > 0 else rows[i]
                 downstream = rows[i + 1] if i < len(rows) - 1 else None
+
+                # Use custom massflow target if defined, otherwise use default
+                if rows[i].massflow_target is not None:
+                    current_massflow_target = rows[i].massflow_target
+                else:
+                    current_massflow_target = massflow_target
 
                 if rows[i].row_type == RowType.Stator:
                     bounds = [0, 80]
@@ -469,8 +480,8 @@ class TurbineSpool:
                     res = minimize_scalar(
                         massflow_loss_function,
                         bounds=bounds,
-                        args=(j, rows[i], upstream, massflow_target[j], downstream),
-                        tol=1e-4,
+                        args=(j, rows[i], upstream, current_massflow_target[j], downstream),
+                        options={'xatol': 1e-4},
                         method="bounded",
                     )
                     if rows[i].row_type == RowType.Rotor:
@@ -482,8 +493,29 @@ class TurbineSpool:
                 compute_gas_constants(upstream, self.fluid)
                 compute_gas_constants(rows[i], self.fluid)
             
+            # Adjust inlet to match massflow found at first blade row
+            target = rows[1].total_massflow_no_coolant
+            self.inlet.massflow = np.array([target]) if self.num_streamlines == 1 else (np.linspace(0, 1, self.num_streamlines) * target)
+            self.inlet.total_massflow_no_coolant = rows[1].total_massflow_no_coolant
+            self.inlet.total_massflow = rows[1].total_massflow_no_coolant
+            self.inlet.calculated_massflow = self.inlet.total_massflow_no_coolant
+            inlet_calc(self.inlet)
+            
             if self.adjust_streamlines:
                 adjust_streamlines(rows, self.passage)
+
+            # Track convergence history
+            err = self.__massflow_std__(rows[1:-1])
+            self.convergence_history.append({
+                'iteration': iter_num + 1,
+                'massflow_std': float(err),
+                'massflow_change': float(abs(err - prev_err)),
+                'relative_change': float(abs((err - prev_err) / max(err, 1e-6))),
+                'massflow': float(rows[1].total_massflow_no_coolant)
+            })
+            prev_err = err
+            print(f"Angle match iteration {iter_num + 1}, massflow std: {err:.6f}")
+
         compute_reynolds(rows, self.passage)
 
     @staticmethod
@@ -623,6 +655,7 @@ class TurbineSpool:
         past_err = -100.0
         loop_iter = 0
         err = 1e-3
+        self.convergence_history = []  # Reset convergence history
         while (np.abs((err - past_err) / err) > 0.05) and (loop_iter < 10):
             if len(pressure_ratio_ranges) == 1: # Single stage, use minimize scalar 
                 x = minimize_scalar(
@@ -660,6 +693,15 @@ class TurbineSpool:
             err = self.__massflow_std__(rows)
             loop_iter += 1
             print(f"Loop {loop_iter} massflow convergenced error:{err}")
+
+            # Store convergence history
+            self.convergence_history.append({
+                'iteration': loop_iter,
+                'massflow_std': float(err),
+                'massflow_change': float(abs(err - past_err)),
+                'relative_change': float(abs((err - past_err) / max(err, 1e-6))),
+                'massflow': float(rows[1].total_massflow_no_coolant)
+            })
 
         compute_reynolds(rows, self.passage)
 
@@ -785,132 +827,323 @@ class TurbineSpool:
             json.dump(data, f, indent=4, cls=NumpyEncoder)
 
     def plot(self) -> None:
-        """Plot hub/shroud and streamlines."""
+        """Plot hub/shroud and streamlines with improved labels and formatting."""
         blade_rows = self._all_rows()
-        plt.figure(num=1, clear=True, dpi=150, figsize=(15, 10))
-        plt.plot(
+        fig, ax = plt.subplots(1, 1, figsize=(16, 8), dpi=150)
+
+        # Plot hub and shroud with thicker lines
+        ax.plot(
             self.passage.xhub_pts,
             self.passage.rhub_pts,
-            label="hub",
+            label="Hub",
             linestyle="solid",
-            linewidth=2,
+            linewidth=3,
             color="black",
+            zorder=10
         )
-        plt.plot(
+        ax.plot(
             self.passage.xshroud_pts,
             self.passage.rshroud_pts,
-            label="shroud",
+            label="Shroud",
             linestyle="solid",
-            linewidth=2,
+            linewidth=3,
             color="black",
+            zorder=10
         )
 
         hub_length = np.sum(
             np.sqrt(np.diff(self.passage.xhub_pts) ** 2 + np.diff(self.passage.rhub_pts) ** 2)
         )
+
+        # Prepare streamline data
         x_streamline = np.zeros((self.num_streamlines, len(blade_rows)))
         r_streamline = np.zeros((self.num_streamlines, len(blade_rows)))
         for i in range(len(blade_rows)):
             x_streamline[:, i] = blade_rows[i].x
             r_streamline[:, i] = blade_rows[i].r
 
+        # Plot streamlines connecting blade rows
         for i in range(1, len(blade_rows) - 1):
-            plt.plot(x_streamline[:, i], r_streamline[:, i], "--b", linewidth=1.5)
+            ax.plot(x_streamline[:, i], r_streamline[:, i],
+                   linestyle="--", linewidth=1.2, color="gray", alpha=0.6, zorder=1)
+
+        # Track label positions to avoid overlaps
+        label_positions = []
 
         for i, row in enumerate(blade_rows):
-            plt.plot(row.x, row.r, linestyle="dashed", linewidth=1.5, color="blue", alpha=0.4)
-            plt.plot(x_streamline[:, i], r_streamline[:, i], "or")
+            # Plot blade row exit locations
+            ax.plot(row.x, row.r, linestyle="none", marker="o",
+                   markersize=6, color="red", alpha=0.7, zorder=5)
 
-            if i == 0:
-                pass
-            else:
-                upstream = blade_rows[i - 1]
-                if upstream.row_type == RowType.Inlet:
-                    cut_line1, _, _ = self.passage.get_cutting_line(
-                        (row.hub_location * hub_length + (0.5 * row.blade_to_blade_gap * row.axial_chord) - row.axial_chord)
-                        / hub_length
+            # Label inlet
+            if row.row_type == RowType.Inlet:
+                x_pos = row.x.mean()
+                r_pos = row.r.mean()
+                ax.axvline(x=x_pos, color='green', linestyle=':', linewidth=2, alpha=0.7, zorder=2)
+                ax.text(x_pos, self.passage.rshroud_pts.max() * 1.05, 'INLET',
+                       fontsize=12, fontweight='bold', ha='center', va='bottom',
+                       bbox=dict(boxstyle='round,pad=0.5', facecolor='lightgreen', alpha=0.7))
+                label_positions.append((x_pos, 'INLET'))
+
+            # Plot blade rows with proper labels
+            elif row.row_type in [RowType.Stator, RowType.Rotor]:
+                if i > 0:
+                    upstream = blade_rows[i - 1]
+                    if upstream.row_type == RowType.Inlet:
+                        cut_line1, _, _ = self.passage.get_cutting_line(
+                            (row.hub_location * hub_length + (0.5 * row.blade_to_blade_gap * row.axial_chord) - row.axial_chord)
+                            / hub_length
+                        )
+                    else:
+                        cut_line1, _, _ = self.passage.get_cutting_line(
+                            (upstream.hub_location * hub_length) / hub_length
+                        )
+                    cut_line2, _, _ = self.passage.get_cutting_line(
+                        (row.hub_location * hub_length - (0.5 * row.blade_to_blade_gap * row.axial_chord)) / hub_length
                     )
-                else:
-                    cut_line1, _, _ = self.passage.get_cutting_line(
-                        (upstream.hub_location * hub_length) / hub_length
-                    )
-                cut_line2, _, _ = self.passage.get_cutting_line(
-                    (row.hub_location * hub_length - (0.5 * row.blade_to_blade_gap * row.axial_chord)) / hub_length
-                )
 
-            if row.row_type == RowType.Stator:
-                x1, r1 = cut_line1.get_point(np.linspace(0, 1, 10))
-                plt.plot(x1, r1, "m")
-                x2, r2 = cut_line2.get_point(np.linspace(0, 1, 10))
-                plt.plot(x2, r2, "m")
-                x_text = (x1 + x2) / 2
-                r_text = (r1 + r2) / 2
-                plt.text(x_text.mean(), r_text.mean(), "Stator", fontdict={"fontsize": "xx-large"})
-            elif row.row_type == RowType.Rotor:
-                x1, r1 = cut_line1.get_point(np.linspace(0, 1, 10))
-                plt.plot(x1, r1, color="brown")
-                x2, r2 = cut_line2.get_point(np.linspace(0, 1, 10))
-                plt.plot(x2, r2, color="brown")
-                x_text = (x1 + x2) / 2
-                r_text = (r1 + r2) / 2
-                plt.text(x_text.mean(), r_text.mean(), "Rotor", fontdict={"fontsize": "xx-large"})
+                    # Plot blade leading and trailing edges
+                    if row.row_type == RowType.Stator:
+                        color = 'purple'
+                        label = f'Stator {row.stage_id + 1}'
+                    else:
+                        color = 'brown'
+                        label = f'Rotor {row.stage_id + 1}'
 
-        plt.axis("scaled")
-        plt.savefig("Meridional.png", transparent=False, dpi=150)
+                    x1, r1 = cut_line1.get_point(np.linspace(0, 1, 10))
+                    ax.plot(x1, r1, color=color, linewidth=2.5, alpha=0.8, zorder=3)
+                    x2, r2 = cut_line2.get_point(np.linspace(0, 1, 10))
+                    ax.plot(x2, r2, color=color, linewidth=2.5, alpha=0.8, zorder=3)
+
+                    # Mark exit location with vertical line
+                    x_exit = row.x.mean()
+                    ax.axvline(x=x_exit, color=color, linestyle='--',
+                             linewidth=1.5, alpha=0.5, zorder=2)
+
+                    # Add exit label at top
+                    ax.text(x_exit, self.passage.rshroud_pts.max() * 1.02, f'{label} Exit',
+                           fontsize=10, ha='center', va='bottom', rotation=0,
+                           color=color, fontweight='bold')
+
+            # Label outlet
+            elif row.row_type == RowType.Outlet:
+                x_pos = row.x.mean()
+                ax.axvline(x=x_pos, color='blue', linestyle=':', linewidth=2, alpha=0.7, zorder=2)
+                ax.text(x_pos, self.passage.rshroud_pts.max() * 1.05, 'OUTLET',
+                       fontsize=12, fontweight='bold', ha='center', va='bottom',
+                       bbox=dict(boxstyle='round,pad=0.5', facecolor='lightblue', alpha=0.7))
+
+        # Formatting
+        ax.set_xlabel('Axial Distance [m]', fontsize=13, fontweight='bold')
+        ax.set_ylabel('Radial Distance [m]', fontsize=13, fontweight='bold')
+        ax.set_title(f'Meridional View - {self.num_streamlines} Streamlines',
+                    fontsize=14, fontweight='bold', pad=20)
+        ax.grid(True, alpha=0.3, linestyle=':', linewidth=0.5)
+        ax.legend(loc='upper left', fontsize=11, framealpha=0.9)
+        ax.set_aspect('equal', adjustable='box')
+
+        plt.tight_layout()
+        plt.savefig("Meridional.png", transparent=False, dpi=200, bbox_inches='tight')
         plt.show()
 
     def plot_velocity_triangles(self) -> None:
-        """Plot velocity triangles for each blade row (turbines).
-        """
+        """Plot velocity triangles for each blade row with improved styling and annotations."""
         blade_rows = self._all_rows()
-        prop = dict(arrowstyle="-|>,head_width=0.4,head_length=0.8", shrinkA=0, shrinkB=0)
+
+        # Define arrow properties for different velocity types
+        prop_V = dict(arrowstyle="-|>,head_width=0.5,head_length=1.0",
+                     shrinkA=0, shrinkB=0, color='blue', lw=2.5)
+        prop_W = dict(arrowstyle="-|>,head_width=0.5,head_length=1.0",
+                     shrinkA=0, shrinkB=0, color='red', lw=2.5)
+        prop_U = dict(arrowstyle="-|>,head_width=0.5,head_length=1.0",
+                     shrinkA=0, shrinkB=0, color='green', lw=2.5)
+        prop_component = dict(arrowstyle="-|>,head_width=0.4,head_length=0.8",
+                             shrinkA=0, shrinkB=0, color='gray', lw=1.5, linestyle='--')
 
         for j in range(self.num_streamlines):
             x_start = 0.0
             y_max = 0.0
             y_min = 0.0
-            plt.figure(num=1, clear=True)
+
+            fig, ax = plt.subplots(1, 1, figsize=(14, 8), dpi=150)
+
             for i in range(1, len(blade_rows) - 1):
                 row = blade_rows[i]
-                x_end = x_start + row.Vm.mean()
+                x_end = x_start + row.Vm[j]
                 dx = x_end - x_start
 
                 Vt = row.Vt[j]
                 Wt = row.Wt[j]
                 U = row.U[j]
+                Vm = row.Vm[j]
 
-                y_max = max(y_max, Vt, Wt)
-                y_min = min(y_min, Vt, Wt)
+                y_max = max(y_max, Vt, Wt, U + Wt, U + Vt)
+                y_min = min(y_min, Vt, Wt, 0)
 
-                # V
-                plt.annotate("", xy=(x_end, Vt), xytext=(x_start, 0), arrowprops=prop)
-                plt.text((x_start + x_end) / 2, Vt / 2 * 1.1, "V", fontdict={"fontsize": "xx-large"})
+                # Draw absolute velocity V (blue)
+                ax.annotate("", xy=(x_end, Vt), xytext=(x_start, 0), arrowprops=prop_V, zorder=5)
+                v_mag = np.sqrt(Vm**2 + Vt**2)
+                ax.text((x_start + x_end) / 2, Vt / 2 + np.sign(Vt) * 15,
+                       f"V={v_mag:.1f}", fontsize=12, fontweight='bold',
+                       ha='center', color='blue',
+                       bbox=dict(boxstyle='round,pad=0.3', facecolor='lightblue', alpha=0.7))
 
-                # W
-                plt.annotate("", xy=(x_end, Wt), xytext=(x_start, 0), arrowprops=prop)
-                plt.text((x_start + x_end) / 2, Wt / 2 * 1.1, "W", fontdict={"fontsize": "xx-large"})
+                # Draw relative velocity W (red)
+                ax.annotate("", xy=(x_end, Wt), xytext=(x_start, 0), arrowprops=prop_W, zorder=5)
+                w_mag = np.sqrt(Vm**2 + Wt**2)
+                ax.text((x_start + x_end) / 2, Wt / 2 - np.sign(Wt) * 15,
+                       f"W={w_mag:.1f}", fontsize=12, fontweight='bold',
+                       ha='center', color='red',
+                       bbox=dict(boxstyle='round,pad=0.3', facecolor='lightcoral', alpha=0.7))
 
+                # Draw velocity components and U
                 if abs(Vt) > abs(Wt):
-                    plt.annotate("", xy=(x_end, Wt), xytext=(x_end, 0), arrowprops=prop)  # Wt
-                    plt.text(x_end + dx * 0.1, Wt / 2, "Wt", fontdict={"fontsize": "xx-large"})
+                    # Draw Wt component
+                    ax.annotate("", xy=(x_end, Wt), xytext=(x_end, 0), arrowprops=prop_component, zorder=3)
+                    ax.text(x_end + dx * 0.08, Wt / 2, f"Wt={Wt:.1f}",
+                           fontsize=10, ha='left', color='gray')
 
-                    plt.annotate("", xy=(x_end, U + Wt), xytext=(x_end, Wt), arrowprops=prop)  # U
-                    plt.text(x_end + dx * 0.1, (Wt + U) / 2, "U", fontdict={"fontsize": "xx-large"})
+                    # Draw U (blade speed)
+                    ax.annotate("", xy=(x_end, U + Wt), xytext=(x_end, Wt), arrowprops=prop_U, zorder=4)
+                    ax.text(x_end + dx * 0.08, (Wt + U + Wt) / 2, f"U={U:.1f}",
+                           fontsize=11, ha='left', fontweight='bold', color='green',
+                           bbox=dict(boxstyle='round,pad=0.3', facecolor='lightgreen', alpha=0.7))
                 else:
-                    plt.annotate("", xy=(x_end, Vt), xytext=(x_end, 0), arrowprops=prop)  # Vt
-                    plt.text(x_end + dx * 0.1, Vt / 2, "Vt", fontdict={"fontsize": "xx-large"})
+                    # Draw Vt component
+                    ax.annotate("", xy=(x_end, Vt), xytext=(x_end, 0), arrowprops=prop_component, zorder=3)
+                    ax.text(x_end + dx * 0.08, Vt / 2, f"Vt={Vt:.1f}",
+                           fontsize=10, ha='left', color='gray')
 
-                    plt.annotate("", xy=(x_end, Wt + U), xytext=(x_end, Wt), arrowprops=prop)  # U
-                    plt.text(x_end + dx * 0.1, Wt + U / 2, "U", fontdict={"fontsize": "xx-large"})
+                    # Draw U (blade speed)
+                    ax.annotate("", xy=(x_end, Wt), xytext=(x_end, Vt), arrowprops=prop_U, zorder=4)
+                    ax.text(x_end + dx * 0.08, (Vt + Wt) / 2, f"U={U:.1f}",
+                           fontsize=11, ha='left', fontweight='bold', color='green',
+                           bbox=dict(boxstyle='round,pad=0.3', facecolor='lightgreen', alpha=0.7))
 
-                y = y_min if -np.sign(Vt) > 0 else y_max
-                plt.text((x_start + x_end) / 2, -np.sign(Vt) * y * 0.95, row.row_type.name, fontdict={"fontsize": "xx-large"})
-                x_start += row.Vm[j]
-                plt.axis([0, x_end + dx, y_min, y_max])
-            plt.ylabel("Tangental Velocity [m/s]")
-            plt.xlabel("Vm [m/s]")
-            plt.title(f"Velocity Triangles for Streamline {j}")
-            plt.savefig(f"streamline_{j:04d}.png", transparent=False, dpi=150)
+                # Draw Vm component (dashed horizontal)
+                ax.plot([x_start, x_end], [0, 0], 'k--', linewidth=1.5, alpha=0.5, zorder=2)
+                ax.text((x_start + x_end) / 2, -5, f"Vm={Vm:.1f}",
+                       fontsize=10, ha='center', va='top', color='black')
+
+                # Add blade row label
+                label_y = y_min - (y_max - y_min) * 0.15 if Vt > 0 else y_max + (y_max - y_min) * 0.15
+                stage_label = f"{row.row_type.name} {row.stage_id + 1}"
+                ax.text((x_start + x_end) / 2, label_y, stage_label,
+                       fontsize=13, ha='center', fontweight='bold',
+                       bbox=dict(boxstyle='round,pad=0.5',
+                               facecolor='lightyellow' if row.row_type == RowType.Stator else 'lightcoral',
+                               edgecolor='black', linewidth=2))
+
+                # Add separation line between blade rows
+                if i < len(blade_rows) - 2:
+                    ax.axvline(x=x_end, color='gray', linestyle=':', linewidth=1, alpha=0.5, zorder=1)
+
+                x_start = x_end
+
+            # Formatting
+            margin = (y_max - y_min) * 0.2
+            ax.set_ylim([y_min - margin, y_max + margin])
+            ax.set_xlim([0, x_end * 1.1])
+
+            ax.set_ylabel('Tangential Velocity [m/s]', fontsize=13, fontweight='bold')
+            ax.set_xlabel('Meridional Velocity Vm [m/s]', fontsize=13, fontweight='bold')
+            ax.set_title(f'Velocity Triangles - Streamline {j} (r={blade_rows[1].r[j]:.4f} m)',
+                        fontsize=14, fontweight='bold', pad=20)
+
+            ax.grid(True, alpha=0.3, linestyle=':', linewidth=0.5)
+            ax.axhline(y=0, color='black', linewidth=1.5, zorder=2)
+
+            # Add legend
+            from matplotlib.patches import FancyArrow
+            legend_elements = [
+                plt.Line2D([0], [0], color='blue', linewidth=2.5, label='V (Absolute Velocity)'),
+                plt.Line2D([0], [0], color='red', linewidth=2.5, label='W (Relative Velocity)'),
+                plt.Line2D([0], [0], color='green', linewidth=2.5, label='U (Blade Speed)')
+            ]
+            ax.legend(handles=legend_elements, loc='upper right', fontsize=10, framealpha=0.9)
+
+            plt.tight_layout()
+            plt.savefig(f"streamline_{j:04d}.png", transparent=False, dpi=200, bbox_inches='tight')
+            plt.close()
+
+    def save_convergence_history(self, filename: str = "convergence_history.jsonl") -> None:
+        """Save convergence history to JSONL file.
+
+        Writes the convergence history collected during solve() to a JSON Lines file,
+        where each line is a JSON object representing one iteration.
+
+        Args:
+            filename: Output JSONL file path (default: "convergence_history.jsonl")
+
+        Returns:
+            None. Writes JSONL file to specified path.
+
+        Example:
+            >>> spool.solve()
+            >>> spool.save_convergence_history("turbine_convergence.jsonl")
+        """
+        import json
+        from pathlib import Path
+
+        output_path = Path(filename)
+        with open(output_path, 'w') as f:
+            for entry in self.convergence_history:
+                f.write(json.dumps(entry) + '\n')
+        print(f"Convergence history saved to {output_path}")
+
+    def plot_convergence(self, save_to_file: Optional[Union[bool, str]] = None) -> None:
+        """Plot convergence history showing massflow error vs iteration.
+
+        Displays a semi-log plot of the massflow standard deviation error across
+        iterations. If convergence history is empty, warns user.
+
+        Args:
+            save_to_file: If True, saves to "convergence.png". If string, saves to that filename.
+                         If None/False, displays plot without saving.
+
+        Returns:
+            None. Either displays plot or saves to file.
+
+        Example:
+            >>> spool.solve()
+            >>> spool.plot_convergence()  # Display plot
+            >>> spool.plot_convergence(save_to_file=True)  # Save to convergence.png
+            >>> spool.plot_convergence(save_to_file="my_convergence.png")  # Save to custom file
+        """
+        if not self.convergence_history:
+            print("Warning: No convergence history available. Run solve() first.")
+            return
+
+        iterations = [entry['iteration'] for entry in self.convergence_history]
+        massflow_std = [entry['massflow_std'] for entry in self.convergence_history]
+        relative_change = [entry['relative_change'] for entry in self.convergence_history]
+
+        fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(10, 8))
+
+        # Plot massflow std deviation
+        ax1.semilogy(iterations, massflow_std, 'o-', linewidth=2, markersize=8)
+        ax1.set_xlabel('Iteration', fontsize=12)
+        ax1.set_ylabel('Massflow Std Dev [kg/s]', fontsize=12)
+        ax1.set_title('Convergence History: Massflow Standard Deviation', fontsize=14, fontweight='bold')
+        ax1.grid(True, alpha=0.3)
+
+        # Plot relative change
+        ax2.semilogy(iterations, relative_change, 's-', color='orange', linewidth=2, markersize=8)
+        ax2.set_xlabel('Iteration', fontsize=12)
+        ax2.set_ylabel('Relative Change', fontsize=12)
+        ax2.set_title('Convergence History: Relative Change', fontsize=14, fontweight='bold')
+        ax2.axhline(y=0.05, color='r', linestyle='--', label='Convergence Threshold (0.05)')
+        ax2.legend()
+        ax2.grid(True, alpha=0.3)
+
+        plt.tight_layout()
+
+        if save_to_file:
+            filename = "convergence.png" if save_to_file is True else str(save_to_file)
+            plt.savefig(filename, dpi=150, bbox_inches='tight')
+            print(f"Convergence plot saved to {filename}")
+        else:
+            plt.show()
 
 
 # ------------------------------
