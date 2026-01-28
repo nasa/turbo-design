@@ -1130,15 +1130,15 @@ class TurbineSpool:
         # Plot massflow std deviation
         ax1.semilogy(iterations, massflow_std, 'o-', linewidth=2, markersize=8)
         ax1.set_xlabel('Iteration', fontsize=16)
-        ax1.set_ylabel('Massflow Std Dev [kg/s]', fontsize=16)
+        ax1.set_ylabel('2× Massflow Std Dev [kg/s]', fontsize=16)
         ax1.set_title('Convergence History: Massflow Standard Deviation', fontsize=14, fontweight='bold')
         ax1.grid(True, alpha=0.3)
 
         # Plot relative change
         ax2.semilogy(iterations, relative_change, 's-', color='orange', linewidth=2, markersize=8)
         ax2.set_xlabel('Iteration', fontsize=16)
-        ax2.set_ylabel('Relative Change', fontsize=16)
-        ax2.set_title('Convergence History: Relative Change', fontsize=14, fontweight='bold')
+        ax2.set_ylabel(r'Massflow Residual $\left|\frac{err_{n-1} - err_n}{err_n}\right|$', fontsize=16)
+        ax2.set_title('Convergence History: Relative Error Change', fontsize=14, fontweight='bold')
         ax2.grid(True, alpha=0.3)
 
         plt.tight_layout()
