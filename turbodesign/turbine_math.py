@@ -236,7 +236,7 @@ def rotor_calc(row:BladeRow,upstream:BladeRow,calculate_vm:bool=True,outlet_type
     T0_coolant = 0 
     if row.coolant is not None:
         T0_coolant = T0_coolant_weighted_average(row)
-    row.T0R = upstream.T0R - T0_coolant # (upstream_rothalpy + 0.5*row.U**2)/row.Cp # - T0_coolant_weighted_average(row) 
+    row.T0R = (upstream_rothalpy + 0.5*row.U**2)/row.Cp - T0_coolant
     P0R_P = row.P0R / row.P
     T0R_T = P0R_P**((row.gamma-1)/row.gamma)
     row.T = (row.T0R/T0R_T)     # Exit static temperature

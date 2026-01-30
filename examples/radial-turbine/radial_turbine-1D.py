@@ -1,5 +1,12 @@
 from pyturbo.helper import bezier, arc, line2D, xr_to_mprime
 import numpy as np 
+from turbodesign import PassageType
+from turbodesign.row_factory import make_rotor_row, make_stator_row
+from turbodesign import TurbineSpool, Inlet, Passage, Outlet
+from turbodesign.coolant import Coolant
+from turbodesign.loss import FixedPressureLoss
+import matplotlib.pyplot as plt
+import os
 
 def build_endwalls(radius:float,
                    hub_outlet_radius_scale:float=1.1,
@@ -82,18 +89,7 @@ def offset_curve(x, y, offset_distance):
     
     return np.vstack([x_offset, y_offset]).transpose()
 
-from typing import Tuple
-from turbodesign import PassageType
-from turbodesign.row_factory import make_rotor_row, make_stator_row
-from turbodesign import TurbineSpool, Inlet, RowType, BladeRow, Passage, Outlet
-from turbodesign.coolant import Coolant
-from turbodesign.loss import FixedPressureLoss
-from cantera import Solution
-from scipy.optimize import minimize_scalar
-from scipy.interpolate import pchip
-import matplotlib.pyplot as plt
-import cantera as ct
-import numpy.typing as npt 
+
 
 # Units for Radius, shroud_inlet_offset,rhub_out are in meters 
 hub_inlet, hub, hub_outlet, shroud_inlet, shroud, shroud_outlet = build_endwalls(radius=0.04,
@@ -140,18 +136,19 @@ passage = Passage(hub[:,0],hub[:,1],shroud[:,0],shroud[:,1],passageType=PassageT
 #%% Defining the Inlet/Outlet
 inlet = Inlet(hub_location=0, alpha=[0])
 inlet.init_total(P0=[P0], T0=[T0], M=[0.1], percent_radii=[0.5])
+inlet.gamma = 1.38
 
 outlet = Outlet(num_streamlines=5)
 outlet.init_static(P=P, percent_radii=[0.5])
 
 stator = make_stator_row(hub_location=blade_position[0])
 stator.R = 287.15
-stator.gamma = 1.35
+stator.gamma = 1.38
 stator.Cp = stator.gamma*stator.R/(stator.gamma-1)
 
 rotor = make_rotor_row(hub_location=blade_position[1])
 rotor.R = 287.15
-rotor.gamma = 1.35
+rotor.gamma = 1.38
 rotor.Cp = stator.gamma*stator.R/(stator.gamma-1)
 
 # If coolant has 0 massflow then it isn't used
@@ -162,7 +159,7 @@ rotor.coolant = Coolant(T0=T0*0.555556,P0=5E5,Cp=900,massflow_percentage=0)
 stator.beta2_metal = [alpha2,alpha2,alpha2,alpha2,alpha2] # Angle, hub,mean,tip
 stator.loss_model = FixedPressureLoss(0.0) # type: ignore
 
-rotor.beta2_metal = [45,47,52,57,60] # Angle, hub,mean,tip
+rotor.beta2_metal = [45,47,52,57,60] # Angle, hub, to tip
 rotor.loss_model = FixedPressureLoss(0.15669278543371953) # type: ignore # <- From CFD.
 
 spool = TurbineSpool(
@@ -179,4 +176,4 @@ spool.adjust_streamlines = False
 
 spool.solve() # This also initializes streamlines
 spool.plot_velocity_triangles()
-spool.export_properties("output.json")
+spool.export_properties(os.path.join(os.path.dirname(__file__), "output.json"))

@@ -91,7 +91,7 @@ class TurbineSpool:
         self.passage = passage
         self.massflow = massflow
         self.num_streamlines = num_streamlines
-        self._fluid = fluid if fluid is not None else Solution("air.yaml")
+        self._fluid = fluid
         self.rpm = rpm
 
         self.inlet = inlet
@@ -111,8 +111,9 @@ class TurbineSpool:
                 br.axial_chord = br.hub_location * self.passage.hub_length
 
         # Propagate initial fluid to rows
-        for br in self._all_rows():
-            br.fluid = self._fluid
+        if self._fluid is not None:
+            for br in self._all_rows():
+                br.fluid = self._fluid
 
     def _all_rows(self) -> List[BladeRow]:
         """Convenience to iterate inlet + interior rows + outlet."""
@@ -273,7 +274,9 @@ class TurbineSpool:
         inlet = self.inlet
         if self.fluid:
             inlet.__initialize_fluid__(self.fluid)  # type: ignore[arg-type]
-        else:
+        elif inlet.gamma is not None:
+            inlet.__initialize_fluid__(R=inlet.R, gamma=inlet.gamma, Cp=inlet.Cp)  # type: ignore[call-arg]
+        elif blade_rows[1].gamma is not None:
             inlet.__initialize_fluid__(  # type: ignore[call-arg]
                 R=blade_rows[1].R,
                 gamma=blade_rows[1].gamma,
@@ -793,10 +796,6 @@ class TurbineSpool:
             "rpm": self.rpm,
             "r_streamline": r_streamline.tolist(),
             "x_streamline": x_streamline.tolist(),
-            "rhub": self.passage.rhub_pts.tolist(),
-            "rshroud": self.passage.rshroud_pts.tolist(),
-            "xhub": self.passage.xhub_pts.tolist(),
-            "xshroud": self.passage.xshroud_pts.tolist(),
             "num_streamlines": self.num_streamlines,
             "euler_power": euler_power,
             "euler_power_hp": euler_power_hp,
