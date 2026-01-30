@@ -1203,9 +1203,7 @@ def massflow_loss_function(
     compute_power(row, upstream)
 
     if row.row_type != RowType.Inlet:
-        T3_is = upstream.T0 * (1 / row.P0_P) ** ((row.gamma - 1) / row.gamma)
-        a = np.sqrt(row.gamma * row.R * T3_is)
-        T03_is = T3_is * (1 + (row.gamma - 1) / 2 * (row.V / a) ** 2)
+        T03_is = upstream.T0 * (row.P0 / upstream.P0) ** ((row.gamma - 1) / row.gamma)
         row.eta_total = (upstream.T0.mean() - row.T0.mean()) / (upstream.T0.mean() - T03_is.mean())
 
     return float(np.abs(massflow_target - row.massflow[index]))

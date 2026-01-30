@@ -124,32 +124,34 @@ rotor_arc_len = xr_to_mprime(hub)[1][-1]
 # Calculate where the blade will be located based on the arc length
 blade_position = (0,(inlet_arc_len+rotor_arc_len)/total_hub_arc_len)
 
-P0 = 562891 # Inlet Total Pressure
-T0 = 1237 # Inlet Total Temperature
-P = 263724 # Static Pressure
+P0 = 562738 # Inlet Total Pressure
+T0 = 1242 # Inlet Total Temperature
+P = 261874 # Static Pressure
 P0_P = P0/P
 RPM = -50000
 massflow = 0.1 # Guessed value for initialization 
-alpha2 = -51.5
-
+alpha2 = -52.0  # Adjusted to give beta1 ≈ 0° at rotor inlet (matching CFD)
+gamma = 1.35
 passage = Passage(hub[:,0],hub[:,1],shroud[:,0],shroud[:,1],passageType=PassageType.Centrifugal) # type: ignore
 #%% Defining the Inlet/Outlet
 inlet = Inlet(hub_location=0, alpha=[0])
 inlet.init_total(P0=[P0], T0=[T0], M=[0.1], percent_radii=[0.5])
-inlet.gamma = 1.38
+inlet.gamma = gamma
+inlet.R = 287.15
+inlet.Cp = gamma*inlet.R/(gamma-1)
 
 outlet = Outlet(num_streamlines=5)
 outlet.init_static(P=P, percent_radii=[0.5])
 
 stator = make_stator_row(hub_location=blade_position[0])
 stator.R = 287.15
-stator.gamma = 1.38
+stator.gamma = gamma
 stator.Cp = stator.gamma*stator.R/(stator.gamma-1)
 
 rotor = make_rotor_row(hub_location=blade_position[1])
 rotor.R = 287.15
-rotor.gamma = 1.38
-rotor.Cp = stator.gamma*stator.R/(stator.gamma-1)
+rotor.gamma = gamma
+rotor.Cp = rotor.gamma*rotor.R/(rotor.gamma-1)
 
 # If coolant has 0 massflow then it isn't used
 stator.coolant = Coolant(T0=T0*0.555556,P0=5E5,Cp=900,massflow_percentage=0) 
@@ -159,8 +161,8 @@ rotor.coolant = Coolant(T0=T0*0.555556,P0=5E5,Cp=900,massflow_percentage=0)
 stator.beta2_metal = [alpha2,alpha2,alpha2,alpha2,alpha2] # Angle, hub,mean,tip
 stator.loss_model = FixedPressureLoss(0.0) # type: ignore
 
-rotor.beta2_metal = [45,47,52,57,60] # Angle, hub, to tip
-rotor.loss_model = FixedPressureLoss(0.15669278543371953) # type: ignore # <- From CFD.
+rotor.beta2_metal = [44,46,51,56,59] # Angle, hub to tip; shifted ~1° to match CFD avg beta2=51.74°
+rotor.loss_model = FixedPressureLoss(0.1397493298790384) # type: ignore # <- From CFD (gamma=1.35)
 
 spool = TurbineSpool(
                 passage=passage,
@@ -176,4 +178,4 @@ spool.adjust_streamlines = False
 
 spool.solve() # This also initializes streamlines
 spool.plot_velocity_triangles()
-spool.export_properties(os.path.join(os.path.dirname(__file__), "output.json"))
+spool.export_properties(os.path.join(os.path.dirname(__file__), "turbo_design_1D_output.json"))

@@ -176,12 +176,12 @@ def calculate_properties(station01:Dict[str,float],station02:Dict[str,float],IsR
     P0_P = station01['P0']/station02['P']
     T3_is = station01['T0'] * (1/P0_P)**((gamma-1)/gamma)
    
-    a = math.sqrt(gamma*R*station02['T'])
-    T03_is = T3_is * (1+(gamma-1)/2*station02['M']**2) # This is probably V not Vm
-    station02['total-total_power'] = (station01['T0'] - station02['T0'])*station02['massflow']
+    T03_is = station01['T0'] * (station02['P0']/station01['P0'])**((gamma-1)/gamma)
+    # T03_is = T3_is * (1+(gamma-1)/2*station02['M']**2) 
+    station02['total-total_power'] = station02['massflow'] * Cp * (station01['T0'] - station02['T0'])
     station02['total-total_efficiency'] = (station01['T0'] - station02['T0'])/(station01['T0'] - T03_is)
     station02['total-static_efficiency'] = (station01['T0'] - station02['T0'])/(station01['T0'] - T3_is)
-    station02['torque_efficiency'] = station02['total_power_torque']/(n_blades*station02['massflow']*(station01['T0'] - T03_is))
+    station02['torque_efficiency'] = station02['total_power_torque']/(n_blades*station02['massflow']*Cp*(station01['T0'] - T03_is))
     station02['Total-Total_Power_kW_per_blade'] = station02['massflow'] * Cp * (station01['T0'] - station02['T0']) / 1000
     station02['Total-Total_Power_kW'] = n_blades*station02['Total-Total_Power_kW_per_blade']
     station02['Euler_Power_kW_per_blade'] = station02['massflow'] * (station01['U']*station01['Vt'] - station02['U']*station02['Vt'])/1000
@@ -327,5 +327,5 @@ data = {
 plot_velocity_triangles(inlet_data,outlet_data)
 
 # Write to JSON file
-with open(str(script_dir / 'results.json'), 'w') as json_file:
+with open(str(script_dir / 'cfd_results.json'), 'w') as json_file:
     json.dump(data, json_file, indent=4)
