@@ -829,8 +829,8 @@ class TurbineSpool:
                     return obj.tolist()
                 return super().default(obj)
 
-        with open(filename, "w") as f:
-            json.dump(data, f, indent=4, cls=NumpyEncoder)
+        with open(filename, "w", encoding="utf-8") as f:
+            json.dump(data, f, indent=4, cls=NumpyEncoder, ensure_ascii=False)
 
     def plot(self) -> None:
         """Plot hub/shroud and streamlines with improved labels and formatting."""
