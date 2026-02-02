@@ -236,7 +236,7 @@ def rotor_calc(row:BladeRow,upstream:BladeRow,calculate_vm:bool=True,outlet_type
     T0_coolant = 0 
     if row.coolant is not None:
         T0_coolant = T0_coolant_weighted_average(row)
-    row.T0R = upstream.T0R - T0_coolant # (upstream_rothalpy + 0.5*row.U**2)/row.Cp # - T0_coolant_weighted_average(row) 
+    row.T0R = (upstream_rothalpy + 0.5*row.U**2)/row.Cp - T0_coolant
     P0R_P = row.P0R / row.P
     T0R_T = P0R_P**((row.gamma-1)/row.gamma)
     row.T = (row.T0R/T0R_T)     # Exit static temperature
@@ -254,8 +254,8 @@ def rotor_calc(row:BladeRow,upstream:BladeRow,calculate_vm:bool=True,outlet_type
                 reason += "; Yp > 0.3 This could be a problem with the loss model;"
             _log_rotor_failure(reason)
             raise ValueError(f'nan detected')
-        row.Vr = row.W*np.sin(row.phi)
         row.Vm = row.W*np.cos(row.beta2)
+        row.Vr = row.Vm*np.sin(row.phi)
         row.Wt = row.W*np.sin(row.beta2)
         row.Vx = row.Vm*np.cos(row.phi)
         row.Vt = row.Wt + row.U 
@@ -264,25 +264,33 @@ def rotor_calc(row:BladeRow,upstream:BladeRow,calculate_vm:bool=True,outlet_type
         row.Vm = np.sqrt(row.Vx**2+row.Vr**2)
         row.T0 = row.T + row.V**2/(2*row.Cp)
         row.alpha2 = np.arctan2(row.Vt,row.Vm)
-    else: # We know Vm, P0, T0
+    else: # We know Vm from radeq, beta2 from blade angle, T0R from rothalpy
         row.Vr = row.Vm*np.sin(row.phi)
         row.Vx = row.Vm*np.cos(row.phi)
-        
-        row.W = np.sqrt(2*row.Cp*(row.T0R-row.T))
+
+        # Compute W from velocity triangle (not thermodynamics) to close the triangle
+        row.W = row.Vm / np.cos(row.beta2)
         row.Wt = row.W*np.sin(row.beta2)
-        row.U = row.omega * row.r 
+        row.U = row.omega * row.r
         row.Vt = row.Wt + row.U
-        
+
         row.alpha2 = np.arctan2(row.Vt,row.Vm)
         row.V = np.sqrt(row.Vm**2*(1+np.tan(row.alpha2)**2))
-        
+
+        # Update T from energy conservation in rotating frame
+        row.T = row.T0R - row.W**2 / (2*row.Cp)
+
         row.M = row.V/np.sqrt(row.gamma*row.R*row.T)
-    T0_T = (1+(row.gamma-1)/2 * row.M**2)
-    row.P0 = row.P * T0_T**(row.gamma/(row.gamma-1))
+
+    # Compute T0 first, then derive P0 from P0R to keep the velocity triangle consistent.
+    # P0/P0R = (T0/T0R)^(gamma/(gamma-1)) always holds since both reference the same static state.
+    # Using P0R (from the loss model) avoids dependence on the boundary-condition P, which may
+    # not be consistent with T after radeq adjusts Vm.
+    row.T0 = row.T + row.V**2/(2*row.Cp)
+    row.P0 = row.P0R * (row.T0 / row.T0R) ** (row.gamma / (row.gamma - 1))
     row.P0_P = (row.P0_stator_inlet/row.P).mean()
 
     row.M_rel = row.W/np.sqrt(row.gamma*row.R*row.T)
-    row.T0 = row.T+row.V**2/(2*row.Cp)
 
 def inlet_calc(row:BladeRow):
     """Calculates the conditions for the Inlet 

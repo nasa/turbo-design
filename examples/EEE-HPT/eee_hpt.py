@@ -10,7 +10,7 @@ from scipy.interpolate import PchipInterpolator
 from get_ss_ps import split_airfoil_by_angle_distance, resample_curve, plot_blade
 
 # Set this to false to use the default blade angles; True means the blade angles are determined by matching the massflow 
-FindBladeAngles = True
+FindBladeAngles = False
 
 blades = pickle.load(open(Path(__file__).resolve().parent / 'stator_rotor.pkl','rb'))
 

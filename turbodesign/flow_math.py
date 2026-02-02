@@ -132,8 +132,7 @@ def compute_power(row: BladeRow, upstream: BladeRow | None = None, downstream: B
         row.P0_ratio = P0_ratio_actual
         setattr(row, "P0_ratio_actual", float(P0_ratio_actual))
         row.T_is = ref.T0 * (1 / P0_P) ** ((row.gamma - 1) / row.gamma)
-        a = np.sqrt(row.gamma * row.R * row.T_is)
-        row.T0_is = row.T_is * (1 + (row.gamma - 1) / 2 * (row.V / a) ** 2)
+        row.T0_is = ref.T0 * (row.P0 / ref.P0) ** ((row.gamma - 1) / row.gamma)
 
         comp_mode = is_compressor
         if comp_mode is None:
@@ -156,4 +155,4 @@ def compute_power(row: BladeRow, upstream: BladeRow | None = None, downstream: B
         if is_compressor:
             row.stage_loading *= -1 # Stage_loading will be negative 
         row.euler_power = mdot * (ref.U * ref.Vt - row.U * row.Vt).mean()
-        row.flow_coefficient = float(np.mean(row.Vm) / max(row.U.mean(), 1e-9))
+        row.flow_coefficient = abs(float(np.mean(row.Vm / row.U)))

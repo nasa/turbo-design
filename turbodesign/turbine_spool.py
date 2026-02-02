@@ -91,7 +91,7 @@ class TurbineSpool:
         self.passage = passage
         self.massflow = massflow
         self.num_streamlines = num_streamlines
-        self._fluid = fluid if fluid is not None else Solution("air.yaml")
+        self._fluid = fluid
         self.rpm = rpm
 
         self.inlet = inlet
@@ -111,8 +111,9 @@ class TurbineSpool:
                 br.axial_chord = br.hub_location * self.passage.hub_length
 
         # Propagate initial fluid to rows
-        for br in self._all_rows():
-            br.fluid = self._fluid
+        if self._fluid is not None:
+            for br in self._all_rows():
+                br.fluid = self._fluid
 
     def _all_rows(self) -> List[BladeRow]:
         """Convenience to iterate inlet + interior rows + outlet."""
@@ -273,7 +274,9 @@ class TurbineSpool:
         inlet = self.inlet
         if self.fluid:
             inlet.__initialize_fluid__(self.fluid)  # type: ignore[arg-type]
-        else:
+        elif inlet.gamma is not None:
+            inlet.__initialize_fluid__(R=inlet.R, gamma=inlet.gamma, Cp=inlet.Cp)  # type: ignore[call-arg]
+        elif blade_rows[1].gamma is not None:
             inlet.__initialize_fluid__(  # type: ignore[call-arg]
                 R=blade_rows[1].R,
                 gamma=blade_rows[1].gamma,
@@ -456,9 +459,12 @@ class TurbineSpool:
         massflow_target = np.linspace(0,rows[-1].total_massflow,self.num_streamlines)
 
         self.convergence_history = []  # Reset convergence history
-        prev_err = 1e9
+        past_err = -100.0
+        loop_iter = 0
+        err = 1e-3
 
-        for iter_num in range(3):
+        print("Looping to converge massflow (angle matching)")
+        while (np.abs((err - past_err) / err) > 0.05) and (loop_iter < 10):
             for i in range(1,len(rows)-1):
                 upstream = rows[i - 1] if i > 0 else rows[i]
                 downstream = rows[i + 1] if i < len(rows) - 1 else None
@@ -492,7 +498,7 @@ class TurbineSpool:
                         rows[i].alpha2[0] = 1 / (len(rows[i].alpha2) - 1) * rows[i].alpha2[1:].sum()
                 compute_gas_constants(upstream, self.fluid)
                 compute_gas_constants(rows[i], self.fluid)
-            
+
             # Adjust inlet to match massflow found at first blade row
             target = rows[1].total_massflow_no_coolant
             self.inlet.massflow = np.array([target]) if self.num_streamlines == 1 else (np.linspace(0, 1, self.num_streamlines) * target)
@@ -500,21 +506,23 @@ class TurbineSpool:
             self.inlet.total_massflow = rows[1].total_massflow_no_coolant
             self.inlet.calculated_massflow = self.inlet.total_massflow_no_coolant
             inlet_calc(self.inlet)
-            
+
             if self.adjust_streamlines:
                 adjust_streamlines(rows, self.passage)
 
             # Track convergence history
+            past_err = err
             err = self.__massflow_std__(rows[1:-1])
+            loop_iter += 1
+
             self.convergence_history.append({
-                'iteration': iter_num + 1,
+                'iteration': loop_iter,
                 'massflow_std': float(err),
-                'massflow_change': float(abs(err - prev_err)),
-                'relative_change': float(abs((err - prev_err) / max(err, 1e-6))),
+                'massflow_change': float(abs(err - past_err)),
+                'relative_change': float(abs((err - past_err) / max(err, 1e-6))),
                 'massflow': float(rows[1].total_massflow_no_coolant)
             })
-            prev_err = err
-            print(f"Angle match iteration {iter_num + 1}, massflow std: {err:.6f}")
+            print(f"Angle match iteration {loop_iter}, massflow std: {err:.6f}")
 
         compute_reynolds(rows, self.passage)
 
@@ -554,14 +562,18 @@ class TurbineSpool:
     def _balance_pressure(self) -> None:
         """Balance massflow between rows using radial equilibrium."""
         rows = self._all_rows()
-
+        past_err = -100.0
+        loop_iter = 0
+        err = 1e-3
+        self.convergence_history = []  # Reset convergence history
+        
         def balance_loop(
             x0: List[float],
             rows: List[BladeRow],
             P0: List[float],
             P_or_P0: List[float],
         ) -> float:
-            """Runs through the calclulation and outputs the standard deviation of massflow 
+            """Runs through the calclulation and outputs the standard deviation of massflow
 
             Args:
                 x0 (List[float]): Array of percent breakdown (P0 to P) or (P0 to P0_exit)
@@ -572,6 +584,7 @@ class TurbineSpool:
             Returns:
                 float: _description_
             """
+            nonlocal err, past_err, loop_iter
             static_defined = (self.outlet.outlet_type == OutletType.static_pressure)
             P_exit = P_or_P0
             for j in range(self.num_streamlines):
@@ -639,6 +652,20 @@ class TurbineSpool:
                         compute_massflow(row)
                         compute_power(row,upstream)
             print(x0)
+            
+            past_err = err
+            err = self.__massflow_std__(rows[1:-1])
+            loop_iter += 1
+            
+            # Store convergence history
+            self.convergence_history.append({
+                'iteration': loop_iter,
+                'massflow_std': float(err),
+                'massflow_change': float(abs(err - past_err)),
+                'relative_change': float(abs((err - past_err) / max(err, 1e-6))),
+                'massflow': float(rows[1].total_massflow_no_coolant)
+            })
+            
             return self.__massflow_std__(rows[1:-1])
 
         pressure_ratio_ranges: List[tuple] = []
@@ -652,10 +679,6 @@ class TurbineSpool:
             raise ValueError("For turbine calculations, please define outlet using init_static")
         
         print("Looping to converge massflow")
-        past_err = -100.0
-        loop_iter = 0
-        err = 1e-3
-        self.convergence_history = []  # Reset convergence history
         while (np.abs((err - past_err) / err) > 0.05) and (loop_iter < 10):
             if len(pressure_ratio_ranges) == 1: # Single stage, use minimize scalar 
                 x = minimize_scalar(
@@ -689,19 +712,6 @@ class TurbineSpool:
             self.outlet.transfer_quantities(rows[-2])  # outlet
             self.outlet.P = self.outlet.get_static_pressure(self.outlet.percent_hub_shroud)
 
-            past_err = err
-            err = self.__massflow_std__(rows)
-            loop_iter += 1
-            print(f"Loop {loop_iter} massflow convergenced error:{err}")
-
-            # Store convergence history
-            self.convergence_history.append({
-                'iteration': loop_iter,
-                'massflow_std': float(err),
-                'massflow_change': float(abs(err - past_err)),
-                'relative_change': float(abs((err - past_err) / max(err, 1e-6))),
-                'massflow': float(rows[1].total_massflow_no_coolant)
-            })
 
         compute_reynolds(rows, self.passage)
 
@@ -786,10 +796,6 @@ class TurbineSpool:
             "rpm": self.rpm,
             "r_streamline": r_streamline.tolist(),
             "x_streamline": x_streamline.tolist(),
-            "rhub": self.passage.rhub_pts.tolist(),
-            "rshroud": self.passage.rshroud_pts.tolist(),
-            "xhub": self.passage.xhub_pts.tolist(),
-            "xshroud": self.passage.xshroud_pts.tolist(),
             "num_streamlines": self.num_streamlines,
             "euler_power": euler_power,
             "euler_power_hp": euler_power_hp,
@@ -823,8 +829,8 @@ class TurbineSpool:
                     return obj.tolist()
                 return super().default(obj)
 
-        with open(filename, "w") as f:
-            json.dump(data, f, indent=4, cls=NumpyEncoder)
+        with open(filename, "w", encoding="utf-8") as f:
+            json.dump(data, f, indent=4, cls=NumpyEncoder, ensure_ascii=False)
 
     def plot(self) -> None:
         """Plot hub/shroud and streamlines with improved labels and formatting."""
@@ -937,7 +943,7 @@ class TurbineSpool:
         ax.set_xlabel('Axial Distance [m]', fontsize=13, fontweight='bold')
         ax.set_ylabel('Radial Distance [m]', fontsize=13, fontweight='bold')
         ax.set_title(f'Meridional View - {self.num_streamlines} Streamlines',
-                    fontsize=14, fontweight='bold', pad=20)
+                    fontsize=14, fontweight='bold', pad=40)
         ax.grid(True, alpha=0.3, linestyle=':', linewidth=0.5)
         ax.legend(loc='upper left', fontsize=11, framealpha=0.9)
         ax.set_aspect('equal', adjustable='box')
@@ -1122,18 +1128,16 @@ class TurbineSpool:
 
         # Plot massflow std deviation
         ax1.semilogy(iterations, massflow_std, 'o-', linewidth=2, markersize=8)
-        ax1.set_xlabel('Iteration', fontsize=12)
-        ax1.set_ylabel('Massflow Std Dev [kg/s]', fontsize=12)
+        ax1.set_xlabel('Iteration', fontsize=16)
+        ax1.set_ylabel('2× Massflow Std Dev [kg/s]', fontsize=16)
         ax1.set_title('Convergence History: Massflow Standard Deviation', fontsize=14, fontweight='bold')
         ax1.grid(True, alpha=0.3)
 
         # Plot relative change
         ax2.semilogy(iterations, relative_change, 's-', color='orange', linewidth=2, markersize=8)
-        ax2.set_xlabel('Iteration', fontsize=12)
-        ax2.set_ylabel('Relative Change', fontsize=12)
-        ax2.set_title('Convergence History: Relative Change', fontsize=14, fontweight='bold')
-        ax2.axhline(y=0.05, color='r', linestyle='--', label='Convergence Threshold (0.05)')
-        ax2.legend()
+        ax2.set_xlabel('Iteration', fontsize=16)
+        ax2.set_ylabel(r'Massflow Residual $\left|\frac{err_{n-1} - err_n}{err_n}\right|$', fontsize=16)
+        ax2.set_title('Convergence History: Relative Error Change', fontsize=14, fontweight='bold')
         ax2.grid(True, alpha=0.3)
 
         plt.tight_layout()
@@ -1199,9 +1203,7 @@ def massflow_loss_function(
     compute_power(row, upstream)
 
     if row.row_type != RowType.Inlet:
-        T3_is = upstream.T0 * (1 / row.P0_P) ** ((row.gamma - 1) / row.gamma)
-        a = np.sqrt(row.gamma * row.R * T3_is)
-        T03_is = T3_is * (1 + (row.gamma - 1) / 2 * (row.V / a) ** 2)
+        T03_is = upstream.T0 * (row.P0 / upstream.P0) ** ((row.gamma - 1) / row.gamma)
         row.eta_total = (upstream.T0.mean() - row.T0.mean()) / (upstream.T0.mean() - T03_is.mean())
 
     return float(np.abs(massflow_target - row.massflow[index]))
