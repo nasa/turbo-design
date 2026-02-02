@@ -155,12 +155,8 @@ def compute_power(row: BladeRow, upstream: BladeRow | None = None, downstream: B
             # change, is dominated by the frame change and barely reflects the
             # relative-frame loss — giving η ≈ 1 even with significant Yp.
             # The entropy-based definition always isolates the irreversibility.
-            ref_P0R = getattr(ref, 'P0R', None)
-            row_P0R = getattr(row, 'P0R', None)
-            if (ref_P0R is not None and row_P0R is not None
-                    and np.mean(ref_P0R) > 0 and np.mean(row_P0R) > 0
-                    and deltaT > 0):
-                ds = row.R * np.log(np.mean(ref_P0R) / np.mean(row_P0R))
+            if np.mean(ref.P0R) > 0 and np.mean(row.P0R) > 0 and deltaT > 0:
+                ds = row.R * np.log(np.mean(ref.P0R) / np.mean(row.P0R))
                 w_per_mass = row.Cp * deltaT
                 row.eta_total = w_per_mass / (w_per_mass + row.T.mean() * max(ds, 0.0))
             else:
