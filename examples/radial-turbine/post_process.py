@@ -224,7 +224,6 @@ def calculate_properties(station01:Dict[str,float],station02:Dict[str,float],IsR
     """
     P0_P = station01['P0']/station02['P']
     T3_is = station01['T0'] * (1/P0_P)**((gamma-1)/gamma)           # isentropic static T at outlet
-    T03_is = station01['T0'] * (station02['P0']/station01['P0'])**((gamma-1)/gamma)  # isentropic total T at outlet
 
     # --- Rothalpy correction ---
     # Correct outlet T0 using rothalpy conservation: I = Cp*T0 - U*Vt = const
@@ -233,7 +232,16 @@ def calculate_properties(station01:Dict[str,float],station02:Dict[str,float],IsR
     T0_outlet_corrected = (station01['rothalpy'] + station02['UVt']) / Cp
     station02['T0_corrected'] = T0_outlet_corrected
 
-    # --- Performance metrics (all use the corrected T0) ---
+    # Correct P0 to be thermodynamically consistent with T0_corrected.
+    # Raw mass-averaged P0 pairs with raw T0; if we use the rothalpy-
+    # corrected T0 in the numerator we must also correct P0 so that
+    # T03_is reflects the same thermodynamic state.  Otherwise T03_is ≈
+    # T0_corrected and η ≈ 1 (spurious).
+    P0_outlet_corrected = station02['P'] * (T0_outlet_corrected / station02['T']) ** (gamma / (gamma - 1))
+    station02['P0_corrected'] = P0_outlet_corrected
+    T03_is = station01['T0'] * (P0_outlet_corrected / station01['P0']) ** ((gamma - 1) / gamma)
+
+    # --- Performance metrics (all use the corrected T0 and corrected P0) ---
     station02['total-total_power'] = station02['massflow'] * Cp * (station01['T0'] - T0_outlet_corrected)
     station02['total-total_efficiency'] = (station01['T0'] - T0_outlet_corrected)/(station01['T0'] - T03_is)
     station02['total-static_efficiency'] = (station01['T0'] - T0_outlet_corrected)/(station01['T0'] - T3_is)
