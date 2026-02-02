@@ -124,13 +124,13 @@ rotor_arc_len = xr_to_mprime(hub)[1][-1]
 # Calculate where the blade will be located based on the arc length
 blade_position = (0,(inlet_arc_len+rotor_arc_len)/total_hub_arc_len)
 
-P0 = 562738 # Inlet Total Pressure
-T0 = 1242 # Inlet Total Temperature
+P0 = 536657.313099755 # Inlet Total Pressure (CFD mass-averaged at r=0.043 m)
+T0 = 1222.8779357137 # Inlet Total Temperature (CFD mass-averaged at r=0.043 m)
 P = 261874 # Static Pressure
 P0_P = P0/P
 RPM = -50000
 massflow = 0.1 # Guessed value for initialization 
-alpha2 = -52.0  # Adjusted to give beta1 ≈ 0° at rotor inlet (matching CFD)
+alpha2 = -52.07  # Adjusted to give beta1 ≈ 0° at rotor inlet (matching CFD)
 gamma = 1.35
 passage = Passage(hub[:,0],hub[:,1],shroud[:,0],shroud[:,1],passageType=PassageType.Centrifugal) # type: ignore
 #%% Defining the Inlet/Outlet
@@ -148,7 +148,7 @@ stator.R = 287.15
 stator.gamma = gamma
 stator.Cp = stator.gamma*stator.R/(stator.gamma-1)
 
-rotor = make_rotor_row(hub_location=blade_position[1])
+rotor = make_rotor_row(hub_location=blade_position[1], num_blades=5)
 rotor.R = 287.15
 rotor.gamma = gamma
 rotor.Cp = rotor.gamma*rotor.R/(rotor.gamma-1)
@@ -162,7 +162,7 @@ stator.beta2_metal = [alpha2,alpha2,alpha2,alpha2,alpha2] # Angle, hub,mean,tip
 stator.loss_model = FixedPressureLoss(0.0) # type: ignore
 
 rotor.beta2_metal = [44,46,51,56,59] # Angle, hub to tip; shifted ~1° to match CFD avg beta2=51.74°
-rotor.loss_model = FixedPressureLoss(0.1397493298790384) # type: ignore # <- From CFD (gamma=1.35)
+rotor.loss_model = FixedPressureLoss(0.1358751871641363) # type: ignore # <- From CFD P0_loss (gamma=1.35)
 
 spool = TurbineSpool(
                 passage=passage,

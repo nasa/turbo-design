@@ -244,11 +244,12 @@ def rotor_calc(
         deviation_rad = np.radians(deviation_val)
 
         P0R_local = upstream.P0R - row.Yp * (upstream.P0R - upstream.P)
-        T0R_local = upstream.T0R
-        
-        P_local = P0R_local / IsenP(M_rel, row.gamma)
+        # Use rothalpy conservation: I = Cp*T0R - U^2/2 = const across rotor
         U_local = row.omega * row.r
-        
+        T0R_local = (upstream_rothalpy + 0.5 * U_local ** 2) / row.Cp
+
+        P_local = P0R_local / IsenP(M_rel, row.gamma)
+
         P0R_P = P0R_local / P_local
         T0R_T = P0R_P ** ((row.gamma - 1) / row.gamma)
         T_local = T0R_local / T0R_T
@@ -351,24 +352,35 @@ def rotor_calc(
             solve_massflow_for_current_loss()
         else:
             solve_massflow_for_current_loss()
-    else: # We know Vm, P0, T0
+    else: # We know Vm from radeq, beta2 from blade angle, T0R from rothalpy
         deviation_func = getattr(row, "deviation_function", None)
         deviation_val = deviation_func(row, upstream) if callable(deviation_func) else 0.0
         deviation_rad = np.radians(deviation_val)
         beta2_eff = row.beta2 + deviation_rad
-        row.Vr = row.Vm*np.sin(row.phi)
-        row.Vx = row.Vm*np.cos(row.phi)
-        row.W = np.sqrt(2*row.Cp*(row.T0R-row.T))
-        row.Wt = row.W*np.sin(beta2_eff)
-        row.Vt = row.Wt+row.U
-        
-        row.alpha2 = np.arctan2(row.Vt,row.Vm)
-        row.V = np.sqrt(row.Vm**2*(1+np.tan(row.alpha2)**2))
-        
-        row.M = row.V/np.sqrt(row.gamma*row.R*row.T)
-        T0_T = (1+(row.gamma-1)/2 * row.M**2)
-        row.P0 = row.P * T0_T**(row.gamma/(row.gamma-1))
-    
-    row.M_rel = row.W/np.sqrt(row.gamma*row.R*row.T)
-    row.T0 = row.T+row.V**2/(2*row.Cp)
+
+        row.U = row.omega * row.r
+        row.T0R = (upstream_rothalpy + 0.5 * row.U ** 2) / row.Cp
+        row.P0R = upstream.P0R - row.Yp * (upstream.P0R - upstream.P)
+
+        row.Vr = row.Vm * np.sin(row.phi)
+        row.Vx = row.Vm * np.cos(row.phi)
+
+        # Compute W from velocity triangle (geometric closure)
+        row.W = row.Vm / np.cos(beta2_eff)
+        row.Wt = row.W * np.sin(beta2_eff)
+        row.Vt = row.Wt + row.U
+
+        row.alpha2 = np.arctan2(row.Vt, row.Vm)
+        row.V = np.sqrt(row.Vm ** 2 * (1 + np.tan(row.alpha2) ** 2))
+
+        # Update T from energy conservation in rotating frame
+        row.T = row.T0R - row.W ** 2 / (2 * row.Cp)
+
+        row.M = row.V / np.sqrt(row.gamma * row.R * row.T)
+
+    # Compute T0 first, then derive P0 from P0R to keep the velocity triangle consistent.
+    # P0/P0R = (T0/T0R)^(gamma/(gamma-1)) always holds since both reference the same static state.
+    row.M_rel = row.W / np.sqrt(row.gamma * row.R * row.T)
+    row.T0 = row.T + row.V ** 2 / (2 * row.Cp)
+    row.P0 = row.P0R * (row.T0 / row.T0R) ** (row.gamma / (row.gamma - 1))
     compute_gas_constants(row)
