@@ -149,7 +149,18 @@ def compute_power(row: BladeRow, upstream: BladeRow | None = None, downstream: B
             deltaT = ref.T0.mean() - row.T0.mean()
             row.power = mdot * row.Cp * deltaT
             row.eta_static = row.power / (mdot * row.Cp * (ref.T0.mean() - row.T_is.mean()))
-            row.eta_total = (ref.T0.mean() - row.T0.mean()) / (ref.T0.mean() - row.T0_is.mean())
+            # Entropy-based total-total efficiency:  η = w / (w + T_exit·Δs)
+            # The standard isentropic formula η = ΔT0/(T01−T0_is) uses the
+            # absolute P0 ratio which, for radial machines with large radius
+            # change, is dominated by the frame change and barely reflects the
+            # relative-frame loss — giving η ≈ 1 even with significant Yp.
+            # The entropy-based definition always isolates the irreversibility.
+            if np.mean(ref.P0R) > 0 and np.mean(row.P0R) > 0 and deltaT > 0:
+                ds = row.R * np.log(np.mean(ref.P0R) / np.mean(row.P0R))
+                w_per_mass = row.Cp * deltaT
+                row.eta_total = w_per_mass / (w_per_mass + row.T.mean() * max(ds, 0.0))
+            else:
+                row.eta_total = (ref.T0.mean() - row.T0.mean()) / max(ref.T0.mean() - row.T0_is.mean(), 1e-9)
         
         row.stage_loading = row.Cp * (ref.T0.mean() - row.T0.mean()) / max(row.U.mean() ** 2, 1e-9)
         if is_compressor:
