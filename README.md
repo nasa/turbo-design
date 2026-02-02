@@ -1,6 +1,33 @@
 # Turbo Design 3
 This tool is a streamline turbomachinery design tool solving the radial equilibrium equations. It can be used for designing compressors and turbines. The designs can have counter rotating stages, different working fluids, and cooling. The intent of this tool is to enable added flexibility in which loss models are used. Because it's a python, it can connect with custom machine learning based loss models.
 
+## Table of Contents
+- [Key Features](#key-features)
+- [Code Structure](#code-structure)
+  - [Core Solver Classes](#core-solver-classes)
+  - [Mathematics & Solvers](#mathematics--solvers)
+  - [Loss Model Architecture](#loss-model-architecture)
+- [How Loss Models Work](#how-loss-models-work)
+  - [Loss Model Interface](#loss-model-interface)
+  - [Available Loss Types](#available-loss-types)
+  - [Using Loss Models](#using-loss-models)
+  - [Built-in Turbine Loss Models](#built-in-turbine-loss-models)
+  - [Built-in Compressor Loss Models](#built-in-compressor-loss-models)
+  - [Loss Model Data Files](#loss-model-data-files)
+  - [Custom Loss Models](#custom-loss-models)
+- [Solver Modes](#solver-modes)
+  - [Pressure Balance Mode (Default)](#1-pressure-balance-mode-default)
+  - [Angle Matching Mode](#2-angle-matching-mode)
+- [Typical Workflow](#typical-workflow)
+- [Tutorials](#tutorials)
+- [Understanding Velocity Triangles](#understanding-velocity-triangles)
+- [Documentation](#documentation)
+  - [Online Documentation](#online-documentation)
+  - [Building Documentation Locally](#building-documentation-locally)
+  - [CI/CD for Documentation](#cicd-for-documentation)
+- [Contributors](#contributors)
+- [License](#license)
+
 ## Key Features
 - Streamline-based radial equilibrium solver for axial and radial turbomachinery
 - Pluggable loss model architecture supporting multiple empirical correlations
