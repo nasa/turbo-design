@@ -17,6 +17,173 @@ from .arrayfuncs import safe_interpolate
 
 @dataclass(eq=False)
 class BladeRow:
+    """A single blade row (stator or rotor) in a turbomachine stage.
+
+    Attributes
+    ----------
+    **Core Configuration**
+
+    id : int
+        Row identifier.
+    stage_id : int
+        Stage identifier.
+    row_type : RowType
+        Stator or Rotor.
+    loss_function : LossBaseClass, optional
+        Loss model applied to this row.
+    deviation_function : DeviationBaseClass, optional
+        Deviation model applied to this row.
+    cutting_line : line2D, optional
+        Line perpendicular to the streamline.
+    rp : float
+        Degree of reaction.
+    hub_location : float
+        Hub axial location.
+    shroud_location : float
+        Shroud axial location.
+
+    **Fluid Properties**
+
+    R : float
+        Ideal gas constant, J/(kg K). Default 287.15.
+    gamma : float
+        Ratio of specific heats Cp/Cv. Default 1.33.
+    Cp : float
+        Specific heat at constant pressure, J/(kg K). Default 1019.
+    Cv : float
+        Specific heat at constant volume, J/(kg K).
+    mu : float
+        Dynamic viscosity, Pa s.
+
+    **Mass Flow**
+
+    total_massflow : float
+        Total mass flow including upstream cooling, kg/s.
+    massflow : ndarray
+        Mass flow distribution per radial station.
+    total_massflow_no_coolant : float
+        Inlet mass flow without coolant, kg/s.
+    massflow_target : ndarray, optional
+        Custom mass flow distribution for angle matching, kg/s.
+
+    **Streamline Geometry**
+
+    percent_hub : float
+        Where blade row is defined along the hub (0-1).
+    percent_hub_shroud : ndarray
+        Percent streamline length from hub to shroud.
+    x : ndarray
+        Axial coordinates.
+    r : ndarray
+        Radial coordinates.
+    m : ndarray
+        Meridional coordinates.
+    total_area : float
+        Total annular flow area.
+    area : ndarray
+        Flow area per streamline.
+
+    **Row Efficiency**
+
+    eta_total : float
+        Total-to-total isentropic efficiency.
+    eta_static : float
+        Total-to-static isentropic efficiency.
+    eta_poly : float
+        Polytropic efficiency.
+    stage_loading : float
+        Stage loading coefficient (work per stage).
+
+    **Flow Angles** *(radians)*
+
+    alpha1, alpha2 : ndarray
+        Absolute flow angles at inlet and exit.
+    beta1, beta2 : ndarray
+        Relative flow angles at inlet and exit.
+    deviation : ndarray
+        Flow deviation from metal angle.
+    beta1_fixed, beta2_fixed : bool
+        Whether inlet/exit geometry is already defined.
+
+    **Velocities**
+
+    Vm : ndarray
+        Meridional velocity.
+    Vx : ndarray
+        Axial velocity.
+    Vt : ndarray
+        Tangential (swirl) velocity.
+    Vr : ndarray
+        Radial velocity.
+    V : ndarray
+        Absolute velocity magnitude.
+    U : ndarray
+        Blade peripheral velocity.
+    W : ndarray
+        Relative velocity magnitude.
+    Wt : ndarray
+        Relative tangential velocity.
+    M : ndarray
+        Absolute Mach number.
+    M_rel : ndarray
+        Relative Mach number.
+    omega : float
+        Angular velocity, rad/s.
+
+    **Thermodynamic Quantities**
+
+    P0 : ndarray
+        Total pressure, Pa.
+    T0 : ndarray
+        Total temperature, K.
+    P : ndarray
+        Static pressure, Pa.
+    T : ndarray
+        Static temperature, K.
+    rho : ndarray
+        Density, kg/m^3.
+    P0R : ndarray
+        Relative total pressure, Pa.
+    T0R : ndarray
+        Relative total temperature, K.
+    entropy_rise : ndarray
+        Entropy rise across row.
+
+    **Performance**
+
+    power : float
+        Power, W.
+    P0_P : float
+        Total-to-static pressure ratio.
+    P0_ratio : float
+        Total-to-total pressure ratio.
+    flow_coefficient : float
+        Flow coefficient (Vm/U).
+    Reynolds : float
+        Reynolds number.
+    Yp : ndarray
+        Pressure loss coefficient.
+
+    **Blade Geometry** *(set via properties)*
+
+    axial_chord : float
+        Axial chord length. Set via property.
+    aspect_ratio : float
+        Height-to-chord ratio. Set via property.
+    pitch_to_chord : float
+        Pitch-to-chord ratio. Set via property.
+    stagger : float
+        Stagger angle, degrees. Set via property.
+    num_blades : int
+        Blade count. Set via property.
+    tip_clearance : float
+        Clearance as fraction of span. Set via property.
+    te_pitch : float
+        Trailing-edge-to-pitch ratio. Set via property.
+    blade_to_blade_gap : float
+        Inter-row gap as fraction of chord. Set via property.
+    """
+
     id: int = 0
     stage_id: int = 0
     row_type: RowType = RowType.Stator

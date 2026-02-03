@@ -69,6 +69,7 @@ extensions = [
 ]
 autodoc_mock_imports = ["pyturbo", "cantera"]
 autosummary_generate = True
+autodoc_class_signature = 'separated'
 
 napoleon_google_docstring = True
 napoleon_numpy_docstring = True
