@@ -7,14 +7,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Index &mdash; Turbo Design 1.0.6 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
-      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
 
   
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
       <script src="_static/documentation_options.js?v=e2a723ec"></script>
-      <script src="_static/doctools.js?v=9bcbadda"></script>
-      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="#" />
     <link rel="search" title="Search" href="search.html" /> 
@@ -43,6 +43,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="modules/bladerow.html">BladeRow</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="modules/bladerow.html#turbodesign.bladerow.BladeRow"><code class="docutils literal notranslate"><span class="pre">BladeRow</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="modules/bladerow.html#id0"><code class="docutils literal notranslate"><span class="pre">BladeRow</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="modules/bladerow.html#turbodesign.bladerow.interpolate_quantities"><code class="docutils literal notranslate"><span class="pre">interpolate_quantities()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="modules/bladerow.html#turbodesign.bladerow.interpolate_streamline_quantities"><code class="docutils literal notranslate"><span class="pre">interpolate_streamline_quantities()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="modules/bladerow.html#turbodesign.bladerow.sutherland"><code class="docutils literal notranslate"><span class="pre">sutherland()</span></code></a></li>
@@ -51,7 +52,6 @@
 <li class="toctree-l1"><a class="reference internal" href="modules/coolant.html">Coolant</a></li>
 <li class="toctree-l1"><a class="reference internal" href="modules/enums.html">Enums</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="modules/enums.html#turbodesign.enums.LossType"><code class="docutils literal notranslate"><span class="pre">LossType</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="modules/enums.html#turbodesign.enums.MassflowConstraint"><code class="docutils literal notranslate"><span class="pre">MassflowConstraint</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="modules/enums.html#turbodesign.enums.PassageType"><code class="docutils literal notranslate"><span class="pre">PassageType</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="modules/enums.html#turbodesign.enums.PowerType"><code class="docutils literal notranslate"><span class="pre">PowerType</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="modules/enums.html#turbodesign.enums.RowType"><code class="docutils literal notranslate"><span class="pre">RowType</span></code></a></li>
@@ -67,6 +67,7 @@
 <li class="toctree-l2"><a class="reference internal" href="modules/isentropic.html#turbodesign.isentropic.IsenP"><code class="docutils literal notranslate"><span class="pre">IsenP()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="modules/isentropic.html#turbodesign.isentropic.IsenT"><code class="docutils literal notranslate"><span class="pre">IsenT()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="modules/isentropic.html#turbodesign.isentropic.Massflow"><code class="docutils literal notranslate"><span class="pre">Massflow()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="modules/isentropic.html#turbodesign.isentropic.solve_for_mach"><code class="docutils literal notranslate"><span class="pre">solve_for_mach()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="modules/loss.html">Turbine Loss</a><ul>
@@ -107,11 +108,8 @@
 </li>
 <li class="toctree-l1"><a class="reference internal" href="modules/turbine_math.html">Turbine Design Math</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="modules/turbine_math.html#turbodesign.turbine_math.T0_coolant_weighted_average"><code class="docutils literal notranslate"><span class="pre">T0_coolant_weighted_average()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="modules/turbine_math.html#turbodesign.turbine_math.compute_massflow"><code class="docutils literal notranslate"><span class="pre">compute_massflow()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="modules/turbine_math.html#turbodesign.turbine_math.compute_power"><code class="docutils literal notranslate"><span class="pre">compute_power()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="modules/turbine_math.html#turbodesign.turbine_math.compute_quantities"><code class="docutils literal notranslate"><span class="pre">compute_quantities()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="modules/turbine_math.html#turbodesign.turbine_math.compute_reynolds"><code class="docutils literal notranslate"><span class="pre">compute_reynolds()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="modules/turbine_math.html#turbodesign.turbine_math.compute_streamline_areas"><code class="docutils literal notranslate"><span class="pre">compute_streamline_areas()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="modules/turbine_math.html#turbodesign.turbine_math.inlet_calc"><code class="docutils literal notranslate"><span class="pre">inlet_calc()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="modules/turbine_math.html#turbodesign.turbine_math.rotor_calc"><code class="docutils literal notranslate"><span class="pre">rotor_calc()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="modules/turbine_math.html#turbodesign.turbine_math.stator_calc"><code class="docutils literal notranslate"><span class="pre">stator_calc()</span></code></a></li>
@@ -154,6 +152,7 @@
  | <a href="#A"><strong>A</strong></a>
  | <a href="#B"><strong>B</strong></a>
  | <a href="#C"><strong>C</strong></a>
+ | <a href="#E"><strong>E</strong></a>
  | <a href="#F"><strong>F</strong></a>
  | <a href="#G"><strong>G</strong></a>
  | <a href="#H"><strong>H</strong></a>
@@ -172,9 +171,11 @@
 <h2 id="_">_</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="modules/loss.html#turbodesign.loss.LossBaseClass.__call__">__call__() (turbodesign.loss.LossBaseClass method)</a>
+      <li><a href="modules/loss.html#turbodesign.loss.fixedpressureloss.FixedPressureLoss.__call__">__call__() (turbodesign.loss.fixedpressureloss.FixedPressureLoss method)</a>
 
       <ul>
+        <li><a href="modules/loss.html#turbodesign.loss.LossBaseClass.__call__">(turbodesign.loss.LossBaseClass method)</a>
+</li>
         <li><a href="modules/loss.html#turbodesign.loss.turbine.ainleymathieson.AinleyMathieson.__call__">(turbodesign.loss.turbine.ainleymathieson.AinleyMathieson method)</a>
 </li>
         <li><a href="modules/loss.html#turbodesign.loss.turbine.CraigCox.__call__">(turbodesign.loss.turbine.CraigCox method)</a>
@@ -198,6 +199,8 @@
 </li>
       <li><a href="modules/inlet.html#turbodesign.inlet.Inlet.__interpolate_quantities__">__interpolate_quantities__() (turbodesign.inlet.Inlet method)</a>
 </li>
+      <li><a href="modules/spool.html#turbodesign.turbine_spool.TurbineSpool.__massflow_std__">__massflow_std__() (turbodesign.turbine_spool.TurbineSpool static method)</a>, <a href="modules/turbinespool.html#turbodesign.turbine_spool.TurbineSpool.__massflow_std__">[1]</a>
+</li>
   </ul></td>
 </tr></table>
 
@@ -212,7 +215,7 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="modules/loss.html#turbodesign.loss.turbine.ainleymathieson.AinleyMathieson">AinleyMathieson (class in turbodesign.loss.turbine.ainleymathieson)</a>
 </li>
-      <li><a href="modules/bladerow.html#turbodesign.bladerow.BladeRow.axial_chord">axial_chord (turbodesign.bladerow.BladeRow property)</a>
+      <li><a href="modules/bladerow.html#id1">axial_chord (turbodesign.bladerow.BladeRow property)</a>, <a href="modules/bladerow.html#turbodesign.bladerow.BladeRow.axial_chord">[1]</a>
 </li>
   </ul></td>
 </tr></table>
@@ -220,13 +223,17 @@
 <h2 id="B">B</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="modules/spool.html#turbodesign.turbine_spool.TurbineSpool.blade_rows">blade_rows (turbodesign.turbine_spool.TurbineSpool property)</a>, <a href="modules/turbinespool.html#turbodesign.turbine_spool.TurbineSpool.blade_rows">[1]</a>
+      <li><a href="modules/bladerow.html#id2">beta1_metal (turbodesign.bladerow.BladeRow property)</a>, <a href="modules/bladerow.html#turbodesign.bladerow.BladeRow.beta1_metal">[1]</a>
+</li>
+      <li><a href="modules/bladerow.html#id3">beta2_metal (turbodesign.bladerow.BladeRow property)</a>, <a href="modules/bladerow.html#turbodesign.bladerow.BladeRow.beta2_metal">[1]</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="modules/bladerow.html#turbodesign.bladerow.BladeRow.blade_to_blade_gap">blade_to_blade_gap (turbodesign.bladerow.BladeRow property)</a>
+      <li><a href="modules/spool.html#turbodesign.turbine_spool.TurbineSpool.blade_rows">blade_rows (turbodesign.turbine_spool.TurbineSpool property)</a>, <a href="modules/turbinespool.html#turbodesign.turbine_spool.TurbineSpool.blade_rows">[1]</a>
 </li>
-      <li><a href="modules/bladerow.html#turbodesign.bladerow.BladeRow">BladeRow (class in turbodesign.bladerow)</a>
+      <li><a href="modules/bladerow.html#id4">blade_to_blade_gap (turbodesign.bladerow.BladeRow property)</a>, <a href="modules/bladerow.html#turbodesign.bladerow.BladeRow.blade_to_blade_gap">[1]</a>
+</li>
+      <li><a href="modules/bladerow.html#id0">BladeRow (class in turbodesign.bladerow)</a>, <a href="modules/bladerow.html#turbodesign.bladerow.BladeRow">[1]</a>
 </li>
   </ul></td>
 </tr></table>
@@ -236,23 +243,25 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="modules/spool.html#turbodesign.turbine_spool.TurbineSpool.calculate_streamline_curvature">calculate_streamline_curvature() (turbodesign.turbine_spool.TurbineSpool method)</a>, <a href="modules/turbinespool.html#turbodesign.turbine_spool.TurbineSpool.calculate_streamline_curvature">[1]</a>
 </li>
-      <li><a href="modules/bladerow.html#turbodesign.bladerow.BladeRow.camber">camber (turbodesign.bladerow.BladeRow property)</a>
+      <li><a href="modules/bladerow.html#id5">camber (turbodesign.bladerow.BladeRow property)</a>, <a href="modules/bladerow.html#turbodesign.bladerow.BladeRow.camber">[1]</a>
 </li>
-      <li><a href="modules/bladerow.html#turbodesign.bladerow.BladeRow.chord">chord (turbodesign.bladerow.BladeRow property)</a>
-</li>
-      <li><a href="modules/turbine_math.html#turbodesign.turbine_math.compute_massflow">compute_massflow() (in module turbodesign.turbine_math)</a>
+      <li><a href="modules/bladerow.html#id6">chord (turbodesign.bladerow.BladeRow property)</a>, <a href="modules/bladerow.html#turbodesign.bladerow.BladeRow.chord">[1]</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="modules/turbine_math.html#turbodesign.turbine_math.compute_power">compute_power() (in module turbodesign.turbine_math)</a>
-</li>
       <li><a href="modules/turbine_math.html#turbodesign.turbine_math.compute_quantities">compute_quantities() (in module turbodesign.turbine_math)</a>
 </li>
       <li><a href="modules/turbine_math.html#turbodesign.turbine_math.compute_reynolds">compute_reynolds() (in module turbodesign.turbine_math)</a>
 </li>
-      <li><a href="modules/turbine_math.html#turbodesign.turbine_math.compute_streamline_areas">compute_streamline_areas() (in module turbodesign.turbine_math)</a>
-</li>
       <li><a href="modules/loss.html#turbodesign.loss.turbine.CraigCox">CraigCox (class in turbodesign.loss.turbine)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="E">E</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="modules/spool.html#turbodesign.turbine_spool.TurbineSpool.export_properties">export_properties() (turbodesign.turbine_spool.TurbineSpool method)</a>, <a href="modules/turbinespool.html#turbodesign.turbine_spool.TurbineSpool.export_properties">[1]</a>
 </li>
   </ul></td>
 </tr></table>
@@ -265,6 +274,8 @@
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="modules/loss.html#turbodesign.loss.turbine.fixedefficiency.FixedEfficiency">FixedEfficiency (class in turbodesign.loss.turbine.fixedefficiency)</a>
+</li>
+      <li><a href="modules/loss.html#turbodesign.loss.fixedpressureloss.FixedPressureLoss">FixedPressureLoss (class in turbodesign.loss.fixedpressureloss)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -332,7 +343,7 @@
 </li>
       <li><a href="modules/turbine_math.html#turbodesign.turbine_math.inlet_calc">inlet_calc() (in module turbodesign.turbine_math)</a>
 </li>
-      <li><a href="modules/bladerow.html#turbodesign.bladerow.BladeRow.inlet_to_outlet_pratio">inlet_to_outlet_pratio (turbodesign.bladerow.BladeRow property)</a>
+      <li><a href="modules/bladerow.html#id7">inlet_to_outlet_pratio (turbodesign.bladerow.BladeRow property)</a>, <a href="modules/bladerow.html#turbodesign.bladerow.BladeRow.inlet_to_outlet_pratio">[1]</a>
 </li>
       <li><a href="modules/bladerow.html#turbodesign.bladerow.interpolate_quantities">interpolate_quantities() (in module turbodesign.bladerow)</a>
 </li>
@@ -372,7 +383,9 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="modules/isentropic.html#turbodesign.isentropic.Massflow">Massflow() (in module turbodesign.isentropic)</a>
 </li>
-      <li><a href="modules/enums.html#turbodesign.enums.MassflowConstraint">MassflowConstraint (class in turbodesign.enums)</a>
+      <li><a href="modules/bladerow.html#id8">metal_exit_angle (turbodesign.bladerow.BladeRow property)</a>, <a href="modules/bladerow.html#turbodesign.bladerow.BladeRow.metal_exit_angle">[1]</a>
+</li>
+      <li><a href="modules/bladerow.html#id9">metal_inlet_angle (turbodesign.bladerow.BladeRow property)</a>, <a href="modules/bladerow.html#turbodesign.bladerow.BladeRow.metal_inlet_angle">[1]</a>
 </li>
       <li>
     module
@@ -397,7 +410,7 @@
 <h2 id="N">N</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="modules/bladerow.html#turbodesign.bladerow.BladeRow.num_blades">num_blades (turbodesign.bladerow.BladeRow property)</a>
+      <li><a href="modules/bladerow.html#id10">num_blades (turbodesign.bladerow.BladeRow property)</a>, <a href="modules/bladerow.html#turbodesign.bladerow.BladeRow.num_blades">[1]</a>
 </li>
   </ul></td>
 </tr></table>
@@ -417,18 +430,20 @@
 </li>
       <li><a href="modules/enums.html#turbodesign.enums.PassageType">PassageType (class in turbodesign.enums)</a>
 </li>
-      <li><a href="modules/bladerow.html#turbodesign.bladerow.BladeRow.pitch">pitch (turbodesign.bladerow.BladeRow property)</a>
+      <li><a href="modules/bladerow.html#id11">pitch (turbodesign.bladerow.BladeRow property)</a>, <a href="modules/bladerow.html#turbodesign.bladerow.BladeRow.pitch">[1]</a>
 </li>
-      <li><a href="modules/bladerow.html#turbodesign.bladerow.BladeRow.pitch_to_chord">pitch_to_chord (turbodesign.bladerow.BladeRow property)</a>
+      <li><a href="modules/bladerow.html#id12">pitch_to_chord (turbodesign.bladerow.BladeRow property)</a>, <a href="modules/bladerow.html#turbodesign.bladerow.BladeRow.pitch_to_chord">[1]</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="modules/lossinterp.html#turbodesign.lossinterp.LossInterp.plot">plot() (turbodesign.lossinterp.LossInterp method)</a>
 
       <ul>
         <li><a href="modules/spool.html#turbodesign.turbine_spool.TurbineSpool.plot">(turbodesign.turbine_spool.TurbineSpool method)</a>, <a href="modules/turbinespool.html#turbodesign.turbine_spool.TurbineSpool.plot">[1]</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="modules/spool.html#turbodesign.turbine_spool.TurbineSpool.plot_convergence">plot_convergence() (turbodesign.turbine_spool.TurbineSpool method)</a>, <a href="modules/turbinespool.html#turbodesign.turbine_spool.TurbineSpool.plot_convergence">[1]</a>
+</li>
       <li><a href="modules/passage.html#turbodesign.passage.Passage.plot_cuts">plot_cuts() (turbodesign.passage.Passage method)</a>
 </li>
       <li><a href="modules/spool.html#turbodesign.turbine_spool.TurbineSpool.plot_velocity_triangles">plot_velocity_triangles() (turbodesign.turbine_spool.TurbineSpool method)</a>, <a href="modules/turbinespool.html#turbodesign.turbine_spool.TurbineSpool.plot_velocity_triangles">[1]</a>
@@ -455,23 +470,33 @@
 <h2 id="S">S</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="modules/spool.html#turbodesign.turbine_spool.TurbineSpool.save_convergence_history">save_convergence_history() (turbodesign.turbine_spool.TurbineSpool method)</a>, <a href="modules/turbinespool.html#turbodesign.turbine_spool.TurbineSpool.save_convergence_history">[1]</a>
+</li>
       <li><a href="modules/spool.html#turbodesign.turbine_spool.TurbineSpool.set_blade_row_exit_angles">set_blade_row_exit_angles() (turbodesign.turbine_spool.TurbineSpool method)</a>, <a href="modules/turbinespool.html#turbodesign.turbine_spool.TurbineSpool.set_blade_row_exit_angles">[1]</a>
 </li>
       <li><a href="modules/passage.html#turbodesign.passage.Passage.shroud_length">shroud_length (turbodesign.passage.Passage property)</a>
 </li>
-      <li><a href="modules/bladerow.html#turbodesign.bladerow.BladeRow.solidity">solidity (turbodesign.bladerow.BladeRow property)</a>
+      <li><a href="modules/bladerow.html#id13">solidity (turbodesign.bladerow.BladeRow property)</a>, <a href="modules/bladerow.html#turbodesign.bladerow.BladeRow.solidity">[1]</a>
 </li>
       <li><a href="modules/spool.html#turbodesign.turbine_spool.TurbineSpool.solve">solve() (turbodesign.turbine_spool.TurbineSpool method)</a>, <a href="modules/turbinespool.html#turbodesign.turbine_spool.TurbineSpool.solve">[1]</a>
 </li>
+      <li><a href="modules/isentropic.html#turbodesign.isentropic.solve_for_mach">solve_for_mach() (in module turbodesign.isentropic)</a>
+</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="modules/bladerow.html#turbodesign.bladerow.BladeRow.stagger">stagger (turbodesign.bladerow.BladeRow property)</a>
+      <li><a href="modules/spool.html#turbodesign.turbine_spool.TurbineSpool.solve_for_static_pressure">solve_for_static_pressure() (turbodesign.turbine_spool.TurbineSpool method)</a>, <a href="modules/turbinespool.html#turbodesign.turbine_spool.TurbineSpool.solve_for_static_pressure">[1]</a>
+</li>
+      <li><a href="modules/spool.html#turbodesign.turbine_spool.TurbineSpool.solve_massflow_for_power">solve_massflow_for_power() (turbodesign.turbine_spool.TurbineSpool method)</a>, <a href="modules/turbinespool.html#turbodesign.turbine_spool.TurbineSpool.solve_massflow_for_power">[1]</a>
+</li>
+      <li><a href="modules/bladerow.html#id14">stagger (turbodesign.bladerow.BladeRow property)</a>, <a href="modules/bladerow.html#turbodesign.bladerow.BladeRow.stagger">[1]</a>
 </li>
       <li><a href="modules/turbine_math.html#turbodesign.turbine_math.stator_calc">stator_calc() (in module turbodesign.turbine_math)</a>
 </li>
-      <li><a href="modules/passage.html#turbodesign.passage.Passage.streamline_curvature">streamline_curvature() (turbodesign.passage.Passage static method)</a>
+      <li><a href="modules/passage.html#turbodesign.passage.Passage.streamline_curvature">streamline_curvature() (turbodesign.passage.Passage method)</a>
 </li>
       <li><a href="modules/bladerow.html#turbodesign.bladerow.sutherland">sutherland() (in module turbodesign.bladerow)</a>
+</li>
+      <li><a href="modules/bladerow.html#id15">synchronize_blade_geometry() (turbodesign.bladerow.BladeRow method)</a>, <a href="modules/bladerow.html#turbodesign.bladerow.BladeRow.synchronize_blade_geometry">[1]</a>
 </li>
   </ul></td>
 </tr></table>
@@ -485,11 +510,13 @@
 </li>
       <li><a href="modules/loss.html#turbodesign.loss.turbine.TD2.TD2_Reynolds_Correction">TD2_Reynolds_Correction (class in turbodesign.loss.turbine.TD2)</a>
 </li>
-      <li><a href="modules/bladerow.html#turbodesign.bladerow.BladeRow.te_pitch">te_pitch (turbodesign.bladerow.BladeRow property)</a>
+      <li><a href="modules/bladerow.html#id16">te_pitch (turbodesign.bladerow.BladeRow property)</a>, <a href="modules/bladerow.html#turbodesign.bladerow.BladeRow.te_pitch">[1]</a>
 </li>
-      <li><a href="modules/bladerow.html#turbodesign.bladerow.BladeRow.throat">throat (turbodesign.bladerow.BladeRow property)</a>
+      <li><a href="modules/bladerow.html#id17">throat (turbodesign.bladerow.BladeRow property)</a>, <a href="modules/bladerow.html#turbodesign.bladerow.BladeRow.throat">[1]</a>
 </li>
-      <li><a href="modules/bladerow.html#turbodesign.bladerow.BladeRow.tip_clearance">tip_clearance (turbodesign.bladerow.BladeRow property)</a>
+      <li><a href="modules/bladerow.html#id18">tip_clearance (turbodesign.bladerow.BladeRow property)</a>, <a href="modules/bladerow.html#turbodesign.bladerow.BladeRow.tip_clearance">[1]</a>
+</li>
+      <li><a href="modules/spool.html#turbodesign.turbine_spool.TurbineSpool.total_power">total_power() (turbodesign.turbine_spool.TurbineSpool method)</a>, <a href="modules/turbinespool.html#turbodesign.turbine_spool.TurbineSpool.total_power">[1]</a>
 </li>
       <li><a href="modules/outlet.html#turbodesign.outlet.Outlet.transfer_quantities">transfer_quantities() (turbodesign.outlet.Outlet method)</a>
 </li>

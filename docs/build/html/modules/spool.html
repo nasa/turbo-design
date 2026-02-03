@@ -8,14 +8,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>TurbineSpool &mdash; Turbo Design 1.0.6 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
-      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
 
   
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
       <script src="../_static/documentation_options.js?v=e2a723ec"></script>
-      <script src="../_static/doctools.js?v=9bcbadda"></script>
-      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -46,6 +46,7 @@
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="bladerow.html">BladeRow</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="bladerow.html#turbodesign.bladerow.BladeRow"><code class="docutils literal notranslate"><span class="pre">BladeRow</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="bladerow.html#id0"><code class="docutils literal notranslate"><span class="pre">BladeRow</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="bladerow.html#turbodesign.bladerow.interpolate_quantities"><code class="docutils literal notranslate"><span class="pre">interpolate_quantities()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="bladerow.html#turbodesign.bladerow.interpolate_streamline_quantities"><code class="docutils literal notranslate"><span class="pre">interpolate_streamline_quantities()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="bladerow.html#turbodesign.bladerow.sutherland"><code class="docutils literal notranslate"><span class="pre">sutherland()</span></code></a></li>
@@ -54,7 +55,6 @@
 <li class="toctree-l1"><a class="reference internal" href="coolant.html">Coolant</a></li>
 <li class="toctree-l1"><a class="reference internal" href="enums.html">Enums</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="enums.html#turbodesign.enums.LossType"><code class="docutils literal notranslate"><span class="pre">LossType</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="enums.html#turbodesign.enums.MassflowConstraint"><code class="docutils literal notranslate"><span class="pre">MassflowConstraint</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="enums.html#turbodesign.enums.PassageType"><code class="docutils literal notranslate"><span class="pre">PassageType</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="enums.html#turbodesign.enums.PowerType"><code class="docutils literal notranslate"><span class="pre">PowerType</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="enums.html#turbodesign.enums.RowType"><code class="docutils literal notranslate"><span class="pre">RowType</span></code></a></li>
@@ -70,6 +70,7 @@
 <li class="toctree-l2"><a class="reference internal" href="isentropic.html#turbodesign.isentropic.IsenP"><code class="docutils literal notranslate"><span class="pre">IsenP()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="isentropic.html#turbodesign.isentropic.IsenT"><code class="docutils literal notranslate"><span class="pre">IsenT()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="isentropic.html#turbodesign.isentropic.Massflow"><code class="docutils literal notranslate"><span class="pre">Massflow()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="isentropic.html#turbodesign.isentropic.solve_for_mach"><code class="docutils literal notranslate"><span class="pre">solve_for_mach()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="loss.html">Turbine Loss</a><ul>
@@ -110,11 +111,8 @@
 </li>
 <li class="toctree-l1"><a class="reference internal" href="turbine_math.html">Turbine Design Math</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="turbine_math.html#turbodesign.turbine_math.T0_coolant_weighted_average"><code class="docutils literal notranslate"><span class="pre">T0_coolant_weighted_average()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="turbine_math.html#turbodesign.turbine_math.compute_massflow"><code class="docutils literal notranslate"><span class="pre">compute_massflow()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="turbine_math.html#turbodesign.turbine_math.compute_power"><code class="docutils literal notranslate"><span class="pre">compute_power()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="turbine_math.html#turbodesign.turbine_math.compute_quantities"><code class="docutils literal notranslate"><span class="pre">compute_quantities()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="turbine_math.html#turbodesign.turbine_math.compute_reynolds"><code class="docutils literal notranslate"><span class="pre">compute_reynolds()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="turbine_math.html#turbodesign.turbine_math.compute_streamline_areas"><code class="docutils literal notranslate"><span class="pre">compute_streamline_areas()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="turbine_math.html#turbodesign.turbine_math.inlet_calc"><code class="docutils literal notranslate"><span class="pre">inlet_calc()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="turbine_math.html#turbodesign.turbine_math.rotor_calc"><code class="docutils literal notranslate"><span class="pre">rotor_calc()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="turbine_math.html#turbodesign.turbine_math.stator_calc"><code class="docutils literal notranslate"><span class="pre">stator_calc()</span></code></a></li>
@@ -154,7 +152,7 @@
 <h1>TurbineSpool<a class="headerlink" href="#turbinespool" title="Link to this heading"></a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="turbodesign.turbine_spool.TurbineSpool">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">turbodesign.turbine_spool.</span></span><span class="sig-name descname"><span class="pre">TurbineSpool</span></span><a class="reference internal" href="../_modules/turbodesign/turbine_spool.html#TurbineSpool"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#turbodesign.turbine_spool.TurbineSpool" title="Link to this definition"></a></dt>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">turbodesign.turbine_spool.</span></span><span class="sig-name descname"><span class="pre">TurbineSpool</span></span><a class="reference internal" href="../_modules/turbodesign/turbine_spool.html#TurbineSpool"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#turbodesign.turbine_spool.TurbineSpool" title="Link to this definition"></a></dt>
 <dd><p>Used with turbines</p>
 <p>This class (formerly named <em>Spool</em>) encapsulates both the generic geometry/plotting
 utilities from the original base spool and the turbine-solving logic that lived
@@ -170,24 +168,66 @@ in the turbine-specific spool implementation.</p>
 preserved here. If you ever add a <em>CompressorSpool</em> in the future, consider
 splitting turbine/compressor behaviors behind a strategy/solver object.</p></li>
 </ul>
+<dl class="py method">
+<dt class="sig sig-object py" id="turbodesign.turbine_spool.TurbineSpool.__massflow_std__">
+<span class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">__massflow_std__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">blade_rows</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="bladerow.html#id0" title="turbodesign.bladerow.BladeRow"><span class="pre">BladeRow</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="../_modules/turbodesign/turbine_spool.html#TurbineSpool.__massflow_std__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#turbodesign.turbine_spool.TurbineSpool.__massflow_std__" title="Link to this definition"></a></dt>
+<dd><p>Calculate massflow standard deviation across blade rows.</p>
+<p>Computes the standard deviation of total massflow (without coolant) across
+all blade rows. Used as a convergence criterion for pressure balance and
+angle matching iterations. Warns if deviation exceeds 1.0 kg/s.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>blade_rows</strong> – List of all blade rows (inlet, stators, rotors, outlet)</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Two times the standard deviation of massflow [kg/s]</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
 <dl class="py property">
 <dt class="sig sig-object py" id="turbodesign.turbine_spool.TurbineSpool.blade_rows">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">blade_rows</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="bladerow.html#turbodesign.bladerow.BladeRow" title="turbodesign.bladerow.BladeRow"><span class="pre">BladeRow</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#turbodesign.turbine_spool.TurbineSpool.blade_rows" title="Link to this definition"></a></dt>
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">blade_rows</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="bladerow.html#id0" title="turbodesign.bladerow.BladeRow"><span class="pre">BladeRow</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#turbodesign.turbine_spool.TurbineSpool.blade_rows" title="Link to this definition"></a></dt>
 <dd><p>Backwards-compatible combined row list.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="turbodesign.turbine_spool.TurbineSpool.calculate_streamline_curvature">
-<span class="sig-name descname"><span class="pre">calculate_streamline_curvature</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">row</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="bladerow.html#turbodesign.bladerow.BladeRow" title="turbodesign.bladerow.BladeRow"><span class="pre">BladeRow</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">t_hub_shroud</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">_ScalarType_co</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/turbodesign/turbine_spool.html#TurbineSpool.calculate_streamline_curvature"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#turbodesign.turbine_spool.TurbineSpool.calculate_streamline_curvature" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">calculate_streamline_curvature</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">row</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="bladerow.html#id0" title="turbodesign.bladerow.BladeRow"><span class="pre">BladeRow</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">t_hub_shroud</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">_ScalarT</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/turbodesign/turbine_spool.html#TurbineSpool.calculate_streamline_curvature"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#turbodesign.turbine_spool.TurbineSpool.calculate_streamline_curvature" title="Link to this definition"></a></dt>
 <dd><p>Calculates the streamline curvature</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>row</strong> (<a class="reference internal" href="bladerow.html#turbodesign.bladerow.BladeRow" title="turbodesign.bladerow.BladeRow"><em>BladeRow</em></a>) – current blade row</p></li>
+<li><p><strong>row</strong> (<a class="reference internal" href="bladerow.html#id0" title="turbodesign.bladerow.BladeRow"><em>BladeRow</em></a>) – current blade row</p></li>
 <li><p><strong>t_radial</strong> (<em>Union</em><em>[</em><em>List</em><em>[</em><em>float</em><em>]</em><em>, </em><em>npt.NDArray</em><em>]</em>) – percent along line from hub to shroud</p></li>
 </ul>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="turbodesign.turbine_spool.TurbineSpool.export_properties">
+<span class="sig-name descname"><span class="pre">export_properties</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'turbine_spool.json'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/turbodesign/turbine_spool.html#TurbineSpool.export_properties"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#turbodesign.turbine_spool.TurbineSpool.export_properties" title="Link to this definition"></a></dt>
+<dd><p>Export turbine spool properties and blade row data to JSON file.</p>
+<p>Exports comprehensive turbine design data including blade row properties,
+streamline coordinates, efficiency metrics, degree of reaction, stage loading,
+and power calculations for each stage. Useful for post-processing and result
+archiving.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>filename</strong> – Output JSON file path (default: “turbine_spool.json”)</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None. Writes JSON file to specified path.</p>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">spool</span><span class="o">.</span><span class="n">export_properties</span><span class="p">(</span><span class="s2">&quot;eee_hpt_results.json&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
 </dd></dl>
 
 <dl class="py method">
@@ -205,13 +245,58 @@ splitting turbine/compressor behaviors behind a strategy/solver object.</p></li>
 <dl class="py method">
 <dt class="sig sig-object py" id="turbodesign.turbine_spool.TurbineSpool.plot">
 <span class="sig-name descname"><span class="pre">plot</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/turbodesign/turbine_spool.html#TurbineSpool.plot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#turbodesign.turbine_spool.TurbineSpool.plot" title="Link to this definition"></a></dt>
-<dd><p>Plot hub/shroud and streamlines.</p>
+<dd><p>Plot hub/shroud and streamlines with improved labels and formatting.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="turbodesign.turbine_spool.TurbineSpool.plot_convergence">
+<span class="sig-name descname"><span class="pre">plot_convergence</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">save_to_file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/turbodesign/turbine_spool.html#TurbineSpool.plot_convergence"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#turbodesign.turbine_spool.TurbineSpool.plot_convergence" title="Link to this definition"></a></dt>
+<dd><p>Plot convergence history showing massflow error vs iteration.</p>
+<p>Displays a semi-log plot of the massflow standard deviation error across
+iterations. If convergence history is empty, warns user.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>save_to_file</strong> – If True, saves to “convergence.png”. If string, saves to that filename.
+If None/False, displays plot without saving.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None. Either displays plot or saves to file.</p>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">spool</span><span class="o">.</span><span class="n">solve</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">spool</span><span class="o">.</span><span class="n">plot_convergence</span><span class="p">()</span>  <span class="c1"># Display plot</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">spool</span><span class="o">.</span><span class="n">plot_convergence</span><span class="p">(</span><span class="n">save_to_file</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>  <span class="c1"># Save to convergence.png</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">spool</span><span class="o">.</span><span class="n">plot_convergence</span><span class="p">(</span><span class="n">save_to_file</span><span class="o">=</span><span class="s2">&quot;my_convergence.png&quot;</span><span class="p">)</span>  <span class="c1"># Save to custom file</span>
+</pre></div>
+</div>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="turbodesign.turbine_spool.TurbineSpool.plot_velocity_triangles">
 <span class="sig-name descname"><span class="pre">plot_velocity_triangles</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/turbodesign/turbine_spool.html#TurbineSpool.plot_velocity_triangles"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#turbodesign.turbine_spool.TurbineSpool.plot_velocity_triangles" title="Link to this definition"></a></dt>
-<dd><p>Plot velocity triangles for each blade row (turbines).</p>
+<dd><p>Plot velocity triangles for each blade row with improved styling and annotations.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="turbodesign.turbine_spool.TurbineSpool.save_convergence_history">
+<span class="sig-name descname"><span class="pre">save_convergence_history</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'convergence_history.jsonl'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/turbodesign/turbine_spool.html#TurbineSpool.save_convergence_history"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#turbodesign.turbine_spool.TurbineSpool.save_convergence_history" title="Link to this definition"></a></dt>
+<dd><p>Save convergence history to JSONL file.</p>
+<p>Writes the convergence history collected during solve() to a JSON Lines file,
+where each line is a JSON object representing one iteration.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>filename</strong> – Output JSONL file path (default: “convergence_history.jsonl”)</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None. Writes JSONL file to specified path.</p>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">spool</span><span class="o">.</span><span class="n">solve</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">spool</span><span class="o">.</span><span class="n">save_convergence_history</span><span class="p">(</span><span class="s2">&quot;turbine_convergence.jsonl&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
 </dd></dl>
 
 <dl class="py method">
@@ -224,6 +309,59 @@ splitting turbine/compressor behaviors behind a strategy/solver object.</p></li>
 <dt class="sig sig-object py" id="turbodesign.turbine_spool.TurbineSpool.solve">
 <span class="sig-name descname"><span class="pre">solve</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/turbodesign/turbine_spool.html#TurbineSpool.solve"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#turbodesign.turbine_spool.TurbineSpool.solve" title="Link to this definition"></a></dt>
 <dd><p>Solve for exit angles/pressures to satisfy chosen massflow constraint.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="turbodesign.turbine_spool.TurbineSpool.solve_for_static_pressure">
+<span class="sig-name descname"><span class="pre">solve_for_static_pressure</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">upstream</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="bladerow.html#id0" title="turbodesign.bladerow.BladeRow"><span class="pre">BladeRow</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">row</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="bladerow.html#id0" title="turbodesign.bladerow.BladeRow"><span class="pre">BladeRow</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/turbodesign/turbine_spool.html#TurbineSpool.solve_for_static_pressure"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#turbodesign.turbine_spool.TurbineSpool.solve_for_static_pressure" title="Link to this definition"></a></dt>
+<dd><p>Solve for static pressure at blade row exit using isentropic flow relations.</p>
+<p>Uses massflow-area-Mach number relation to find static pressure from known
+total conditions. Attempts both subsonic and supersonic solutions and selects
+the subsonic solution.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>upstream</strong> – Upstream blade row providing inlet conditions</p></li>
+<li><p><strong>row</strong> – Current blade row where static pressure is being solved</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None. Updates row.M, row.T, and row.P in-place.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="turbodesign.turbine_spool.TurbineSpool.solve_massflow_for_power">
+<span class="sig-name descname"><span class="pre">solve_massflow_for_power</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target_power</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">massflow_guess</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tol_rel</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.001</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_iter</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">8</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">relax</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.7</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bounds</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">(1e-06,</span> <span class="pre">1000000000.0)</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/turbodesign/turbine_spool.html#TurbineSpool.solve_massflow_for_power"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#turbodesign.turbine_spool.TurbineSpool.solve_massflow_for_power" title="Link to this definition"></a></dt>
+<dd><p>Power-driven closure: iterate inlet massflow to hit a target turbine power.</p>
+<dl class="simple">
+<dt>This uses a simple algebraic update (no additional nested optimizer):</dt><dd><p>mdot_next = mdot_current * (P_target / P_current)</p>
+</dd>
+</dl>
+<p>The inner flow solution still uses the existing pressure-balance method to
+maintain a consistent massflow between rows for the current guess.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>target_power</strong> – Desired turbine power [W]. Use a positive value for power extracted.</p></li>
+<li><p><strong>massflow_guess</strong> – Optional starting guess for inlet massflow [kg/s]. Defaults to <cite>self.massflow</cite>.</p></li>
+<li><p><strong>tol_rel</strong> – Relative tolerance on power error.</p></li>
+<li><p><strong>max_iter</strong> – Maximum outer iterations.</p></li>
+<li><p><strong>relax</strong> – Under-relaxation factor (0–1) for massflow updates.</p></li>
+<li><p><strong>bounds</strong> – (lower, upper) bounds for massflow during updates.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Tuple of (achieved_massflow_kg_s, achieved_power_W).</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="turbodesign.turbine_spool.TurbineSpool.total_power">
+<span class="sig-name descname"><span class="pre">total_power</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="../_modules/turbodesign/turbine_spool.html#TurbineSpool.total_power"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#turbodesign.turbine_spool.TurbineSpool.total_power" title="Link to this definition"></a></dt>
+<dd><p>Return total turbine power extracted (sum over rotor rows).</p>
 </dd></dl>
 
 </dd></dl>

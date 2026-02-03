@@ -7,14 +7,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>turbodesign.loss.turbine.TD2 &mdash; Turbo Design 1.0.6 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
-      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=9edc463e" />
 
   
       <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
       <script src="../../../../_static/documentation_options.js?v=e2a723ec"></script>
-      <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
-      <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../../genindex.html" />
     <link rel="search" title="Search" href="../../../../search.html" /> 
@@ -43,6 +43,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../../modules/bladerow.html">BladeRow</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../../../modules/bladerow.html#turbodesign.bladerow.BladeRow"><code class="docutils literal notranslate"><span class="pre">BladeRow</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../modules/bladerow.html#id0"><code class="docutils literal notranslate"><span class="pre">BladeRow</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../modules/bladerow.html#turbodesign.bladerow.interpolate_quantities"><code class="docutils literal notranslate"><span class="pre">interpolate_quantities()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../modules/bladerow.html#turbodesign.bladerow.interpolate_streamline_quantities"><code class="docutils literal notranslate"><span class="pre">interpolate_streamline_quantities()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../modules/bladerow.html#turbodesign.bladerow.sutherland"><code class="docutils literal notranslate"><span class="pre">sutherland()</span></code></a></li>
@@ -51,7 +52,6 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../modules/coolant.html">Coolant</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../modules/enums.html">Enums</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../../../modules/enums.html#turbodesign.enums.LossType"><code class="docutils literal notranslate"><span class="pre">LossType</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../../../modules/enums.html#turbodesign.enums.MassflowConstraint"><code class="docutils literal notranslate"><span class="pre">MassflowConstraint</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../modules/enums.html#turbodesign.enums.PassageType"><code class="docutils literal notranslate"><span class="pre">PassageType</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../modules/enums.html#turbodesign.enums.PowerType"><code class="docutils literal notranslate"><span class="pre">PowerType</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../modules/enums.html#turbodesign.enums.RowType"><code class="docutils literal notranslate"><span class="pre">RowType</span></code></a></li>
@@ -67,6 +67,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../../../../modules/isentropic.html#turbodesign.isentropic.IsenP"><code class="docutils literal notranslate"><span class="pre">IsenP()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../modules/isentropic.html#turbodesign.isentropic.IsenT"><code class="docutils literal notranslate"><span class="pre">IsenT()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../modules/isentropic.html#turbodesign.isentropic.Massflow"><code class="docutils literal notranslate"><span class="pre">Massflow()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../modules/isentropic.html#turbodesign.isentropic.solve_for_mach"><code class="docutils literal notranslate"><span class="pre">solve_for_mach()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../modules/loss.html">Turbine Loss</a><ul>
@@ -107,11 +108,8 @@
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../modules/turbine_math.html">Turbine Design Math</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../../../modules/turbine_math.html#turbodesign.turbine_math.T0_coolant_weighted_average"><code class="docutils literal notranslate"><span class="pre">T0_coolant_weighted_average()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../../../modules/turbine_math.html#turbodesign.turbine_math.compute_massflow"><code class="docutils literal notranslate"><span class="pre">compute_massflow()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../../../modules/turbine_math.html#turbodesign.turbine_math.compute_power"><code class="docutils literal notranslate"><span class="pre">compute_power()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../modules/turbine_math.html#turbodesign.turbine_math.compute_quantities"><code class="docutils literal notranslate"><span class="pre">compute_quantities()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../modules/turbine_math.html#turbodesign.turbine_math.compute_reynolds"><code class="docutils literal notranslate"><span class="pre">compute_reynolds()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../../../modules/turbine_math.html#turbodesign.turbine_math.compute_streamline_areas"><code class="docutils literal notranslate"><span class="pre">compute_streamline_areas()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../modules/turbine_math.html#turbodesign.turbine_math.inlet_calc"><code class="docutils literal notranslate"><span class="pre">inlet_calc()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../modules/turbine_math.html#turbodesign.turbine_math.rotor_calc"><code class="docutils literal notranslate"><span class="pre">rotor_calc()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../modules/turbine_math.html#turbodesign.turbine_math.stator_calc"><code class="docutils literal notranslate"><span class="pre">stator_calc()</span></code></a></li>
