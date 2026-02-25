@@ -20,6 +20,7 @@ This tool is a streamline turbomachinery design tool solving the radial equilibr
   - [Angle Matching Mode](#2-angle-matching-mode)
 - [Typical Workflow](#typical-workflow)
 - [Tutorials](#tutorials)
+- [Technical Notes](#technical-notes)
 - [Understanding Velocity Triangles](#understanding-velocity-triangles)
 - [Documentation](#documentation)
   - [Online Documentation](#online-documentation)
@@ -289,6 +290,10 @@ print(f"Total power: {spool.total_power()} W")
 [Turbine optimization with scipy](https://colab.research.google.com/github/nasa/turbo-design/blob/main/examples/optturb-turbine/optturb.ipynb)
 
 [Multi-stage turbine optimization](https://colab.research.google.com/github/nasa/turbo-design/blob/main/examples/optturb-multistage/optturb-multistage.ipynb)
+
+## Technical Notes
+
+- [Entropy-Based Efficiency: The T2·delta-s Approach](entropy_based_efficiency.md) — Derives why the conventional isentropic efficiency ($\eta = \Delta T_0 / (T_{01} - T_{02s})$) breaks down for radial machines with large radius change, and how the entropy-based definition $\eta = w/(w + T_2 \Delta s)$ resolves this by isolating irreversibility from frame-change effects. Includes full derivations from first and second law, the Gouy-Stodola lost-work theorem, and shows applicability to both compressors and turbines.
 
 ## Understanding Velocity Triangles
 
