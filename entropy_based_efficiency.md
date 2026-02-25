@@ -217,15 +217,12 @@ Both forms give $\eta = 1$ when $\Delta s = 0$ (no loss) and $\eta < 1$ when $\D
 
 ### 6.2 Implementation in turbo-design
 
-The turbine implementation (`flow_math.py`, lines 152–163):
+Both turbines and compressors use the entropy-based approach in `flow_math.py`. The entropy rise $\Delta s = R \ln(P_{0R,\text{in}} / P_{0R,\text{out}})$ is the same in both cases — loss always reduces $P_{0R}$ relative to the ideal, giving positive $\Delta s$.
+
+**Turbine** (`flow_math.py`, lines 162–173):
 
 ```python
-# Entropy-based total-total efficiency:  η = w / (w + T_exit·Δs)
-# The standard isentropic formula η = ΔT0/(T01−T0_is) uses the
-# absolute P0 ratio which, for radial machines with large radius
-# change, is dominated by the frame change and barely reflects the
-# relative-frame loss — giving η ≈ 1 even with significant Yp.
-# The entropy-based definition always isolates the irreversibility.
+# η = w / (w + T_exit·Δs)
 if np.mean(ref.P0R) > 0 and np.mean(row.P0R) > 0 and deltaT > 0:
     ds = row.R * np.log(np.mean(ref.P0R) / np.mean(row.P0R))
     w_per_mass = row.Cp * deltaT
@@ -235,7 +232,22 @@ else:
                     max(ref.T0.mean() - row.T0_is.mean(), 1e-9)
 ```
 
-Note: the fallback (line 163) uses the conventional isentropic formula when relative-frame data ($P_{0R}$) is unavailable — for example, across a stator where there is no relative frame.
+**Compressor** (`flow_math.py`, lines 146–157):
+
+```python
+# η = (w - T_exit·Δs) / w = 1 - T_exit·Δs / w
+if np.mean(ref.P0R) > 0 and np.mean(row.P0R) > 0 and deltaT > 0:
+    ds = row.R * np.log(np.mean(ref.P0R) / np.mean(row.P0R))
+    w_per_mass = row.Cp * deltaT
+    row.eta_total = (w_per_mass - row.T.mean() * max(ds, 0.0)) / w_per_mass
+else:
+    denom_total = max(row.T0.mean() - ref.T0.mean(), 1e-9)
+    row.eta_total = (row.T0_is.mean() - ref.T0.mean()) / denom_total
+```
+
+Note the difference in form: for turbines $\eta = w/(w + T_2 \Delta s)$ and for compressors $\eta = (w - T_2 \Delta s)/w$. These are equivalent to the standard definitions $\eta_{\text{turbine}} = w_{\text{actual}}/w_{\text{ideal}}$ and $\eta_{\text{compressor}} = w_{\text{ideal}}/w_{\text{actual}}$, where $w_{\text{ideal}} = w \pm T_2 \Delta s$.
+
+Both fall back to the conventional isentropic formula when relative-frame data ($P_{0R}$) is unavailable — for example, across a stator where there is no relative frame.
 
 ### 6.3 Limiting Cases
 
@@ -294,4 +306,4 @@ The $T_2 \Delta s$ approach works universally because:
 | Zero-loss limit | $\eta = 1$ | $\eta = 1$ |
 | Axial-machine limit | Standard value | Same as conventional |
 
-The entropy-based efficiency definition is the thermodynamically rigorous way to quantify turbomachinery performance. It reduces to the conventional definition for axial machines (where both work fine) and provides correct results for radial and mixed-flow machines (where the conventional definition fails). This is why turbo-design uses $T_2 \Delta s$ as the primary efficiency metric for turbine rotors.
+The entropy-based efficiency definition is the thermodynamically rigorous way to quantify turbomachinery performance. It reduces to the conventional definition for axial machines (where both work fine) and provides correct results for radial and mixed-flow machines (where the conventional definition fails). This is why turbo-design uses $T_2 \Delta s$ as the primary efficiency metric for all rotors — both turbine and compressor.

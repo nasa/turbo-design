@@ -142,9 +142,19 @@ def compute_power(row: BladeRow, upstream: BladeRow | None = None, downstream: B
             deltaT = row.T0.mean() - ref.T0.mean()
             row.power = mdot * row.Cp * deltaT
             denom_static = max(row.T.mean() - ref.T0.mean(), 1e-9)
-            denom_total = max(row.T0.mean() - ref.T0.mean(), 1e-9)
             row.eta_static = (row.T_is.mean() - ref.T0.mean()) / denom_static
-            row.eta_total = (row.T0_is.mean() - ref.T0.mean()) / denom_total
+            # Entropy-based total-total efficiency for compressors:
+            #   η = (w - T_exit·Δs) / w = 1 - T_exit·Δs / w
+            # Same reasoning as the turbine branch — the conventional
+            # isentropic formula uses the absolute P0 ratio which is
+            # dominated by the frame change for centrifugal compressors.
+            if np.mean(ref.P0R) > 0 and np.mean(row.P0R) > 0 and deltaT > 0:
+                ds = row.R * np.log(np.mean(ref.P0R) / np.mean(row.P0R))
+                w_per_mass = row.Cp * deltaT
+                row.eta_total = (w_per_mass - row.T.mean() * max(ds, 0.0)) / w_per_mass
+            else:
+                denom_total = max(row.T0.mean() - ref.T0.mean(), 1e-9)
+                row.eta_total = (row.T0_is.mean() - ref.T0.mean()) / denom_total
         else:
             deltaT = ref.T0.mean() - row.T0.mean()
             row.power = mdot * row.Cp * deltaT
