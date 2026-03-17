@@ -513,13 +513,7 @@ def plot_all_blades_combined(blades: List[Tuple[npt.NDArray, npt.NDArray]],
     plt.show()
 
 
-def _format_iges_line(content: str, section: str, seq: int) -> str:
-    """Format a single IGES line (80 chars with section letter and sequence)."""
-    line = f"{content:<72s}{section}{seq:>7d}"
-    return line
-
-
-def export_smoothed_iges(
+def export_smoothed_step(
     blades: List[Tuple[npt.NDArray, npt.NDArray]],
     hub: npt.NDArray,
     shroud: npt.NDArray,
@@ -527,129 +521,95 @@ def export_smoothed_iges(
     blade_labels: List[str] | None = None,
     degree: int = 3,
 ) -> None:
-    """Export smoothed blade geometry to IGES files.
+    """Export smoothed blade geometry to STEP files.
 
-    Each blade row is written to a separate IGES file containing
-    B-spline curves (entity 126) for all spanwise sections.
+    Each blade row is written to a separate STEP file containing
+    B-spline curves for all spanwise sections.
 
     Args:
         blades: List of (ss, ps) tuples. Each ss/ps is (n_sections, n_pts, 3)
                 with columns [x, rtheta, r] in mm.
         hub: Hub curve (N, 2) as [x, r] in mm.
         shroud: Shroud curve (N, 2) as [x, r] in mm.
-        output_dir: Directory to write IGES files.
+        output_dir: Directory to write STEP files.
         blade_labels: Names for each blade row.
         degree: B-spline degree for curve fitting (default 3).
     """
     from geomdl import fitting
+    from OCP.BRepBuilderAPI import BRepBuilderAPI_MakeEdge
+    from OCP.Geom import Geom_BSplineCurve
+    from OCP.TColgp import TColgp_Array1OfPnt
+    from OCP.TColStd import TColStd_Array1OfReal, TColStd_Array1OfInteger
+    from OCP.gp import gp_Pnt
+    from OCP.STEPControl import STEPControl_Writer, STEPControl_AsIs
+    from OCP.IFSelect import IFSelect_RetDone
+    from OCP.TopoDS import TopoDS_Compound
+    from OCP.BRep import BRep_Builder
 
     output_dir.mkdir(exist_ok=True)
 
     if blade_labels is None:
         blade_labels = [f"Blade{i}" for i in range(len(blades))]
 
-    def _write_iges(curves_pts, curve_names, output_path):
-        """Write curves to a single IGES file."""
-        bsplines = []
+    def _write_step(curves_pts, output_path):
+        """Write curves to a single STEP file."""
+        builder = BRep_Builder()
+        compound = TopoDS_Compound()
+        builder.MakeCompound(compound)
+
         for pts in curves_pts:
             deg = min(degree, len(pts) - 1)
             curve = fitting.interpolate_curve(pts, degree=deg)
-            bsplines.append(curve)
 
-        start_lines = ["EEE-HPT Smoothed Blade Geometry"]
+            # Build OCC B-spline curve
+            n_ctrl = len(curve.ctrlpts)
+            occ_pts = TColgp_Array1OfPnt(1, n_ctrl)
+            for i, cp in enumerate(curve.ctrlpts):
+                occ_pts.SetValue(i + 1, gp_Pnt(cp[0], cp[1], cp[2]))
 
-        fname = output_path.name
-        global_str = (
-            f"1H,,1H;,{len(fname)}H{fname},"
-            f"7Hexport_iges,7Hexport_iges,"
-            "32,38,6,308,15,"
-            f"{len(fname)}H{fname},"
-            "1.0,2,2HMM,1,0.001,"
-            "15H20260316.000000,"
-            "0.0001,100000.0,0H,0H;"
-        )
+            # Count unique knots and their multiplicities
+            knots = curve.knotvector
+            unique_knots = []
+            mults = []
+            prev = None
+            for k in knots:
+                if prev is None or abs(k - prev) > 1e-12:
+                    unique_knots.append(k)
+                    mults.append(1)
+                else:
+                    mults[-1] += 1
+                prev = k
 
-        directory_lines = []
-        param_lines = []
-        param_seq = 1
-        dir_seq = 1
+            occ_knots = TColStd_Array1OfReal(1, len(unique_knots))
+            occ_mults = TColStd_Array1OfInteger(1, len(unique_knots))
+            for i, (kv, m) in enumerate(zip(unique_knots, mults)):
+                occ_knots.SetValue(i + 1, kv)
+                occ_mults.SetValue(i + 1, m)
 
-        for curve_idx, bsp in enumerate(bsplines):
-            knots = bsp.knotvector
-            ctrlpts = bsp.ctrlpts
-            n_ctrl = len(ctrlpts)
-            k = n_ctrl - 1
-            m = len(knots) - 1
+            bspline = Geom_BSplineCurve(occ_pts, occ_knots, occ_mults, deg)
+            edge = BRepBuilderAPI_MakeEdge(bspline).Edge()
+            builder.Add(compound, edge)
 
-            parts = [f"126,{k},{m},1,0,1,0"]
-            parts.append(",".join(f"{t:.10f}" for t in knots))
-            parts.append(",".join(["1.0"] * n_ctrl))
-            for cp in ctrlpts:
-                parts.append(f"{cp[0]:.10f},{cp[1]:.10f},{cp[2]:.10f}")
-            parts.append(f"{knots[0]:.10f},{knots[-1]:.10f}")
-            parts.append("0.0,0.0,0.0")
-
-            param_str = ",".join(parts) + ";"
-
-            param_start_seq = param_seq
-            for i in range(0, len(param_str), 64):
-                chunk = param_str[i:i + 64]
-                param_lines.append(f"{chunk:<64s}{dir_seq:>8d}")
-                param_seq += 1
-
-            n_param_lines = param_seq - param_start_seq
-            cname = curve_names[curve_idx][:8] if curve_idx < len(curve_names) else ""
-
-            de1 = (f"{126:>8d}{param_start_seq:>8d}{0:>8d}{0:>8d}{0:>8d}"
-                   f"{0:>8d}{0:>8d}{0:>8d}{'00000000':>8s}")
-            de2 = (f"{126:>8d}{0:>8d}{0:>8d}{n_param_lines:>8d}{0:>8d}"
-                   f"{'':>8s}{'':>8s}{cname:>8s}{0:>8d}")
-
-            directory_lines.append(de1)
-            directory_lines.append(de2)
-            dir_seq += 2
-
-        with open(output_path, "w") as f:
-            for i, line in enumerate(start_lines, 1):
-                f.write(_format_iges_line(line, "S", i) + "\n")
-
-            g_seq = 1
-            for i in range(0, len(global_str), 72):
-                f.write(_format_iges_line(global_str[i:i + 72], "G", g_seq) + "\n")
-                g_seq += 1
-
-            for i, line in enumerate(directory_lines, 1):
-                f.write(f"{line}D{i:>7d}\n")
-
-            for i, line in enumerate(param_lines, 1):
-                f.write(f"{line:<72s}P{i:>7d}\n")
-
-            n_s = len(start_lines)
-            n_g = g_seq - 1
-            n_d = len(directory_lines)
-            n_p = len(param_lines)
-            term = f"S{n_s:>7d}G{n_g:>7d}D{n_d:>7d}P{n_p:>7d}"
-            f.write(_format_iges_line(term, "T", 1) + "\n")
-
-        print(f"  Wrote {output_path} ({len(bsplines)} curves)")
+        writer = STEPControl_Writer()
+        writer.Transfer(compound, STEPControl_AsIs)
+        status = writer.Write(str(output_path))
+        if status != IFSelect_RetDone:
+            raise RuntimeError(f"Failed to write STEP file: {output_path}")
+        print(f"  Wrote {output_path}")
 
     # Export each blade row
     for blade_idx, (ss, ps) in enumerate(blades):
         name = blade_labels[blade_idx]
         curves = []
-        names = []
         for sec_idx in range(ss.shape[0]):
             curves.append(ss[sec_idx].tolist())
-            names.append(f"{name}_SS{sec_idx}")
             curves.append(ps[sec_idx].tolist())
-            names.append(f"{name}_PS{sec_idx}")
-        _write_iges(curves, names, output_dir / f"{name.lower()}_smoothed.igs")
+        _write_step(curves, output_dir / f"{name.lower()}_smoothed.step")
 
     # Export hub and shroud
     hub_3d = np.column_stack([hub, np.zeros(len(hub))]).tolist()
     shroud_3d = np.column_stack([shroud, np.zeros(len(shroud))]).tolist()
-    _write_iges([hub_3d, shroud_3d], ["Hub", "Shroud"],
-                output_dir / "hub_shroud.igs")
+    _write_step([hub_3d, shroud_3d], output_dir / "hub_shroud.step")
 
 
 def process_geometry(script_dir: Path, npts: int = 400) -> dict:
@@ -743,11 +703,11 @@ def process_geometry(script_dir: Path, npts: int = 400) -> dict:
 
     print(f"\nProcessed geometry saved to: {script_dir / 'eee_hpt_processed.pkl'}")
 
-    # Step 9: Export smoothed geometry to IGES
-    print("\nExporting smoothed geometry to IGES...")
-    export_smoothed_iges(
+    # Step 9: Export smoothed geometry to STEP
+    print("\nExporting smoothed geometry to STEP...")
+    export_smoothed_step(
         processed_data, hub, shroud,
-        output_dir=script_dir / 'iges',
+        output_dir=script_dir / 'step',
         blade_labels=labels,
     )
 
