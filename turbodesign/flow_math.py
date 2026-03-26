@@ -35,9 +35,11 @@ def compute_streamline_areas(row: BladeRow) -> Tuple[float, npt.NDArray]:
             total_area += delta
         else:  # Radial machines
             dx = row.x[j] - row.x[j - 1]
-            S = row.r[j] - row.r[j - 1]
-            C = np.sqrt(1 + ((row.r[j] - row.r[j - 1]) / dx) ** 2)
-            streamline_area[j] = 2 * np.pi * C * (S / 2 * dx ** 2 + row.r[j - 1] * dx)
+            dr = row.r[j] - row.r[j - 1]
+            dl = np.sqrt(dx**2 + dr**2)
+            # Signed area: sign follows dx to maintain massflow sign convention
+            sign = -1.0 if dx < 0 else 1.0
+            streamline_area[j] = sign * np.pi * (row.r[j] + row.r[j - 1]) * dl
             total_area += streamline_area[j]
     return total_area, streamline_area
 

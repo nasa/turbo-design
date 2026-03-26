@@ -323,7 +323,7 @@ def rotor_calc(
             tau_is = (row.P0_is / upstream.P0) ** ((row.gamma - 1.0) / row.gamma)
             row.T0_is = upstream.T0 * tau_is
     
-        return np.abs(upstream.total_massflow - total_massflow_local)
+        return np.abs(np.abs(upstream.total_massflow) - np.abs(total_massflow_local))
     
     def solve_massflow_for_current_loss() -> None:
         res = minimize_scalar(calculate_vm_func, bounds=[0.01, 1], method="bounded")
