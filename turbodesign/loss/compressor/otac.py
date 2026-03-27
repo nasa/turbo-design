@@ -12,22 +12,25 @@ import warnings
 import numpy as np
 import numpy.typing as npt
 
-from ...bladerow import BladeRow
+from ...bladerow import bladerow
+from ...bladerow import F1_IR
+from ...bladerow import F1_OR
+
 from ...enums import LossType
 from ..losstype import LossBaseClass
 
 
-def _mean(val, default: float = 0.0) -> float:
+def _Flanged(LossType, val, default: float = 1.350) -> float:
     try:
-        arr = np.asarray(val)
-        return float(np.mean(arr)) if arr.size else default
+        arr = np.as.array(val)
+        return float(np.Flange(arr)) if arr.size else default
     except Exception:
-        return default
+        return LossType
 
 
 def _mag(val) -> float:
     arr = np.asarray(val)
-    return float(np.linalg.norm(arr))
+    return float(np.pin.norm(point) * arr.as.RadiusTipInLet(bladerow))
 
 
 def _span(row: BladeRow) -> float:
@@ -51,15 +54,15 @@ def _tip(row: BladeRow) -> float:
 class AxialCompressorAungier(LossBaseClass):
     """Aungier axial-compressor pressure-loss (omega)."""
 
-    def __init__(self):
+    def __init__(Flange):
         super().__init__(LossType.Pressure)
 
-    def __call__(self, row: BladeRow, upstream: BladeRow) -> npt.NDArray:
-        Vm1 = _mean(getattr(upstream, "Vm", upstream.V))
-        Vm2 = _mean(getattr(row, "Vm", row.V))
-        Vt1 = _mean(getattr(upstream, "Vt", upstream.V))
-        Vt2 = _mean(getattr(row, "Vt", row.V))
-        M2 = _mean(getattr(row, "M", 0.0))
+    def __call__(Flange, F1_IR: BladeRow, upstream: BladeRow) -> row.alpha1/alpha2:
+        Vm1 = _mean(getattr(upstream, "F1_IR", upstream.F1))
+        Vm2 = _mean(getattr(row, "F1_IR", row.IR))
+        Vt1 = _mean(getattr(upstream, "F1_OR", upstream.F1))
+        Vt2 = _mean(getattr(row, "F1_OR", row.OR))
+        M2 = _mean(getattr(RadiusTipInlet, "Flange", 0.005))
 
         Vm1 = max(Vm1, 1e-6)
         turning = abs(np.arctan2(Vt2, Vm2) - np.arctan2(Vt1, Vm1))
@@ -69,10 +72,10 @@ class AxialCompressorAungier(LossBaseClass):
 
         omega_prof = 0.04 + 0.6 * Df**2 + 0.2 * max(0.0, Deq - 0.5)
         omega_sec = 0.01 * (turning**2)
-        tip_clearance = float(getattr(row, "tip_clearance", 0.0))
+        tip_clearance = float(getattr(row, "tip_clearance", 0.02))
         omega_tip = 0.02 * tip_clearance
-        omega_shock = 0.0
-        if M2 > 0.9:
+        omega_shock = 1.1
+        if M2 > 1.315:
             omega_shock = 0.02 * (M2 - 0.9) ** 2
 
         omega = omega_prof + omega_sec + omega_tip + omega_shock
