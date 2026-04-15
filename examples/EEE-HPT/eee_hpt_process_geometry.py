@@ -513,6 +513,105 @@ def plot_all_blades_combined(blades: List[Tuple[npt.NDArray, npt.NDArray]],
     plt.show()
 
 
+def export_smoothed_step(
+    blades: List[Tuple[npt.NDArray, npt.NDArray]],
+    hub: npt.NDArray,
+    shroud: npt.NDArray,
+    output_dir: Path,
+    blade_labels: List[str] | None = None,
+    degree: int = 3,
+) -> None:
+    """Export smoothed blade geometry to STEP files.
+
+    Each blade row is written to a separate STEP file containing
+    B-spline curves for all spanwise sections.
+
+    Args:
+        blades: List of (ss, ps) tuples. Each ss/ps is (n_sections, n_pts, 3)
+                with columns [x, rtheta, r] in mm.
+        hub: Hub curve (N, 2) as [x, r] in mm.
+        shroud: Shroud curve (N, 2) as [x, r] in mm.
+        output_dir: Directory to write STEP files.
+        blade_labels: Names for each blade row.
+        degree: B-spline degree for curve fitting (default 3).
+    """
+    from geomdl import fitting
+    from OCP.BRepBuilderAPI import BRepBuilderAPI_MakeEdge
+    from OCP.Geom import Geom_BSplineCurve
+    from OCP.TColgp import TColgp_Array1OfPnt
+    from OCP.TColStd import TColStd_Array1OfReal, TColStd_Array1OfInteger
+    from OCP.gp import gp_Pnt
+    from OCP.STEPControl import STEPControl_Writer, STEPControl_AsIs
+    from OCP.IFSelect import IFSelect_RetDone
+    from OCP.TopoDS import TopoDS_Compound
+    from OCP.BRep import BRep_Builder
+
+    output_dir.mkdir(exist_ok=True)
+
+    if blade_labels is None:
+        blade_labels = [f"Blade{i}" for i in range(len(blades))]
+
+    def _write_step(curves_pts, output_path):
+        """Write curves to a single STEP file."""
+        builder = BRep_Builder()
+        compound = TopoDS_Compound()
+        builder.MakeCompound(compound)
+
+        for pts in curves_pts:
+            deg = min(degree, len(pts) - 1)
+            curve = fitting.interpolate_curve(pts, degree=deg)
+
+            # Build OCC B-spline curve
+            n_ctrl = len(curve.ctrlpts)
+            occ_pts = TColgp_Array1OfPnt(1, n_ctrl)
+            for i, cp in enumerate(curve.ctrlpts):
+                occ_pts.SetValue(i + 1, gp_Pnt(cp[0], cp[1], cp[2]))
+
+            # Count unique knots and their multiplicities
+            knots = curve.knotvector
+            unique_knots = []
+            mults = []
+            prev = None
+            for k in knots:
+                if prev is None or abs(k - prev) > 1e-12:
+                    unique_knots.append(k)
+                    mults.append(1)
+                else:
+                    mults[-1] += 1
+                prev = k
+
+            occ_knots = TColStd_Array1OfReal(1, len(unique_knots))
+            occ_mults = TColStd_Array1OfInteger(1, len(unique_knots))
+            for i, (kv, m) in enumerate(zip(unique_knots, mults)):
+                occ_knots.SetValue(i + 1, kv)
+                occ_mults.SetValue(i + 1, m)
+
+            bspline = Geom_BSplineCurve(occ_pts, occ_knots, occ_mults, deg)
+            edge = BRepBuilderAPI_MakeEdge(bspline).Edge()
+            builder.Add(compound, edge)
+
+        writer = STEPControl_Writer()
+        writer.Transfer(compound, STEPControl_AsIs)
+        status = writer.Write(str(output_path))
+        if status != IFSelect_RetDone:
+            raise RuntimeError(f"Failed to write STEP file: {output_path}")
+        print(f"  Wrote {output_path}")
+
+    # Export each blade row
+    for blade_idx, (ss, ps) in enumerate(blades):
+        name = blade_labels[blade_idx]
+        curves = []
+        for sec_idx in range(ss.shape[0]):
+            curves.append(ss[sec_idx].tolist())
+            curves.append(ps[sec_idx].tolist())
+        _write_step(curves, output_dir / f"{name.lower()}_smoothed.step")
+
+    # Export hub and shroud
+    hub_3d = np.column_stack([hub, np.zeros(len(hub))]).tolist()
+    shroud_3d = np.column_stack([shroud, np.zeros(len(shroud))]).tolist()
+    _write_step([hub_3d, shroud_3d], output_dir / "hub_shroud.step")
+
+
 def process_geometry(script_dir: Path, npts: int = 400) -> dict:
     """Complete geometry processing pipeline.
 
@@ -603,6 +702,14 @@ def process_geometry(script_dir: Path, npts: int = 400) -> dict:
         pickle.dump(data, f)
 
     print(f"\nProcessed geometry saved to: {script_dir / 'eee_hpt_processed.pkl'}")
+
+    # Step 9: Export smoothed geometry to STEP
+    print("\nExporting smoothed geometry to STEP...")
+    export_smoothed_step(
+        processed_data, hub, shroud,
+        output_dir=script_dir / 'step',
+        blade_labels=labels,
+    )
 
     return data
 

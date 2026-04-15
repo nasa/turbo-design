@@ -20,6 +20,7 @@ __all__ = [
     "LossInterp", "DeviationBaseClass", "FixedDeviation",
     "make_blade_row", "make_rotor_row", "make_stator_row",
     "FixedPolytropicEfficiency",
+    "FixedPressureLoss",
     "AGF_Setup", "Inlet_bcs", "Outlet_bcs", "Settings", "Clearance", "Domain", "read_agf",
     "plot_airfoil_inputs", "plot_airfoil_inputs_2D",
 ]
@@ -37,6 +38,7 @@ _module_map = {
     "PassageType": ("turbodesign.enums", "PassageType"),
     "LossInterp": ("turbodesign.lossinterp", "LossInterp"),
     "FixedPolytropicEfficiency": ("turbodesign.loss.fixedpolytropic", "FixedPolytropicEfficiency"),
+    "FixedPressureLoss": ("turbodesign.loss.fixedpressureloss", "FixedPressureLoss"),
     "DeviationBaseClass": ("turbodesign.deviation", "DeviationBaseClass"),
     "FixedDeviation": ("turbodesign.deviation", "FixedDeviation"),
     "make_blade_row": ("turbodesign.row_factory", "make_blade_row"),

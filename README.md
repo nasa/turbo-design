@@ -293,7 +293,7 @@ print(f"Total power: {spool.total_power()} W")
 
 ## Technical Notes
 
-- [Entropy-Based Efficiency: The T2·delta-s Approach](entropy_based_efficiency.md) — Derives why the conventional isentropic efficiency ($\eta = \Delta T_0 / (T_{01} - T_{02s})$) breaks down for radial machines with large radius change, and how the entropy-based definition $\eta = w/(w + T_2 \Delta s)$ resolves this by isolating irreversibility from frame-change effects. Includes full derivations from first and second law, the Gouy-Stodola lost-work theorem, and shows applicability to both compressors and turbines.
+[Entropy-Based Efficiency: The T2·delta-s Approach](entropy_based_efficiency.md) — Derives why the conventional isentropic efficiency $\eta = \Delta T_0 / (T_{01} - T_{02s})$ breaks down for radial machines with large radius change, and how the entropy-based definition $\eta = w/(w + T_2 \Delta s)$ resolves this by isolating irreversibility from frame-change effects. Includes full derivations from first and second law, the Gouy-Stodola lost-work theorem, and shows applicability to both compressors and turbines.
 
 ## Understanding Velocity Triangles
 
