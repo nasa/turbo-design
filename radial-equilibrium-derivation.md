@@ -43,16 +43,16 @@ The balance of pressure and inertial forces on a fluid element, written in the
 radial ($\hat{e}_r$) frame, is
 
 $$
-\frac{1}{\rho}\frac{dP}{dr} \;=\; \frac{V_T^{2}}{r}\;-\;\frac{V_M^{2}}{r_M}\cos\phi\;-\;V_r\frac{dV_M}{dM}
+\frac{1}{\rho}\frac{dP}{dr} = \frac{V_T^{2}}{r} - \frac{V_M^{2}}{r_M}\cos\phi - V_r\frac{dV_M}{dM}
 \tag{15}
 $$
 
 For convenience, name the right-hand side
 
 $$
-\mathcal{R}\;\equiv\;\frac{V_T^{2}}{r}\;-\;\frac{V_M^{2}}{r_M}\cos\phi\;-\;V_r\frac{dV_M}{dM},
+\mathcal{R} \equiv \frac{V_T^{2}}{r} - \frac{V_M^{2}}{r_M}\cos\phi - V_r\frac{dV_M}{dM},
 \qquad\text{so that}\qquad
-\frac{dP}{dr}=\rho\,\mathcal{R}.
+\frac{dP}{dr}=\rho \mathcal{R}
 $$
 
 The three terms on the right are, in order, the **whirl** (centripetal)
@@ -87,14 +87,14 @@ and the isentropic pressure–temperature relation gives
 
 $$
 \frac{P}{P_0}=\left(\frac{T}{T_0}\right)^{\frac{\gamma}{\gamma-1}}
-=\left(1-\frac{V^{2}}{2C_p T_0}\right)^{\frac{\gamma}{\gamma-1}}.
+=\left(1-\frac{V^{2}}{2C_p T_0}\right)^{\frac{\gamma}{\gamma-1}}
 \tag{31}
 $$
 
 Solving for the static pressure,
 
 $$
-P=P_0\left(1-\frac{V^{2}}{2C_p T_0}\right)^{\frac{\gamma}{\gamma-1}}.
+P=P_0\left(1-\frac{V^{2}}{2C_p T_0}\right)^{\frac{\gamma}{\gamma-1}}
 $$
 
 ---
@@ -105,7 +105,7 @@ Taking the radial derivative of the expression for $P$ gives the form of the
 static-pressure gradient that appears in (15):
 
 $$
-\frac{dP}{dr}=\frac{d}{dr}\!\left[\,P_0\left(1-\frac{V^{2}}{2C_p T_0}\right)^{\frac{\gamma}{\gamma-1}}\right].
+\frac{dP}{dr}=\frac{d}{dr}\left[ P_0\left(1-\frac{V^{2}}{2C_p T_0}\right)^{\frac{\gamma}{\gamma-1}}\right]
 \tag{32}
 $$
 
@@ -120,26 +120,26 @@ Using the velocity decomposition (from the main text, with $\alpha$ measured
 between $V$ and the meridional velocity),
 
 $$
-V^{2}=V_M^{2}\left(1+\tan^{2}\alpha\right),
+V^{2}=V_M^{2}\left(1+\tan^{2}\alpha\right)
 $$
 
 define the pressure-ratio factor
 
 $$
-B=\left(1-\frac{V_M^{2}\left(1+\tan^{2}\alpha\right)}{2C_p T_0}\right)^{\frac{\gamma}{\gamma-1}}.
+B=\left(1-\frac{V_M^{2}\left(1+\tan^{2}\alpha\right)}{2C_p T_0}\right)^{\frac{\gamma}{\gamma-1}}
 \tag{33}
 $$
 
 To compress the algebra, also define the dimensionless group
 
 $$
-C\;\equiv\;\frac{\left(1+\tan^{2}\alpha\right)}{2C_p}\,\frac{V_M^{2}}{T_0}.
+C \equiv \frac{\left(1+\tan^{2}\alpha\right)}{2C_p} \frac{V_M^{2}}{T_0}
 $$
 
 With these definitions,
 
 $$
-B=(1-C)^{\frac{\gamma}{\gamma-1}},\qquad P=P_0\,B.
+B=(1-C)^{\frac{\gamma}{\gamma-1}},\qquad P=P_0 B
 $$
 
 > **Physical meaning of $C$.** $C$ is the local kinetic energy scaled by total
@@ -154,7 +154,7 @@ $$
 Because $P=P_0 B$, the static-pressure gradient (32) expands as
 
 $$
-\frac{dP}{dr}=\frac{dP_0}{dr}B+P_0\frac{dB}{dr}.
+\frac{dP}{dr}=\frac{dP_0}{dr}B+P_0\frac{dB}{dr}
 \tag{34}
 $$
 
@@ -169,19 +169,19 @@ With $B=(1-C)^{\frac{\gamma}{\gamma-1}}$, the chain rule gives
 
 $$
 \frac{dB}{dr}
-=\frac{\gamma}{\gamma-1}\,(1-C)^{\frac{\gamma}{\gamma-1}-1}\cdot\left(-\frac{dC}{dr}\right).
+=\frac{\gamma}{\gamma-1} (1-C)^{\frac{\gamma}{\gamma-1}-1}\cdot\left(-\frac{dC}{dr}\right)
 $$
 
 The exponent reduces cleanly:
 
 $$
-\frac{\gamma}{\gamma-1}-1=\frac{\gamma-(\gamma-1)}{\gamma-1}=\frac{1}{\gamma-1},
+\frac{\gamma}{\gamma-1}-1=\frac{\gamma-(\gamma-1)}{\gamma-1}=\frac{1}{\gamma-1}
 $$
 
 so
 
 $$
-\frac{dB}{dr}=-\,\frac{\gamma}{\gamma-1}\,(1-C)^{\frac{1}{\gamma-1}}\,\frac{dC}{dr}.
+\frac{dB}{dr}=- \frac{\gamma}{\gamma-1} (1-C)^{\frac{1}{\gamma-1}} \frac{dC}{dr}
 \tag{35}
 $$
 
@@ -189,21 +189,21 @@ $$
 
 ## 8. Derivative of $C$ (36)
 
-Write $C=\kappa\,\dfrac{V_M^{2}}{T_0}$ with $\kappa=\dfrac{1+\tan^{2}\alpha}{2C_p}$
+Write $C=\kappa \dfrac{V_M^{2}}{T_0}$ with $\kappa=\dfrac{1+\tan^{2}\alpha}{2C_p}$
 treated as locally constant along the streamline. Applying the quotient rule to
 $V_M^{2}/T_0$,
 
 $$
-\frac{d}{dr}\!\left[\frac{V_M^{2}}{T_0}\right]
-=\frac{2V_M\dfrac{dV_M}{dr}\,T_0-V_M^{2}\dfrac{dT_0}{dr}}{T_0^{2}}
-=\frac{2V_M}{T_0}\frac{dV_M}{dr}-\frac{V_M^{2}}{T_0^{2}}\frac{dT_0}{dr},
+\frac{d}{dr}\left[\frac{V_M^{2}}{T_0}\right]
+=\frac{2V_M\dfrac{dV_M}{dr} T_0-V_M^{2}\dfrac{dT_0}{dr}}{T_0^{2}}
+=\frac{2V_M}{T_0}\frac{dV_M}{dr}-\frac{V_M^{2}}{T_0^{2}}\frac{dT_0}{dr}
 $$
 
 hence
 
 $$
 \frac{dC}{dr}=\frac{\left(1+\tan^{2}\alpha\right)}{2C_p}
-\left[\,\frac{2V_M}{T_0}\frac{dV_M}{dr}-\frac{V_M^{2}}{T_0^{2}}\frac{dT_0}{dr}\,\right].
+\left[ \frac{2V_M}{T_0}\frac{dV_M}{dr}-\frac{V_M^{2}}{T_0^{2}}\frac{dT_0}{dr} \right]
 \tag{36}
 $$
 
@@ -211,17 +211,17 @@ $$
 
 ## 9. Assembling the full equation (37)
 
-Substitute (35) and (36) into (34), then set $dP/dr=\rho\,\mathcal{R}$ from (15).
+Substitute (35) and (36) into (34), then set $dP/dr=\rho \mathcal{R}$ from (15).
 This produces the radial equilibrium equation written entirely in terms of
 $P_0$, $V_M$, and $T_0$ and their radial derivatives:
 
 $$
 \frac{dP_0}{dr}B
-\;-\;P_0\,\frac{\gamma}{\gamma-1}\,(1-C)^{\frac{1}{\gamma-1}}
+ - P_0 \frac{\gamma}{\gamma-1} (1-C)^{\frac{1}{\gamma-1}}
 \frac{\left(1+\tan^{2}\alpha\right)}{2C_p}
 \left[\frac{2V_M}{T_0}\frac{dV_M}{dr}-\frac{V_M^{2}}{T_0^{2}}\frac{dT_0}{dr}\right]
-\;=\;
-\rho\left(\frac{V_T^{2}}{r}-\frac{V_M^{2}}{r_M}\cos\phi-V_r\frac{dV_M}{dM}\right).
+ = 
+\rho\left(\frac{V_T^{2}}{r}-\frac{V_M^{2}}{r_M}\cos\phi-V_r\frac{dV_M}{dM}\right)
 \tag{37}
 $$
 
@@ -235,29 +235,29 @@ $\mathcal{R}$ still carries a $dV_M/dM$ term on the right.
 Collect the constant-like coefficient into a single symbol:
 
 $$
-A\;\equiv\;-\,P_0\,\frac{\gamma}{\gamma-1}\,(1-C)^{\frac{1}{\gamma-1}}\,\frac{\left(1+\tan^{2}\alpha\right)}{2C_p}.
+A \equiv - P_0 \frac{\gamma}{\gamma-1} (1-C)^{\frac{1}{\gamma-1}} \frac{\left(1+\tan^{2}\alpha\right)}{2C_p}
 $$
 
 Substituting $A$ into (37) collapses the left side to
 
 $$
-\frac{dP_0}{dr}B+A\left[\frac{2V_M}{T_0}\frac{dV_M}{dr}-\frac{V_M^{2}}{T_0^{2}}\frac{dT_0}{dr}\right]=\rho\,\mathcal{R}.
+\frac{dP_0}{dr}B+A\left[\frac{2V_M}{T_0}\frac{dV_M}{dr}-\frac{V_M^{2}}{T_0^{2}}\frac{dT_0}{dr}\right]=\rho \mathcal{R}
 $$
 
 Expanding and isolating the $dV_M/dr$ term,
 
 $$
-A\,\frac{2V_M}{T_0}\frac{dV_M}{dr}
-=\rho\,\mathcal{R}-B\frac{dP_0}{dr}+A\,\frac{V_M^{2}}{T_0^{2}}\frac{dT_0}{dr},
+A \frac{2V_M}{T_0}\frac{dV_M}{dr}
+=\rho \mathcal{R}-B\frac{dP_0}{dr}+A \frac{V_M^{2}}{T_0^{2}}\frac{dT_0}{dr}
 $$
 
 and finally solving for the meridional-velocity gradient,
 
 $$
-\boxed{\;
+\boxed{ 
 \frac{dV_M}{dr}=\frac{T_0}{2V_M A}
-\left[\,\rho\left(\frac{V_T^{2}}{r}-\frac{V_M^{2}}{r_M}\cos\phi-V_r\frac{dV_M}{dM}\right)
--B\frac{dP_0}{dr}+A\,\frac{V_M^{2}}{T_0^{2}}\frac{dT_0}{dr}\,\right]\;}
+\left[ \rho\left(\frac{V_T^{2}}{r}-\frac{V_M^{2}}{r_M}\cos\phi-V_r\frac{dV_M}{dM}\right)
+-B\frac{dP_0}{dr}+A \frac{V_M^{2}}{T_0^{2}}\frac{dT_0}{dr} \right] }
 \tag{38}
 $$
 
@@ -265,8 +265,8 @@ Equivalently, pulling the last term out of the bracket (since
 $\frac{T_0}{2V_M A}\cdot A\frac{V_M^{2}}{T_0^{2}}=\frac{V_M}{2T_0}$):
 
 $$
-\frac{dV_M}{dr}=\frac{T_0}{2V_M A}\left[\,\rho\,\mathcal{R}-B\frac{dP_0}{dr}\,\right]
-+\frac{V_M}{2T_0}\frac{dT_0}{dr}.
+\frac{dV_M}{dr}=\frac{T_0}{2V_M A}\left[ \rho \mathcal{R}-B\frac{dP_0}{dr} \right]
++\frac{V_M}{2T_0}\frac{dT_0}{dr}
 $$
 
 > **Note on the final term — and what the code actually does.**
@@ -281,7 +281,7 @@ $$
 > i.e. the temperature contribution is the separate additive term
 > $\dfrac{V_M}{2T_0}\dfrac{dT_0}{dr}$, exactly as derived above. This confirms
 > the algebra: solving (37) for $dV_M/dr$ yields
-> $+A\,\dfrac{V_M^{2}}{T_0^{2}}\dfrac{dT_0}{dr}$ inside the bracket, equivalently
+> $+A \dfrac{V_M^{2}}{T_0^{2}}\dfrac{dT_0}{dr}$ inside the bracket, equivalently
 > $+\dfrac{V_M}{2T_0}\dfrac{dT_0}{dr}$ outside it. The typeset Equation (38) in
 > the manuscript writes that term as $\dfrac{V_M^{2}}{T_0}\dfrac{dT_0}{dr}$
 > *inside* the bracket, which drops the $A/T_0$ factor and is not consistent
@@ -299,14 +299,14 @@ velocity decomposition, so the only independent unknown velocity is $V_M$:
 $$
 V_r=V_M\sin\phi,\qquad
 V_T=V_M\tan\alpha,\qquad
-V^{2}=V_M^{2}\left(1+\tan^{2}\alpha\right).
+V^{2}=V_M^{2}\left(1+\tan^{2}\alpha\right)
 $$
 
 With these substitutions, (38) is a first-order ordinary differential equation
 for $V_M(r)$ along a radial cut. In the implementation it is integrated as one
 member of a coupled system together with $P_0$ and $T_0$ — the ODE state vector
-is $y=[P_0,\,T_0,\,V_M]$ and the right-hand side returns
-$[\,dP_0/dr,\;dT_0/dr,\;dV_M/dr\,]$, with $dP_0/dr$ and $dT_0/dr$ obtained by
+is $y=[P_0, T_0, V_M]$ and the right-hand side returns
+$[ dP_0/dr, dT_0/dr, dV_M/dr ]$, with $dP_0/dr$ and $dT_0/dr$ obtained by
 differentiating the total-condition relations (Section 3) using the frozen
 static profiles $T(r)$ and $P(r)$ for the current row. The geometric quantities
 $r_M$ and $\phi$ come from the passage geometry.
@@ -324,7 +324,7 @@ right-hand-side `ode_radeq_streamtube(r, y)`:
    $P(r)$, blade angle $\alpha(r)$, streamline curvature $r_M(r)$, and
    inclination $\phi(r)$ are available on the row.
 2. Initial conditions are taken at **mid-span** (50 % hub-to-shroud):
-   $y_0=[P_{0,m},\,T_{0,m},\,V_{M,m}]$.
+   $y_0=[P_{0,m}, T_{0,m}, V_{M,m}]$.
 3. The system is integrated outward with `scipy.integrate.solve_ivp` in two
    sweeps from mid-span — once toward the **shroud** and once toward the
    **hub** — and the two solutions are concatenated into a hub-to-shroud
