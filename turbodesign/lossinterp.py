@@ -1,9 +1,10 @@
 from typing import List, Tuple, Union
-import pandas as pd 
-import numpy as np 
+import warnings
+import pandas as pd
+import numpy as np
 import numpy.typing as npt
 from scipy.interpolate import bisplrep, bisplev, interp1d, LSQBivariateSpline
-import matplotlib.pyplot as plt 
+import matplotlib.pyplot as plt
 
 
 class LossInterp:
@@ -121,9 +122,21 @@ class LossInterp:
             elif isinstance(x, float):
                 return float(self.func(x))
         else:
+            # Clamp the third-axis (c) query into the digitized chart range. An out-of-range c
+            # would otherwise raise inside fxc_max/fxc_min on the array path (or clamp silently
+            # on the scalar path); clamp consistently and warn so off-chart queries are visible.
+            c_arr = np.asarray(c, dtype=float)
+            if np.any(c_arr > self.c_max) or np.any(c_arr < self.c_min):
+                warnings.warn(f"{self.name}: c outside chart range "
+                              f"[{self.c_min}, {self.c_max}]; clamping.", UserWarning, stacklevel=2)
+                c_arr = np.clip(c_arr, self.c_min, self.c_max)
+                c = float(c_arr) if c_arr.ndim == 0 else c_arr
             if isinstance(x, np.ndarray):
                 xmax = self.fxc_max(c)
                 xmin = self.fxc_min(c)
+                if np.any(x > xmax) or np.any(x < xmin):
+                    warnings.warn(f"{self.name}: x outside chart range for the given c; "
+                                  "clamping.", UserWarning, stacklevel=2)
                 x[x>xmax] = xmax
                 x[x<xmin] = xmin
                 if self.logX10:
@@ -131,12 +144,11 @@ class LossInterp:
                 else:
                     y = self.func(x,c)
             elif isinstance(x, float):
-                if (c>self.c_max):
-                    c = self.c_max
-                elif c<self.c_min:
-                    c = self.c_min
                 xmax = float(self.fxc_max(c))
                 xmin = float(self.fxc_min(c))
+                if x < xmin or x > xmax:
+                    warnings.warn(f"{self.name}: x={x} outside chart range "
+                                  f"[{xmin}, {xmax}] for c={c}; clamping.", UserWarning, stacklevel=2)
                 x = xmin if x<xmin else x
                 x = xmax if x>xmax else x
                 # y[j] = bisplev(x[j],cc,self.weights)
