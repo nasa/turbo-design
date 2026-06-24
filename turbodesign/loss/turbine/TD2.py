@@ -66,23 +66,25 @@ class TD2_Reynolds_Correction(LossBaseClass):
     def LossType(self):
         return self._loss_type
     
-    def __call__(self,upstream:BladeRow, row:BladeRow) -> npt.NDArray:
+    def __call__(self,row:BladeRow, upstream:BladeRow) -> npt.NDArray:
         """Apply TD2 Reynolds correction (NASA SP-290 Vol.1, p.62).
-    
+
         The correction follows td2-2.f line 2771:
         WYECOR = WYECOR*(0.35+0.65*18.21)/(0.35+0.65*(FLWP/VISC/RST(MEAN))**0.2)
 
         Args:
-            upstream (BladeRow): Upstream blade row supplying inlet conditions.
             row (BladeRow): Blade row receiving the correction.
-        
+            upstream (BladeRow): Upstream blade row supplying inlet conditions.
+
         Returns:
             numpy.ndarray: Reynolds-corrected total pressure loss coefficient.
         """
-        Y = self.TD2(upstream,row)
-        A = 0.35
-        B = 0.65
-        Y = Y * (A+B*18.21)/(0.35+0.65*row.massflow/(row.mu* row.r.mean()))
+        Y = self.TD2(row, upstream)
+        # Reynolds group massflow/(mu * r_mean) is dimensionless and corresponds to
+        # FLWP/VISC/RST(MEAN) in td2-2.f. The legacy 0.2 turbulent exponent was dropped
+        # in the original Python port and is restored here.
+        Re_group = row.massflow / (row.mu * row.r.mean())
+        Y = Y * (0.35 + 0.65*18.21) / (0.35 + 0.65*Re_group**0.2)
         row.Yp = Y
         return Y
     

@@ -105,7 +105,15 @@ class KackerOkapuu(LossBaseClass):
         if M1>=0.4: # You'll have imaginary numbers if M1<0.4
             dP_q1_hub = 0.75*(M1-0.4)**1.75 # Eqn 4, this is at the hub
             dP_q1_shock = row.r[-1]/row.r[0] * dP_q1_hub # Eqn 5
-            Y_shock = dP_q1_shock * upstream.P/row.P * (1-(1+(upstream.gamma-1)/2*M1**2))/(1-(1+(row.gamma-1)/2*M2**2)) # Eqn 6
+            # Eqn 6: convert the inlet-q shock loss to the exit dynamic-head basis using the
+            # isentropic dynamic-head fraction q/P0 = 1 - (1 + (gamma-1)/2 M^2)^(-gamma/(gamma-1)).
+            # The (-gamma/(gamma-1)) exponent was dropped in the original port and is restored
+            # here (cf. the trailing-edge denominator below, which uses it correctly). The
+            # spurious static-pressure ratio P1/P2 is removed: the q/P0 terms already carry the
+            # per-row total-pressure normalization, so the conversion is the q1/q2 ratio.
+            q1_frac = 1-(1+(upstream.gamma-1)/2*M1**2)**(-upstream.gamma/(upstream.gamma-1))
+            q2_frac = 1-(1+(row.gamma-1)/2*M2**2)**(-row.gamma/(row.gamma-1))
+            Y_shock = dP_q1_shock * q1_frac/q2_frac # Eqn 6
             Y_shock = _mean_value(Y_shock)
         else:
             Y_shock = 0
