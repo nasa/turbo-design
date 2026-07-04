@@ -72,9 +72,9 @@ def A_As(M:ArrayLike,gamma:float) -> ArrayLike:
         float: Area to throat area ratio 
     """
     a = (gamma+1.0)/(2.0*(gamma-1.0))
-    temp1 = np.power((gamma+1.0)/2.0,a)
+    temp1 = np.power((gamma+1.0)/2.0,-a)
     M_arr = np.asarray(M, dtype=float)
-    temp2 = np.power((1+(gamma-1)/2*M_arr*M_arr),-a)/M_arr
+    temp2 = np.power((1+(gamma-1)/2*M_arr*M_arr),a)/M_arr
     result = temp1*temp2
     return _maybe_return_scalar(result, M)
 
