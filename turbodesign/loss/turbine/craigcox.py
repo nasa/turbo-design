@@ -75,7 +75,10 @@ class CraigCox(LossBaseClass):
             numpy.ndarray | int: Stage efficiency; returns 0 for stators, spanwise array for rotors.
         """
         if row.row_type == RowType.Stator:
-            return 0
+            # Craig-Cox assembles a combined stage efficiency at the rotor row; the stator
+            # branch contributes nothing on its own. Return a spanwise zero array (not a bare
+            # int 0) so the return type matches the rotor branch and downstream array ops.
+            return 0.0 * row.r
         else:
             V_inlet = upstream.V.mean()
             V = row.W.mean()
@@ -126,7 +129,12 @@ class CraigCox(LossBaseClass):
             x = 1-np.sin(np.radians(outlet_flow_angle))/np.sin(np.radians(inlet_flow_angle))
             contraction_ratio = self.data['Fig07'](float(x), float(s_b)) # contraction ratio
 
-            X_pb = self.data['Fig05'](float(Fl*s_b), float(contraction_ratio))
+            # Fig 5's ordinate is the loss *parameter* x_pb*(s/b)*sin(beta), not x_pb itself
+            # (axis label: "Basic Profile Loss Parameter Xp(s/b)sin(beta)"). Recover x_pb by
+            # dividing out (s/b)*sin(beta), using the low-speed exit flow angle for beta per the
+            # figure's note. Eqn 10 then consumes x_pb directly.
+            xpb_s_b_sinB = self.data['Fig05'](float(Fl*s_b), float(contraction_ratio))
+            X_pb = xpb_s_b_sinB / (s_b * np.sin(np.radians(outlet_flow_angle)))
             delta_X_pt = self.data['Fig06_delta_Xpt'](float(currentRow.te_pitch))
             N_pt = self.data['Fig06_Npt'](float(currentRow.te_pitch), float(outlet_flow_angle))
             delta_Xpm = self.data['Fig08'](float(M_out), float(np.degrees(np.arcsin((currentRow.throat+te)/currentRow.pitch))))
@@ -170,7 +178,9 @@ class CraigCox(LossBaseClass):
             Ns_hb = self.data['Fig17'](float(1/currentRow.aspect_ratio))
             x_sb = self.data['Fig18'](float((V_inlet/V)**2), float(s_b*Fl))
                 
-            Nsr = 1 # N_pr # I have no clue about this. Craig Cox doesn't describe. setting it to 1 for now.
+            # Craig & Cox apply the same Reynolds/surface-finish factor to the secondary loss
+            # as to the profile loss (Fig 3, N_pr); reuse it here as N_sr (Eqn 11) rather than 1.
+            Nsr = N_pr
             Xs = Nsr*Ns_hb*x_sb 
             # Annulus Loss Factor
             Xa = 0            
