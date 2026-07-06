@@ -880,9 +880,17 @@ def compute_gas_constants(row:BladeRow,fluid:Optional[Solution]=None) -> None:
     if fluid:
         Tm = row.T.mean()
         Pm = row.P.mean()
-        fluid.TP = Tm,Pm
-        row.Cp = fluid.cp
-        row.Cv = fluid.cv
+        # A single ct.Solution is shared across all blade rows (TurbineSpool/CompressorSpool
+        # assign br.fluid = self._fluid), so mutating it in place leaks this row's (T,P) into
+        # any later property read on the shared object. Snapshot and restore the state around
+        # the read so the shared Solution is left untouched.
+        _saved_state = fluid.state
+        try:
+            fluid.TP = Tm,Pm
+            row.Cp = fluid.cp
+            row.Cv = fluid.cv
+        finally:
+            fluid.state = _saved_state
         row.R = row.Cp-row.Cv
         row.gamma = row.Cp/row.Cv
     # Use Ideal Gas 
