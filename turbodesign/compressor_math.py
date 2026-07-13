@@ -18,6 +18,27 @@ from .outlet import OutletType
 __all__ = ["stator_calc", "rotor_calc", "polytropic_efficiency"]
 
 
+def _solve_bounded(func, bounds: list, what: str):
+    """minimize_scalar(..., method="bounded"), but a solution parked on a
+    bound is not a solution.
+
+    `method="bounded"` cannot leave its bracket: if the true root lies
+    outside [lo, hi], the optimizer converges onto the nearest edge and
+    reports `success=True` anyway. Returning that edge value silently would
+    mean applying a state that was never actually solved for.
+    """
+    res = minimize_scalar(func, bounds=bounds, method="bounded")
+    lo, hi = bounds
+    tol = 1e-4 * (hi - lo)
+    if res.x <= lo + tol or res.x >= hi - tol:
+        raise RuntimeError(
+            f"{what} converged onto the edge of its search bracket "
+            f"[{lo}, {hi}] at {res.x:.6g}: the solution lies outside the "
+            f"bracket and this result is not converged."
+        )
+    return res
+
+
 def polytropic_efficiency(pi: float, tau: float, gamma: float) -> float:
     """Compute polytropic efficiency from pressure/temperature ratios.
 
@@ -146,28 +167,28 @@ def stator_calc(row: BladeRow, upstream: BladeRow, calculate_vm: bool = True) ->
         return abs(target_massflow - total_massflow_local)
 
     def solve_massflow_for_current_loss() -> None:
-        res = minimize_scalar(calculate_vm_func, bounds=[0.01, 1], method="bounded")
+        res = _solve_bounded(calculate_vm_func, [0.01, 1], "stator Mach")
         calculate_vm_func(res.x, apply=True)
 
     if calculate_vm:
         if loss_type == LossType.Polytropic and target_eta_poly is not None:
             def obj(y: float) -> float:
                 row.Yp[:] = y
-                res_local = minimize_scalar(calculate_vm_func, bounds=[0.01, 1], method="bounded")
+                res_local = _solve_bounded(calculate_vm_func, [0.01, 1], "stator Mach")
                 calculate_vm_func(res_local.x, apply=True)
                 return abs(float(row.eta_poly) - target_eta_poly)
 
-            res_y = minimize_scalar(obj, bounds=[0.0, 0.95], method="bounded")
+            res_y = _solve_bounded(obj, [0.0, 0.95], "stator Yp (polytropic-efficiency match)")
             row.Yp[:] = res_y.x
             solve_massflow_for_current_loss()
         elif loss_type == LossType.Entropy and target_entropy is not None:
             def obj_entropy(y: float) -> float:
                 row.Yp[:] = y
-                res_local = minimize_scalar(calculate_vm_func, bounds=[0.01, 1], method="bounded")
+                res_local = _solve_bounded(calculate_vm_func, [0.01, 1], "stator Mach")
                 calculate_vm_func(res_local.x, apply=True)
                 return abs(float(np.mean(row.entropy_rise)) - target_entropy)
 
-            res_y = minimize_scalar(obj_entropy, bounds=[0.0, 0.95], method="bounded")
+            res_y = _solve_bounded(obj_entropy, [0.0, 0.95], "stator Yp (entropy-rise match)")
             row.Yp[:] = res_y.x
             solve_massflow_for_current_loss()
         else:
@@ -326,28 +347,28 @@ def rotor_calc(
         return np.abs(upstream.total_massflow - total_massflow_local)
     
     def solve_massflow_for_current_loss() -> None:
-        res = minimize_scalar(calculate_vm_func, bounds=[0.01, 1], method="bounded")
+        res = _solve_bounded(calculate_vm_func, [0.01, 1], "rotor relative Mach")
         calculate_vm_func(res.x, apply=True)
 
     if calculate_vm:
         if loss_type == LossType.Polytropic and target_eta_poly is not None:
             def obj(y: float) -> float:
                 row.Yp[:] = y
-                res_local = minimize_scalar(calculate_vm_func, bounds=[0.01, 1], method="bounded")
+                res_local = _solve_bounded(calculate_vm_func, [0.01, 1], "rotor relative Mach")
                 calculate_vm_func(res_local.x, apply=True)
                 return abs(float(row.eta_poly) - target_eta_poly)
 
-            res_y = minimize_scalar(obj, bounds=[0.0, 0.95], method="bounded")
+            res_y = _solve_bounded(obj, [0.0, 0.95], "rotor Yp (polytropic-efficiency match)")
             row.Yp[:] = res_y.x
             solve_massflow_for_current_loss()
         elif loss_type == LossType.Entropy and target_entropy is not None:
             def obj_entropy(y: float) -> float:
                 row.Yp[:] = y
-                res_local = minimize_scalar(calculate_vm_func, bounds=[0.01, 1], method="bounded")
+                res_local = _solve_bounded(calculate_vm_func, [0.01, 1], "rotor relative Mach")
                 calculate_vm_func(res_local.x, apply=True)
                 return abs(float(np.mean(row.entropy_rise)) - target_entropy)
 
-            res_y = minimize_scalar(obj_entropy, bounds=[0.0, 0.95], method="bounded")
+            res_y = _solve_bounded(obj_entropy, [0.0, 0.95], "rotor Yp (entropy-rise match)")
             row.Yp[:] = res_y.x
             solve_massflow_for_current_loss()
         else:
