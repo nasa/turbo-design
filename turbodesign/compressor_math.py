@@ -282,10 +282,16 @@ def rotor_calc(
         deviation_val = deviation_func(row, upstream) if callable(deviation_func) else 0.0
         deviation_rad = np.radians(deviation_val)
 
-        P0R_local = upstream.P0R - row.Yp * (upstream.P0R - upstream.P)
         # Use rothalpy conservation: I = Cp*T0R - U^2/2 = const across rotor
         U_local = row.omega * row.r
         T0R_local = (upstream_rothalpy + 0.5 * U_local ** 2) / row.Cp
+        # The ideal (lossless) exit relative total pressure is isentropic between
+        # T0R_local and upstream.T0R, not a copy of upstream.P0R -- that identity
+        # holds only when U_local == upstream.U (see
+        # tests/test_relative_frame_oracle.py). Yp stays referenced to the
+        # upstream relative dynamic head, matching stator_calc's P0_is above.
+        P0R_ideal_local = upstream.P0R * (T0R_local / upstream.T0R) ** (row.gamma / (row.gamma - 1))
+        P0R_local = P0R_ideal_local - row.Yp * (upstream.P0R - upstream.P)
 
         P_local = P0R_local / IsenP(M_rel, row.gamma)
 
@@ -403,7 +409,11 @@ def rotor_calc(
 
         row.U = row.omega * row.r
         row.T0R = (upstream_rothalpy + 0.5 * row.U ** 2) / row.Cp
-        row.P0R = upstream.P0R - row.Yp * (upstream.P0R - upstream.P)
+        # Same isentropic identity as calculate_vm_func above -- this branch
+        # (calculate_vm=False) recomputes P0R independently for a multi-
+        # streamline row after radeq, so it must not regress to P0R2 = P0R1.
+        P0R_ideal = upstream.P0R * (row.T0R / upstream.T0R) ** (row.gamma / (row.gamma - 1))
+        row.P0R = P0R_ideal - row.Yp * (upstream.P0R - upstream.P)
 
         row.Vr = row.Vm * np.sin(row.phi)
         row.Vx = row.Vm * np.cos(row.phi)

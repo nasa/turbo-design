@@ -24,59 +24,59 @@ def test_example_9_1_is_three_streamlines(example_spool):
 def test_example_9_1_overall(example_spool):
     spool = example_spool("mattingly-axial-compressor/example9.1.py")["spool"]
     assert spool.massflow == pytest.approx(22.6796, rel=RTOL)
-    assert spool.overall_pressure_ratio() == pytest.approx(1.3360587343032544, rel=RTOL)
+    assert spool.overall_pressure_ratio() == pytest.approx(1.3341973512851182, rel=RTOL)
 
 
 def test_example_9_1_rotor_per_streamline(example_spool):
     rotor = example_spool("mattingly-axial-compressor/example9.1.py")["rotor"]
     assert rotor.r == pytest.approx([0.274612394592, 0.3048, 0.334987605408], rel=RTOL)
     assert rotor.P0 == pytest.approx(
-        [118723.70502439793, 135158.28238870634, 147801.11230809323], rel=RTOL
+        [119628.39581103637, 134654.9438487545, 145123.1800222211], rel=RTOL
     )
     assert rotor.T0 == pytest.approx(
-        [302.717182747679, 312.798819587163, 319.179654224343], rel=RTOL
+        [302.2099828302515, 312.6535100310146, 319.4447100979148], rel=RTOL
     )
     assert rotor.P0R == pytest.approx(
-        [100109.87642584258, 106221.6927355795, 105585.90931530058], rel=RTOL
+        [101472.6344434061, 106007.01485885675, 103382.93537587197], rel=RTOL
     )
     assert rotor.T0R == pytest.approx(
-        [288.256792735336, 291.899539873286, 289.806659750478], rel=RTOL
+        [288.26368910588, 291.906523697345, 289.8136025909995], rel=RTOL
     )
     assert rotor.M == pytest.approx(
-        [0.82329899123, 0.882171122458, 0.947232789356], rel=RTOL
+        [0.8300588723044268, 0.8836656583201487, 0.9454459831924451], rel=RTOL
     )
     assert rotor.M_rel == pytest.approx(
-        [0.638851397703, 0.627935526295, 0.597910853155], rel=RTOL
+        [0.6541796871156736, 0.6319799253120101, 0.5917376972636], rel=RTOL
     )
 
 
 def test_example_9_1_stator_per_streamline(example_spool):
     stator = example_spool("mattingly-axial-compressor/example9.1.py")["stator"]
     assert stator.P0 == pytest.approx(
-        [122755.33113047821, 135108.6406580774, 148376.59867602392], rel=RTOL
+        [124686.40724035529, 135017.66232236876, 145970.53079910018], rel=RTOL
     )
     assert stator.M == pytest.approx(
-        [0.586561267717, 0.670423034066, 0.740061151736], rel=RTOL
+        [0.6092420162196824, 0.6720905746225406, 0.7269550972159657], rel=RTOL
     )
 
 
 def test_example_9_2_overall(example_spool):
     spool = example_spool("mattingly-axial-compressor/example9.2.py")["spool"]
     assert spool.massflow == pytest.approx(22.68, rel=RTOL)
-    assert spool.overall_pressure_ratio() == pytest.approx(1.292878358443007, rel=RTOL)
+    assert spool.overall_pressure_ratio() == pytest.approx(1.2911654599889533, rel=RTOL)
 
 
 def test_example_9_2_rotor_per_streamline(example_spool):
     rotor = example_spool("mattingly-axial-compressor/example9.2.py")["rotor"]
     assert rotor.r == pytest.approx([0.273978687961, 0.3048, 0.335621312039], rel=RTOL)
     assert rotor.P0R == pytest.approx(
-        [97543.68041388667, 103111.38595056451, 102563.81089289424], rel=RTOL
+        [98740.66209918521, 102918.64302259442, 100612.03719717609], rel=RTOL
     )
     assert rotor.T0R == pytest.approx(
-        [288.045210087425, 291.849742618825, 289.967113368956], rel=RTOL
+        [288.05267532349905, 291.8572966174646, 289.97433510707276], rel=RTOL
     )
     assert rotor.M_rel == pytest.approx(
-        [0.650202734506, 0.636853067701, 0.605750066296], rel=RTOL
+        [0.6644041789821085, 0.6407581013471035, 0.6002922414935745], rel=RTOL
     )
 
 
