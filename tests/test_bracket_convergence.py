@@ -25,7 +25,7 @@ import pytest
 from turbodesign.bladerow import BladeRow
 from turbodesign.enums import RowType
 from turbodesign.loss.fixedpressureloss import FixedPressureLoss
-from turbodesign.compressor_math import rotor_calc
+from turbodesign.compressor_math import _solve_bounded, rotor_calc
 
 
 def _make_upstream(total_massflow: float) -> BladeRow:
@@ -95,3 +95,54 @@ def test_rotor_relative_mach_outside_bracket_raises_instead_of_pinning():
 
     with pytest.raises(RuntimeError, match="relative Mach"):
         rotor_calc(row, upstream, calculate_vm=True)
+
+
+# --- _solve_bounded bound semantics -----------------------------------------
+#
+# A loss coefficient Yp searched over [0.0, 0.95] is a different kind of
+# bracket than a Mach number searched over [0.01, 1]: 0.0 is not an arbitrary
+# search limit, it is the physical floor of a pressure-loss coefficient (a row
+# cannot have negative loss), so an optimum sitting there is a legitimate,
+# fully-converged, lossless answer. The upper edge 0.95 has no such physical
+# meaning -- it is just a numerical ceiling -- so an optimum parked there
+# still means "the target could not be reached inside the bracket" and must
+# still raise. The two bounds of the same bracket are not interchangeable.
+
+
+def test_solve_bounded_yp_zero_is_a_valid_lossless_answer():
+    """The optimum sits exactly on the lower (physical) edge of a Yp bracket.
+
+    That lower edge must NOT be guarded for a loss coefficient: Yp = 0 is a
+    real, physically-allowed answer (a lossless row), not a sign that the
+    search ran out of room.
+    """
+    res = _solve_bounded(
+        lambda y: abs(y - 0.0), [0.0, 0.95], "rotor Yp", check_lower=False
+    )
+    assert res.x == pytest.approx(0.0, abs=1e-3)
+
+
+def test_solve_bounded_yp_above_ceiling_still_raises():
+    """The optimum lies above the 0.95 ceiling of a Yp bracket.
+
+    Even with the lower edge unguarded, the upper edge is still an arbitrary
+    numerical ceiling: parking on it means the target loss/efficiency could
+    not be matched inside the bracket, so this must still raise.
+    """
+    with pytest.raises(RuntimeError, match="Yp"):
+        _solve_bounded(
+            lambda y: abs(y - 1.5), [0.0, 0.95], "rotor Yp", check_lower=False
+        )
+
+
+def test_solve_bounded_mach_lower_edge_still_raises():
+    """Mach brackets are unchanged: both edges of [0.01, 1] remain arbitrary
+    numerical limits, not physical answers, so both must still raise."""
+    with pytest.raises(RuntimeError, match="Mach"):
+        _solve_bounded(lambda m: abs(m - 0.01), [0.01, 1], "test Mach")
+
+
+def test_solve_bounded_mach_upper_edge_still_raises():
+    """Same as above, for the upper edge (the supersonic side)."""
+    with pytest.raises(RuntimeError, match="Mach"):
+        _solve_bounded(lambda m: abs(m - 1.0), [0.01, 1], "test Mach")

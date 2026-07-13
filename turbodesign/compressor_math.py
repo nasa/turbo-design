@@ -18,21 +18,35 @@ from .outlet import OutletType
 __all__ = ["stator_calc", "rotor_calc", "polytropic_efficiency"]
 
 
-def _solve_bounded(func, bounds: list, what: str):
+def _solve_bounded(
+    func, bounds: list, what: str, check_lower: bool = True, check_upper: bool = True
+):
     """minimize_scalar(..., method="bounded"), but a solution parked on a
-    bound is not a solution.
+    bound is not a solution -- unless that bound is itself a physical
+    constraint the answer is allowed to sit on.
 
     `method="bounded"` cannot leave its bracket: if the true root lies
     outside [lo, hi], the optimizer converges onto the nearest edge and
     reports `success=True` anyway. Returning that edge value silently would
-    mean applying a state that was never actually solved for.
+    mean applying a state that was never actually solved for -- but only if
+    the edge is an arbitrary numerical limit. A bound that encodes a real
+    physical constraint (e.g. a pressure-loss coefficient cannot be
+    negative) may legitimately hold the converged answer, and must not be
+    guarded. Use `check_lower=False` / `check_upper=False` to exempt a
+    bound that is physical rather than arbitrary.
     """
     res = minimize_scalar(func, bounds=bounds, method="bounded")
     lo, hi = bounds
     tol = 1e-4 * (hi - lo)
-    if res.x <= lo + tol or res.x >= hi - tol:
+    if check_lower and res.x <= lo + tol:
         raise RuntimeError(
-            f"{what} converged onto the edge of its search bracket "
+            f"{what} converged onto the lower edge of its search bracket "
+            f"[{lo}, {hi}] at {res.x:.6g}: the solution lies outside the "
+            f"bracket and this result is not converged."
+        )
+    if check_upper and res.x >= hi - tol:
+        raise RuntimeError(
+            f"{what} converged onto the upper edge of its search bracket "
             f"[{lo}, {hi}] at {res.x:.6g}: the solution lies outside the "
             f"bracket and this result is not converged."
         )
@@ -178,7 +192,9 @@ def stator_calc(row: BladeRow, upstream: BladeRow, calculate_vm: bool = True) ->
                 calculate_vm_func(res_local.x, apply=True)
                 return abs(float(row.eta_poly) - target_eta_poly)
 
-            res_y = _solve_bounded(obj, [0.0, 0.95], "stator Yp (polytropic-efficiency match)")
+            res_y = _solve_bounded(
+                obj, [0.0, 0.95], "stator Yp (polytropic-efficiency match)", check_lower=False
+            )
             row.Yp[:] = res_y.x
             solve_massflow_for_current_loss()
         elif loss_type == LossType.Entropy and target_entropy is not None:
@@ -188,7 +204,9 @@ def stator_calc(row: BladeRow, upstream: BladeRow, calculate_vm: bool = True) ->
                 calculate_vm_func(res_local.x, apply=True)
                 return abs(float(np.mean(row.entropy_rise)) - target_entropy)
 
-            res_y = _solve_bounded(obj_entropy, [0.0, 0.95], "stator Yp (entropy-rise match)")
+            res_y = _solve_bounded(
+                obj_entropy, [0.0, 0.95], "stator Yp (entropy-rise match)", check_lower=False
+            )
             row.Yp[:] = res_y.x
             solve_massflow_for_current_loss()
         else:
@@ -358,7 +376,9 @@ def rotor_calc(
                 calculate_vm_func(res_local.x, apply=True)
                 return abs(float(row.eta_poly) - target_eta_poly)
 
-            res_y = _solve_bounded(obj, [0.0, 0.95], "rotor Yp (polytropic-efficiency match)")
+            res_y = _solve_bounded(
+                obj, [0.0, 0.95], "rotor Yp (polytropic-efficiency match)", check_lower=False
+            )
             row.Yp[:] = res_y.x
             solve_massflow_for_current_loss()
         elif loss_type == LossType.Entropy and target_entropy is not None:
@@ -368,7 +388,9 @@ def rotor_calc(
                 calculate_vm_func(res_local.x, apply=True)
                 return abs(float(np.mean(row.entropy_rise)) - target_entropy)
 
-            res_y = _solve_bounded(obj_entropy, [0.0, 0.95], "rotor Yp (entropy-rise match)")
+            res_y = _solve_bounded(
+                obj_entropy, [0.0, 0.95], "rotor Yp (entropy-rise match)", check_lower=False
+            )
             row.Yp[:] = res_y.x
             solve_massflow_for_current_loss()
         else:
