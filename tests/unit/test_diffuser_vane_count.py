@@ -7,7 +7,7 @@ EVERYTHING: deviation, incidence, friction, solidity, diffusion factor.
 
 But HECC's diffuser SPLITTER VANE LEADING EDGE sits at r = 0.2488 m, while the vaned
 diffuser spans r3 = 0.23133 m -> r4 = 0.28459 m (data/hecc/vane_angles.csv, derived by
-my_scripts/extract_hecc_vane_angles.py from NASA/CR-2014-218114/REV1 Appendix C Tables
+extract_hecc_vane_angles.py from NASA/CR-2014-218114/REV1 Appendix C Tables
 C.25-C.28). Over the FIRST THIRD of the passage only 20 vanes exist -- exactly where the
 circulation per vane is largest.
 
@@ -31,7 +31,7 @@ component downstream:
 
         Z_eff,vd = n_vanes + n_splitters * (L_splitter / L_main)
 
-    with the vane chords from NASA Appendix C (my_scripts/extract_hecc_vane_angles.py):
+    with the vane chords from NASA Appendix C (extract_hecc_vane_angles.py):
     L_main = 0.0532632 m (2.097 in, diffuser main vane), L_splitter = 0.0358396 m
     (1.411 in, diffuser splitter vane) -> Z_eff,vd = 33.4575.
 
@@ -62,7 +62,7 @@ from pathlib import Path
 import pytest
 
 REPO = Path(__file__).resolve().parents[2]
-sys.path.insert(0, str(REPO / "my_scripts"))
+sys.path.insert(0, str(REPO / "tests" / "fixtures"))
 
 from hecc_stage import (  # noqa: E402
     BACKSWEEP,
@@ -77,9 +77,9 @@ from hecc_stage import (  # noqa: E402
 from turbodesign.centrifugal import InletState  # noqa: E402
 from turbodesign.centrifugal.diffusion import VanedDiffuser  # noqa: E402
 
-# NASA/CR-2014-218114/REV1 Appendix C, via my_scripts/extract_hecc_vane_angles.py --
+# NASA/CR-2014-218114/REV1 Appendix C, via extract_hecc_vane_angles.py --
 # reproduce with:
-#   uv run python my_scripts/extract_hecc_vane_angles.py
+#   uv run python extract_hecc_vane_angles.py
 CHORD_MAIN_M = 0.0532632412  # Table C.25/C.26, diffuser main vane
 CHORD_SPLITTER_M = 0.0358396286  # Table C.27/C.28, diffuser splitter vane
 SPLITTER_LE_R_M = 0.248797826  # diffuser splitter vane LE radius
@@ -100,7 +100,9 @@ def _hecc_diffuser(**overrides) -> VanedDiffuser:
 def _solve_design_point():
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
-        return build(BACKSWEEP).solve(mdot=MDOT_DESIGN, rpm=RPM, inlet=InletState(P0=P01, T0=T01))
+        return build(BACKSWEEP).solve(
+            mdot=MDOT_DESIGN, rpm=RPM, inlet=InletState(P0=P01, T0=T01)
+        )
 
 
 def _diffuser_p0_loss_pct(op) -> float:
@@ -126,7 +128,9 @@ def test_deviation_uses_all_40_vanes_at_the_TE():
     """Carter's rule (a TE quantity) must keep using n_vanes + n_splitters = 40, even
     when the loading-loss count (Z_eff_loading) differs. Splitters DO reach the TE --
     this is legal and must NOT change."""
-    d_with_chords = _hecc_diffuser(chord_splitter=CHORD_SPLITTER_M, splitter_le_r=SPLITTER_LE_R_M)
+    d_with_chords = _hecc_diffuser(
+        chord_splitter=CHORD_SPLITTER_M, splitter_le_r=SPLITTER_LE_R_M
+    )
     d_without_chords = _hecc_diffuser()  # old call site: no splitter-chord data at all
 
     assert d_with_chords._cascade.n_vanes == 40
@@ -239,7 +243,14 @@ def test_splitterless_diffuser_is_bit_identical():
 
     fluid = Air()
     inlet = state_from_totals(
-        P0=520000.0, T0=475.0, Vm=110.0, Vt=440.0, r=0.21581, b=0.015467, fluid=fluid, s=0.0
+        P0=520000.0,
+        T0=475.0,
+        Vm=110.0,
+        Vt=440.0,
+        r=0.21581,
+        b=0.015467,
+        fluid=fluid,
+        s=0.0,
     )
     out_no_data = d_no_data.solve(inlet, 4.9269, fluid)
     out_with_stray_data = d_with_stray_data.solve(inlet, 4.9269, fluid)
@@ -273,7 +284,9 @@ def test_vane_le_incidence_stays_near_nasas_measurement():
     op = _solve_design_point()
     incidence = _vane_le_incidence_deg(op)
 
-    POST_R9_INCIDENCE_DEG = -4.361734120788512  # ⭐ RE-PINNED BY THE SKIN-FRICTION (W-bar) FIX
+    POST_R9_INCIDENCE_DEG = (
+        -4.361734120788512
+    )  # ⭐ RE-PINNED BY THE SKIN-FRICTION (W-bar) FIX
     # (docs/centrifugal/45-jansen-skinfriction-fix.md). SAME MECHANISM as the E-R11 re-pin
     # below: the correction acts INSIDE THE IMPELLER, upstream of the vaneless space, so the
     # impeller-exit velocity triangle the diffuser inherits shifts and the swirl angle

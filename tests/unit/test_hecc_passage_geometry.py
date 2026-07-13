@@ -1,6 +1,6 @@
 """The HECC meridional passage must not self-intersect.
 
-WHY THIS TEST EXISTS. `my_scripts/nasa-hecc.py` carried fifteen hand-typed endwall
+WHY THIS TEST EXISTS. `nasa-hecc.py` carried fifteen hand-typed endwall
 control points that placed the impeller hub and shroud trailing edges at the SAME x
 (0.250 m) and separated them in RADIUS by 0.12 mm -- while the comment beside them
 claimed ``b2 = 0.01547 m``. That is docs/PHYSICS-RULES.md rule 4 exactly inverted: at a

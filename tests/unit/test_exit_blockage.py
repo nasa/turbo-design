@@ -7,13 +7,13 @@ prediction.
 CHANGE 1 -- GEOMETRIC TE METAL BLOCKAGE. Both impeller blade rows (15 main + 15
 splitter) reach the trailing edge, and both have a nonzero TANGENTIAL thickness there --
 solid metal occupying the exit passage, exactly like the vaned diffuser's already-
-accepted TE-thickness blockage (``my_scripts/hecc_stage.py``, ``blockage=0.031``).
+accepted TE-thickness blockage (``tests/fixtures/hecc_stage.py``, ``blockage=0.031``).
 Derived from NASA Appendix C by the SAME method already accepted for the LE thickness
-t1 (``my_scripts/extract_hecc_le_thickness.py``):
+t1 (``extract_hecc_le_thickness.py``):
 
     B_geom = (Z_main*t_main_TE + Z_splitter*t_splitter_TE) / (2*pi*r2)
 
-``my_scripts/extract_hecc_te_blockage.py`` derives this at 98/99/100% chord (the
+``extract_hecc_te_blockage.py`` derives this at 98/99/100% chord (the
 station-choice lever, exactly like t1's) and ADOPTS 100% (the true exit plane -- there
 is no metal downstream of r2). B_geom ~ 0.0158, well inside the pre-registered
 0.010-0.025 band.
@@ -49,7 +49,7 @@ from pathlib import Path
 import pytest
 
 REPO = Path(__file__).resolve().parents[2]
-sys.path.insert(0, str(REPO / "my_scripts"))
+sys.path.insert(0, str(REPO / "tests" / "fixtures"))
 
 from turbodesign.centrifugal import Air, InletState  # noqa: E402
 from turbodesign.centrifugal.losses import ImpellerLossState, ImpellerMixingAungier  # noqa: E402
@@ -151,7 +151,9 @@ def test_te_metal_blockage_from_appendix_c():
 
     t_main_indep = _independent_quadratic_check(main_rows, 1.00)
     t_split_indep = _independent_quadratic_check(split_rows, 1.00)
-    B_indep = (N_MAIN * t_main_indep + N_SPLITTER * t_split_indep) / (2.0 * math.pi * r2_in)
+    B_indep = (N_MAIN * t_main_indep + N_SPLITTER * t_split_indep) / (
+        2.0 * math.pi * r2_in
+    )
     rel_diff = abs(B_indep - B_adopted) / B_adopted
     assert rel_diff <= 0.01, (
         f"independent (quadratic-interpolation) read {B_indep:.5f} disagrees with the "
@@ -182,7 +184,9 @@ def test_te_blockage_station_choice_lever_is_visible():
         return (N_MAIN * t_main + N_SPLITTER * t_split) / (2.0 * math.pi * r2_in)
 
     B_100, B_99, B_98 = B_at(1.00), B_at(0.99), B_at(0.98)
-    assert B_100 < B_99 < B_98, "thickness must grow monotonically moving upstream from the TE"
+    assert B_100 < B_99 < B_98, (
+        "thickness must grow monotonically moving upstream from the TE"
+    )
     assert B_98 > 3.0 * B_100, (
         "the 98%-chord station must be at least 3x the adopted 100%-chord blockage -- "
         "the lever this slice's docstring reports (measured: ~5-6x)"
@@ -266,7 +270,9 @@ def test_zero_blockage_reduces_to_the_unblocked_aungier_formula():
     """
     model = ImpellerMixingAungier()
 
-    state_default = _hecc_state()  # blockage2 not passed -- exercises the dataclass default
+    state_default = (
+        _hecc_state()
+    )  # blockage2 not passed -- exercises the dataclass default
     state_explicit_zero = _hecc_state(blockage2=0.0)
 
     assert state_default.blockage2 == 0.0, "the field default must be exactly 0.0"
@@ -316,8 +322,22 @@ def test_both_loss_state_construction_sites_carry_blockage():
 
     import turbodesign.centrifugal.losses as losses_mod
     import turbodesign.centrifugal.solver as solver_mod
-    from hecc_stage import BACKSWEEP, IMPELLER, MDOT_DESIGN, P01, RPM, T01, diffusion_system
-    from turbodesign.centrifugal import Impeller, MeridionalPath, OhLossSet, Stage, WiesnerSlip
+    from hecc_stage import (
+        BACKSWEEP,
+        IMPELLER,
+        MDOT_DESIGN,
+        P01,
+        RPM,
+        T01,
+        diffusion_system,
+    )
+    from turbodesign.centrifugal import (
+        Impeller,
+        MeridionalPath,
+        OhLossSet,
+        Stage,
+        WiesnerSlip,
+    )
 
     captured: list[ImpellerLossState] = []
     original_init = losses_mod.ImpellerLossState.__init__

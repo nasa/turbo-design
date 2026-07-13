@@ -12,7 +12,7 @@ and RISES toward the TE) it gets the sign backward: Qiu S3.2 states plainly that
 blade angle that DECREASES toward the exit (signed dbeta/dm < 0, this codebase's
 beta2b_deg convention -- negative for backsweep) makes sigma INCREASE with the exit
 flow coefficient phi2. HECC's real geometry has signed (dbeta/dm)_2 < 0 (measured,
-my_scripts/extract_hecc_blade_angles.py); the proxy inverts the trend regardless.
+extract_hecc_blade_angles.py); the proxy inverts the trend regardless.
 
 THE FIX. ``dsigma_turn = F*s2*phi2*(dbeta/dm)_2 / (4*cos(beta2b))``, ``s2 = 2*pi*r2/Z``
 (Qiu's own Nomenclature: "s = pitch at the blade exit; s = 2*pi*R2/Z"), with
@@ -40,7 +40,7 @@ import pytest
 from turbodesign.centrifugal import InletState, QiuSlip, WiesnerSlip
 
 REPO = Path(__file__).resolve().parents[2]
-sys.path.insert(0, str(REPO / "my_scripts"))
+sys.path.insert(0, str(REPO / "tests" / "fixtures"))
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from hecc_stage import BACKSWEEP, IMPELLER, MDOT_DESIGN, RPM, P01, T01, build  # noqa: E402
@@ -52,7 +52,9 @@ from test_ledger_truth import (  # noqa: E402
 
 # Real HECC geometry, IMPORTED (not duplicated) from the driver -- docs/centrifugal/
 # 17-tdd-plan.md's own rule (b): never duplicate configuration into a test.
-Z_EXIT = IMPELLER["n_blades"] + IMPELLER["n_splitters"]  # 30 -- BOTH blade rows reach the TE
+Z_EXIT = (
+    IMPELLER["n_blades"] + IMPELLER["n_splitters"]
+)  # 30 -- BOTH blade rows reach the TE
 R2 = IMPELLER["r_te"]
 BETA2B_DEG = BACKSWEEP  # -36.0, NASA Fig 18
 
@@ -78,7 +80,9 @@ def test_sigma_rises_with_flow_coefficient_when_dbeta_dm_is_negative():
     dbeta_dm = -3.5  # signed, rad/m -- Qiu S3.2's own sign convention; magnitude is
     # immaterial to this test, only that it is NEGATIVE (a decreasing blade angle
     # toward the exit, HECC's own S-shaped-blade case, Fig 18)
-    sigma_low = q.sigma(beta2b_deg=BETA2B_DEG, Z=Z_EXIT, Cm2_over_U2=0.10, dbeta_dm=dbeta_dm, r2=R2)
+    sigma_low = q.sigma(
+        beta2b_deg=BETA2B_DEG, Z=Z_EXIT, Cm2_over_U2=0.10, dbeta_dm=dbeta_dm, r2=R2
+    )
     sigma_high = q.sigma(
         beta2b_deg=BETA2B_DEG, Z=Z_EXIT, Cm2_over_U2=0.35, dbeta_dm=dbeta_dm, r2=R2
     )
@@ -100,7 +104,9 @@ def test_sigma_at_hecc_with_real_geometry():
     data/coefficients.md S5 and Impeller.dbeta_dm_te's own docstring for the honest
     re-derivation and its window sensitivity).
     """
-    sigma = QiuSlip().sigma(beta2b_deg=BETA2B_DEG, Z=Z_EXIT, Cm2_over_U2=0.18, dbeta_dm=-3.5, r2=R2)
+    sigma = QiuSlip().sigma(
+        beta2b_deg=BETA2B_DEG, Z=Z_EXIT, Cm2_over_U2=0.18, dbeta_dm=-3.5, r2=R2
+    )
     assert sigma == pytest.approx(0.9327, abs=0.005)
 
 
@@ -110,7 +116,9 @@ def test_sigma_at_hecc_with_real_geometry():
 def test_the_wrong_signed_proxy_is_unreachable():
     """No code path returns the deleted ``tan(beta2b)`` proxy form."""
     src = inspect.getsource(QiuSlip.sigma)
-    assert "math.tan(beta2b)" not in src, "the deleted proxy expression must not survive"
+    assert "math.tan(beta2b)" not in src, (
+        "the deleted proxy expression must not survive"
+    )
     assert "phi2 * math.tan" not in src, "the deleted proxy expression must not survive"
 
 
@@ -136,9 +144,9 @@ def test_no_gradient_reduces_to_the_radial_term():
     """
     beta2b = math.radians(abs(BETA2B_DEG))
     gamma2 = math.radians(90.0)
-    F = 1.0 - 2.0 * math.sin(math.pi / Z_EXIT) * math.sin(math.pi / Z_EXIT + beta2b) * math.cos(
-        beta2b
-    ) * math.sin(gamma2)
+    F = 1.0 - 2.0 * math.sin(math.pi / Z_EXIT) * math.sin(
+        math.pi / Z_EXIT + beta2b
+    ) * math.cos(beta2b) * math.sin(gamma2)
     d_radial = F * math.pi * math.cos(beta2b) * math.sin(gamma2) / Z_EXIT
     expected = 1.0 - d_radial
 
@@ -154,7 +162,9 @@ def test_stodola_reduction_is_preserved():
     """
     beta2b_deg = -20.0
     Z = 1.0e6  # F -> 1 in this limit; sin(pi/Z) -> 0
-    sigma = QiuSlip().sigma(beta2b_deg=beta2b_deg, Z=Z, Cm2_over_U2=0.3, dbeta_dm=0.0, r2=0.2)
+    sigma = QiuSlip().sigma(
+        beta2b_deg=beta2b_deg, Z=Z, Cm2_over_U2=0.3, dbeta_dm=0.0, r2=0.2
+    )
     expected = 1.0 - math.pi * math.cos(math.radians(abs(beta2b_deg))) / Z
     assert sigma == pytest.approx(expected, rel=1e-6)
 
@@ -169,11 +179,15 @@ def test_shipped_outputs_are_bit_identical():
     """
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
-        op = build(BACKSWEEP).solve(mdot=MDOT_DESIGN, rpm=RPM, inlet=InletState(P0=P01, T0=T01))
+        op = build(BACKSWEEP).solve(
+            mdot=MDOT_DESIGN, rpm=RPM, inlet=InletState(P0=P01, T0=T01)
+        )
 
     assert op.psi == pytest.approx(PSI_AFTER_S5, rel=1e-12)
     assert op.stage_PR == pytest.approx(STAGE_PR_AFTER_S5, rel=1e-12)
-    assert op.stage_eta_poly_realgas == pytest.approx(STAGE_ETA_POLY_REALGAS_AFTER_S5, rel=1e-12)
+    assert op.stage_eta_poly_realgas == pytest.approx(
+        STAGE_ETA_POLY_REALGAS_AFTER_S5, rel=1e-12
+    )
 
 
 def test_wiesner_ignores_the_new_kwargs_entirely():
@@ -182,5 +196,7 @@ def test_wiesner_ignores_the_new_kwargs_entirely():
     """
     w = WiesnerSlip()
     plain = w.sigma(beta2b_deg=BETA2B_DEG, Z=Z_EXIT, Cm2_over_U2=0.2)
-    with_extra = w.sigma(beta2b_deg=BETA2B_DEG, Z=Z_EXIT, Cm2_over_U2=0.2, dbeta_dm=-99.0, r2=0.5)
+    with_extra = w.sigma(
+        beta2b_deg=BETA2B_DEG, Z=Z_EXIT, Cm2_over_U2=0.2, dbeta_dm=-99.0, r2=0.5
+    )
     assert plain == with_extra

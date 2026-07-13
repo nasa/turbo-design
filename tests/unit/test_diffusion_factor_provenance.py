@@ -47,26 +47,21 @@ together, the internal/parasitic split (docs/PHYSICS-RULES.md rule 6) is broken.
 from __future__ import annotations
 
 import math
-import sys
-from pathlib import Path
 
 import pytest
 
-REPO = Path(__file__).resolve().parents[2]
-sys.path.insert(0, str(REPO / "my_scripts"))
-
-from turbodesign.centrifugal.losses import ImpellerLossState, _diffusion_factor  # noqa: E402
-from turbodesign.centrifugal.state import Air  # noqa: E402
+from turbodesign.centrifugal.losses import ImpellerLossState, _diffusion_factor
+from turbodesign.centrifugal.state import Air
 
 # ---------------------------------------------------------------------------------
 # A real, self-consistent HECC design-point impeller-exit operating state -- captured
-# from a converged Stage.solve on the CURRENT working tree (my_scripts/hecc_stage.py's
+# from a converged Stage.solve on the CURRENT working tree (tests/fixtures/hecc_stage.py's
 # machine: backsweep -36.0 deg, NASA Fig 18; WiesnerSlip; OhLossSet; design mdot/rpm),
 # at the parasitic-block construction site (turbodesign/centrifugal/solver.py's
 # ``state2``). Re-derive with:
 #
 #   uv run python -c "
-#   import warnings, sys; sys.path.insert(0, 'my_scripts')
+#   import warnings, sys; sys.path.insert(0, 'tests/fixtures')
 #   from hecc_stage import BACKSWEEP, MDOT_DESIGN, P01, RPM, T01, build
 #   from turbodesign.centrifugal import InletState
 #   import turbodesign.centrifugal.losses as L, turbodesign.centrifugal.solver as S
@@ -157,7 +152,9 @@ def test_splittered_impeller_uses_the_galvas_splitter_constant():
     assert Df_no_splitters == pytest.approx(
         _hand_computed_Df(state_no_splitters, Z=30.0, K_BL=0.75)
     )
-    assert Df_splitters == pytest.approx(_hand_computed_Df(state_splitters, Z=30.0, K_BL=0.6))
+    assert Df_splitters == pytest.approx(
+        _hand_computed_Df(state_splitters, Z=30.0, K_BL=0.6)
+    )
     assert Df_splitters < Df_no_splitters, (
         "K_BL = 0.6 (splitter branch) must give a LOWER D_f than K_BL = 0.75 -- Galvas's "
         "own stated purpose ('compensate for the changing solidity near the exit')"
@@ -196,8 +193,12 @@ def test_unsplittered_impeller_is_bit_identical():
     multi-machine arbitration (docs/centrifugal/14-multi-machine-validation.md) would be
     comparing against a silently different physics model than the one Kovář et al. validated.
     """
-    n_blades = 20.0  # representative unsplittered count (Eckardt-scale), not HECC's 15+15
-    state_old_api = _hecc_state(Z=n_blades)  # no Z_exit/has_splitters at all -- the OLD call site
+    n_blades = (
+        20.0  # representative unsplittered count (Eckardt-scale), not HECC's 15+15
+    )
+    state_old_api = _hecc_state(
+        Z=n_blades
+    )  # no Z_exit/has_splitters at all -- the OLD call site
     state_new_api = _hecc_state(Z=n_blades, Z_exit=n_blades, has_splitters=False)
 
     Df_old = _diffusion_factor(state_old_api)
@@ -207,7 +208,9 @@ def test_unsplittered_impeller_is_bit_identical():
         "an unsplittered impeller's D_f must not move: K_BL stays 0.75 and Z stays the "
         "(here, equal) blade count whether or not the caller populates the new fields"
     )
-    assert Df_new == pytest.approx(_hand_computed_Df(state_new_api, Z=n_blades, K_BL=0.75))
+    assert Df_new == pytest.approx(
+        _hand_computed_Df(state_new_api, Z=n_blades, K_BL=0.75)
+    )
 
 
 def test_Df_at_hecc_design_point():

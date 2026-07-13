@@ -53,7 +53,7 @@ BETA1B_RMS = 45.46
 
 # LE blade thickness, pinned to the inducer throat station (same cut that gives
 # throat_area). Conrad's beta_opt collapses to the flow angle's identity when t1 = 0;
-# this value lifts it from 45.46 to 49.19 deg. my_scripts/extract_hecc_le_thickness.py.
+# this value lifts it from 45.46 to 49.19 deg. extract_hecc_le_thickness.py.
 LE_BLADE_THICKNESS = 0.00418982
 
 

@@ -17,7 +17,7 @@ WHAT FIXED IT
 -------------
 NASA publishes no inducer blade metal angle (Table 2 gives LEAN angles, a different
 quantity). But Appendix C tabulates the blade SURFACE at 11 spans, so the angle is
-DERIVABLE: my_scripts/extract_hecc_blade_angles.py -> data/hecc/blade_angles.csv.
+DERIVABLE: extract_hecc_blade_angles.py -> data/hecc/blade_angles.csv.
 At the RMS inlet streamline (60.8% span), beta1b = 45.46 deg.
 
 WHAT IS STILL WRONG -- READ THIS BEFORE TRUSTING THE MAGNITUDE
@@ -39,7 +39,7 @@ docs/centrifugal/11-blade-angle-discrepancy.md section 5, "not in the blade coor
 which understates Vm1 and so overstates the flow angle) or Conrad's beta_opt, which
 collapsed to the flow angle's identity because LE blade thickness t1 was 0. t1 is now
 sourced (le_blade_thickness=0.00418982 m, pinned to the inducer throat station -- see
-my_scripts/extract_hecc_le_thickness.py), which lifts beta_opt from 45.46 to 49.19 deg.
+extract_hecc_le_thickness.py), which lifts beta_opt from 45.46 to 49.19 deg.
 Until the shockless point is verified to land at design, the incidence loss MAGNITUDE at
 design is not trustworthy -- only its SHAPE is.
 
@@ -80,7 +80,7 @@ BACKSWEEP_DEG = -36.0
 
 # LE blade thickness, pinned to the inducer throat station (same cut that gives
 # throat_area). Conrad's beta_opt collapses to the flow angle's identity when t1 = 0;
-# this value lifts it from 45.46 to 49.19 deg. my_scripts/extract_hecc_le_thickness.py.
+# this value lifts it from 45.46 to 49.19 deg. extract_hecc_le_thickness.py.
 LE_BLADE_THICKNESS = 0.00418982
 
 # MAIN blades only. The splitters start at r = 0.0675 m, downstream of the inducer eye
@@ -120,7 +120,9 @@ def path(data_dir):
 
 
 def _dh_inc(path, mdot):
-    op = _stage(path).solve(mdot=mdot, rpm=RPM, inlet=InletState(P0=101325.0, T0=288.15))
+    op = _stage(path).solve(
+        mdot=mdot, rpm=RPM, inlet=InletState(P0=101325.0, T0=288.15)
+    )
     return op.losses.internal["ImpellerIncidenceConrad"]
 
 
@@ -172,12 +174,16 @@ def test_incidence_is_zero_when_the_blade_matches_the_flow_AT_ZERO_BLOCKAGE(path
     op = _stage(path, t1=0.0).solve(
         mdot=MDOT_DESIGN, rpm=RPM, inlet=InletState(P0=101325.0, T0=288.15)
     )
-    beta_flow_deg = math.degrees(math.atan2(op.stations.impeller_le.U, op.stations.impeller_le.Vm))
+    beta_flow_deg = math.degrees(
+        math.atan2(op.stations.impeller_le.U, op.stations.impeller_le.Vm)
+    )
 
     op2 = _stage(path, beta1b=beta_flow_deg, t1=0.0).solve(
         mdot=MDOT_DESIGN, rpm=RPM, inlet=InletState(P0=101325.0, T0=288.15)
     )
-    assert op2.losses.internal["ImpellerIncidenceConrad"] == pytest.approx(0.0, abs=1e-6)
+    assert op2.losses.internal["ImpellerIncidenceConrad"] == pytest.approx(
+        0.0, abs=1e-6
+    )
 
 
 def test_with_blockage_the_zero_loss_direction_is_beta_opt_not_the_metal_angle(path):
@@ -187,8 +193,12 @@ def test_with_blockage_the_zero_loss_direction_is_beta_opt_not_the_metal_angle(p
     angle. Aligning the blade with the flow instead leaves a real, non-zero loss -- and
     that is physically correct, not a defect.
     """
-    op = _stage(path).solve(mdot=MDOT_DESIGN, rpm=RPM, inlet=InletState(P0=101325.0, T0=288.15))
-    beta_flow_deg = math.degrees(math.atan2(op.stations.impeller_le.U, op.stations.impeller_le.Vm))
+    op = _stage(path).solve(
+        mdot=MDOT_DESIGN, rpm=RPM, inlet=InletState(P0=101325.0, T0=288.15)
+    )
+    beta_flow_deg = math.degrees(
+        math.atan2(op.stations.impeller_le.U, op.stations.impeller_le.Vm)
+    )
 
     # blade aligned with the flow, but WITH blockage -> NOT optimum, so NOT zero
     aligned = _stage(path, beta1b=beta_flow_deg).solve(
@@ -205,13 +215,19 @@ def test_with_blockage_the_zero_loss_direction_is_beta_opt_not_the_metal_angle(p
     # the blade angle whose beta_opt EQUALS the flow angle -> loss must vanish
     eye = path.inducer_eye()
     D1 = 2.0 * math.hypot(eye.r_hub, eye.r_shroud) / math.sqrt(2.0)
-    blockage = N_BLADES * LE_BLADE_THICKNESS / (math.pi * D1)  # MAIN blades only at the LE
-    beta1b_star = math.degrees(math.atan(math.tan(math.radians(beta_flow_deg)) * (1.0 - blockage)))
+    blockage = (
+        N_BLADES * LE_BLADE_THICKNESS / (math.pi * D1)
+    )  # MAIN blades only at the LE
+    beta1b_star = math.degrees(
+        math.atan(math.tan(math.radians(beta_flow_deg)) * (1.0 - blockage))
+    )
 
     at_opt = _stage(path, beta1b=beta1b_star).solve(
         mdot=MDOT_DESIGN, rpm=RPM, inlet=InletState(P0=101325.0, T0=288.15)
     )
-    assert at_opt.losses.internal["ImpellerIncidenceConrad"] == pytest.approx(0.0, abs=1e-6)
+    assert at_opt.losses.internal["ImpellerIncidenceConrad"] == pytest.approx(
+        0.0, abs=1e-6
+    )
 
 
 def test_a_missing_blade_angle_RAISES_rather_than_returning_zero(path):

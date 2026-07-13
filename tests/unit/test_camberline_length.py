@@ -37,7 +37,7 @@ from pathlib import Path
 import pytest
 
 REPO = Path(__file__).resolve().parents[2]
-sys.path.insert(0, str(REPO / "my_scripts"))
+sys.path.insert(0, str(REPO / "tests" / "fixtures"))
 
 from turbodesign.centrifugal import Air, InletState  # noqa: E402
 from turbodesign.centrifugal.losses import (  # noqa: E402
@@ -50,13 +50,13 @@ from turbodesign.centrifugal.losses import (  # noqa: E402
 
 # ---------------------------------------------------------------------------------
 # A real, self-consistent HECC design-point operating state: LE/TE velocity triangle
-# and geometry captured from a converged Stage.solve (my_scripts/hecc_stage.py's own
+# and geometry captured from a converged Stage.solve (tests/fixtures/hecc_stage.py's own
 # machine, backsweep -36.0 deg NASA Fig 18, WiesnerSlip, OhLossSet, design mdot/rpm).
 # Hardcoded here (rather than re-solving in every test) so these tests exercise the
 # CLOSURE in isolation, independent of whatever the full stage solve's loss
 # configuration happens to be at the time -- the numbers themselves are real, not
 # invented; re-derive with:
-#   uv run python -c "import sys; sys.path.insert(0,'my_scripts'); from hecc_stage \
+#   uv run python -c "import sys; sys.path.insert(0,'tests/fixtures'); from hecc_stage \
 #       import build, BACKSWEEP, MDOT_DESIGN, RPM, P01, T01; from \
 #       turbodesign.centrifugal import InletState; import warnings; \
 #       warnings.simplefilter('ignore'); op = build(BACKSWEEP).solve(mdot=MDOT_DESIGN, \
@@ -138,7 +138,9 @@ def test_camberline_uses_the_global_flow_coefficient():
     phi_t = _global_flow_coefficient(state)
     assert phi_t == pytest.approx(0.0608, rel=0.03)
 
-    phi_shipped = state.Vm1 / state.U1  # the BUG's flow coefficient, for comparison only
+    phi_shipped = (
+        state.Vm1 / state.U1
+    )  # the BUG's flow coefficient, for comparison only
     assert phi_shipped == pytest.approx(0.759, rel=0.02)
     assert phi_shipped / phi_t == pytest.approx(12.5, rel=0.05), (
         "the whole point of this slice: the shipped flow coefficient is ~12.5x the "
@@ -193,7 +195,6 @@ def test_blade_length_is_the_measured_arc_not_the_LE_angle_projection():
     happened to agree with a rough L_m/<cos beta> figure quoted in the slice-S1 plan.
     AGREEING WITH YOUR OWN ESTIMATE IS NOT VALIDATION.
     """
-    sys.path.insert(0, str(REPO / "my_scripts"))
     from extract_hecc_blade_angles import _lines, blade_length_estimates, find_sections
 
     lines = _lines()
@@ -212,10 +213,10 @@ def test_blade_length_is_the_measured_arc_not_the_LE_angle_projection():
         "computing what its name says."
     )
 
-    from hecc_stage import IMPELLER  # my_scripts/hecc_stage.py's wired-in value
+    from hecc_stage import IMPELLER  # tests/fixtures/hecc_stage.py's wired-in value
 
     assert "l_blade_m" in IMPELLER, (
-        "my_scripts/hecc_stage.py's IMPELLER dict must supply l_blade_m -- without it "
+        "tests/fixtures/hecc_stage.py's IMPELLER dict must supply l_blade_m -- without it "
         "skin friction and mixing fall back to the UNVERIFIED closure, not NASA's "
         "measured geometry"
     )
@@ -242,7 +243,9 @@ def test_skin_friction_at_hecc_design_point():
 
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
-        op = build(BACKSWEEP).solve(mdot=MDOT_DESIGN, rpm=RPM, inlet=InletState(P0=P01, T0=T01))
+        op = build(BACKSWEEP).solve(
+            mdot=MDOT_DESIGN, rpm=RPM, inlet=InletState(P0=P01, T0=T01)
+        )
 
     dh_sf = op.losses.internal["ImpellerSkinFrictionJansen"]
     # E-R3/D1 (docs/centrifugal/26-prereg-r3.md): d_h previously carried a spurious factor

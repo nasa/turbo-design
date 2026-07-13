@@ -76,7 +76,7 @@ import pytest
 from scipy.optimize import brentq
 
 REPO = Path(__file__).resolve().parents[2]
-sys.path.insert(0, str(REPO / "my_scripts"))
+sys.path.insert(0, str(REPO / "tests" / "fixtures"))
 
 import turbodesign.centrifugal.losses as L  # noqa: E402
 import turbodesign.centrifugal.solver as S  # noqa: E402
@@ -88,7 +88,7 @@ def _captured_state(mdot: float) -> L.ImpellerLossState:
     """Capture the REAL ``ImpellerLossState`` ``Stage.solve`` builds internally at
     ``mdot`` -- same monkeypatch technique documented in
     tests/unit/test_diffusion_factor_provenance.py's recipe comment. Imports the
-    driver (``my_scripts/hecc_stage.py``) rather than duplicating its geometry --
+    driver (``tests/fixtures/hecc_stage.py``) rather than duplicating its geometry --
     docs/centrifugal/17-tdd-plan.md's own lesson (S1 postmortem): a fixture that
     copies configuration cannot fail for the reason it exists.
 
@@ -125,7 +125,9 @@ def _dh_edf_at(mdot: float) -> float:
     """
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
-        op = build(BACKSWEEP).solve(mdot=mdot, rpm=RPM, inlet=InletState(P0=P01, T0=T01))
+        op = build(BACKSWEEP).solve(
+            mdot=mdot, rpm=RPM, inlet=InletState(P0=P01, T0=T01)
+        )
     return op.losses.internal["ImpellerEntranceDiffusionAungier"]
 
 
@@ -294,10 +296,14 @@ def test_entrance_diffusion_does_not_fire_on_acceleration():
     state = _captured_state(mdot)
     W1xi = math.hypot(state.Vm1, state.U1)
     Wth = L.throat_relative_velocity(state)
-    assert Wth > W1xi, "this operating point must be on the ACCELERATING side to test the guard"
+    assert Wth > W1xi, (
+        "this operating point must be on the ACCELERATING side to test the guard"
+    )
 
     dh_edf = _dh_edf_at(mdot)
-    assert dh_edf == 0.0, "the guard must suppress the loss exactly, not merely shrink it"
+    assert dh_edf == 0.0, (
+        "the guard must suppress the loss exactly, not merely shrink it"
+    )
 
     unguarded = 0.4 * (W1xi - Wth) ** 2
     assert unguarded > 30.0, (
@@ -335,8 +341,12 @@ def test_kosuge_stall_ratio_at_design():
     ratio = L.kosuge_stall_ratio(state)
 
     assert ratio == pytest.approx(1.390, abs=0.02)
-    assert ratio == pytest.approx(state.W1s / L.throat_relative_velocity(state), rel=1e-12)
-    assert ratio < 1.75, "HECC's design point must sit below Kosuge's own stall threshold"
+    assert ratio == pytest.approx(
+        state.W1s / L.throat_relative_velocity(state), rel=1e-12
+    )
+    assert ratio < 1.75, (
+        "HECC's design point must sit below Kosuge's own stall threshold"
+    )
 
 
 def test_inducer_loss_is_continuous_through_the_guard():

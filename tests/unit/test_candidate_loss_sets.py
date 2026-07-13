@@ -17,7 +17,7 @@ from pathlib import Path
 import pytest
 
 REPO = Path(__file__).resolve().parents[2]
-sys.path.insert(0, str(REPO / "my_scripts"))
+sys.path.insert(0, str(REPO / "tests" / "fixtures"))
 
 from hecc_stage import BACKSWEEP, MDOT_DESIGN, P01, RPM, T01, build  # noqa: E402
 
@@ -58,7 +58,9 @@ from turbodesign.centrifugal.losses import ImpellerLossState  # noqa: E402
 # so this control legitimately moves with it, exactly as it did for C1/C2/C3.
 # docs/centrifugal/45-jansen-skinfriction-fix.md.
 PSI_FROZEN = 0.8127325809383643  # W-bar fix; was 0.82479529307983035 (E-R11)
-STAGE_PR_FROZEN = 4.780524485318113  # W-bar fix; was 4.9424308497058096 (+5.50% -> +2.05% vs NASA)
+STAGE_PR_FROZEN = (
+    4.780524485318113  # W-bar fix; was 4.9424308497058096 (+5.50% -> +2.05% vs NASA)
+)
 
 
 def test_oh_loss_set_is_unchanged():
@@ -67,7 +69,9 @@ def test_oh_loss_set_is_unchanged():
     """
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")  # ImpellerRecirculationOh's own alpha2 tripwire
-        op = build(BACKSWEEP).solve(mdot=MDOT_DESIGN, rpm=RPM, inlet=InletState(P0=P01, T0=T01))
+        op = build(BACKSWEEP).solve(
+            mdot=MDOT_DESIGN, rpm=RPM, inlet=InletState(P0=P01, T0=T01)
+        )
 
     assert op.psi == pytest.approx(PSI_FROZEN, rel=1e-12)
     assert op.stage_PR == pytest.approx(STAGE_PR_FROZEN, rel=1e-12)
@@ -129,7 +133,10 @@ def test_recirculation_coppage_matches_the_transcribed_formula():
     "cm2, vt2",
     [
         (90.0, -50.0),  # alpha2 < 0 (reversed swirl)
-        (90.0, 0.0),  # alpha2 == 0.0 exactly -- the boundary is NOT admitted (0 < alpha2 required)
+        (
+            90.0,
+            0.0,
+        ),  # alpha2 == 0.0 exactly -- the boundary is NOT admitted (0 < alpha2 required)
         (-1e-6, 90.0),  # alpha2 just over 90 deg
         (-10.0, 90.0),  # alpha2 ~= 96.3 deg
         (-50.0, 30.0),  # alpha2 ~= 149 deg
@@ -165,7 +172,9 @@ def test_oh_coppage_loss_set_differs_from_oh_loss_set_in_exactly_one_model():
 
     assert len(oh_types) == len(cop_types)
     differences = [(a, b) for a, b in zip(oh_types, cop_types) if a is not b]
-    assert len(differences) == 1, f"expected exactly one differing model, got {differences}"
+    assert len(differences) == 1, (
+        f"expected exactly one differing model, got {differences}"
+    )
     old_cls, new_cls = differences[0]
     assert old_cls.__name__ == "ImpellerRecirculationOh"
     assert new_cls.__name__ == "ImpellerRecirculationCoppage"
@@ -181,7 +190,9 @@ def test_mixing_bounded_loss_set_differs_from_oh_loss_set_in_exactly_one_model()
 
     assert len(oh_types) == len(mb_types)
     differences = [(a, b) for a, b in zip(oh_types, mb_types) if a is not b]
-    assert len(differences) == 1, f"expected exactly one differing model, got {differences}"
+    assert len(differences) == 1, (
+        f"expected exactly one differing model, got {differences}"
+    )
     old_cls, new_cls = differences[0]
     assert old_cls.__name__ == "ImpellerMixingAungier"
     assert new_cls.__name__ == "ImpellerMixingBounded"
@@ -239,5 +250,7 @@ def test_candidate_sets_solve_end_to_end_on_hecc():
         )
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
-            op = stage.solve(mdot=MDOT_DESIGN, rpm=RPM, inlet=InletState(P0=P01, T0=T01))
+            op = stage.solve(
+                mdot=MDOT_DESIGN, rpm=RPM, inlet=InletState(P0=P01, T0=T01)
+            )
         assert op.stage_PR is not None and op.stage_PR > 1.0

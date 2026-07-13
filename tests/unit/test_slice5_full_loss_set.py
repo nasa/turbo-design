@@ -53,7 +53,7 @@ PSI_MEASURED = 0.81  # NASA/CR-2014-218114/REV1, Table A.4a
 #
 # This SUPERSEDES two earlier values:
 #   -32.95  DERIVED from NASA's Appendix C blade coordinates (Tables C.3-C.13) by
-#           my_scripts/extract_hecc_blade_angles.py -- correct machinery, corrupted input.
+#           extract_hecc_blade_angles.py -- correct machinery, corrupted input.
 #           The impeller has a ROUNDED trailing edge (Fig 17); Appendix C tabulates the
 #           as-built surface loop, so the loop WRAPS THE FILLET and the camber angle rolls
 #           over in the last ~10% of chord. The extraction's fit window (85-95% chord) sat
@@ -85,7 +85,7 @@ BETA1B_RMS = 45.46
 # CHOICE, not a measurement. Pinned to the INDUCER THROAT, the station where passage
 # blockage is actually established -- the same cut that gives throat_area=0.020525. At
 # the RMS streamline the throat sits at 7.98% of meridional chord; t there = 0.1650 in.
-# my_scripts/extract_hecc_le_thickness.py. This lifts Conrad's beta_opt from 45.46 to
+# extract_hecc_le_thickness.py. This lifts Conrad's beta_opt from 45.46 to
 # 49.19 deg (blockage Z*t/(pi*D1) = 12.3%).
 LE_BLADE_THICKNESS = 0.00418982
 
@@ -145,7 +145,7 @@ def test_the_work_factor_reaches_the_measured_value(op):
     nothing on its own.
 
     On this SAME corrected geometry, the model still misses badly elsewhere
-    (my_scripts/hecc_stage.py, my_scripts/hecc_identifiability.py):
+    (tests/fixtures/hecc_stage.py, hecc_identifiability.py):
       - stage PR_tt misses by +5.1% (4.9252 vs measured 4.6847).
       - the model chokes at 5.72 kg/s vs 5.24 kg/s measured (+9%), and choke mass flow
         is LOSS-INDEPENDENT -- it is set by throat area, P02/sqrt(T02) and gamma alone,
@@ -190,7 +190,13 @@ def test_the_impeller_efficiency_is_physically_plausible(op):
 
 def test_the_canonical_internal_losses_are_all_present(op):
     names = set(op.losses.internal)
-    for expected in ("Incidence", "BladeLoading", "SkinFriction", "Clearance", "Mixing"):
+    for expected in (
+        "Incidence",
+        "BladeLoading",
+        "SkinFriction",
+        "Clearance",
+        "Mixing",
+    ):
         assert any(expected in n for n in names), f"missing internal loss: {expected}"
 
 
@@ -208,7 +214,9 @@ def test_aungier_choke_and_entrance_diffusion_are_included(op):
 
 def test_the_internal_parasitic_split_survives_the_full_set(op):
     """Tier A. The energy bookkeeping must remain exact with 10+ losses active."""
-    assert op.work_actual == pytest.approx(op.work_euler + op.losses.parasitic_total, rel=1e-9)
+    assert op.work_actual == pytest.approx(
+        op.work_euler + op.losses.parasitic_total, rel=1e-9
+    )
     assert op.losses.internal_total > 0.0
     assert op.losses.parasitic_total > 0.0
 
@@ -252,7 +260,9 @@ def test_no_single_loss_dominates(op):
     """
     total = op.losses.internal_total
     for name, dh in op.losses.internal.items():
-        assert dh / total < 0.75, f"{name} is {dh / total:.0%} of all internal loss -- suspicious"
+        assert dh / total < 0.75, (
+            f"{name} is {dh / total:.0%} of all internal loss -- suspicious"
+        )
 
 
 # ------------------------------------------------------- the sensitivity that was FLAT

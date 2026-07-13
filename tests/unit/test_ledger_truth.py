@@ -2,7 +2,7 @@
 
 WHY THIS FILE IMPORTS THE DRIVER INSTEAD OF COPYING IT
 -----------------------------------------------------
-The first version of this guard COPIED ``my_scripts/hecc_stage.py``'s ``IMPELLER`` dict,
+The first version of this guard COPIED ``tests/fixtures/hecc_stage.py``'s ``IMPELLER`` dict,
 with the comment *"kept byte-identical so this test builds the exact same machine the
 driver does"*. That is a promise the code cannot keep, and it broke within the hour: slice
 S1 corrected ``l_blade_m`` in the driver (0.292394 -> 0.237875 m), the copy kept the old
@@ -30,7 +30,7 @@ import pytest
 from turbodesign.centrifugal import InletState
 
 REPO = Path(__file__).resolve().parents[2]
-sys.path.insert(0, str(REPO / "my_scripts"))
+sys.path.insert(0, str(REPO / "tests" / "fixtures"))
 
 from hecc_stage import BACKSWEEP, MDOT_DESIGN, P01, RPM, T01, build  # noqa: E402
 
@@ -87,7 +87,7 @@ from hecc_stage import BACKSWEEP, MDOT_DESIGN, P01, RPM, T01, build  # noqa: E40
 # (docs/centrifugal/12-model-as-implemented.md S7.4's exact prediction). (1) A real,
 # GEOMETRIC trailing-edge metal blockage (B = 0.015837, both blade rows' own tangential
 # thickness at the true exit plane, derived from NASA Appendix C by the same method
-# already accepted for the LE thickness t1 -- my_scripts/extract_hecc_te_blockage.py).
+# already accepted for the LE thickness t1 -- extract_hecc_te_blockage.py).
 # (2) ``ImpellerMixingAungier`` had been computing its own exit area as the UNBLOCKED
 # ``2*pi*r2*b2``, hardcoded, while the velocity triangle itself was already using the
 # BLOCKED area (``Impeller.blockage`` existed and fed ``te_geom`` but ``ImpellerLossState``
@@ -176,7 +176,7 @@ from hecc_stage import BACKSWEEP, MDOT_DESIGN, P01, RPM, T01, build  # noqa: E40
 #     ``VanedDiffuser.Z_eff_loading``, the SAME Aungier length-weighted formula already
 #     used for the impeller's Z_eff (Yang, Liu & Zhao 2023, Machines 11(1):118, Eq. 1),
 #     with the vane CHORDS from NASA Appendix C Tables C.25-C.28
-#     (my_scripts/extract_hecc_vane_angles.py): L_main = 0.0532632 m (2.097 in),
+#     (extract_hecc_vane_angles.py): L_main = 0.0532632 m (2.097 in),
 #     L_splitter = 0.0358396 m (1.411 in) -> Z_eff,vd = 33.4575.
 #
 # Measured: Df rose 1.078 -> 1.136 (sigma fell 1.314 -> 1.099, as Df's denominator
@@ -265,17 +265,23 @@ PSI_AFTER_S5 = 0.8127325809383643  # W-bar fix; was 0.82479529307983035 (E-R11)
 STAGE_PR_AFTER_S5 = (
     4.780524485318113  # W-bar fix; was 4.9424308497058096 (+5.50% -> +2.05% vs NASA)
 )
-STAGE_ETA_POLY_REALGAS_AFTER_S5 = 0.853991995752914  # W-bar fix; was 0.86204978793140929
+STAGE_ETA_POLY_REALGAS_AFTER_S5 = (
+    0.853991995752914  # W-bar fix; was 0.86204978793140929
+)
 
 
 def test_hecc_design_point_is_bit_identical_after_s5():
     with warnings.catch_warnings():
-        # Same suppression as my_scripts/hecc_stage.py -- this fixture is deep in
+        # Same suppression as tests/fixtures/hecc_stage.py -- this fixture is deep in
         # ImpellerRecirculationOh's exponential-warning region by design (see
         # data/coefficients.md S4); that is not what this test is checking.
         warnings.simplefilter("ignore")
-        op = build(BACKSWEEP).solve(mdot=MDOT_DESIGN, rpm=RPM, inlet=InletState(P0=P01, T0=T01))
+        op = build(BACKSWEEP).solve(
+            mdot=MDOT_DESIGN, rpm=RPM, inlet=InletState(P0=P01, T0=T01)
+        )
 
     assert op.psi == pytest.approx(PSI_AFTER_S5, rel=1e-12)
     assert op.stage_PR == pytest.approx(STAGE_PR_AFTER_S5, rel=1e-12)
-    assert op.stage_eta_poly_realgas == pytest.approx(STAGE_ETA_POLY_REALGAS_AFTER_S5, rel=1e-12)
+    assert op.stage_eta_poly_realgas == pytest.approx(
+        STAGE_ETA_POLY_REALGAS_AFTER_S5, rel=1e-12
+    )

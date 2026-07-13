@@ -1,4 +1,4 @@
-"""Tests for my_scripts/flowpath_builder.py (WAVE B geometry reconstruction).
+"""Tests for turbodesign/centrifugal/flowpath_builder.py (WAVE B geometry reconstruction).
 
 Covers: the superellipse turn's endpoint tangents (exact, analytic -- see the module
 docstring's derivation), the b2 sign convention (docs/PHYSICS-RULES.md rule 4), a CSV
@@ -10,15 +10,11 @@ analytic quarter-circle check that anchors ``meridional_length``'s discretisatio
 from __future__ import annotations
 
 import math
-import sys
-from pathlib import Path
 
 import numpy as np
 import pytest
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "my_scripts"))
-
-from flowpath_builder import (  # noqa: E402
+from turbodesign.centrifugal.flowpath_builder import (
     _superellipse_turn,
     _tangent_slopes,
     build_flowpath,
@@ -26,8 +22,7 @@ from flowpath_builder import (  # noqa: E402
     meridional_length,
     write_flowpath_csv,
 )
-
-from turbodesign.centrifugal.geometry import MeridionalPath  # noqa: E402
+from turbodesign.centrifugal.geometry import MeridionalPath
 
 # A representative meanline table, loosely HECC-scaled, used across several tests.
 _R1H, _R1S = 0.04, 0.11
@@ -104,7 +99,9 @@ def test_csv_round_trip_reproduces_b2_and_area_at_r2(tmp_path):
     hub_xr, shroud_xr = build_flowpath(
         _R1H, _R1S, _R2, _B2, _LZ, _R_EXIT, _INLET_DUCT_LEN, lz_refers_to="hub"
     )
-    hub_path, shroud_path = write_flowpath_csv("case", hub_xr, shroud_xr, out_dir=tmp_path)
+    hub_path, shroud_path = write_flowpath_csv(
+        "case", hub_xr, shroud_xr, out_dir=tmp_path
+    )
 
     path = MeridionalPath.from_csv(hub_path, shroud_path)
     station = path.station_at_radius(_R2)
@@ -141,7 +138,9 @@ def test_diffuser_walls_are_parallel_constant_b(tmp_path):
     hub_xr, shroud_xr = build_flowpath(
         _R1H, _R1S, _R2, _B2, _LZ, _R_EXIT, inlet_duct_len=0.0, lz_refers_to="hub"
     )
-    hub_path, shroud_path = write_flowpath_csv("diffuser-case", hub_xr, shroud_xr, out_dir=tmp_path)
+    hub_path, shroud_path = write_flowpath_csv(
+        "diffuser-case", hub_xr, shroud_xr, out_dir=tmp_path
+    )
     path = MeridionalPath.from_csv(hub_path, shroud_path)
     for r in np.linspace(_R2, _R_EXIT, 6):
         station = path.station_at_radius(float(r))
