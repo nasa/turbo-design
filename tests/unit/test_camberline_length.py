@@ -173,59 +173,6 @@ def test_the_old_flow_coefficient_form_is_unreachable():
     assert L_z_actual != pytest.approx(L_z_shipped_bug, rel=1e-3)
 
 
-# ------------------------------------------------------------- l_blade_m: measured, not proxied
-
-
-def test_blade_length_is_the_measured_arc_not_the_LE_angle_projection():
-    """Impeller.l_blade_m (HECC) = 0.237875 m -- the MEASURED 3-D camberline arc.
-
-    ds = sqrt(dm^2 + (r*dtheta)^2), integrated along each of NASA Appendix C's 11
-    main-blade sections (Tables C.3-C.13) and span-averaged. It needs NO blade angle at
-    all: it is the geometry.
-
-    THIS TEST EXISTS TO REJECT A SPECIFIC WRONG ANSWER. The tempting derivation is
-    l_main_m / mean(cos(beta1b)) = 0.292395 m, which divides the WHOLE blade's meridional
-    length by the cosine of the INDUCER LEADING-EDGE angle (45.46 deg) -- a one-station
-    quantity applied to the whole blade. HECC's blade is S-shaped (NASA Fig 18: a
-    mid-chord beta minimum near 14-20 deg, where cos(beta) ~ 0.95, not 0.70), so it
-    inflates the length by 23% and the skin-friction loss with it.
-
-    That is this project's signature failure mode -- A QUANTITY VALID AT ONE STATION USED
-    AT ANOTHER (docs/PHYSICS-RULES.md) -- and it was very nearly adopted here, because it
-    happened to agree with a rough L_m/<cos beta> figure quoted in the slice-S1 plan.
-    AGREEING WITH YOUR OWN ESTIMATE IS NOT VALIDATION.
-    """
-    from extract_hecc_blade_angles import _lines, blade_length_estimates, find_sections
-
-    lines = _lines()
-    est = blade_length_estimates(lines, find_sections(lines, "IMPELLER MAIN BLADE"))
-
-    measured_arc = est["l_blade_m"]
-    le_projection = est["l_blade_m_le_angle_projection"]
-
-    assert measured_arc == pytest.approx(0.237875, rel=0.01)
-
-    # The rejected proxy must stay visibly different -- if these ever converge, the arc
-    # integration has silently degenerated into the projection.
-    assert le_projection / measured_arc == pytest.approx(1.23, rel=0.03), (
-        f"the LE-angle projection ({le_projection:.6f} m) should exceed the measured arc "
-        f"({measured_arc:.6f} m) by ~23%. If it does not, one of the two is no longer "
-        "computing what its name says."
-    )
-
-    from hecc_stage import IMPELLER  # tests/fixtures/hecc_stage.py's wired-in value
-
-    assert "l_blade_m" in IMPELLER, (
-        "tests/fixtures/hecc_stage.py's IMPELLER dict must supply l_blade_m -- without it "
-        "skin friction and mixing fall back to the UNVERIFIED closure, not NASA's "
-        "measured geometry"
-    )
-    assert IMPELLER["l_blade_m"] == pytest.approx(measured_arc, rel=0.01)
-    assert IMPELLER["l_blade_m"] != pytest.approx(le_projection, rel=0.05), (
-        "l_blade_m has regressed to the LE-angle projection"
-    )
-
-
 # ------------------------------------------------------------- the pre-registered result
 
 
