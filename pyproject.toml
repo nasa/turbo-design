@@ -21,6 +21,7 @@ shapely = "*"
 
 [poetry.group.dev.dependencies]
 python = ">=3.12"
+pytest = "*"
 
 [build-system]
 requires = ["poetry>=1.1.2"]
