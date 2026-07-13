@@ -192,7 +192,7 @@ def test_eee_hpt_slsqp_tripwire(example_spool):
 
 
 # ---------------------------------------------------------------------------
-# examples/radial-turbine/radial_turbine-1D.py -- single-stage CENTRIFUGAL turbine,
+# examples/radial-turbine/radial_turbine-1D.py -- single-stage radial-inflow turbine,
 # single-stage pressure balance (turbodesign/turbine_spool.py:_balance_pressure,
 # minimize_scalar branch -- only one stage, so fmin_slsqp is not used here).
 #

@@ -72,8 +72,9 @@ def test_the_bug_breaks_meridional_closure_off_axis(phi_deg):
 
 
 def test_the_error_is_W_over_Vm_at_ninety_degrees():
-    """At phi = 90 deg the overstatement is W/Vm = 1/cos(beta2). At 37.5 deg backsweep that
-    is 1.26, so Vr is 26% too large -- and phi = 90 deg is an impeller exit.
+    """At phi = 90 deg the overstatement is W/Vm = 1/cos(beta2). At 37.5 deg of exit swirl
+    that is 1.26, so Vr comes out 26% too large. The error grows smoothly from zero at
+    phi = 0, so any station with a sloped endwall carries some of it.
     """
     beta2 = np.radians(-37.5)
     _, Vr_ok, _, _, _ = triangle_from_Vm(250.0, beta2, np.pi / 2, 300.0)
