@@ -318,7 +318,7 @@ class ImpellerDiscFrictionDaily(LossBaseClass):
     """Daily & Nece disc friction loss."""
 
     def __init__(self, bf_gap: float | None = None, loss_modifier: float = 1.0):
-        super().__init__(LossType.Enthalpy)
+        super().__init__(LossType.Enthalpy, is_parasitic=True)
         self.bf_gap = bf_gap
         self.loss_modifier = loss_modifier
 
@@ -462,7 +462,7 @@ class ImpellerLeakageAungier(LossBaseClass):
         loading_coefficient: float = 1.0,
         loss_modifier: float = 1.0,
     ):
-        super().__init__(LossType.Enthalpy)
+        super().__init__(LossType.Enthalpy, is_parasitic=True)
         self.number_of_blades = number_of_blades
         self.splitter_le = splitter_le
         self.seal_clearance = seal_clearance
@@ -598,7 +598,7 @@ class ImpellerRecirculationAungier(LossBaseClass):
         lb: float | None = None,
         loss_modifier: float = 1.0,
     ):
-        super().__init__(LossType.Enthalpy)
+        super().__init__(LossType.Enthalpy, is_parasitic=True)
         self.number_of_blades = number_of_blades
         self.splitter_le = splitter_le
         self.loading_coefficient = loading_coefficient
@@ -638,7 +638,7 @@ class ImpellerRecirculationOh(LossBaseClass):
         surge_vrel: float = 1.0,
         loss_modifier: float = 1.0,
     ):
-        super().__init__(LossType.Enthalpy)
+        super().__init__(LossType.Enthalpy, is_parasitic=True)
         self.splitter_le = splitter_le
         self.loading_coefficient = loading_coefficient
         self.number_of_blades = number_of_blades
@@ -743,7 +743,12 @@ class ImpellerVarious(LossBaseClass):
     """Aggregate loss using multiple sub-correlations."""
 
     def __init__(self):
-        super().__init__(LossType.Enthalpy)
+        # This aggregate sums disc_friction + leakage + recirculation
+        # (all parasitic) together with internal terms into one number, so
+        # the whole aggregate must be treated as parasitic: it cannot be
+        # split back into a pure Yp any more than its parasitic components
+        # can.
+        super().__init__(LossType.Enthalpy, is_parasitic=True)
         # Compose key submodels with default parameters
         self.blade_loading = ImpellerBladeLoadingCoppage()
         self.clearance = ImpellerClearanceJansen()

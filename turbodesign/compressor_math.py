@@ -93,6 +93,24 @@ def stator_calc(row: BladeRow, upstream: BladeRow, calculate_vm: bool = True) ->
                 target_entropy = float(np.mean(row.entropy_rise))
             elif callable(loss_fn):
                 target_entropy = float(loss_fn(row, upstream))  # type: ignore[arg-type]
+        elif loss_type == LossType.Enthalpy:
+            raise NotImplementedError(
+                f"{type(loss_fn).__name__} declares LossType.Enthalpy. The "
+                f"compressor path does not implement it: Yp would silently "
+                f"remain 0 and the row would come out loss-free. "
+                + (
+                    "This model carries parasitic work (disc friction, "
+                    "recirculation, leakage). A parasitic loss raises T0 and "
+                    "destroys no total pressure, so it cannot be expressed as "
+                    "a pressure-loss coefficient at all: it belongs in the "
+                    "denominator of efficiency, and this solver has no "
+                    "parasitic-work term."
+                    if getattr(loss_fn, "is_parasitic", False)
+                    else
+                    "An internal loss can in principle be converted to a Yp, "
+                    "but that conversion is not implemented here."
+                )
+            )
 
     def calculate_vm_func(M_guess: float, apply: bool = False) -> float:
         """Solve stator for a guessed Mach; returns massflow residual."""
@@ -250,6 +268,24 @@ def rotor_calc(
                 target_entropy = float(np.mean(row.entropy_rise))
             elif callable(loss_fn):
                 target_entropy = float(loss_fn(row, upstream))  # type: ignore[arg-type]
+        elif loss_type == LossType.Enthalpy:
+            raise NotImplementedError(
+                f"{type(loss_fn).__name__} declares LossType.Enthalpy. The "
+                f"compressor path does not implement it: Yp would silently "
+                f"remain 0 and the row would come out loss-free. "
+                + (
+                    "This model carries parasitic work (disc friction, "
+                    "recirculation, leakage). A parasitic loss raises T0 and "
+                    "destroys no total pressure, so it cannot be expressed as "
+                    "a pressure-loss coefficient at all: it belongs in the "
+                    "denominator of efficiency, and this solver has no "
+                    "parasitic-work term."
+                    if getattr(loss_fn, "is_parasitic", False)
+                    else
+                    "An internal loss can in principle be converted to a Yp, "
+                    "but that conversion is not implemented here."
+                )
+            )
 
     # Use the frozen target (if available) so diagnostic code can overwrite row.P0_ratio
     # without changing the initial guess used by this solver.
