@@ -1,6 +1,5 @@
 # type: ignore[arg-type, reportUnknownArgumentType]
 from __future__ import annotations
-from turtle import down, up
 from typing import Dict, List, Union, Optional, Tuple
 import json
 
