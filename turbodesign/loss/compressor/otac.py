@@ -666,7 +666,7 @@ class ImpellerRecirculationOh(LossBaseClass):
             1e-6,
         )
 
-        dh = 8e-5 * np.sinh(3.5 * (np.radians(_mean(row.alpha2)) ** 3)) * Df**2 * (_mean(row.U) ** 2)
+        dh = 8e-5 * np.sinh(3.5 * (_mean(row.alpha2) ** 3)) * Df**2 * (_mean(row.U) ** 2)
         cp = _mean([row.Cp, upstream.Cp], row.Cp)
         cap = 0.5 * cp * (_mean(row.T0) - _mean(upstream.T0))
         dh = np.clip(dh * self.loss_modifier, 0.0, cap)
