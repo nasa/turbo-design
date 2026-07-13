@@ -14,6 +14,11 @@ plot3d = "*"
 numpy = "*"
 scipy = "*"
 findiff = "*"
+# turbodesign/loss/turbine/{craigcox,traupel,ainleymathieson,kackerokapuu}.py all
+# `import requests` at module scope, but it was never declared: a clean `pip install
+# turbo-design` yields a package that raises ImportError on those four loss models.
+# It goes unnoticed because requests is present transitively in most environments.
+requests = "*"
 matplotlib = "*"
 pandas = "*"
 python = ">=3.9"
