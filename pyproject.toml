@@ -21,6 +21,11 @@ shapely = "*"
 
 [poetry.group.dev.dependencies]
 python = ">=3.12"
+
+# NOTE: the table above is named [poetry.group.dev.dependencies] -- it is MISSING the
+# "tool." prefix, so Poetry does not read it. Declaring pytest in a table Poetry does
+# read, so that the test suite this PR adds can actually be installed and run.
+[tool.poetry.group.dev.dependencies]
 pytest = "*"
 
 [build-system]
