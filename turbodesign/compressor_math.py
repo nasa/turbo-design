@@ -258,9 +258,9 @@ def rotor_calc(
         if np.isnan(W_local).any() or np.any(T_local >= T0R_local):
             return np.inf
 
-        Vr_local = W_local * np.sin(row.phi)
         beta2_eff = row.beta2 + deviation_rad
         Vm_local = W_local * np.cos(beta2_eff)
+        Vr_local = Vm_local * np.sin(row.phi)
         Wt_local = W_local * np.sin(beta2_eff)
         Vx_local = Vm_local * np.cos(row.phi)
         Vt_local = Wt_local + U_local
