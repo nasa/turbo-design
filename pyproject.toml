@@ -22,6 +22,17 @@ shapely = "*"
 [poetry.group.dev.dependencies]
 python = ">=3.12"
 
+# NOTE: the table above is missing the "tool." prefix, so Poetry does not read it as a
+# dependency group. Left as it is: correcting it would change dependency resolution, which
+# is outside the scope of a change that adds tests.
+[tool.poetry.group.dev.dependencies]
+pytest = ">=8.0"
+
 [build-system]
 requires = ["poetry>=1.1.2"]
-build-backend = "poetry.masonry.api"    
+build-backend = "poetry.masonry.api"
+
+[tool.pytest.ini_options]
+markers = [
+    "slow: takes multiple seconds (e.g. runs an optimizer-driven example); deselect with '-m \"not slow\"'",
+]
