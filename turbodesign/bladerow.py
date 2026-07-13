@@ -280,7 +280,7 @@ class BladeRow:
     incli_curve_radii: npt.NDArray = field(default_factory=lambda: np.array([0]))       # radius at which curvature was evaluated
     mprime: npt.NDArray = field(default_factory=lambda: np.array([0]))                   # Mprime distance
     
-    Yp: npt.NDArray = field(default_factory=lambda: np.array([0]))                       # Pressure loss
+    Yp: npt.NDArray = field(default_factory=lambda: np.array([0.0]))                     # Pressure loss
     blockage: float = 0 
     flow_coefficient: float = 0     # Vm/U or similar nondimensional flow coefficient
     power: float = 0                 # Watts 
