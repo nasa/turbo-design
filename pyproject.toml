@@ -14,6 +14,11 @@ plot3d = "*"
 numpy = "*"
 scipy = "*"
 findiff = "*"
+# turbodesign/loss/turbine/{craigcox,traupel,ainleymathieson,kackerokapuu}.py all
+# `import requests` at module scope, but it was never declared: a clean `pip install
+# turbo-design` yields a package that raises ImportError on those four loss models.
+# It goes unnoticed because requests is present transitively in most environments.
+requests = "*"
 matplotlib = "*"
 pandas = "*"
 python = ">=3.9"
@@ -21,13 +26,17 @@ shapely = "*"
 
 [poetry.group.dev.dependencies]
 python = ">=3.12"
-
-# NOTE: the table above is named [poetry.group.dev.dependencies] -- it is MISSING the
-# "tool." prefix, so Poetry does not read it. Declaring pytest in a table Poetry does
-# read, so that the test suite this PR adds can actually be installed and run.
+# NOTE: the table above is missing the "tool." prefix, so Poetry does not read it as a
+# dependency group. Left as it is: correcting it would change dependency resolution, which
+# is outside the scope of a change that adds tests.
 [tool.poetry.group.dev.dependencies]
-pytest = "*"
+pytest = ">=8.0"
 
 [build-system]
 requires = ["poetry>=1.1.2"]
-build-backend = "poetry.masonry.api"    
+build-backend = "poetry.masonry.api"
+
+[tool.pytest.ini_options]
+markers = [
+    "slow: takes multiple seconds (e.g. runs an optimizer-driven example); deselect with '-m \"not slow\"'",
+]
