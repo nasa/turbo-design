@@ -1,0 +1,56 @@
+# ============================================================================
+# WARNING — UNVERIFIED. SECONDARY LITERATURE ONLY. DO NOT USE FOR MAP VALIDATION.
+# See README.md in this directory before using ANY value below.
+# Every field is tagged `unverified: true`. No number here has been confirmed
+# against a primary (Eckardt 1976/1980) or a single citable authoritative source.
+# ============================================================================
+#
+# Eckardt Rotor A — 30 deg backswept impeller. DLR, 1970s. Same base geometry
+# family as Rotor O; the O/A pair isolates the effect of backsweep on slip.
+#
+# Same provenance caveats as rotor_O.yaml — see that file's header and this
+# directory's README.md. Both Eckardt originals (Eckardt 1976, 1980) are
+# paywalled ASME papers, not accessible in this session.
+
+unverified: true
+
+impeller:
+  n_blades: 20              # unverified: true — 20 full blades, no splitters (same as O).
+  n_splitters: 0             # unverified: true
+
+  backsweep_deg: 30          # unverified: true — "Rotor A" defining feature.
+
+  r_te_m: 0.200               # unverified: true — same assumed R2 ~ 200 mm as Rotor O
+                               # (secondary sources do not distinguish O vs A geometry
+                               # beyond backsweep angle; treat r_te/b2 as shared-family
+                               # assumptions, not independently confirmed per-rotor).
+  b2_m: 0.026                 # unverified: true — same assumed b2 ~ 26 mm as Rotor O.
+
+  r_le_hub_m: null            # MISSING.
+  r_le_shroud_m: null         # MISSING.
+  inducer_tip_blade_angle_deg: null   # MISSING.
+  tip_clearance_mm: null      # MISSING.
+
+design_point:
+  rpm: 14000                  # unverified: true — same design speed as Rotor O.
+  mdot_kgs: 4.54               # unverified: true — "Rotor A ~4.54 kg/s" per the survey
+                                # note. CAUTION: an independent web search in this session
+                                # surfaced a DIFFERING secondary-source figure of
+                                # 4.52 kg/s and PR 1.92 for "an Eckardt-A type impeller" —
+                                # close to but not identical to the values here, and from
+                                # an unidentified/unconfirmed source. NOT adopted; recorded
+                                # here only as further evidence that Eckardt-A numbers are
+                                # inconsistent across secondary literature and must not be
+                                # trusted as ground truth.
+  PR_tt: 2.0                   # unverified: true — "Pressure ratio ~2.0 (A)" per the
+                                # survey note; see mdot caution above re: source disagreement.
+  U2_ms: 293                   # unverified: true — same as Rotor O (same rpm/r2 assumption).
+  eta: null                    # MISSING — not located.
+  inlet:
+    P0_Pa: null                # MISSING — not located.
+    T0_K: null                 # MISSING — not located.
+
+usage_restriction: >
+  Use ONLY for the slip-model O-vs-A relative A/B comparison (backsweep 0 vs 30 deg at
+  matched rpm/geometry assumptions). NEVER use this file for absolute compressor-map
+  validation. See rotor_O.yaml and README.md.

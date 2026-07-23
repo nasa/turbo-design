@@ -26,7 +26,6 @@ shapely = "*"
 
 [poetry.group.dev.dependencies]
 python = ">=3.12"
-
 # NOTE: the table above is missing the "tool." prefix, so Poetry does not read it as a
 # dependency group. Left as it is: correcting it would change dependency resolution, which
 # is outside the scope of a change that adds tests.
