@@ -39,7 +39,11 @@ and on the cone below it was 15% low.
 import numpy as np
 import pytest
 
-from tests.test_band_area_oracle import buggy_band_area, pappus_band_area
+from tests.test_band_area_oracle import (
+    buggy_band_area,
+    pappus_band_area,
+    slope_variant_band_area,
+)
 from turbodesign.bladerow import BladeRow
 from turbodesign.flow_math import compute_streamline_areas
 
@@ -102,3 +106,45 @@ def test_the_area_is_dimensionally_homogeneous():
     scaled, _ = compute_streamline_areas(scaled_row)
 
     assert scaled / plain == pytest.approx(k**2, rel=1e-12)
+
+
+def test_the_library_returns_a_SIGNED_area_not_a_geometric_one():
+    """The library's area is signed: reverse the cut and it changes sign.
+
+    This is deliberate in PR #27 -- `# Signed area: sign follows dx to maintain massflow
+    sign convention` -- and this test does not argue with it. It pins it, because nothing
+    else does, and because the sign is invisible in every forward-ordered case the rest of
+    this file exercises.
+
+    Note what the suite already says about this shape. `slope_variant_band_area` in the
+    oracle is "the obvious repair to buggy_band_area ... It fixes the dimensional error but
+    not the sign", and `test_area_is_never_negative_for_a_reversed_cut` records the verdict:
+    a reversed cut "returns a negative area, which Pappus -- and an area -- cannot."
+
+    The library now computes that variant EXACTLY, reversed cuts included. So the geometric
+    magnitude is right and agrees with Pappus, while the sign is a flow-direction convention
+    carried on the same number as the area. That is a real design decision and it may well be
+    the intended one; it is pinned here so that changing it cannot pass unnoticed, and so the
+    disagreement with the geometric oracle is stated rather than latent.
+    """
+    forward, _ = compute_streamline_areas(_cone_row())
+
+    reversed_row = BladeRow()
+    reversed_row.percent_hub_shroud = np.array([0.0, 1.0])
+    reversed_row.x = np.array([X2, X1])
+    reversed_row.r = np.array([R2, R1])
+    backward, _ = compute_streamline_areas(reversed_row)
+
+    # Magnitude: agrees with the geometric oracle in both directions.
+    exact = pappus_band_area(X1, R1, X2, R2)
+    assert abs(forward) == pytest.approx(exact, rel=1e-12)
+    assert abs(backward) == pytest.approx(exact, rel=1e-12)
+
+    # Sign: the convention. Pappus is unsigned and cannot express this.
+    assert forward > 0.0
+    assert backward < 0.0
+    assert backward == pytest.approx(-forward, rel=1e-12)
+
+    # And it is precisely the variant the oracle names and rejects as a geometric area.
+    assert forward == pytest.approx(slope_variant_band_area(X1, R1, X2, R2), rel=1e-12)
+    assert backward == pytest.approx(slope_variant_band_area(X2, R2, X1, R1), rel=1e-12)
