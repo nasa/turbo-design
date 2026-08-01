@@ -110,3 +110,16 @@ def example_spool():
         return cache[name]
 
     return _load
+
+
+@pytest.fixture(scope="session")
+def data_dir() -> Path:
+    """Repository `data/` directory.
+
+    Required by every test under tests/unit/ that reads a committed machine definition.
+    It was defined in the conftest.py that arrived with the centrifugal module and was
+    lost when that conftest and this one were reconciled: the surviving file kept
+    `example_spool` and dropped this, leaving 51 tests erroring at setup with
+    "fixture 'data_dir' not found".
+    """
+    return REPO_ROOT / "data"
