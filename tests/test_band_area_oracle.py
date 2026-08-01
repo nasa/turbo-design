@@ -19,11 +19,16 @@ from scipy.integrate import quad
 
 
 def buggy_band_area(x1, r1, x2, r2):
-    """Verbatim reproduction of flow_math.py:40 (upstream 4018a6c).
+    """Verbatim reproduction of flow_math.py:40 as it stood at upstream 4018a6c.
 
     S is a length in metres, so S/2 * dx**2 is a cubic metre, and it is added to r1*dx,
-    a square metre. tests/test_current_area_formula.py checks that this reproduction still
-    matches the library.
+    a square metre.
+
+    SUPERSEDED: the library no longer computes this. PR #27
+    (`fix/radial-area-and-massflow-sign`) replaced it with the exact frustum area, which is
+    what `pappus_band_area` below has always returned. This function is kept as the record
+    of the old expression, and `tests/test_current_area_formula.py` now uses it as a
+    regression tripwire -- it asserts the library does NOT match this any more.
     """
     dx = x2 - x1
     S = r2 - r1  # metres -- not a slope
