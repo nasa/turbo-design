@@ -149,6 +149,18 @@ class BladeRow:
     entropy_rise : ndarray
         Entropy rise across row.
 
+    **Choking**
+
+    mass_flow_function : ndarray
+        Non-dimensional mass flow function m~, per streamline. Uses M_rel for
+        rotors (relative frame), M for stators/IGVs (absolute frame).
+    choke_margin : ndarray
+        1 - m~/m~_max, per streamline. m~ peaks at M=1 on both sides, so this
+        is >= 0 everywhere and exactly 0 only at M=1 (choked); it does not
+        distinguish subsonic from supersonic. Recomputed fresh every solve.
+    choke_margin_min : float
+        min(choke_margin) across streamlines, for scalar reporting.
+
     **Performance**
 
     power : float
@@ -273,7 +285,15 @@ class BladeRow:
     T_is: npt.NDArray = field(default_factory=lambda: np.array([0]))
     rho: npt.NDArray = field(default_factory=lambda: np.array([0]))
     entropy_rise: npt.NDArray = field(default_factory=lambda: np.array([0]))
-    
+
+    # Choking diagnostics (non-dimensional mass flow function m~, per-streamline).
+    # Frame convention: rotors choke in the relative frame (uses M_rel), stators
+    # and IGVs choke in the absolute frame (uses M). Recomputed fresh on every
+    # solve - never interpolated.
+    mass_flow_function: npt.NDArray = field(default_factory=lambda: np.array([0]))   # m~ = M*(1+(gamma-1)/2*M^2)^-(gamma+1)/(2(gamma-1))
+    choke_margin: npt.NDArray = field(default_factory=lambda: np.array([0]))         # 1 - m~/m~_max, per streamline. 0 at M=1, >0 subsonic
+    choke_margin_min: float = 0.0                                                    # min(choke_margin) across streamlines, for scalar reporting
+
     # Related to streamline curvature
     phi: npt.NDArray = field(default_factory=lambda: np.array([0]))                      # Inclination angle x,r plane. AY td2.f
     rm: npt.NDArray = field(default_factory=lambda: np.array([0]))                      # Curvature
@@ -745,7 +765,10 @@ class BladeRow:
             "dr":self.r[-1]-self.r[0],
             "mprime":self.mprime[-1],
             "Reynolds":self.Reynolds,
-            "axial_chord":self.axial_chord
+            "axial_chord":self.axial_chord,
+            "mass_flow_function":self.mass_flow_function.tolist(),
+            "choke_margin":self.choke_margin.tolist(),
+            "choke_margin_min":self.choke_margin_min
         }
 
         return data

@@ -12,7 +12,7 @@ from .bladerow import BladeRow, compute_gas_constants
 from .enums import LossType, RowType
 from .isentropic import IsenP, IsenT, solve_for_mach
 from .turbine_math import T0_coolant_weighted_average
-from .flow_math import compute_massflow, compute_streamline_areas
+from .flow_math import compute_massflow, compute_streamline_areas, update_choke_diagnostics, explain_infeasible_massflow
 from .outlet import OutletType
 
 __all__ = ["stator_calc", "rotor_calc", "polytropic_efficiency"]
@@ -199,7 +199,17 @@ def stator_calc(row: BladeRow, upstream: BladeRow, calculate_vm: bool = True) ->
         return abs(target_massflow - total_massflow_local)
 
     def solve_massflow_for_current_loss() -> None:
-        res = _solve_bounded(calculate_vm_func, [0.01, 1], "stator Mach")
+        try:
+            res = _solve_bounded(calculate_vm_func, [0.01, 1], "stator Mach")
+        except RuntimeError:
+            P0_ref = row.P0 if np.any(row.P0) else upstream.P0
+            T0_ref = row.T0 if np.any(row.T0) else upstream.T0
+            target = float(getattr(upstream, "total_massflow", 0.0))
+            area_ref, _ = compute_streamline_areas(row)
+            msg = explain_infeasible_massflow(row, target, P0_ref, T0_ref, area=area_ref)
+            if msg is not None:
+                raise ValueError(msg) from None
+            raise
         calculate_vm_func(res.x, apply=True)
 
     if calculate_vm:
@@ -236,6 +246,8 @@ def stator_calc(row: BladeRow, upstream: BladeRow, calculate_vm: bool = True) ->
         row.V = np.sqrt(row.Vx ** 2 + row.Vr ** 2 + row.Vt ** 2)
         row.T = row.P / (row.R * row.rho)   # We know P, this is a guess
         row.M = row.V / np.sqrt(row.gamma * row.R * row.T)
+
+    update_choke_diagnostics(row)
 
 def rotor_calc(
     row: BladeRow,
@@ -407,7 +419,20 @@ def rotor_calc(
         return np.abs(np.abs(upstream.total_massflow) - np.abs(total_massflow_local))
     
     def solve_massflow_for_current_loss() -> None:
-        res = _solve_bounded(calculate_vm_func, [0.01, 1], "rotor relative Mach")
+        try:
+            res = _solve_bounded(calculate_vm_func, [0.01, 1], "rotor relative Mach")
+        except RuntimeError:
+            # row.P0R/T0R (relative frame) aren't populated until this solve succeeds;
+            # row.P0 (absolute, set above from P0_ratio_target) is the best available
+            # proxy, paired with upstream's T0 since the row's own T0 isn't set yet either.
+            P0_ref = row.P0 if np.any(row.P0) else upstream.P0
+            T0_ref = upstream.T0
+            target = float(getattr(upstream, "total_massflow", 0.0))
+            area_ref, _ = compute_streamline_areas(row)
+            msg = explain_infeasible_massflow(row, target, P0_ref, T0_ref, area=area_ref)
+            if msg is not None:
+                raise ValueError(msg) from None
+            raise
         calculate_vm_func(res.x, apply=True)
 
     if calculate_vm:
@@ -473,3 +498,4 @@ def rotor_calc(
     row.T0 = row.T + row.V ** 2 / (2 * row.Cp)
     row.P0 = row.P0R * (row.T0 / row.T0R) ** (row.gamma / (row.gamma - 1))
     compute_gas_constants(row)
+    update_choke_diagnostics(row)

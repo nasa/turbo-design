@@ -15,7 +15,7 @@ from .agf import AGF_Setup, Inlet_bcs, Outlet_bcs, Settings, Clearance, Domain, 
 from importlib import import_module
 
 __all__ = [
-    "TurbineSpool", "Stage", "Inlet", "Outlet", "BladeRow", "Coolant",
+    "TurbineSpool", "CompressorSpool", "Stage", "Inlet", "Outlet", "BladeRow", "Coolant",
     "Passage", "RowType", "PassageType", "LossType",
     "LossInterp", "DeviationBaseClass", "FixedDeviation",
     "make_blade_row", "make_rotor_row", "make_stator_row",
@@ -23,10 +23,17 @@ __all__ = [
     "FixedPressureLoss",
     "AGF_Setup", "Inlet_bcs", "Outlet_bcs", "Settings", "Clearance", "Domain", "read_agf",
     "plot_airfoil_inputs", "plot_airfoil_inputs_2D",
+    "ShaftMatch", "ComponentSizingSpec", "SizingEstimate", "MatchResult", "turbine_massflow",
 ]
 
 _module_map = {
     "TurbineSpool": ("turbodesign.turbine_spool", "TurbineSpool"),
+    "CompressorSpool": ("turbodesign.compressor_spool", "CompressorSpool"),
+    "ShaftMatch": ("turbodesign.shaft_match", "ShaftMatch"),
+    "ComponentSizingSpec": ("turbodesign.shaft_match", "ComponentSizingSpec"),
+    "SizingEstimate": ("turbodesign.shaft_match", "SizingEstimate"),
+    "MatchResult": ("turbodesign.shaft_match", "MatchResult"),
+    "turbine_massflow": ("turbodesign.shaft_match", "turbine_massflow"),
     "Stage": ("turbodesign.stage", "Stage"),
     "Inlet": ("turbodesign.inlet", "Inlet"),
     "Outlet": ("turbodesign.outlet", "Outlet"),

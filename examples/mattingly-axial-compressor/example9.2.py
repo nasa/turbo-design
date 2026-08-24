@@ -4,12 +4,7 @@ from turbodesign import Inlet, Outlet, Passage, PassageType
 from turbodesign.row_factory import make_rotor_row, make_stator_row
 from turbodesign.compressor_spool import CompressorSpool
 from turbodesign.loss.fixedpressureloss import FixedPressureLoss
-
-
-def MFP(M: float, gamma: float = 1.4, R: float = 287.15) -> float:
-    """Mass-flow parameter (Mattingly Eq. 9.x)."""
-    expo = -(gamma + 1) / (2 * (gamma - 1))
-    return np.sqrt(gamma / R) * M * (1 + (gamma - 1) / 2 * M * M) ** expo
+from turbodesign.isentropic import mass_flow_parameter as MFP
 
 
 def main() -> None:

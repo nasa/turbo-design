@@ -2,16 +2,16 @@ from typing import List, Optional, Tuple
 import warnings
 import numpy as np
 import numpy.typing as npt
-from .isentropic import IsenP, IsenT
+from .isentropic import IsenP, IsenT, mass_flow_function, mass_flow_function_required
 from turbodesign.loss import losstype
 from .bladerow import BladeRow, compute_gas_constants
 from .enums import RowType, LossType
 from .outlet import OutletType
 from scipy.integrate import trapezoid
-from scipy.optimize import minimize
+from scipy.optimize import minimize_scalar
 from .passage import Passage
 from .isentropic import IsenP
-from .flow_math import compute_massflow, compute_streamline_areas, compute_power
+from .flow_math import compute_massflow, compute_streamline_areas, compute_power, update_choke_diagnostics
 
 def compute_reynolds(rows:List[BladeRow],passage:Passage):
     """Calculates the Reynolds Number 
@@ -138,16 +138,24 @@ def stator_calc(row:BladeRow,upstream:BladeRow,downstream:Optional[BladeRow]=Non
        
 
     elif loss_type == LossType.Enthalpy:
-        b = row.total_area * row.P0 / np.sqrt(row.T0) * np.sqrt(row.gamma/row.R)
-        solve_for_M = upstream.total_massflow / b
-        fun = lambda M : np.abs(solve_for_M - M*(1+(row.gamma-1)/2 * M**2) ** (-(row.gamma+1)/(2*(row.gamma-1))))
-        M_subsonic = minimize(fun,0.1, method='L-BFGS-B', bounds=[0,1])
-        M_supersonic = minimize(fun,1.5, method='L-BFGS-B', bounds=[1,5])
+        m_tilde_req = np.atleast_1d(np.asarray(
+            mass_flow_function_required(upstream.total_massflow, row.P0, row.T0, row.total_area, row.gamma, row.R),
+            dtype=float,
+        ))
+        M_subsonic = np.array([
+            minimize_scalar(
+                lambda M, target=target: abs(target - mass_flow_function(M, row.gamma)),
+                bounds=(1e-4, 1.0), method="bounded",
+            ).x
+            for target in m_tilde_req
+        ])
+        if np.isscalar(row.P0) or np.asarray(row.P0).ndim == 0:
+            M_subsonic = M_subsonic[0]
         row.M = M_subsonic
-        row.T = row.T0/IsenT(M_subsonic,row.gamma)
+        row.T = row.T0/IsenT(row.M,row.gamma)
         a = np.sqrt(row.T*row.gamma*row.R)
-        row.P = row.total_massflow * row.R*row.T / (row.total_area * row.M * a) # Use the massflow to find static pressure 
-        
+        row.P = row.total_massflow * row.R*row.T / (row.total_area * row.M * a) # Use the massflow to find static pressure
+
     if downstream is not None:
         row.P0_P = float((row.P0/downstream.P).mean())
         row.rp = ((row.P-downstream.P)/(upstream.P0-downstream.P)).mean()
@@ -177,6 +185,7 @@ def stator_calc(row:BladeRow,upstream:BladeRow,downstream:Optional[BladeRow]=Non
     row.U = row.omega*row.r
     row.Wt = row.Vt-row.U
     row.P0_stator_inlet = upstream.P0
+    update_choke_diagnostics(row)
 
 def rotor_calc(row:BladeRow,upstream:BladeRow,calculate_vm:bool=True,outlet_type:OutletType=OutletType.static_pressure):
     """Calculates quantities given beta2
@@ -291,6 +300,7 @@ def rotor_calc(row:BladeRow,upstream:BladeRow,calculate_vm:bool=True,outlet_type
     row.P0_P = (row.P0_stator_inlet/row.P).mean()
 
     row.M_rel = row.W/np.sqrt(row.gamma*row.R*row.T)
+    update_choke_diagnostics(row)
 
 def inlet_calc(row:BladeRow):
     """Calculates the conditions for the Inlet 

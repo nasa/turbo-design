@@ -30,7 +30,8 @@ from .turbine_math import (
     compute_gas_constants,
     compute_reynolds,
 )
-from .flow_math import compute_massflow, compute_streamline_areas, compute_power
+from .isentropic import IsenT, mass_flow_function, mass_flow_function_required
+from .flow_math import compute_massflow, compute_streamline_areas, compute_power, assert_flow_capacity
 from .solve_radeq import adjust_streamlines, radeq
 from pyturbo.helper import line2D, convert_to_ndarray
 
@@ -240,21 +241,30 @@ class TurbineSpool:
             None. Updates row.M, row.T, and row.P in-place.
         """
         if row.row_type == RowType.Stator:
-            b = row.total_area * row.P0 / np.sqrt(row.T0) * np.sqrt(row.gamma/row.R)
+            P0_local, T0_local = row.P0, row.T0
         else:
-            b = row.total_area * row.P0R / np.sqrt(row.T0R) * np.sqrt(row.gamma/row.R)
+            P0_local, T0_local = row.P0R, row.T0R
 
-        solve_for_M = upstream.total_massflow / b
-        fun = lambda M : np.abs(solve_for_M - M*(1+(row.gamma-1)/2 * M**2) ** (-(row.gamma+1)/(2*(row.gamma-1))))
-        M_subsonic = minimize_scalar(fun,0.1, bounds=[0,1])
-        M_supersonic = minimize_scalar(fun,1.5, bounds=[1,5])
+        m_tilde_req = np.atleast_1d(np.asarray(
+            mass_flow_function_required(upstream.total_massflow, P0_local, T0_local, row.total_area, row.gamma, row.R),
+            dtype=float,
+        ))
+        M_subsonic = np.array([
+            minimize_scalar(
+                lambda M, target=target: abs(target - mass_flow_function(M, row.gamma)),
+                bounds=(1e-4, 1.0), method="bounded",
+            ).x
+            for target in m_tilde_req
+        ])
+        if np.isscalar(P0_local) or np.asarray(P0_local).ndim == 0:
+            M_subsonic = M_subsonic[0]
         row.M = M_subsonic
         if row.row_type == RowType.Stator:
-            row.T = row.T0/IsenT(M_subsonic,row.gamma)
-        else: 
-            row.T = row.T0R/IsenT(M_subsonic,row.gamma)
+            row.T = row.T0/IsenT(row.M,row.gamma)
+        else:
+            row.T = row.T0R/IsenT(row.M,row.gamma)
         a = np.sqrt(row.T*row.gamma*row.R)
-        row.P = row.total_massflow * row.R*row.T / (row.total_area * row.M * a) 
+        row.P = row.total_massflow * row.R*row.T / (row.total_area * row.M * a)
         # When total conditions are defined we calculate static pressure
         if row.row_type == RowType.Stator:
             row.P = upstream.P0 - (upstream.P0 - row.P0) / row.Yp 
@@ -456,6 +466,11 @@ class TurbineSpool:
         """Match massflow between streamtubes by tweaking exit angles."""
         rows = self._all_rows()
         massflow_target = np.linspace(0,rows[-1].total_massflow,self.num_streamlines)
+        capacity_targets = [
+            float(row.massflow_target[-1]) if row.massflow_target is not None else float(rows[-1].total_massflow)
+            for row in rows
+        ]
+        assert_flow_capacity(rows, "TurbineSpool._angle_match", targets=capacity_targets)
 
         self.convergence_history = []  # Reset convergence history
         past_err = -100.0
@@ -561,6 +576,7 @@ class TurbineSpool:
     def _balance_pressure(self) -> None:
         """Balance massflow between rows using radial equilibrium."""
         rows = self._all_rows()
+        assert_flow_capacity(rows, "TurbineSpool._balance_pressure")
         past_err = -100.0
         loop_iter = 0
         err = 1e-3
@@ -788,6 +804,13 @@ class TurbineSpool:
         euler_power_hp = [p / 745.7 for p in euler_power]
         enthalpy_power_hp = [p / 745.7 for p in enthalpy_power]
 
+        choke_margin = [
+            float(row.choke_margin_min)
+            for row in blade_rows
+            if row.row_type in (RowType.Rotor, RowType.Stator, RowType.IGV)
+        ]
+        min_choke_margin = float(np.min(choke_margin)) if choke_margin else 0.0
+
         data = {
             "blade_rows": blade_rows_out,
             "massflow": massflow_kg_s,
@@ -809,6 +832,8 @@ class TurbineSpool:
             "FlowFunction": float(FlowFunction),
             "CorrectedSpeed": float(CorrectedSpeed),
             "EnergyFunction": float(EnergyFunction),
+            "ChokeMargin": choke_margin,
+            "MinChokeMargin": min_choke_margin,
             "units": {
                 "massflow": {"metric": "kg/s", "english": "lbm/s"},
                 "rpm": {"metric": "rpm", "english": "rpm"},
@@ -819,6 +844,7 @@ class TurbineSpool:
                 "FlowFunction": {"metric": "kg/s·K^0.5·Pa", "english": "lbm/s·R^0.5·psf"},
                 "CorrectedSpeed": {"metric": "rad/s·K^-0.5", "english": "rad/s·R^-0.5"},
                 "EnergyFunction": {"metric": "—", "english": "—"},
+                "ChokeMargin": {"metric": "—", "english": "—"},
             },
         }
 
