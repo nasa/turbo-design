@@ -4,7 +4,7 @@ import numpy as np
 import numpy.typing as npt
 from .isentropic import IsenP, IsenT, mass_flow_function, mass_flow_function_required
 from turbodesign.loss import losstype
-from .bladerow import BladeRow, compute_gas_constants
+from .bladerow import BladeRow, compute_gas_constants, row_entropy_rise
 from .enums import RowType, LossType
 from .outlet import OutletType
 from scipy.integrate import trapezoid
@@ -185,6 +185,7 @@ def stator_calc(row:BladeRow,upstream:BladeRow,downstream:Optional[BladeRow]=Non
     row.U = row.omega*row.r
     row.Wt = row.Vt-row.U
     row.P0_stator_inlet = upstream.P0
+    row.entropy_rise = row_entropy_rise(row, upstream, row.T, row.P)
     update_choke_diagnostics(row)
 
 def rotor_calc(row:BladeRow,upstream:BladeRow,calculate_vm:bool=True,outlet_type:OutletType=OutletType.static_pressure):
@@ -300,6 +301,7 @@ def rotor_calc(row:BladeRow,upstream:BladeRow,calculate_vm:bool=True,outlet_type
     row.P0_P = (row.P0_stator_inlet/row.P).mean()
 
     row.M_rel = row.W/np.sqrt(row.gamma*row.R*row.T)
+    row.entropy_rise = row_entropy_rise(row, upstream, row.T, row.P)
     update_choke_diagnostics(row)
 
 def inlet_calc(row:BladeRow):

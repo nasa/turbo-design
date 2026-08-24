@@ -80,20 +80,16 @@ def A_As(M:ArrayLike,gamma:float) -> ArrayLike:
 
 
 def mass_flow_function(M:ArrayLike,gamma:float) -> ArrayLike:
-    """Non-dimensional mass flow function (Mattingly), a pure function of Mach
-    number and gamma only - gas- and scale-agnostic.
+    """Non-dimensional mass flow function (Mattingly), gas- and scale-agnostic:
 
         m~ = M * (1 + (gamma-1)/2 * M^2) ^ (-(gamma+1)/(2*(gamma-1)))
 
-    Note: this is the "pure" non-dimensional form (no sqrt(gamma) factor).
-    `mass_flow_parameter` layers the dimensional sqrt(gamma/R) scaling on top
-    of this to recover Mattingly's mdot*sqrt(Tt)/(A*Pt) quantity.
+    The "pure" form (no sqrt(gamma) factor) - `mass_flow_parameter` adds the
+    dimensional sqrt(gamma/R) scaling.
 
-    Identity: mass_flow_function(M,gamma) * A_As(M,gamma) == mass_flow_function_max(gamma)
-    so choke_margin(M,gamma) == 1 - 1/A_As(M,gamma) - the fraction of annulus
-    area in excess of the sonic throat area. This ratio is quadratically flat
-    near M=1 (margin is only ~0.04 at M=0.8, ~0.01 at M=0.9) so it should be
-    reported alongside M, not in place of it, near the choke point.
+    Identity: m~(M,gamma) * A_As(M,gamma) == m~_max(gamma), so choke_margin
+    is quadratically flat near M=1 (~0.04 at M=0.8, ~0.01 at M=0.9) - report
+    it alongside M, not in place of it, near the choke point.
 
     Args:
         M (np.ndarray): Mach Number
@@ -174,16 +170,12 @@ def mass_flow_function_required(massflow:ArrayLike,P0:ArrayLike,T0:ArrayLike,A:A
 
 
 def choke_margin(M:ArrayLike,gamma:float) -> ArrayLike:
-    """Fraction of flow capacity remaining before choking (M=1).
+    """Fraction of flow capacity remaining before choking (M=1):
 
         choke_margin = 1 - mass_flow_function(M,gamma) / mass_flow_function_max(gamma)
 
-    `mass_flow_function` peaks at M=1 on BOTH sides (it decreases moving away
-    from M=1 whether subsonic or supersonic), so this margin is >= 0 for any
-    M and exactly 0 only at M=1 - it does not distinguish subsonic from
-    supersonic. In this codebase every Mach this is evaluated at comes from a
-    bounded subsonic solve ([0, 1]), so in practice it reads as "how far
-    below choked capacity," but the function itself is direction-agnostic.
+    m~ peaks at M=1 on both sides, so this is >= 0 for any M and 0 only at
+    M=1 - it does not distinguish subsonic from supersonic.
 
     Args:
         M (np.ndarray): Mach Number

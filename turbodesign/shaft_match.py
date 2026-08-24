@@ -344,13 +344,7 @@ class ShaftMatch:
             area_scale: Multiplier on the reference annulus height at every
                 passage control point. 1.0 reproduces the reference geometry.
             exit_P: Exit static pressure override [Pa]. Defaults to
-                `sizing.exit_P`. `match()` treats this as its second free
-                knob (area_scale mainly sets flow capacity/massflow; exit_P
-                mainly sets the expansion ratio/power) since, for a
-                fixed-angle turbine in pressure-balance mode, `spool.massflow`
-                is only a solver seed - the achieved massflow and power are
-                both outputs of the geometry and boundary pressures, not
-                independently dictated.
+                `sizing.exit_P`; `match()`'s second free knob (see `match()`).
 
         Returns:
             A new, unsolved `TurbineSpool` (call `.solve()` or use `match()`).
@@ -401,18 +395,14 @@ class ShaftMatch:
         """Phase 2b: solve for the (area scale, exit pressure) pair that closes
         both the mass-flow and shaft-power residuals.
 
-        For a fixed-angle turbine in pressure-balance mode, `spool.massflow`
-        is only a solver seed, not an enforced constraint: the achieved
-        massflow and power are both outputs of the annulus geometry and the
-        boundary pressures. `build()` therefore exposes two knobs instead of
-        one: the annulus area scale (which mainly sets flow capacity, i.e.
-        massflow) and the exit static pressure (which mainly sets the
-        expansion ratio, i.e. power). These are solved as nested 1-D bounded
-        root-finds - an outer search over area scale targeting the massflow
-        residual, with an inner search over exit-pressure fraction (of inlet
-        P0) targeting the power residual at each area scale - using the same
-        `minimize_scalar(..., method="bounded")` pattern as
-        `CompressorSpool.solve_massflow_for_pressure_ratio`.
+        A fixed-angle turbine's massflow and power are both outputs of
+        geometry and boundary pressure, not independently dictated - so this
+        needs two knobs, not one: annulus area scale (sets flow capacity,
+        i.e. massflow) and exit static pressure (sets expansion ratio, i.e.
+        power). Solved as nested 1-D bounded searches - outer over area scale
+        against the massflow residual, inner over exit-pressure fraction
+        against the power residual - the same `minimize_scalar(...,
+        method="bounded")` pattern as `solve_massflow_for_pressure_ratio`.
 
         Args:
             tol_rel: Relative tolerance on both residuals for `converged`.

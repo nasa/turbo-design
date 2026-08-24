@@ -201,6 +201,7 @@ class BladeRow:
     row_type: RowType = RowType.Stator
     loss_function: Optional[LossBaseClass] = None
     deviation_function: Optional[DeviationBaseClass] = None
+    fluid: Optional[Solution] = None  # shared Cantera Solution, assigned by the owning spool
     cutting_line: Optional[line2D] = None         # Line perpendicular to the streamline
     rp: float = 0.4              # Degree of Reaction
     hub_location: float = 0.0
@@ -286,10 +287,7 @@ class BladeRow:
     rho: npt.NDArray = field(default_factory=lambda: np.array([0]))
     entropy_rise: npt.NDArray = field(default_factory=lambda: np.array([0]))
 
-    # Choking diagnostics (non-dimensional mass flow function m~, per-streamline).
-    # Frame convention: rotors choke in the relative frame (uses M_rel), stators
-    # and IGVs choke in the absolute frame (uses M). Recomputed fresh on every
-    # solve - never interpolated.
+    # Choking diagnostics. Rotors use M_rel, stators/IGVs use M. Recomputed every solve.
     mass_flow_function: npt.NDArray = field(default_factory=lambda: np.array([0]))   # m~ = M*(1+(gamma-1)/2*M^2)^-(gamma+1)/(2(gamma-1))
     choke_margin: npt.NDArray = field(default_factory=lambda: np.array([0]))         # 1 - m~/m~_max, per streamline. 0 at M=1, >0 subsonic
     choke_margin_min: float = 0.0                                                    # min(choke_margin) across streamlines, for scalar reporting
@@ -916,6 +914,42 @@ def compute_gas_constants(row:BladeRow,fluid:Optional[Solution]=None) -> None:
             fluid.state = _saved_state
         row.R = row.Cp-row.Cv
         row.gamma = row.Cp/row.Cv
-    # Use Ideal Gas 
+    # Use Ideal Gas
     row.rho = row.P/(row.T*row.R)
     row.mu = sutherland(row.T) # type: ignore
+
+
+def entropy_change(fluid: Solution, T2: npt.NDArray, P2: npt.NDArray, T1: npt.NDArray, P1: npt.NDArray) -> npt.NDArray:
+    """s(T2,P2) - s(T1,P1) [J/(kg*K)], per element, via Cantera's exact `fluid.s`.
+
+    `fluid` is shared across all blade rows, so state is snapshotted and
+    restored around every query (matching `compute_gas_constants`).
+    """
+    T2_arr, P2_arr, T1_arr, P1_arr = np.broadcast_arrays(
+        np.atleast_1d(np.asarray(T2, dtype=float)), np.atleast_1d(np.asarray(P2, dtype=float)),
+        np.atleast_1d(np.asarray(T1, dtype=float)), np.atleast_1d(np.asarray(P1, dtype=float)),
+    )
+    result = np.empty(T2_arr.shape, dtype=float)
+    _saved_state = fluid.state
+    try:
+        for i in range(T2_arr.size):
+            fluid.TP = float(T2_arr.flat[i]), float(P2_arr.flat[i])
+            s2 = fluid.s
+            fluid.TP = float(T1_arr.flat[i]), float(P1_arr.flat[i])
+            s1 = fluid.s
+            result.flat[i] = s2 - s1
+    finally:
+        fluid.state = _saved_state
+    return result
+
+
+def row_entropy_rise(row: "BladeRow", upstream: "BladeRow", T2: npt.NDArray, P2: npt.NDArray) -> npt.NDArray:
+    """Entropy change from upstream's static state to (T2, P2) [J/(kg*K)].
+
+    Uses `entropy_change` when `row.fluid` is set; otherwise falls back to
+    `ds = Cp_avg*ln(T2/T1) - R*ln(P2/P1)` (e.g. a bare BladeRow with no fluid).
+    """
+    if row.fluid is not None:
+        return entropy_change(row.fluid, T2, P2, upstream.T, upstream.P)
+    Cp_avg = 0.5 * (row.Cp + upstream.Cp)
+    return Cp_avg * np.log(np.asarray(T2, dtype=float) / upstream.T) - row.R * np.log(np.asarray(P2, dtype=float) / upstream.P)

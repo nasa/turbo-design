@@ -24,6 +24,7 @@ __all__ = [
     "AGF_Setup", "Inlet_bcs", "Outlet_bcs", "Settings", "Clearance", "Domain", "read_agf",
     "plot_airfoil_inputs", "plot_airfoil_inputs_2D",
     "ShaftMatch", "ComponentSizingSpec", "SizingEstimate", "MatchResult", "turbine_massflow",
+    "OperatingPoint", "sweep_operating_points",
 ]
 
 _module_map = {
@@ -34,6 +35,8 @@ _module_map = {
     "SizingEstimate": ("turbodesign.shaft_match", "SizingEstimate"),
     "MatchResult": ("turbodesign.shaft_match", "MatchResult"),
     "turbine_massflow": ("turbodesign.shaft_match", "turbine_massflow"),
+    "OperatingPoint": ("turbodesign.operating_map", "OperatingPoint"),
+    "sweep_operating_points": ("turbodesign.operating_map", "sweep_operating_points"),
     "Stage": ("turbodesign.stage", "Stage"),
     "Inlet": ("turbodesign.inlet", "Inlet"),
     "Outlet": ("turbodesign.outlet", "Outlet"),

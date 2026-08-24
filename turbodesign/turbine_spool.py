@@ -31,7 +31,7 @@ from .turbine_math import (
     compute_reynolds,
 )
 from .isentropic import IsenT, mass_flow_function, mass_flow_function_required
-from .flow_math import compute_massflow, compute_streamline_areas, compute_power, assert_flow_capacity
+from .flow_math import compute_massflow, compute_streamline_areas, compute_power, assert_flow_capacity, reset_rotor_power
 from .solve_radeq import adjust_streamlines, radeq
 from pyturbo.helper import line2D, convert_to_ndarray
 
@@ -151,6 +151,16 @@ class TurbineSpool:
     # ------------------------------
     def set_blade_row_rpm(self, index: int, rpm: float) -> None:
         self.rows[index].rpm = rpm
+
+    def set_rpm(self, rpm: float) -> None:
+        """Push a new shaft speed onto every blade row and `self.rpm`.
+
+        `solve()` never re-reads `self.rpm` on repeat calls - mutating
+        `spool.rpm` alone does nothing. Use this instead, e.g. for a sweep.
+        """
+        self.rpm = rpm
+        for row in self.rows:
+            row.rpm = rpm
 
     def set_blade_row_type(self, blade_row_index: int, rowType: RowType) -> None:
         self.rows[blade_row_index].row_type = rowType
@@ -392,6 +402,44 @@ class TurbineSpool:
                 total += float(getattr(row, "power", 0.0) or 0.0)
         return total
 
+    def overall_pressure_ratio(self) -> float:
+        """Overall expansion ratio: P0_inlet / P0_exit (>1, inlet/exit rather
+        than a compressor's exit/inlet)."""
+        rows = self._all_rows()
+        if len(rows) < 2:
+            return 1.0
+        return float(np.mean(np.mean(self.inlet.P0 / rows[-2].P0)))
+
+    def overall_polytropic_efficiency(self) -> float:
+        """Overall polytropic efficiency: eta_p = [gamma/(gamma-1)] * ln(tau)/ln(pi)."""
+        rows = self._all_rows()
+        if len(rows) < 2:
+            return 0.0
+        pi = float(np.mean(self.inlet.P0) / np.mean(rows[-2].P0))
+        tau = float(np.mean(self.inlet.T0) / np.mean(rows[-2].T0))
+        gamma = float(np.mean(self.inlet.gamma)) if hasattr(self.inlet, "gamma") else 1.33
+        if pi <= 1.0 or tau <= 1.0 or abs(np.log(pi)) < 1e-12:
+            return 0.0
+        return (gamma / (gamma - 1.0)) * np.log(tau) / np.log(pi)
+
+    def overall_entropy_efficiency(self) -> float:
+        """Entropy-based overall efficiency (see entropy_based_efficiency.md):
+
+            eta = w / (w + T_exit * sum(entropy_rise)),  w = Cp*(T0_inlet - T0_exit)
+        """
+        rows = self._all_rows()
+        internal = rows[1:-1]
+        if len(internal) < 1:
+            return 0.0
+        delta_s = max(float(sum(np.mean(r.entropy_rise) for r in internal)), 0.0)
+        exit_row = rows[-2]
+        T_exit = float(np.mean(exit_row.T))
+        Cp = float(np.mean(exit_row.Cp))
+        w = Cp * (float(np.mean(self.inlet.T0)) - float(np.mean(exit_row.T0)))
+        if w <= 0:
+            return 0.0
+        return w / (w + T_exit * delta_s)
+
     def solve_massflow_for_power(self, target_power: float, massflow_guess: Optional[float] = None, tol_rel: float = 1e-3, max_iter: int = 8, relax: float = 0.7, bounds: tuple[float, float] = (1e-6, 1e9)) -> tuple[float, float]:
         """Power-driven closure: iterate inlet massflow to hit a target turbine power.
 
@@ -432,10 +480,7 @@ class TurbineSpool:
             for _ in range(max_iter):
                 # Important: prevent a previous computed `row.power` from being treated as an input
                 # in `initialize()` when power is not a design target.
-                for r in self.rows:
-                    if r.row_type == RowType.Rotor:
-                        r.power = 0.0
-                        r.power_mean = 0.0
+                reset_rotor_power(self.rows)
 
                 self.massflow = mdot
                 self.solve()

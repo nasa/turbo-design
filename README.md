@@ -291,7 +291,11 @@ print(f"Total power: {spool.total_power()} W")
 
 [Multi-stage turbine optimization](https://colab.research.google.com/github/nasa/turbo-design/blob/main/examples/optturb-multistage/optturb-multistage.ipynb)
 
+[Sizing and Matching a Compressor and Turbine with the Mass Flow Function](https://colab.research.google.com/github/nasa/turbo-design/blob/main/examples/shaft-match/compressor_turbine_match.ipynb) — Sizes a compressor inlet and a choked NGV throat directly from the non-dimensional mass flow function, matches a turbine to the compressor's shaft power and mass-flow continuity with `ShaftMatch`, and sweeps the result into a performance map with `sweep_operating_points`.
+
 ## Technical Notes
+
+[The Non-Dimensional Mass Flow Function: Sizing, Matching, and Sweeping](mass_flow_function.md) — Derives $\tilde m(M,\gamma)$ and the choke-margin feasibility guard, and covers the three places it's used: sizing a component's inlet/NGV throat before any blade row is solved, matching a compressor and turbine on a shaft with `ShaftMatch`, and sweeping a fixed geometry into a performance map with `sweep_operating_points` — including why a turbine's massflow can't be swept the same way a compressor's can.
 
 [Entropy-Based Efficiency: The T2·delta-s Approach](entropy_based_efficiency.md) — Derives why the conventional isentropic efficiency $\eta = \Delta T_0 / (T_{01} - T_{02s})$ breaks down for radial machines with large radius change, and how the entropy-based definition $\eta = w/(w + T_2 \Delta s)$ resolves this by isolating irreversibility from frame-change effects. Includes full derivations from first and second law, the Gouy-Stodola lost-work theorem, and shows applicability to both compressors and turbines.
 

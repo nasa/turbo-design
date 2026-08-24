@@ -19,7 +19,7 @@ from .passage import Passage
 from .inlet import Inlet
 from .outlet import Outlet, OutletType
 from .compressor_math import rotor_calc, stator_calc, polytropic_efficiency
-from .flow_math import compute_massflow, compute_streamline_areas, compute_power, assert_flow_capacity
+from .flow_math import compute_massflow, compute_streamline_areas, compute_power, assert_flow_capacity, reset_rotor_power
 from .turbine_math import (
     inlet_calc,
     compute_gas_constants,
@@ -159,6 +159,16 @@ class CompressorSpool:
     # ------------------------------
     def set_blade_row_rpm(self, index: int, rpm: float) -> None:
         self.rows[index].rpm = rpm
+
+    def set_rpm(self, rpm: float) -> None:
+        """Push a new shaft speed onto every blade row and `self.rpm`.
+
+        `solve()` never re-reads `self.rpm` on repeat calls - mutating
+        `spool.rpm` alone does nothing. Use this instead, e.g. for a sweep.
+        """
+        self.rpm = rpm
+        for row in self.rows:
+            row.rpm = rpm
 
     def set_blade_row_type(self, blade_row_index: int, rowType: RowType) -> None:
         self.rows[blade_row_index].row_type = rowType
@@ -391,6 +401,24 @@ class CompressorSpool:
             return 0.0
         return ((gamma - 1.0) / gamma) * np.log(pi) / np.log(tau)
 
+    def overall_entropy_efficiency(self) -> float:
+        """Entropy-based overall efficiency (see entropy_based_efficiency.md):
+
+            eta = 1 - T_exit * sum(entropy_rise) / w,  w = Cp*(T0_exit - T0_inlet)
+        """
+        rows = self._all_rows()
+        internal = rows[1:-1]
+        if len(internal) < 1:
+            return 0.0
+        delta_s = max(float(sum(np.mean(r.entropy_rise) for r in internal)), 0.0)
+        exit_row = rows[-2]
+        T_exit = float(np.mean(exit_row.T))
+        Cp = float(np.mean(exit_row.Cp))
+        w = Cp * (float(np.mean(exit_row.T0)) - float(np.mean(self.inlet.T0)))
+        if w <= 0:
+            return 0.0
+        return 1.0 - T_exit * delta_s / w
+
     def total_power(self) -> float:
         """Return total compressor power absorbed (sum over rotor rows).
 
@@ -425,12 +453,14 @@ class CompressorSpool:
             raise ValueError("Massflow bounds must be positive and (lower < upper).")
 
         def objective(mdot: float) -> float:
+            reset_rotor_power(self.rows)
             self.massflow = mdot
             self.solve()
             achieved = self.overall_pressure_ratio()
             return (achieved - target_pr) ** 2
 
         res = minimize_scalar(objective, bounds=bounds, method="bounded")
+        reset_rotor_power(self.rows)
         self.massflow = float(res.x)
         self.solve()
         achieved = self.overall_pressure_ratio()

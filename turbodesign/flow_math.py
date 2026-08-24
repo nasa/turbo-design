@@ -191,17 +191,23 @@ def compute_power(row: BladeRow, upstream: BladeRow | None = None, downstream: B
         row.flow_coefficient = abs(float(np.mean(row.Vm / row.U)))
 
 
+def reset_rotor_power(rows: Sequence[BladeRow]) -> None:
+    """Zero `power`/`power_mean` on every rotor row.
+
+    `initialize()` seeds its next T0 guess from the *previous* solve's
+    `row.power`. Call this before re-solving at a new operating point, or a
+    stale power from a very different massflow/rpm can slow convergence.
+    """
+    for row in rows:
+        if row.row_type == RowType.Rotor:
+            row.power = 0.0
+            row.power_mean = 0.0
+
+
 def update_choke_diagnostics(row: BladeRow) -> None:
     """Populate row.mass_flow_function / row.choke_margin / row.choke_margin_min.
 
-    Uses the relative-frame Mach number (M_rel) for rotors and the
-    absolute-frame Mach number (M) for stators/IGVs, matching where each row
-    type actually chokes. No-op if the row's Mach array hasn't been solved
-    yet (all zero), so a partially-initialized row is never stamped with
-    bogus diagnostics.
-
-    Args:
-        row: BladeRow with M/M_rel and gamma already populated.
+    Uses M_rel for rotors, M for stators/IGVs. No-op if Mach isn't solved yet.
     """
     M = row.M_rel if row.row_type == RowType.Rotor else row.M
     M_arr = np.atleast_1d(np.asarray(M, dtype=float))
@@ -269,26 +275,17 @@ def explain_infeasible_massflow(row: BladeRow, target_massflow: float, P0: npt.N
     """Return an actionable message if `row` cannot pass `target_massflow` at
     (P0, T0) and its (given or current) area/blockage, else None.
 
-    Used to translate a bounded Mach-solve failure (`_solve_bounded`'s
-    `RuntimeError`, raised when the search pins at a bracket edge) into a
-    clear feasibility diagnosis at the exact point of failure - inside
-    `initialize()`'s first row-by-row pass, a row can already be infeasible
-    before `assert_flow_capacity` ever gets a chance to run at the start of
-    `balance_pressure`/`_angle_match`. (P0, T0) are typically the row's own
-    total conditions if already set, or the upstream row's as an
-    approximation when they are not (e.g. a rotor's relative-frame P0R/T0R,
-    only populated after the Mach solve this guards succeeds).
+    Translates a bounded Mach-solve `RuntimeError` into a feasibility
+    diagnosis at the point of failure, before `assert_flow_capacity`'s own
+    upfront check gets a chance to run.
 
     Args:
         row: The row whose massflow capacity is in question.
         target_massflow: Massflow the row is being asked to pass [kg/s].
         P0: Total pressure to evaluate capacity at [Pa].
         T0: Total temperature to evaluate capacity at [K].
-        area: Annulus area override [m^2]. Needed at this call site because
-            `row.total_area` is only assigned when the Mach solve this
-            guards *succeeds* (`apply=True`) - for `num_streamlines > 1` it
-            is still stale/zero at the point of a bounded-solve failure.
-            Defaults to `row.total_area` when not given.
+        area: Annulus area override [m^2]. Defaults to `row.total_area`
+            (which may still be stale/zero at this point in the solve).
 
     Returns:
         A multi-line diagnostic string if infeasible, else None.
