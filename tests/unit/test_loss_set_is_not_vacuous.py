@@ -77,6 +77,25 @@ def op(data_dir):
             tip_clearance=0.000305,
             inducer_blade_angle_deg=BETA1B_RMS,
             le_blade_thickness=LE_BLADE_THICKNESS,
+            # Item 10 / debt D5. These three were absent, and their absence -- not any
+            # defect in the models -- is what made ImpellerEntranceDiffusionAungier and
+            # ImpellerMixingAungier contribute exactly zero. All are NASA-derived and are
+            # what my_scripts/hecc_stage.py's IMPELLER has been passing in production.
+            #
+            # Inducer throat: minimum distance between adjacent MAIN blades, 15 passages,
+            # from Appendix C surface coordinates (data/hecc/throat_areas.csv,
+            # my_scripts/extract_hecc_throat_areas.py). Without it A_th := A1, which
+            # overstates the real throat by 53%.
+            throat_area=0.020525,
+            # TE GEOMETRIC (metal) blockage from Appendix C. With blockage2 = 0 the mixing
+            # loss's W_out reduces to W2 exactly, so W_sep - W_out == 0 and the loss is
+            # identically zero -- an algebraic identity, not physics.
+            blockage=0.015837,
+            # Camberline lengths (my_scripts/extract_hecc_blade_angles.py). Without these
+            # the mixing loss falls back to the UNVERIFIED length closure.
+            l_main_m=0.209875,
+            l_splitter_m=0.145580,
+            l_blade_m=0.237875,
         ),
         diffuser=None,
         slip=WiesnerSlip(),
@@ -89,12 +108,27 @@ def op(data_dir):
 @pytest.mark.xfail(
     strict=True,
     reason=(
-        "KNOWN DEFECT, not a flake. 3 of 10 losses are identically zero: "
-        "ImpellerIncidenceConrad (no inducer blade-metal-angle field -> beta_opt := "
-        "beta_1xi -> W* == 0; angle now derived in data/hecc/blade_angles.csv, wiring "
-        "is item 5e), ImpellerChokeAungier + ImpellerEntranceDiffusionAungier (no throat "
-        "station -> A_th := A1; debt D5, item 10). strict=True: when these are wired, "
-        "this test MUST start passing and the marker must be removed."
+        "KNOWN DEFECT, not a flake -- but now ONE loss, not three. 2026-08-01: "
+        "ImpellerIncidenceConrad is RESURRECTED (item 5e: beta1b_deg is wired and the "
+        "model now RAISES rather than falling back to the flow angle), and "
+        "ImpellerEntranceDiffusionAungier + ImpellerMixingAungier were revived by giving "
+        "this fixture the geometry production has always passed (throat_area, blockage, "
+        "camberline lengths -- item 10 / debt D5). Note ImpellerMixingAungier was dead and "
+        "the previous version of THIS REASON did not even name it: with blockage2 = 0 its "
+        "W_out reduces to W2 exactly, so W_sep - W_out == 0 identically. "
+        "WHAT REMAINS: ImpellerChokeAungier alone, and for a sharper reason than 'no "
+        "throat station' -- the throat IS wired now. Its onset gate (x <= 0 -> return 0) "
+        "never opens inside the envelope the solver can reach: measured dh == 0.000000 "
+        "EXACTLY at the largest mdot that converges, at 80/90/100/105% speed; the "
+        "solver's own meridional-Mach choke criterion trips first (Choked raised at "
+        "mdot 5.90 vs 5.85 solving, at design speed). An onset loss whose onset lies "
+        "outside the solvable envelope cannot be evidence. "
+        "DO NOT close this by lowering onset_threshold or onset_scale -- those are "
+        "published Aungier/Kovar constants and moving them to make a test pass is "
+        "precisely what docs/DO-NOT-FIT.md forbids. Resolve the disagreement between "
+        "Aungier's onset criterion and the solver's choke criterion instead. "
+        "strict=True: when it is resolved, this test MUST start passing and the marker "
+        "must be removed."
     ),
 )
 def test_every_configured_loss_actually_contributes(op):
