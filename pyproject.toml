@@ -1,40 +1,52 @@
-[tool.poetry]
+[project]
 name = "turbo-design"
 version = "1.4.2"
 description = "TurboDesign is a library used to design turbines and compressors using radial equilibrium."
-authors = ["Paht Juangphanich <paht.juangphanich@nasa.gov>"]
-packages = [
-    { include = "turbodesign" }
+authors = [
+    { name = "Paht Juangphanich", email = "paht.juangphanich@nasa.gov" }
+]
+requires-python = ">=3.9"
+dependencies = [
+    "cantera",
+    "pyturbo-aero",
+    "plot3d",
+    "numpy",
+    "scipy",
+    "findiff",
+    # turbodesign/loss/turbine/{craigcox,traupel,ainleymathieson,kackerokapuu}.py all
+    # `import requests` at module scope, but it was never declared: a clean `pip install
+    # turbo-design` yields a package that raises ImportError on those four loss models.
+    # It goes unnoticed because requests is present transitively in most environments.
+    "requests",
+    "matplotlib",
+    "pandas",
+    "shapely",
 ]
 
-[tool.poetry.dependencies]
-cantera = "*"
-pyturbo-aero = "*"
-plot3d = "*"
-numpy = "*"
-scipy = "*"
-findiff = "*"
-# turbodesign/loss/turbine/{craigcox,traupel,ainleymathieson,kackerokapuu}.py all
-# `import requests` at module scope, but it was never declared: a clean `pip install
-# turbo-design` yields a package that raises ImportError on those four loss models.
-# It goes unnoticed because requests is present transitively in most environments.
-requests = "*"
-matplotlib = "*"
-pandas = "*"
-python = ">=3.9"
-shapely = "*"
+[project.optional-dependencies]
+# examples/EEE-HPT/eee_hpt_process_geometry.py imports pyiges (with its "full" extra,
+# which pulls in geomdl) to read IGES geometry files. It was never declared anywhere
+# except as an ad hoc `!pip install pyiges[full]` cell in the EEE-HPT/EEE-HPC notebooks,
+# so `uv sync` silently removed it on every run. Not available on macOS.
+examples = [
+    "pyiges[full]",
+]
 
-[poetry.group.dev.dependencies]
-python = ">=3.12"
-# NOTE: the table above is missing the "tool." prefix, so Poetry does not read it as a
-# dependency group. Left as it is: correcting it would change dependency resolution, which
-# is outside the scope of a change that adds tests.
-[tool.poetry.group.dev.dependencies]
-pytest = ">=8.0"
+[dependency-groups]
+dev = [
+    "pytest>=8.0",
+]
+docs = [
+    "sphinx",
+    "sphinx-rtd-theme",
+]
 
 [build-system]
-requires = ["poetry>=1.1.2"]
-build-backend = "poetry.masonry.api"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["turbodesign"]
 
 [tool.pytest.ini_options]
 markers = [

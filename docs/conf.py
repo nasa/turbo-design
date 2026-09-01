@@ -35,8 +35,17 @@ for name, module in mock_modules.items():
 sys.modules["pyturbo.helper"].line2D = lambda *args, **kwargs: None
 sys.modules["pyturbo.helper"].convert_to_ndarray = lambda x, *_, **__: x
 sys.modules["pyturbo.helper"].xr_to_mprime = lambda *args, **kwargs: None
-sys.modules["pyturbo.aero.airfoil2D"].Airfoil2D = type("Airfoil2D", (), {})
-mock_solution = type("Solution", (), {})
+# NOTE: conf.py is exec'd by Sphinx in a namespace with no "__name__" global, so
+# type(name, bases, {}) here would normally build a class with no __module__ at all
+# (CPython's type.__new__ infers __module__ from the calling frame's __name__, and
+# silently leaves it unset if that lookup fails). Autodoc later stringifies annotations
+# like `Optional[Solution]`, which calls repr() on the class and crashes with
+# `AttributeError: __module__` for any class missing that attribute. Set __module__
+# explicitly on every dynamically-created mock class to avoid that crash.
+sys.modules["pyturbo.aero.airfoil2D"].Airfoil2D = type(
+    "Airfoil2D", (), {"__module__": "pyturbo.aero.airfoil2D"}
+)
+mock_solution = type("Solution", (), {"__module__": "cantera"})
 sys.modules["cantera"].Solution = mock_solution  # type: ignore[attr-defined]
 sys.modules["cantera.composite"].Solution = mock_solution  # type: ignore[attr-defined]
 
@@ -48,9 +57,18 @@ project = 'Turbo Design'
 copyright = '2024, Paht Juangphanich'
 author = 'Paht Juangphanich <paht.juangphanich@nasa.gov>'
 
-# The full version, including alpha/beta/rc tags
-version = '1.0.6' 
-release = '1.0.6' 
+# The full version, including alpha/beta/rc tags.
+# Read from pyproject.toml instead of hardcoding, so the docs never drift out of
+# sync with the package version again (this was previously hardcoded to '1.0.6'
+# while pyproject.toml had already moved on to 1.4.2).
+try:
+    import tomllib
+except ModuleNotFoundError:  # Python < 3.11
+    import tomli as tomllib
+with open(os.path.join(os.path.dirname(__file__), "..", "pyproject.toml"), "rb") as _f:
+    _pyproject = tomllib.load(_f)
+version = _pyproject["project"]["version"]
+release = version
 
 
 # -- General configuration ---------------------------------------------------
