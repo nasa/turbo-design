@@ -22,61 +22,67 @@ def test_example_9_1_is_three_streamlines(example_spool):
 
 
 def test_example_9_1_overall(example_spool):
+    # Re-baselined: stator_calc previously never re-derived a stator's P0 from its
+    # upstream rotor's converged P0 (only from initialize()'s one-time, pre-convergence
+    # seed), so overall_pressure_ratio() - which reads the last row's P0 - was wrong
+    # whenever that last row is a stator, as it is here.
     spool = example_spool("mattingly-axial-compressor/example9.1.py")["spool"]
     assert spool.massflow == pytest.approx(22.6796, rel=RTOL)
-    assert spool.overall_pressure_ratio() == pytest.approx(1.3341973512851182, rel=RTOL)
+    assert spool.overall_pressure_ratio() == pytest.approx(1.322718069014324, rel=RTOL)
 
 
 def test_example_9_1_rotor_per_streamline(example_spool):
     rotor = example_spool("mattingly-axial-compressor/example9.1.py")["rotor"]
     assert rotor.r == pytest.approx([0.274612394592, 0.3048, 0.334987605408], rel=RTOL)
     assert rotor.P0 == pytest.approx(
-        [119628.39581103637, 134654.9438487545, 145123.1800222211], rel=RTOL
+        [119628.40319595579, 134654.94917312535, 145123.17232950567], rel=RTOL
     )
     assert rotor.T0 == pytest.approx(
-        [302.2099828302515, 312.6535100310146, 319.4447100979148], rel=RTOL
+        [302.20998821723526, 312.6535136186777, 319.44470528076056], rel=RTOL
     )
     assert rotor.P0R == pytest.approx(
-        [101472.6344434061, 106007.01485885675, 103382.93537587197], rel=RTOL
+        [101472.66241132512, 106007.04371937654, 103382.95293928268], rel=RTOL
     )
     assert rotor.T0R == pytest.approx(
-        [288.26368910588, 291.906523697345, 289.8136025909995], rel=RTOL
+        [288.26371192569735, 291.9065465214719, 289.81361672926107], rel=RTOL
     )
     assert rotor.M == pytest.approx(
-        [0.8300588723044268, 0.8836656583201487, 0.9454459831924451], rel=RTOL
+        [0.8300590707928704, 0.8836658122756325, 0.9454460873879358], rel=RTOL
     )
     assert rotor.M_rel == pytest.approx(
-        [0.6541796871156736, 0.6319799253120101, 0.5917376972636], rel=RTOL
+        [0.654180180595538, 0.6319804100205337, 0.5917381359155736], rel=RTOL
     )
 
 
 def test_example_9_1_stator_per_streamline(example_spool):
+    # Re-baselined along with test_example_9_1_overall - see that test's comment.
     stator = example_spool("mattingly-axial-compressor/example9.1.py")["stator"]
     assert stator.P0 == pytest.approx(
-        [124686.40724035529, 135017.66232236876, 145970.53079910018], rel=RTOL
+        [121107.41535333314, 134654.94917312535, 146421.85771165002], rel=RTOL
     )
     assert stator.M == pytest.approx(
-        [0.6092420162196824, 0.6720905746225406, 0.7269550972159657], rel=RTOL
+        [0.5963208015278048, 0.6888803194859718, 0.7469872531703152], rel=RTOL
     )
 
 
 def test_example_9_2_overall(example_spool):
+    # Re-baselined: see test_example_9_1_overall's comment - same stator P0 fix.
     spool = example_spool("mattingly-axial-compressor/example9.2.py")["spool"]
     assert spool.massflow == pytest.approx(22.68, rel=RTOL)
-    assert spool.overall_pressure_ratio() == pytest.approx(1.2911654599889533, rel=RTOL)
+    assert spool.overall_pressure_ratio() == pytest.approx(1.265613361918456, rel=RTOL)
 
 
 def test_example_9_2_rotor_per_streamline(example_spool):
     rotor = example_spool("mattingly-axial-compressor/example9.2.py")["rotor"]
     assert rotor.r == pytest.approx([0.273978687961, 0.3048, 0.335621312039], rel=RTOL)
     assert rotor.P0R == pytest.approx(
-        [98740.66209918521, 102918.64302259442, 100612.03719717609], rel=RTOL
+        [98740.7993354694, 102918.7847158074, 100612.12365309549], rel=RTOL
     )
     assert rotor.T0R == pytest.approx(
-        [288.05267532349905, 291.8572966174646, 289.97433510707276], rel=RTOL
+        [288.0527983355748, 291.85741965922836, 289.97441139016513], rel=RTOL
     )
     assert rotor.M_rel == pytest.approx(
-        [0.6644041789821085, 0.6407581013471035, 0.6002922414935745], rel=RTOL
+        [0.6644070309683578, 0.6407609185183611, 0.6002948269776887], rel=RTOL
     )
 
 

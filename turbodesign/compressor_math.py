@@ -8,11 +8,11 @@ from scipy.optimize import minimize_scalar
 
 from pyturbo.helper import convert_to_ndarray
 
-from .bladerow import BladeRow, compute_gas_constants
+from .bladerow import BladeRow, compute_gas_constants, row_entropy_rise
 from .enums import LossType, RowType
 from .isentropic import IsenP, IsenT, solve_for_mach
 from .turbine_math import T0_coolant_weighted_average
-from .flow_math import compute_massflow, compute_streamline_areas
+from .flow_math import compute_massflow, compute_streamline_areas, update_choke_diagnostics, explain_infeasible_massflow
 from .outlet import OutletType
 
 __all__ = ["stator_calc", "rotor_calc", "polytropic_efficiency"]
@@ -117,11 +117,15 @@ def stator_calc(row: BladeRow, upstream: BladeRow, calculate_vm: bool = True) ->
         T0_coolant_local = T0_coolant_weighted_average(row) if row.coolant is not None else 0.0
         T0_local = upstream.T0 - T0_coolant_local
         
-        P0_local = row.P0
+        # P0 = P0_upstream - Yp*(P0_upstream - P_upstream), derived fresh every call.
+        # Must not read row.P0 back: unlike a turbine's first-row stator (fixed inlet
+        # boundary), this stator's upstream rotor keeps converging every outer iteration.
         if row.row_type == RowType.IGV:
             row.P0 = row.P0_is - row.Yp * (upstream.P0 - upstream.P)
         else:
-            row.P0_is = P0_local + row.Yp * (upstream.P0 - upstream.P)
+            row.P0 = upstream.P0 - row.Yp * (upstream.P0 - upstream.P)
+            row.P0_is = row.P0 + row.Yp * (upstream.P0 - upstream.P)  # == upstream.P0 (zero-loss reference)
+        P0_local = row.P0
 
         deviation_func = getattr(row, "deviation_function", None)
         deviation = deviation_func(row, upstream) if callable(deviation_func) else 0.0
@@ -142,7 +146,6 @@ def stator_calc(row: BladeRow, upstream: BladeRow, calculate_vm: bool = True) ->
         U_local = row.omega * row.r
         Wt_local = Vt_local - U_local
         alpha1_local = upstream.alpha2 + upstream.deviation if upstream.row_type == RowType.Rotor else row.alpha1
-        entropy_rise_local = 0.5 * (row.Cp + upstream.Cp) * np.log(T_local / upstream.T) - row.R * np.log(P_local / upstream.P)
 
         # massflow integration (include blockage and optional coolant)
         total_area, streamline_area = compute_streamline_areas(row)
@@ -183,7 +186,7 @@ def stator_calc(row: BladeRow, upstream: BladeRow, calculate_vm: bool = True) ->
             row.U = U_local
             row.Wt = Wt_local
             row.P0_stator_inlet = upstream.P0
-            row.entropy_rise = entropy_rise_local
+            row.entropy_rise = row_entropy_rise(row, upstream, T_local, P_local)
             row.total_area = total_area
             row.area = streamline_area
             row.massflow = massflow_local
@@ -193,13 +196,21 @@ def stator_calc(row: BladeRow, upstream: BladeRow, calculate_vm: bool = True) ->
             pi_local = float(np.mean(row.P0) / np.mean(upstream.P0)) if np.all(row.P0) else 1.0
             tau_local = float(np.mean(row.T0) / np.mean(upstream.T0)) if np.all(row.T0) else 1.0
             row.eta_poly = polytropic_efficiency(pi_local, tau_local, row.gamma)
-            tau_is = (row.P0_is / upstream.P0) ** ((row.gamma - 1.0) / row.gamma)
-            row.T0_is = upstream.T0 * tau_is
         target_massflow = getattr(upstream, "total_massflow", total_massflow_local)
         return abs(target_massflow - total_massflow_local)
 
     def solve_massflow_for_current_loss() -> None:
-        res = _solve_bounded(calculate_vm_func, [0.01, 1], "stator Mach")
+        try:
+            res = _solve_bounded(calculate_vm_func, [0.01, 1], "stator Mach")
+        except RuntimeError:
+            P0_ref = row.P0 if np.any(row.P0) else upstream.P0
+            T0_ref = row.T0 if np.any(row.T0) else upstream.T0
+            target = float(getattr(upstream, "total_massflow", 0.0))
+            area_ref, _ = compute_streamline_areas(row)
+            msg = explain_infeasible_massflow(row, target, P0_ref, T0_ref, area=area_ref)
+            if msg is not None:
+                raise ValueError(msg) from None
+            raise
         calculate_vm_func(res.x, apply=True)
 
     if calculate_vm:
@@ -236,6 +247,8 @@ def stator_calc(row: BladeRow, upstream: BladeRow, calculate_vm: bool = True) ->
         row.V = np.sqrt(row.Vx ** 2 + row.Vr ** 2 + row.Vt ** 2)
         row.T = row.P / (row.R * row.rho)   # We know P, this is a guess
         row.M = row.V / np.sqrt(row.gamma * row.R * row.T)
+
+    update_choke_diagnostics(row)
 
 def rotor_calc(
     row: BladeRow,
@@ -287,12 +300,9 @@ def rotor_calc(
                 )
             )
 
-    # Use the frozen target (if available) so diagnostic code can overwrite row.P0_ratio
-    # without changing the initial guess used by this solver.
-    P0_ratio_target = getattr(row, "P0_ratio_target", 0.0) or row.P0_ratio
-    row.P0 = upstream.P0 * P0_ratio_target
-    row.P0_is = row.P0 + row.Yp * (upstream.P0 - upstream.P)
-    
+    # row.P0_ratio/P0_ratio_target do not drive this solver - row.P0 is derived below
+    # from rothalpy conservation + the velocity triangle instead.
+
     # Upstream relative frame
     upstream.U = upstream.rpm * np.pi / 30 * upstream.r
     upstream.Wt = upstream.Vt - upstream.U
@@ -395,19 +405,29 @@ def rotor_calc(
             row.massflow = massflow_local
             row.total_area = total_area
             row.area = streamline_area
-            row.entropy_rise = 0.5 * (row.Cp + upstream.Cp) * np.log(T_local / upstream.T) - row.R * np.log(P_local / upstream.P)
+            row.entropy_rise = row_entropy_rise(row, upstream, T_local, P_local)
             row.deviation[:] = deviation_rad
             # pi_local: stage total-pressure ratio (pt_out/pt_in); tau_local: total-temperature ratio (Tt_out/Tt_in)
             pi_local = float(np.mean(row.P0) / np.mean(upstream.P0)) if np.all(row.P0) else 1.0
             tau_local = float(np.mean(row.T0) / np.mean(upstream.T0)) if np.all(row.T0) else 1.0
             row.eta_poly = polytropic_efficiency(pi_local, tau_local, row.gamma)
-            tau_is = (row.P0_is / upstream.P0) ** ((row.gamma - 1.0) / row.gamma)
-            row.T0_is = upstream.T0 * tau_is
-    
+
         return np.abs(np.abs(upstream.total_massflow) - np.abs(total_massflow_local))
     
     def solve_massflow_for_current_loss() -> None:
-        res = _solve_bounded(calculate_vm_func, [0.01, 1], "rotor relative Mach")
+        try:
+            res = _solve_bounded(calculate_vm_func, [0.01, 1], "rotor relative Mach")
+        except RuntimeError:
+            # row.P0R/T0R (relative frame) aren't populated until this solve succeeds,
+            # so use upstream's state as the capacity-check reference instead.
+            P0_ref = upstream.P0
+            T0_ref = upstream.T0
+            target = float(getattr(upstream, "total_massflow", 0.0))
+            area_ref, _ = compute_streamline_areas(row)
+            msg = explain_infeasible_massflow(row, target, P0_ref, T0_ref, area=area_ref)
+            if msg is not None:
+                raise ValueError(msg) from None
+            raise
         calculate_vm_func(res.x, apply=True)
 
     if calculate_vm:
@@ -473,3 +493,4 @@ def rotor_calc(
     row.T0 = row.T + row.V ** 2 / (2 * row.Cp)
     row.P0 = row.P0R * (row.T0 / row.T0R) ** (row.gamma / (row.gamma - 1))
     compute_gas_constants(row)
+    update_choke_diagnostics(row)

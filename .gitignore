@@ -67,8 +67,10 @@ instance/
 # Scrapy stuff:
 .scrapy
 
-# Sphinx documentation
+# Sphinx documentation (docs/Makefile's BUILDDIR is "build", not Sphinx's default "_build";
+# keep both patterns since either could show up depending on how the build is invoked)
 docs/_build/
+docs/build/
 
 # PyBuilder
 .pybuilder/
@@ -155,6 +157,7 @@ python.td3/references/~$TD2 Solution Procedure.pptx
 *.exe
 *.exe
 *.lock
+!uv.lock
 ~$*.pptx
 *.REST
 ~$*.xlsx

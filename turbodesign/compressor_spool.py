@@ -19,7 +19,7 @@ from .passage import Passage
 from .inlet import Inlet
 from .outlet import Outlet, OutletType
 from .compressor_math import rotor_calc, stator_calc, polytropic_efficiency
-from .flow_math import compute_massflow, compute_streamline_areas, compute_power
+from .flow_math import compute_massflow, compute_streamline_areas, compute_power, assert_flow_capacity, reset_rotor_power
 from .turbine_math import (
     inlet_calc,
     compute_gas_constants,
@@ -159,6 +159,16 @@ class CompressorSpool:
     # ------------------------------
     def set_blade_row_rpm(self, index: int, rpm: float) -> None:
         self.rows[index].rpm = rpm
+
+    def set_rpm(self, rpm: float) -> None:
+        """Push a new shaft speed onto every blade row and `self.rpm`.
+
+        `solve()` never re-reads `self.rpm` on repeat calls - mutating
+        `spool.rpm` alone does nothing. Use this instead, e.g. for a sweep.
+        """
+        self.rpm = rpm
+        for row in self.rows:
+            row.rpm = rpm
 
     def set_blade_row_type(self, blade_row_index: int, rowType: RowType) -> None:
         self.rows[blade_row_index].row_type = rowType
@@ -391,6 +401,38 @@ class CompressorSpool:
             return 0.0
         return ((gamma - 1.0) / gamma) * np.log(pi) / np.log(tau)
 
+    def overall_entropy_efficiency(self) -> float:
+        """Entropy-based overall efficiency (see entropy_based_efficiency.md):
+
+            eta = 1 - T_exit * sum(entropy_rise) / w,  w = Cp*(T0_exit - T0_inlet)
+        """
+        rows = self._all_rows()
+        internal = rows[1:-1]
+        if len(internal) < 1:
+            return 0.0
+        delta_s = max(float(sum(np.mean(r.entropy_rise) for r in internal)), 0.0)
+        exit_row = rows[-2]
+        T_exit = float(np.mean(exit_row.T))
+        Cp = float(np.mean(exit_row.Cp))
+        w = Cp * (float(np.mean(exit_row.T0)) - float(np.mean(self.inlet.T0)))
+        if w <= 0:
+            return 0.0
+        return 1.0 - T_exit * delta_s / w
+
+    def total_power(self) -> float:
+        """Return total compressor power absorbed (sum over rotor rows).
+
+        Sign convention: positive (power added to the flow). This is the
+        mirror of `TurbineSpool.total_power()`, which returns positive
+        extracted power - shaft balance between the two is
+        `turbine.total_power() * mechanical_efficiency == compressor.total_power()`.
+        """
+        total = 0.0
+        for row in self._all_rows():
+            if getattr(row, "row_type", None) == RowType.Rotor:
+                total += float(getattr(row, "power", 0.0) or 0.0)
+        return total
+
     def solve_massflow_for_pressure_ratio(self, target_pr: float, bounds: tuple[float, float], meanline: bool = False) -> tuple[float, float]:
         """Solve inlet massflow to hit a target overall total-pressure ratio.
 
@@ -411,12 +453,14 @@ class CompressorSpool:
             raise ValueError("Massflow bounds must be positive and (lower < upper).")
 
         def objective(mdot: float) -> float:
+            reset_rotor_power(self.rows)
             self.massflow = mdot
             self.solve()
             achieved = self.overall_pressure_ratio()
             return (achieved - target_pr) ** 2
 
         res = minimize_scalar(objective, bounds=bounds, method="bounded")
+        reset_rotor_power(self.rows)
         self.massflow = float(res.x)
         self.solve()
         achieved = self.overall_pressure_ratio()
@@ -432,6 +476,7 @@ class CompressorSpool:
             Implemented by marching rows (compressor mode) without guessing pressure ratios.
         """
         rows = self._all_rows()
+        assert_flow_capacity(rows, "CompressorSpool.balance_pressure")
 
         print("Looping to converge massflow (compressor)")
         loop_iter = 0
@@ -515,6 +560,7 @@ class CompressorSpool:
     def _angle_match(self) -> None:
         """Match massflow between streamtubes by tweaking exit angles."""
         blade_rows = self._all_rows()
+        assert_flow_capacity(blade_rows, "CompressorSpool._angle_match")
         self.convergence_history = []  # Reset convergence history
         prev_err = 1e9
 
@@ -639,6 +685,13 @@ class CompressorSpool:
         euler_power_hp = [p / 745.7 for p in euler_power]
         enthalpy_power_hp = [p / 745.7 for p in enthalpy_power]
 
+        choke_margin = [
+            float(row.choke_margin_min)
+            for row in blade_rows
+            if row.row_type in (RowType.Rotor, RowType.Stator, RowType.IGV)
+        ]
+        min_choke_margin = float(np.min(choke_margin)) if choke_margin else 0.0
+
         data = {
             "blade_rows": blade_rows_out,
             "massflow": massflow_kg_s,
@@ -665,6 +718,8 @@ class CompressorSpool:
             "CorrectedSpeed": float(CorrectedSpeed),
             "EnergyFunction": float(EnergyFunction),
             "eta_polytropic_overall": float(self.overall_polytropic_efficiency()),
+            "ChokeMargin": choke_margin,
+            "MinChokeMargin": min_choke_margin,
             "units": {
                 "massflow": {"metric": "kg/s", "english": "lbm/s"},
                 "rpm": {"metric": "rpm", "english": "rpm"},
@@ -675,6 +730,7 @@ class CompressorSpool:
                 "FlowFunction": {"metric": "kg/s·K^0.5·Pa", "english": "lbm/s·R^0.5·psf"},
                 "CorrectedSpeed": {"metric": "rad/s·K^-0.5", "english": "rad/s·R^-0.5"},
                 "EnergyFunction": {"metric": "—", "english": "—"},
+                "ChokeMargin": {"metric": "—", "english": "—"},
             },
         }
 

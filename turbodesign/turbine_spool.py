@@ -30,7 +30,8 @@ from .turbine_math import (
     compute_gas_constants,
     compute_reynolds,
 )
-from .flow_math import compute_massflow, compute_streamline_areas, compute_power
+from .isentropic import IsenT, mass_flow_function, mass_flow_function_required
+from .flow_math import compute_massflow, compute_streamline_areas, compute_power, assert_flow_capacity, reset_rotor_power
 from .solve_radeq import adjust_streamlines, radeq
 from pyturbo.helper import line2D, convert_to_ndarray
 
@@ -151,6 +152,16 @@ class TurbineSpool:
     def set_blade_row_rpm(self, index: int, rpm: float) -> None:
         self.rows[index].rpm = rpm
 
+    def set_rpm(self, rpm: float) -> None:
+        """Push a new shaft speed onto every blade row and `self.rpm`.
+
+        `solve()` never re-reads `self.rpm` on repeat calls - mutating
+        `spool.rpm` alone does nothing. Use this instead, e.g. for a sweep.
+        """
+        self.rpm = rpm
+        for row in self.rows:
+            row.rpm = rpm
+
     def set_blade_row_type(self, blade_row_index: int, rowType: RowType) -> None:
         self.rows[blade_row_index].row_type = rowType
 
@@ -240,21 +251,30 @@ class TurbineSpool:
             None. Updates row.M, row.T, and row.P in-place.
         """
         if row.row_type == RowType.Stator:
-            b = row.total_area * row.P0 / np.sqrt(row.T0) * np.sqrt(row.gamma/row.R)
+            P0_local, T0_local = row.P0, row.T0
         else:
-            b = row.total_area * row.P0R / np.sqrt(row.T0R) * np.sqrt(row.gamma/row.R)
+            P0_local, T0_local = row.P0R, row.T0R
 
-        solve_for_M = upstream.total_massflow / b
-        fun = lambda M : np.abs(solve_for_M - M*(1+(row.gamma-1)/2 * M**2) ** (-(row.gamma+1)/(2*(row.gamma-1))))
-        M_subsonic = minimize_scalar(fun,0.1, bounds=[0,1])
-        M_supersonic = minimize_scalar(fun,1.5, bounds=[1,5])
+        m_tilde_req = np.atleast_1d(np.asarray(
+            mass_flow_function_required(upstream.total_massflow, P0_local, T0_local, row.total_area, row.gamma, row.R),
+            dtype=float,
+        ))
+        M_subsonic = np.array([
+            minimize_scalar(
+                lambda M, target=target: abs(target - mass_flow_function(M, row.gamma)),
+                bounds=(1e-4, 1.0), method="bounded",
+            ).x
+            for target in m_tilde_req
+        ])
+        if np.isscalar(P0_local) or np.asarray(P0_local).ndim == 0:
+            M_subsonic = M_subsonic[0]
         row.M = M_subsonic
         if row.row_type == RowType.Stator:
-            row.T = row.T0/IsenT(M_subsonic,row.gamma)
-        else: 
-            row.T = row.T0R/IsenT(M_subsonic,row.gamma)
+            row.T = row.T0/IsenT(row.M,row.gamma)
+        else:
+            row.T = row.T0R/IsenT(row.M,row.gamma)
         a = np.sqrt(row.T*row.gamma*row.R)
-        row.P = row.total_massflow * row.R*row.T / (row.total_area * row.M * a) 
+        row.P = row.total_massflow * row.R*row.T / (row.total_area * row.M * a)
         # When total conditions are defined we calculate static pressure
         if row.row_type == RowType.Stator:
             row.P = upstream.P0 - (upstream.P0 - row.P0) / row.Yp 
@@ -382,6 +402,44 @@ class TurbineSpool:
                 total += float(getattr(row, "power", 0.0) or 0.0)
         return total
 
+    def overall_pressure_ratio(self) -> float:
+        """Overall expansion ratio: P0_inlet / P0_exit (>1, inlet/exit rather
+        than a compressor's exit/inlet)."""
+        rows = self._all_rows()
+        if len(rows) < 2:
+            return 1.0
+        return float(np.mean(np.mean(self.inlet.P0 / rows[-2].P0)))
+
+    def overall_polytropic_efficiency(self) -> float:
+        """Overall polytropic efficiency: eta_p = [gamma/(gamma-1)] * ln(tau)/ln(pi)."""
+        rows = self._all_rows()
+        if len(rows) < 2:
+            return 0.0
+        pi = float(np.mean(self.inlet.P0) / np.mean(rows[-2].P0))
+        tau = float(np.mean(self.inlet.T0) / np.mean(rows[-2].T0))
+        gamma = float(np.mean(self.inlet.gamma)) if hasattr(self.inlet, "gamma") else 1.33
+        if pi <= 1.0 or tau <= 1.0 or abs(np.log(pi)) < 1e-12:
+            return 0.0
+        return (gamma / (gamma - 1.0)) * np.log(tau) / np.log(pi)
+
+    def overall_entropy_efficiency(self) -> float:
+        """Entropy-based overall efficiency (see entropy_based_efficiency.md):
+
+            eta = w / (w + T_exit * sum(entropy_rise)),  w = Cp*(T0_inlet - T0_exit)
+        """
+        rows = self._all_rows()
+        internal = rows[1:-1]
+        if len(internal) < 1:
+            return 0.0
+        delta_s = max(float(sum(np.mean(r.entropy_rise) for r in internal)), 0.0)
+        exit_row = rows[-2]
+        T_exit = float(np.mean(exit_row.T))
+        Cp = float(np.mean(exit_row.Cp))
+        w = Cp * (float(np.mean(self.inlet.T0)) - float(np.mean(exit_row.T0)))
+        if w <= 0:
+            return 0.0
+        return w / (w + T_exit * delta_s)
+
     def solve_massflow_for_power(self, target_power: float, massflow_guess: Optional[float] = None, tol_rel: float = 1e-3, max_iter: int = 8, relax: float = 0.7, bounds: tuple[float, float] = (1e-6, 1e9)) -> tuple[float, float]:
         """Power-driven closure: iterate inlet massflow to hit a target turbine power.
 
@@ -422,10 +480,7 @@ class TurbineSpool:
             for _ in range(max_iter):
                 # Important: prevent a previous computed `row.power` from being treated as an input
                 # in `initialize()` when power is not a design target.
-                for r in self.rows:
-                    if r.row_type == RowType.Rotor:
-                        r.power = 0.0
-                        r.power_mean = 0.0
+                reset_rotor_power(self.rows)
 
                 self.massflow = mdot
                 self.solve()
@@ -456,6 +511,11 @@ class TurbineSpool:
         """Match massflow between streamtubes by tweaking exit angles."""
         rows = self._all_rows()
         massflow_target = np.linspace(0,rows[-1].total_massflow,self.num_streamlines)
+        capacity_targets = [
+            float(row.massflow_target[-1]) if row.massflow_target is not None else float(rows[-1].total_massflow)
+            for row in rows
+        ]
+        assert_flow_capacity(rows, "TurbineSpool._angle_match", targets=capacity_targets)
 
         self.convergence_history = []  # Reset convergence history
         past_err = -100.0
@@ -561,6 +621,7 @@ class TurbineSpool:
     def _balance_pressure(self) -> None:
         """Balance massflow between rows using radial equilibrium."""
         rows = self._all_rows()
+        assert_flow_capacity(rows, "TurbineSpool._balance_pressure")
         past_err = -100.0
         loop_iter = 0
         err = 1e-3
@@ -788,6 +849,13 @@ class TurbineSpool:
         euler_power_hp = [p / 745.7 for p in euler_power]
         enthalpy_power_hp = [p / 745.7 for p in enthalpy_power]
 
+        choke_margin = [
+            float(row.choke_margin_min)
+            for row in blade_rows
+            if row.row_type in (RowType.Rotor, RowType.Stator, RowType.IGV)
+        ]
+        min_choke_margin = float(np.min(choke_margin)) if choke_margin else 0.0
+
         data = {
             "blade_rows": blade_rows_out,
             "massflow": massflow_kg_s,
@@ -809,6 +877,8 @@ class TurbineSpool:
             "FlowFunction": float(FlowFunction),
             "CorrectedSpeed": float(CorrectedSpeed),
             "EnergyFunction": float(EnergyFunction),
+            "ChokeMargin": choke_margin,
+            "MinChokeMargin": min_choke_margin,
             "units": {
                 "massflow": {"metric": "kg/s", "english": "lbm/s"},
                 "rpm": {"metric": "rpm", "english": "rpm"},
@@ -819,6 +889,7 @@ class TurbineSpool:
                 "FlowFunction": {"metric": "kg/s·K^0.5·Pa", "english": "lbm/s·R^0.5·psf"},
                 "CorrectedSpeed": {"metric": "rad/s·K^-0.5", "english": "rad/s·R^-0.5"},
                 "EnergyFunction": {"metric": "—", "english": "—"},
+                "ChokeMargin": {"metric": "—", "english": "—"},
             },
         }
 
