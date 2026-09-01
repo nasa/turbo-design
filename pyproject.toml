@@ -48,6 +48,12 @@ build-backend = "hatchling.build"
 [tool.hatch.build.targets.wheel]
 packages = ["turbodesign"]
 
+[tool.hatch.build.targets.sdist]
+# Without this, hatchling ships the whole git tree: examples/ (327MB of .lpk/.szplt
+# CFD files) and references/ (98MB) alone blow the sdist past PyPI's 100MB upload
+# limit (it was ~336MB), breaking every future `uv build`/publish.
+only-include = ["turbodesign", "README.md", "pyproject.toml"]
+
 [tool.pytest.ini_options]
 markers = [
     "slow: takes multiple seconds (e.g. runs an optimizer-driven example); deselect with '-m \"not slow\"'",
