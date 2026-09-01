@@ -1563,6 +1563,28 @@ class ImpellerRecirculationOh:
     implementation computes ``alpha2`` directly from ``atan2`` (radians by
     construction, the Python ``math`` module's convention) and applies NO further
     unit conversion.
+
+    **Ceiling (energy bound).** ``sinh`` is unbounded, and its argument grows as the
+    CUBE of alpha2, so as ``Cm2 -> 0`` off-design (``alpha2 -> 90 deg``) the raw
+    correlation returns "losses" larger than the Euler work itself (HECC at 130%
+    speed / 60% design flow: 1.8x ``U2*Vt2``; at 100% speed / 60% flow: 0.55x), which
+    ``Stage.solve`` then adds to T02 -- psi > 1.5 and impeller efficiencies of 0.3.
+    The bound comes from what the term IS: a parasitic work term (module docstring),
+    i.e. the extra shaft work spent re-pumping the mass that flows back into the
+    impeller tip. Per unit of throughflow, ``Δh_rc = f * (re-pumping work per unit
+    mass)`` with ``f`` the recirculated mass fraction and the re-pumping work at most
+    the Euler work ``U2*Vt2`` -- so ``Δh_rc / w_euler`` is, to first order, the
+    recirculated mass fraction, and a steady meanline operating point needs ``f < 1``.
+    The returned value is clipped at ``max_fraction_of_euler_work * U2*Vt2`` (default
+    0.5, restoring the ceiling upstream ``otac.py`` applied as ``0.5*cp*dT0`` -- the
+    same quantity, since parasitic enthalpy never entered T0 in that solver; see
+    ``coefficients.py`` for why 0.5 rather than the hard 1.0 is UNVERIFIED judgement),
+    and a RuntimeWarning fires whenever the clip binds. That warning -- not the 70 deg
+    tripwire below, which fires at the HECC design point too -- is the signal that the
+    operating point is outside anything this correlation can describe. The clip does
+    NOT touch the design point (``Δh_rc / w_euler = 0.048`` at HECC) and, being
+    applied after the coupled continuity solve (parasitic terms never enter the
+    impeller-exit residual), it cannot alter the converged Cm2.
     """
 
     kind: ClassVar[Literal["internal", "parasitic"]] = "parasitic"
@@ -1594,6 +1616,11 @@ class ImpellerRecirculationOh:
     # clearly left its near-linear region (sinh(x)/x = 46 at 70 deg, 234 at 76.3 deg) --
     # NOT a published bound. It is a tripwire, not a physical limit. Do not cite it as Oh's.
     alpha2_warn_deg: float = FROZEN["impeller.recirculation.alpha2_warn_deg"]
+    # Energy ceiling, as a fraction of the Euler work U2*Vt2 -- class docstring,
+    # "Ceiling (energy bound)", and coefficients.py for the provenance of 0.5.
+    max_fraction_of_euler_work: float = FROZEN[
+        "impeller.recirculation.max_fraction_of_euler_work"
+    ]
 
     def delta_h(self, state: ImpellerLossState) -> float:
         Df = _diffusion_factor(state)
@@ -1623,6 +1650,28 @@ class ImpellerRecirculationOh:
             * Df**2
             * state.U2**2
         )
+
+        # Energy ceiling (class docstring). Euler work with no inlet swirl -- the same
+        # ``w = U2*Vt2`` Stage.solve reports as ``work_euler``. Vt2 <= 0 means no work is
+        # being done on the fluid, so there is nothing to re-pump: cap is 0.
+        w_euler = state.U2 * max(state.Vt2, 0.0)
+        cap = self.max_fraction_of_euler_work * w_euler
+        if dh > cap:
+            warnings.warn(
+                f"ImpellerRecirculationOh CAPPED: the raw correlation returned "
+                f"{dh:.0f} J/kg = {dh / w_euler if w_euler > 0 else float('inf'):.2f}x "
+                f"the Euler work ({w_euler:.0f} J/kg) at alpha2 = "
+                f"{math.degrees(alpha2):.1f} deg; clipped to "
+                f"{self.max_fraction_of_euler_work:g}x = {cap:.0f} J/kg. A parasitic "
+                f"loss this large means the recirculated mass fraction the correlation "
+                f"implies is not a steady operating point -- this point is OUTSIDE the "
+                f"correlation's range and the reported psi/efficiency are not "
+                f"trustworthy. (The 0.5 ceiling is upstream otac.py's precedent, "
+                f"UNVERIFIED; the hard energy bound is 1.0 -- see coefficients.py.)",
+                RuntimeWarning,
+                stacklevel=2,
+            )
+            dh = cap
         return max(dh, 0.0)
 
 
