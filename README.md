@@ -56,7 +56,7 @@ The turbodesign package is organized into the following key components:
 ### Loss Model Architecture
 - **[loss/losstype.py](turbodesign/loss/losstype.py)** - Abstract base class `LossBaseClass` defining the loss model interface
 - **[loss/turbine/](turbodesign/loss/turbine/)** - Turbine loss correlations (TD2, Ainley-Mathieson, Kacker-Okapuu, Craig-Cox, Traupel)
-- **[loss/compressor/](turbodesign/loss/compressor/)** - Compressor loss correlations (Lieblein, OTAC, Diffusion Factor)
+- **[loss/compressor/](turbodesign/loss/compressor/)** - Compressor loss correlations (Lieblein, Diffusion Factor)
 - **[loss/fixedpolytropic.py](turbodesign/loss/fixedpolytropic.py)** - Fixed polytropic efficiency model
 - **[loss/fixedpressureloss.py](turbodesign/loss/fixedpressureloss.py)** - Fixed pressure loss model
 
