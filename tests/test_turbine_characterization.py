@@ -35,6 +35,8 @@ RTOL = 1e-9
 # `rotor2` (the same BladeRow objects that are inside `spool.rows`, mutated in place
 # by `spool.solve()`) and `spool` itself. Runtime is ~7-8s (SLSQP + 5 streamlines),
 # hence @pytest.mark.slow.
+#
+# Re-baselined at issue #40; see the note above the radial-turbine goldens below.
 # ---------------------------------------------------------------------------
 
 
@@ -59,15 +61,15 @@ def test_eee_hpt_massflow_attribute_is_the_input_echo(example_spool):
 @pytest.mark.slow
 def test_eee_hpt_stator1_per_streamline(example_spool):
     row = example_spool("EEE-HPT/eee_hpt.py")["stator1"]
-    assert row.P0 == pytest.approx([1230607.077101921] * 5, rel=RTOL)
+    assert row.P0 == pytest.approx([1230685.1033527565] * 5, rel=RTOL)
     assert row.T0 == pytest.approx([1587.0] * 5, rel=RTOL)
     assert row.M == pytest.approx(
         [
-            0.9008453280523004,
-            0.8753927855297182,
-            0.8517684601550825,
-            0.8297668414327242,
-            0.809148370680553,
+            0.8990650500794771,
+            0.8736662763893313,
+            0.8500893087709246,
+            0.8281297103681706,
+            0.807549006621581,
         ],
         rel=RTOL,
     )
@@ -79,31 +81,31 @@ def test_eee_hpt_rotor1_per_streamline(example_spool):
     row = example_spool("EEE-HPT/eee_hpt.py")["rotor1"]
     assert row.P0 == pytest.approx(
         [
-            578345.3532063541,
-            568953.3631594869,
-            561067.2952288443,
-            554464.6265053176,
-            549027.9543868615,
+            577297.9004998863,
+            568371.6156954058,
+            560972.0746986346,
+            554881.9743179418,
+            549985.6928300606,
         ],
         rel=RTOL,
     )
     assert row.T0 == pytest.approx(
         [
-            1343.4794419417044,
-            1338.351413116741,
-            1334.0491926457082,
-            1330.470258091159,
-            1327.5634278022285,
+            1343.777660231714,
+            1338.6877145286628,
+            1334.4269183790007,
+            1330.8946729690774,
+            1328.0399107216124,
         ],
         rel=RTOL,
     )
     assert row.M == pytest.approx(
         [
-            0.39115615492041317,
-            0.3761548794976443,
-            0.36377563900765325,
-            0.35378845466081904,
-            0.3458730120679529,
+            0.39117743813276484,
+            0.3761588973495466,
+            0.36374093364603316,
+            0.35369519099784186,
+            0.34570900099550095,
         ],
         rel=RTOL,
     )
@@ -115,21 +117,21 @@ def test_eee_hpt_stator2_per_streamline(example_spool):
     row = example_spool("EEE-HPT/eee_hpt.py")["stator2"]
     assert row.P0 == pytest.approx(
         [
-            564286.1117135661,
-            555542.1689799328,
-            548200.2397365044,
-            542053.1551549011,
-            536991.6134126185,
+            563313.461468955,
+            555003.0903159837,
+            548114.1176479898,
+            542444.2341935647,
+            537885.7961283474,
         ],
         rel=RTOL,
     )
     assert row.M == pytest.approx(
         [
-            0.8623745634810988,
-            0.8197532030358293,
-            0.7825474243432641,
-            0.7498246933734738,
-            0.7206268276705512,
+            0.8619107764860644,
+            0.8193884851526166,
+            0.7822737806842567,
+            0.7496367600866443,
+            0.7205197559620639,
         ],
         rel=RTOL,
     )
@@ -141,31 +143,31 @@ def test_eee_hpt_rotor2_per_streamline(example_spool):
     row = example_spool("EEE-HPT/eee_hpt.py")["rotor2"]
     assert row.P0 == pytest.approx(
         [
-            270414.06537260045,
-            263897.33914370113,
-            259578.78860271804,
-            257046.7352292148,
-            256108.09563705017,
+            270008.0560312047,
+            263679.00861656386,
+            259563.76257965388,
+            257256.5993644746,
+            256566.7659620641,
         ],
         rel=RTOL,
     )
     assert row.T0 == pytest.approx(
         [
-            1134.8998922573246,
-            1128.4000244077208,
-            1124.1007855487087,
-            1121.6582500344703,
-            1120.9101696617186,
+            1135.6337781208392,
+            1128.9786951588076,
+            1124.5173225909516,
+            1121.9083188087027,
+            1120.9882996604204,
         ],
         rel=RTOL,
     )
     assert row.M == pytest.approx(
         [
-            0.4721947561743981,
-            0.4490594317991563,
-            0.43211060563523745,
-            0.420354573458027,
-            0.4127988942866575,
+            0.4721771422716526,
+            0.4490061806305021,
+            0.4320046568567541,
+            0.4201856361503476,
+            0.41257450730510703,
         ],
         rel=RTOL,
     )
@@ -185,10 +187,10 @@ def test_eee_hpt_slsqp_tripwire(example_spool):
     anything that needs to be exact, prefer the per-row assertions above.
     """
     spool = example_spool("EEE-HPT/eee_hpt.py")["spool"]
-    assert len(spool.convergence_history) == 106
+    assert len(spool.convergence_history) == 122
     last = spool.convergence_history[-1]
-    assert last["massflow_std"] == pytest.approx(0.0014191633426164, rel=1e-6)
-    assert last["massflow"] == pytest.approx(29.2606442034497, rel=1e-6)
+    assert last["massflow_std"] == pytest.approx(0.0010938616316103174, rel=1e-6)
+    assert last["massflow"] == pytest.approx(29.24807564010687, rel=1e-6)
 
 
 # ---------------------------------------------------------------------------
@@ -220,6 +222,20 @@ def test_radial_turbine_massflow_attribute_is_the_input_echo(example_spool):
 
 
 # --------------------------------------------------------------------------------------
+# RE-BASELINED at issue #40 (turbine rotor P0R carried isentropically with T0R).
+#
+# turbine_math.rotor_calc took the ideal exit P0R straight from the rotor inlet while T0R
+# moved with U^2 through rothalpy, so a rotor whose exit radius differs from its inlet radius
+# destroyed entropy. Same defect #35 fixed in compressor_math.py; see
+# tests/test_turbine_ideal_relative_pressure.py. Both examples moved:
+#   radial turbine: converged massflow 0.33576 -> 0.31552 kg/s (CFD: 0.293), rotor P0 -3.5..-5 %,
+#                   15 -> 16 balance iterations. Relative-total ds across the rotor is now
+#                   +17.3..+17.6 J/(kg K) on every streamline.
+#   EEE-HPT:        rotor streamlines sit ~1 mm off their stator-exit radii, so the axial
+#                   rows move too, but only by <= 0.2 % in P0 and -0.04 % in massflow;
+#                   SLSQP 106 -> 122 iterations.
+# The "pre-fix" comments below refer to the #27 area fix, not this one.
+# --------------------------------------------------------------------------------------
 # RE-BASELINED at PR #27 (`fix/radial-area-and-massflow-sign`).
 #
 # The three radial-turbine goldens below moved because `compute_streamline_areas` changed:
@@ -239,7 +255,7 @@ def test_radial_turbine_stator_per_streamline(example_spool):
     assert row.P0 == pytest.approx([536657.313099755] * 5, rel=RTOL)
     assert row.T0 == pytest.approx([1222.8779357137] * 5, rel=RTOL)
     # was 0.42080703647747797 before the area fix; P0/T0/Yp are unchanged by it.
-    assert row.M == pytest.approx([0.49044906439126945] * 5, rel=RTOL)
+    assert row.M == pytest.approx([0.4513929387749093] * 5, rel=RTOL)
     assert row.Yp == pytest.approx([0.0] * 5, abs=1e-12)
 
 
@@ -247,7 +263,7 @@ def test_radial_turbine_rotor_per_streamline(example_spool):
     """The golden that was flagged as most likely to move once the area fix landed. It did.
 
     `M` here is the absolute Mach number, and it exceeds 1 at the hub streamline
-    (M[0] = 1.2320). That is not a choked passage: choking is set by the meridional Mach
+    (M[0] = 1.1472). That is not a choked passage: choking is set by the meridional Mach
     number, which is far lower at a near-radial station, and a swirling flow can carry an
     absolute Mach number above 1 without it. It is also exactly the kind of station where
     the corrected term in `compute_streamline_areas` is large rather than negligible --
@@ -258,11 +274,11 @@ def test_radial_turbine_rotor_per_streamline(example_spool):
     #              418045.0960861983, 409980.2644715815]
     assert row.P0 == pytest.approx(
         [
-            434029.9135235289,
-            428744.0618755014,
-            419931.65779237944,
-            409786.61084366404,
-            401992.02228410816,
+            412056.3563251393,
+            407908.888988232,
+            400886.9282946781,
+            392884.9625809787,
+            387273.3747435612,
         ],
         rel=RTOL,
     )
@@ -270,11 +286,11 @@ def test_radial_turbine_rotor_per_streamline(example_spool):
     #              1146.9118258635594, 1142.398479508869]
     assert row.T0 == pytest.approx(
         [
-            1154.970831024012,
-            1151.9058186779316,
-            1146.5434634683434,
-            1140.3418075933444,
-            1135.9434687109626,
+            1159.8683862595994,
+            1156.879603588391,
+            1151.7508248515,
+            1145.8315941226151,
+            1141.6693063933503,
         ],
         rel=RTOL,
     )
@@ -282,11 +298,11 @@ def test_radial_turbine_rotor_per_streamline(example_spool):
     #             0.837409532372009, 0.7773593618539902]
     assert row.M == pytest.approx(
         [
-            1.2319911973203372,
-            0.9525978451296234,
-            0.8626853849786268,
-            0.8193645118214383,
-            0.7607708835335303,
+            1.147197401823308,
+            0.8987584167242614,
+            0.8166867358070425,
+            0.7765727523624701,
+            0.7211693585730535,
         ],
         rel=RTOL,
     )
@@ -299,15 +315,15 @@ def test_radial_turbine_convergence_tripwire(example_spool):
     above for why this is coarse rather than exact: `minimize_scalar`'s own result
     object is internal to `_balance_pressure` and is not exposed on `spool`).
 
-    The iteration count is unchanged at 15 -- the corrected area moved where the solve
-    lands, not how hard it was to get there.
+    The iteration count was unchanged at 15 by the area fix -- it moved where the solve
+    lands, not how hard it was to get there. The #40 rotor P0R fix took it to 16.
     """
     spool = example_spool("radial-turbine/radial_turbine-1D.py")["spool"]
-    assert len(spool.convergence_history) == 15
+    assert len(spool.convergence_history) == 16
     last = spool.convergence_history[-1]
     # pre-fix: massflow_std 2.7887726216979658e-05, massflow 0.29864834362636516
-    assert last["massflow_std"] == pytest.approx(2.457223793289609e-05, rel=1e-6)
-    assert last["massflow"] == pytest.approx(0.3357569515451556, rel=1e-6)
+    assert last["massflow_std"] == pytest.approx(3.942356690378457e-05, rel=1e-6)
+    assert last["massflow"] == pytest.approx(0.31551515043727607, rel=1e-6)
 
 
 @pytest.mark.slow

@@ -239,15 +239,20 @@ def rotor_calc(row:BladeRow,upstream:BladeRow,calculate_vm:bool=True,outlet_type
     # Rotor Exit Calculations
     row.beta1 = upstream.beta2
     #row.Yp # Evaluated earlier 
-    row.P0R = upstream.P0R - row.Yp*(upstream.P0R-row.P)
-
         
     # Total Relative Temperature stays constant through the rotor. Adjust for change in radius from rotor inlet to exit
     T0_coolant = 0 
     if row.coolant is not None:
         T0_coolant = T0_coolant_weighted_average(row)
-    row.T0R = (upstream_rothalpy + 0.5*row.U**2)/row.Cp - T0_coolant
+    T0R_rothalpy = (upstream_rothalpy + 0.5*row.U**2)/row.Cp
+    row.T0R = T0R_rothalpy - T0_coolant
+
+    # carry P0R isentropically with T0R across the radius change, then apply the loss.
+    # Coolant mixing is not an isentropic process, so it is left out of the ratio.
+    P0R_is = upstream.P0R * (T0R_rothalpy / upstream.T0R) ** (row.gamma / (row.gamma - 1))
+    row.P0R = P0R_is - row.Yp*(P0R_is-row.P)
     P0R_P = row.P0R / row.P
+    
     T0R_T = P0R_P**((row.gamma-1)/row.gamma)
     row.T = (row.T0R/T0R_T)     # Exit static temperature
     if calculate_vm:    # Calculates the T0 at the exit
