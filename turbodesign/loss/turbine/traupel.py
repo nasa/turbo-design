@@ -25,36 +25,40 @@ class Traupel(LossBaseClass):
             self.data = pickle.load(f) # type: ignore
         
     def __call__(self,row:BladeRow, upstream:BladeRow) -> npt.NDArray:
-        """Compute Traupel stage enthalpy efficiency from an upstream/downstream pair.
+        """Compute Traupel stage total-to-total efficiency from a stator/rotor pair.
+
+        Experimental: the digitised figures and the kinetic-energy weighting of the row losses are
+        not validated against Traupel (1977).
+
+        The stage loss is assembled at the rotor, as CraigCox does, because the turbine solver
+        applies the whole stage loss to the rotor Yp and treats stators as lossless.
 
         Args:
-            row (BladeRow): Blade row being evaluated (stator or rotor).
-            upstream (BladeRow): Upstream blade row supplying inlet conditions.
+            row (BladeRow): Blade row being evaluated. Stators return zeros.
+            upstream (BladeRow): Upstream (stator) row supplying inlet conditions.
 
         Returns:
             numpy.ndarray: Spanwise efficiency array matching ``row.r``.
         """
-        
+        if row.row_type != RowType.Rotor:
+            return 0.0 * row.r
+
         alpha1 = 90-np.degrees(upstream.alpha1.mean())
         alpha2 = 90-np.degrees(upstream.alpha2.mean())
         beta2 = 90 - np.degrees(row.beta1.mean())
         beta3 = 90 - np.degrees(row.beta2.mean())
             
-        g = upstream.pitch # G is the pitch 
+        g = upstream.pitch # Stator pitch
+        g_rotor = row.pitch
         h_stator = upstream.r[-1] - upstream.r[0]
         h_rotor = row.r[-1] - row.r[0]
 
-        if row.row_type == RowType.Rotor:
-            turning = np.abs(np.degrees(upstream.beta2-row.beta2).mean())
-            F = self.data['Fig06'](float((upstream.W/row.W).mean()), float(turning)) # Inlet velocity
-        else:
-            turning = np.abs(np.degrees(upstream.alpha2-row.alpha2).mean())
-            F = self.data['Fig06'](float((upstream.V/row.V).mean()), float(turning)) # Inlet velocity
+        turning = np.abs(np.degrees(upstream.beta2-row.beta2).mean())
+        F = self.data['Fig06'](float((upstream.W/row.W).mean()), float(turning)) # Inlet velocity
 
-        H = self.data['Fig07'](float(alpha1-beta2), float(alpha2-beta3))
-        
+        # Fig07 (divergence factor) is not used: whether it is additive or a multiplier is unverified.
         zeta_s = F*g/h_stator  # Stator loss factor scaled by pitch-to-span
-        zeta_r = F*g/h_rotor   # Rotor loss factor scaled by pitch-to-span
+        zeta_r = F*g_rotor/h_rotor   # Rotor loss factor scaled by pitch-to-span
         x_p_stator = self.data['Fig01'](float(alpha1), float(alpha2))
         x_p_rotor = self.data['Fig01'](float(beta2), float(beta3))
         zeta_p_stator = self.data['Fig02'](float(alpha1), float(alpha2))
@@ -66,7 +70,7 @@ class Traupel(LossBaseClass):
         e_te = upstream.te_pitch * g
         o = upstream.throat 
         ssen_alpha2 = e_te/o # Thickness of Trailing edge divide by throat 
-        ssen_beta2 = row.te_pitch*g / row.throat
+        ssen_beta2 = row.te_pitch*g_rotor / row.throat
         
         x_delta_stator = self.data['Fig05'](float(ssen_alpha2), float(alpha2))
         zeta_delta_stator = self.data['Fig04'](float(ssen_alpha2), float(alpha2))
@@ -83,19 +87,15 @@ class Traupel(LossBaseClass):
         
         zeta_pr_rotor = zeta_p_rotor * x_p_rotor * x_m_rotor * x_delta_rotor + zeta_delta_rotor + zeta_f
         
-        if row.row_type == RowType.Stator:
-            zeta_cl = 0 
-        else:
-            zeta_cl = self.data['Fig08'](float(row.tip_clearance))  # Clearance loss for unshrouded blades
-            
+        zeta_cl = self.data['Fig08'](float(row.tip_clearance))  # Clearance loss for unshrouded blades
+
         zeta_z = 0  # Disk friction loss not modeled
-        # 1 - (internal) - (external)
-        zeta_v = 0 
-        zeta_off = 0 
-        eta_stator = 1- (zeta_pr_stator + zeta_s + 0 + zeta_z) - (zeta_r+zeta_v) - zeta_off  # Per Traupel formulation
-        eta_rotor = 1 - (zeta_pr_rotor + zeta_r + zeta_cl + zeta_z) - (zeta_r+zeta_v) - zeta_off
-        return (eta_stator+eta_rotor) + row.r*0
-        
-        
-        
-        
+        zeta_v = 0  # Ventilation loss not modeled
+        zeta_off = 0  # Leaving loss not modeled
+
+        # Each row carries its own secondary loss; clearance applies to the rotor only.
+        # Row losses are summed unweighted; Traupel weights them by each row's exit kinetic energy.
+        zeta_stator = zeta_pr_stator + zeta_s
+        zeta_rotor = zeta_pr_rotor + zeta_r + zeta_cl
+        eta_stage = 1.0 - (zeta_stator + zeta_rotor + zeta_z + zeta_v + zeta_off)
+        return eta_stage + row.r*0
