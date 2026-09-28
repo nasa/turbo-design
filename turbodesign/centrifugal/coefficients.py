@@ -112,6 +112,22 @@ FROZEN: Mapping[str, Coefficient] = MappingProxyType(
         # engineering judgement. Fires at the HECC design point (alpha2 = 76.3 deg).
         # Do not cite it as Oh's.
         "impeller.recirculation.alpha2_warn_deg": 70.0,
+        # CEILING on the recirculation loss, as a fraction of the Euler work U2*Vt2.
+        # sinh(3.5*alpha2**3) is UNBOUNDED, and off-design (alpha2 -> 90 deg as Cm2 -> 0) it
+        # returns "losses" that exceed the Euler work itself (HECC, 130% speed, 60% flow:
+        # 1.8x). PHYSICS: this is a PARASITIC term -- extra shaft work spent re-pumping the
+        # mass that flows back into the impeller tip (docs/PHYSICS-RULES.md rule 6). Per unit of
+        # throughflow it is (recirculated mass fraction f) x (re-pumping work per unit mass,
+        # which cannot exceed U2*Vt2), so dh_rc/w_euler ~ f, and a steady meanline operating
+        # point requires f < 1 -- the HARD ceiling is 1.0. The default 0.5 is UPSTREAM'S
+        # PRECEDENT (turbodesign/loss/compressor/otac.py::ImpellerRecirculationOh, commit
+        # 39b841d: ``cap = 0.5*cp*(T0_row - T0_upstream)``; in that solver parasitic enthalpy
+        # never entered T0, so that dT0 IS the Euler rise and the cap is 0.5*w_euler). 0.5 is
+        # UNVERIFIED engineering judgement -- half the throughflow reversing is already past
+        # any steady operating point -- NOT a published bound; Oh 1997 states none. The cap
+        # never binds at any measured HECC point (design point: dh_rc/w_euler = 0.048), and
+        # ImpellerRecirculationOh warns whenever it does bind.
+        "impeller.recirculation.max_fraction_of_euler_work": 0.5,
         # Aungier gap discharge coefficient, sqrt(2/3). ⚠ The closure it feeds
         # (ImpellerLeakageAungier.delta_h) is DIMENSIONALLY BROKEN -- returns m/s, not J/kg
         # (debt D6, strict xfail). The value is unchanged pending Aungier (2000)'s own primary.
