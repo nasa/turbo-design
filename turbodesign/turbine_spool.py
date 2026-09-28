@@ -372,6 +372,12 @@ class TurbineSpool:
                 row.Yp = row.loss_function(row, upstream)
             elif row.loss_function.loss_type == LossType.Enthalpy: 
                 row.Yp = 0
+            else:
+                raise NotImplementedError(
+                    f"{type(row.loss_function).__name__} declares LossType.{row.loss_function.loss_type.name}, "
+                    f"which TurbineSpool does not implement: the loss would be silently ignored and the row "
+                    f"solved loss-free. Use a Pressure or Enthalpy loss model."
+                )
                     
             if row.row_type == RowType.Stator:
                 stator_calc(row, upstream, downstream,True,Is_static_defined)  # type: ignore[arg-type]

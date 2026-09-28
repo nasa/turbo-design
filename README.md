@@ -125,7 +125,8 @@ stator.loss_function = AinleyMathieson()
 | **Kacker-Okapuu** | Modern update to Ainley-Mathieson | Gas turbines, subsonic to transonic | ASME 81-GT-120 (1982) |
 | **Craig-Cox** | Alternative correlation | Steam turbines | IMechE (1971) |
 | **Traupel** | European-based correlation | Steam turbines | Thermische Turbomaschinen (1977) |
-| **FixedPolytropicEfficiency** | Constant efficiency assumption | Preliminary design, sensitivity studies | - |
+| **FixedEfficiency** | Constant stage efficiency | Preliminary design, sensitivity studies | - |
+| **FixedPressureLoss** | Constant pressure-loss coefficient | Preliminary design, sensitivity studies | - |
 
 ### Built-in Compressor Loss Models
 
@@ -133,6 +134,7 @@ stator.loss_function = AinleyMathieson()
 |-------|-------------|----------|-----------|
 | **Lieblein** | Diffusion factor based loss | Axial compressors | NACA RM E57A28 (1957) |
 | **Diffusion Factor** | Simplified diffusion loss | Preliminary design | - |
+| **FixedPolytropicEfficiency** | Constant polytropic efficiency (compressor solver only; `TurbineSpool` rejects it) | Preliminary design, sensitivity studies | - |
 
 ### Loss Model Data Files
 

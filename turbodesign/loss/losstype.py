@@ -1,9 +1,18 @@
 from abc import ABC, abstractmethod
 from typing import Any, Dict, Iterable, Tuple
 from ..lossinterp import LossInterp
+import numpy as np
 import numpy.typing as npt
 import os 
 from ..enums import LossType
+
+def mean_value(value: Any) -> float:
+    """Spanwise mean of a scalar or array as a Python float.
+
+    ``float()`` on a 1-D array raises on numpy >= 2.5, and chart lookups need scalars.
+    """
+    return float(np.asarray(value).mean())
+
 
 class LossBaseClass(ABC):  
     data: Dict[str,LossInterp]

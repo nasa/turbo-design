@@ -6,13 +6,8 @@ from ...enums import RowType, LossType
 import numpy as np
 import numpy.typing as npt
 import pathlib
-from ..losstype import LossBaseClass
+from ..losstype import LossBaseClass, mean_value
 import requests
-
-
-def _mean_value(value):
-    """Return the mean of an array-like as a Python float."""
-    return float(np.asarray(value).mean())
 
 class KackerOkapuu(LossBaseClass):
     UseCFM:bool = False
@@ -63,39 +58,40 @@ class KackerOkapuu(LossBaseClass):
             numpy.ndarray: Pressure loss coefficient array matching ``row.r``.
         """
         # Get the Inlet incoming mach number relative to the blade
-        c = row.chord
-        b = row.axial_chord
+        c = mean_value(row.chord)
+        b = mean_value(row.axial_chord)
+        H = mean_value(row.r[-1]-row.r[0]) # Blade height
         if row.row_type == RowType.Stator:
-            beta1_rad = np.abs(_mean_value(np.radians(row.beta1_metal))) # Metal angle from fig 3
-            alpha1_rad = np.abs(_mean_value(row.alpha1)) # Flow angle
-            alpha2_rad = np.abs(_mean_value(row.alpha2)) # Flow angle at exit which is metal angle
+            beta1_rad = np.abs(mean_value(np.radians(row.beta1_metal))) # Metal angle from fig 3
+            alpha1_rad = np.abs(mean_value(row.alpha1)) # Flow angle
+            alpha2_rad = np.abs(mean_value(row.alpha2)) # Flow angle at exit which is metal angle
             beta2_rad = alpha2_rad                  
             alpham_rad = (alpha1_rad + alpha2_rad)*0.5
-            M1 = _mean_value(upstream.M)
-            M2 = _mean_value(row.M)
-            h = 0
-            Rec = _mean_value(row.V*row.rho*row.chord / sutherland(row.T))
+            M1 = mean_value(upstream.M)
+            M2 = mean_value(row.M)
+            k = 0.0 # No tip clearance on a stator
+            Rec = mean_value(row.V*row.rho*row.chord / sutherland(row.T))
             
             beta1_deg = np.abs(np.degrees(beta1_rad))
             alpha2_deg = np.abs(np.degrees(alpha2_rad))
-            Yp_beta0 = self.data['Fig01_beta0'](float(row.pitch_to_chord), alpha2_deg)  # when beta1 = 0 
-            Yp_beta1_alpha2 = self.data['Fig02'](float(row.pitch_to_chord), alpha2_deg) # When beta1 = alpha2
+            Yp_beta0 = self.data['Fig01_beta0'](mean_value(row.pitch_to_chord), alpha2_deg)  # when beta1 = 0 
+            Yp_beta1_alpha2 = self.data['Fig02'](mean_value(row.pitch_to_chord), alpha2_deg) # When beta1 = alpha2
             t_max_c = self.data['Fig04'](beta1_deg+alpha2_deg)
         else:
-            h = row.tip_clearance * (row.r[-1]-row.r[0])
-            alpha1_rad = np.abs(_mean_value(row.beta1))
-            beta1_rad = np.abs(_mean_value(np.radians(row.beta1_metal))) # metal angles are stored as degrees 
-            beta2_rad = np.abs(_mean_value(np.radians(row.beta2_metal)))
-            alpha2_rad = np.abs(_mean_value(row.beta2))
+            k = mean_value(row.tip_clearance) * H # tip_clearance is a span fraction; k is the gap in metres
+            alpha1_rad = np.abs(mean_value(row.beta1))
+            beta1_rad = np.abs(mean_value(np.radians(row.beta1_metal))) # metal angles are stored as degrees 
+            beta2_rad = np.abs(mean_value(np.radians(row.beta2_metal)))
+            alpha2_rad = np.abs(mean_value(row.beta2))
             alpham_rad = (beta1_rad + beta2_rad)*0.5
-            M1 = _mean_value(upstream.M_rel) 
-            M2 = _mean_value(row.M_rel)
-            Rec = _mean_value(row.W*row.rho*row.chord / sutherland(row.T))
+            M1 = mean_value(upstream.M_rel) 
+            M2 = mean_value(row.M_rel)
+            Rec = mean_value(row.W*row.rho*row.chord / sutherland(row.T))
 
             beta1_deg = np.abs(np.degrees(beta1_rad))
             alpha2_deg = np.abs(np.degrees(beta2_rad))
-            Yp_beta0 = self.data['Fig01_beta0'](float(row.pitch_to_chord), alpha2_deg)  # when beta1 = 0 
-            Yp_beta1_alpha2 = self.data['Fig02'](float(row.pitch_to_chord), alpha2_deg) # When beta1 = alpha2
+            Yp_beta0 = self.data['Fig01_beta0'](mean_value(row.pitch_to_chord), alpha2_deg)  # when beta1 = 0 
+            Yp_beta1_alpha2 = self.data['Fig02'](mean_value(row.pitch_to_chord), alpha2_deg) # When beta1 = alpha2
             t_max_c = self.data['Fig04'](beta1_deg+alpha2_deg)
         
         ratio = beta1_rad / alpha2_rad
@@ -114,7 +110,7 @@ class KackerOkapuu(LossBaseClass):
             q1_frac = 1-(1+(upstream.gamma-1)/2*M1**2)**(-upstream.gamma/(upstream.gamma-1))
             q2_frac = 1-(1+(row.gamma-1)/2*M2**2)**(-row.gamma/(row.gamma-1))
             Y_shock = dP_q1_shock * q1_frac/q2_frac # Eqn 6
-            Y_shock = _mean_value(Y_shock)
+            Y_shock = mean_value(Y_shock)
         else:
             Y_shock = 0
         
@@ -134,33 +130,32 @@ class KackerOkapuu(LossBaseClass):
         if M2>1:
             Yp = Yp*CFM
         
-        f_ar = (1-0.25*np.sqrt(2-h/c)) / (h/c) if h/c<=2 else 1/(h/c)
         alpham = np.arctan(0.5*(np.tan(alpha1_rad) - np.tan(alpha2_rad)))
         Cl_sc = 2*(np.tan(alpha1_rad)+np.tan(alpha2_rad))*np.cos(alpham)
-        Ys_amdc = 0.0334 *f_ar *np.cos(alpha2_rad)/np.cos(beta1_rad) * (Cl_sc)**2 * np.cos(alpha2_rad)**2 / np.cos(alpham)**3
-        # Secondary Loss
-        if h>0: # h is calculated from tip clearance. When h is 0 there is no tip clearance  
-            K3 = 1/(h/(b))**2       # Fig 13, it's actually bx in the picture which is the axial chord; h is 0 this causes nan
+        # Secondary Loss. H is the blade height, so stators have it too; it is 0 with a single streamline
+        if H>0:
+            h_c = H/c
+            f_ar = (1-0.25*np.sqrt(2-h_c)) / h_c if h_c<=2 else 1/h_c
+            Ys_amdc = 0.0334 *f_ar *np.cos(alpha2_rad)/np.cos(beta1_rad) * (Cl_sc)**2 * np.cos(alpha2_rad)**2 / np.cos(alpham)**3
+            K3 = (b/H)**2           # Fig 13, it's actually bx in the picture which is the axial chord
             Ks = 1-K3*(1-Kp)        # Eqn 15
             Ys = 1.2*Ys_amdc*Ks     # Eqn 16
         else:
-            K3 = 0
-            Ks = 0 
-            Ys = 0 
+            Ys = 0
         
         # Trailing Edge
         if np.abs(beta1_deg-np.degrees(beta2_rad))<5: # impulse turbine the inlet and exit angles are the same
-            delta_phi2 = self.data['Fig14_Impulse'](float(row.te_pitch*row.pitch / row.throat))
+            delta_phi2 = self.data['Fig14_Impulse'](mean_value(row.te_pitch*row.pitch / row.throat))
         else:
-            delta_phi2 = self.data['Fig14_Axial_Entry'](float(row.te_pitch*row.pitch / row.throat))
+            delta_phi2 = self.data['Fig14_Axial_Entry'](mean_value(row.te_pitch*row.pitch / row.throat))
         
         Ytet = (1-(row.gamma-1)/2 * M2**2 * (1/(1-delta_phi2)-1)) **(-row.gamma/(row.gamma-1)) - 1 # Equation 18
         Ytet = Ytet / (1-(1+(row.gamma-1)/2*M2**2)**(-row.gamma/(row.gamma-1)))
         
         # Tip Clearance
-        if h > 0:
-            kprime = row.tip_clearance/(3)**0.42 # Number of seals 
-            Ytc = 0.37*c/h * (kprime/c)**0.78 * Cl_sc**2 * np.cos(alpha2_rad)**2 / np.cos(alpham)**3
+        if k > 0 and H > 0:
+            kprime = k/(3)**0.42 # Number of seals 
+            Ytc = 0.37*c/H * (kprime/c)**0.78 * Cl_sc**2 * np.cos(alpha2_rad)**2 / np.cos(alpham)**3
         else:
             Ytc = 0 
             

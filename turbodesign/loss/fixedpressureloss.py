@@ -24,7 +24,7 @@ class FixedPressureLoss(LossBaseClass):
             loss = loss * np.ones_like(row.r) # type: ignore
         elif loss.shape != row.r.shape:
             if len(row.r) == 1:
-                return loss.mean()
+                return np.full(row.r.shape, loss.mean())
             else:
                 return interp1d(np.linspace(0,1,len(loss)),loss)(row.percent_hub_shroud)
         return loss

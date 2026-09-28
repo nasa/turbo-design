@@ -6,7 +6,7 @@ from ...lossinterp import LossInterp
 from ...enums import RowType, LossType
 import numpy as np
 import pathlib
-from ..losstype import LossBaseClass
+from ..losstype import LossBaseClass, mean_value
 import requests
 
 class CraigCox(LossBaseClass):
@@ -71,6 +71,11 @@ class CraigCox(LossBaseClass):
             row (BladeRow): Downstream blade row being evaluated.
             upstream (BladeRow): Upstream blade row providing inlet conditions.
 
+        Note:
+            TurbineSpool's LossType.Enthalpy path (turbine_spool.py, balance_loop) does not
+            currently work for any enthalpy model: it converts the returned array with float(),
+            and its search for Yp does not depend on Yp. Calling this model directly is fine.
+
         Returns:
             numpy.ndarray | int: Stage efficiency; returns 0 for stators, spanwise array for rotors.
         """
@@ -120,63 +125,63 @@ class CraigCox(LossBaseClass):
             
             asin_os = np.degrees(np.arcsin(currentRow.throat/currentRow.pitch))
             
-            N_pr = self.data['Fig03'](float(Re), 0.05) # use a good finish for the geometry
+            N_pr = self.data['Fig03'](mean_value(Re), 0.05) # use a good finish for the geometry
             if (inlet_flow_angle-imin < 10):
                 Fl = 13
             else:
-                Fl = self.data['Fig04'](float(outlet_flow_angle), float(inlet_flow_angle-imin))
+                Fl = self.data['Fig04'](mean_value(outlet_flow_angle), mean_value(inlet_flow_angle-imin))
             
             x = 1-np.sin(np.radians(outlet_flow_angle))/np.sin(np.radians(inlet_flow_angle))
-            contraction_ratio = self.data['Fig07'](float(x), float(s_b)) # contraction ratio
+            contraction_ratio = self.data['Fig07'](mean_value(x), mean_value(s_b)) # contraction ratio
 
             # Fig 5's ordinate is the loss *parameter* x_pb*(s/b)*sin(beta), not x_pb itself
             # (axis label: "Basic Profile Loss Parameter Xp(s/b)sin(beta)"). Recover x_pb by
             # dividing out (s/b)*sin(beta), using the low-speed exit flow angle for beta per the
             # figure's note. Eqn 10 then consumes x_pb directly.
-            xpb_s_b_sinB = self.data['Fig05'](float(Fl*s_b), float(contraction_ratio))
+            xpb_s_b_sinB = self.data['Fig05'](mean_value(Fl*s_b), mean_value(contraction_ratio))
             X_pb = xpb_s_b_sinB / (s_b * np.sin(np.radians(outlet_flow_angle)))
-            delta_X_pt = self.data['Fig06_delta_Xpt'](float(currentRow.te_pitch))
-            N_pt = self.data['Fig06_Npt'](float(currentRow.te_pitch), float(outlet_flow_angle))
-            delta_Xpm = self.data['Fig08'](float(M_out), float(np.degrees(np.arcsin((currentRow.throat+te)/currentRow.pitch))))
-            delta_Xp_se = self.data['Fig09'](float(e_s), float(M_out)) 
+            delta_X_pt = self.data['Fig06_delta_Xpt'](mean_value(currentRow.te_pitch))
+            N_pt = self.data['Fig06_Npt'](mean_value(currentRow.te_pitch), mean_value(outlet_flow_angle))
+            delta_Xpm = self.data['Fig08'](mean_value(M_out), mean_value(np.degrees(np.arcsin((currentRow.throat+te)/currentRow.pitch))))
+            delta_Xp_se = self.data['Fig09'](mean_value(e_s), mean_value(M_out)) 
             
-            Fi = self.data['Fig15'](float(blade_inlet_angle), float(s_b))
+            Fi = self.data['Fig15'](mean_value(blade_inlet_angle), mean_value(s_b))
             # Incidence Effects 
             if currentRow.beta1_fixed:
                 if incidence_angle>0: # Positive incidence
-                    stall_incidence_angle = self.data['Fig11'](float(currentRow.beta1.mean()), float(asin_os))
+                    stall_incidence_angle = self.data['Fig11'](mean_value(currentRow.beta1.mean()), mean_value(asin_os))
                     
                     incidence_ratio = (incidence_angle - imin)/(stall_incidence_angle-imin)
 
-                    i_plus_istall_sb = self.data['Fig12_sb'](float(s_b), float(asin_os))
-                    i_plus_istall_cor = self.data['Fig12_cr'](float(contraction_ratio), float(asin_os))
+                    i_plus_istall_sb = self.data['Fig12_sb'](mean_value(s_b), mean_value(asin_os))
+                    i_plus_istall_cor = self.data['Fig12_cr'](mean_value(contraction_ratio), mean_value(asin_os))
                     
                     if blade_inlet_angle<=90:
-                        i_plus_istall_basic = self.data['Fig11'](float(inlet_flow_angle), float(asin_os))
+                        i_plus_istall_basic = self.data['Fig11'](mean_value(inlet_flow_angle), mean_value(asin_os))
                         i_plus_istall = i_plus_istall_basic + i_plus_istall_sb + i_plus_istall_cor # Eqn 5 
                     else:
-                        i_plus_istall_basic = self.data["Fig14_i+istall"](float(blade_inlet_angle), float(asin_os))
+                        i_plus_istall_basic = self.data["Fig14_i+istall"](mean_value(blade_inlet_angle), mean_value(asin_os))
                         i_plus_istall = i_plus_istall_basic + (1-(blade_inlet_angle-90)/(90-asin_os))*(i_plus_istall_sb + i_plus_istall_cor) # Eqn 7 
                 else:
-                    i_minus_istall_sb = self.data['Fig13'](float(s_b), float(asin_os))
+                    i_minus_istall_sb = self.data['Fig13'](mean_value(s_b), mean_value(asin_os))
 
                     if blade_inlet_angle<=90: 
-                        i_minus_istall_basic = self.data['Fig13_alpha1'](float(s_b), float(asin_os))
+                        i_minus_istall_basic = self.data['Fig13_alpha1'](mean_value(s_b), mean_value(asin_os))
                         i_minus_istall = i_minus_istall_basic + i_minus_istall_sb # Eqn 6
                     else:
-                        i_minus_istall_basic = self.data["Fig14_i-istall"](float(blade_inlet_angle), float(asin_os))
+                        i_minus_istall_basic = self.data["Fig14_i-istall"](mean_value(blade_inlet_angle), mean_value(asin_os))
                         i_minus_istall = i_minus_istall_basic + (1-(blade_inlet_angle - 90)/(90-asin_os)) * i_minus_istall_sb   # Eqn 8 
                         
                 imin = (i_plus_istall + Fi * (i_minus_istall))/(1+Fi) # type: ignore # Eqn 9
-                N_pi = self.data['Fig10'](float(imin), float(incidence_ratio))
+                N_pi = self.data['Fig10'](mean_value(imin), mean_value(incidence_ratio))
             else:
                 N_pi = 1 # No effect
             
             Xp = X_pb*N_pr*N_pi*N_pt + delta_X_pt + delta_Xp_se + delta_Xpm # Eqn 10
             
             # Secondary Loss 
-            Ns_hb = self.data['Fig17'](float(1/currentRow.aspect_ratio))
-            x_sb = self.data['Fig18'](float((V_inlet/V)**2), float(s_b*Fl))
+            Ns_hb = self.data['Fig17'](mean_value(1/currentRow.aspect_ratio))
+            x_sb = self.data['Fig18'](mean_value((V_inlet/V)**2), mean_value(s_b*Fl))
                 
             # Craig & Cox apply the same Reynolds/surface-finish factor to the secondary loss
             # as to the profile loss (Fig 3, N_pr); reuse it here as N_sr (Eqn 11) rather than 1.

@@ -87,12 +87,12 @@ def stator_calc(row: BladeRow, upstream: BladeRow, calculate_vm: bool = True) ->
             if np.any(row.eta_poly):
                 target_eta_poly = float(np.mean(row.eta_poly))
             elif callable(loss_fn):
-                target_eta_poly = float(loss_fn(row, upstream))  # type: ignore[arg-type]
+                target_eta_poly = float(np.mean(loss_fn(row, upstream)))  # type: ignore[arg-type]
         elif loss_type == LossType.Entropy:
             if np.any(row.entropy_rise):
                 target_entropy = float(np.mean(row.entropy_rise))
             elif callable(loss_fn):
-                target_entropy = float(loss_fn(row, upstream))  # type: ignore[arg-type]
+                target_entropy = float(np.mean(loss_fn(row, upstream)))  # type: ignore[arg-type]
         elif loss_type == LossType.Enthalpy:
             raise NotImplementedError(
                 f"{type(loss_fn).__name__} declares LossType.Enthalpy. The "
@@ -275,12 +275,12 @@ def rotor_calc(
             if np.any(row.eta_poly):
                 target_eta_poly = float(np.mean(row.eta_poly))
             elif callable(loss_fn):
-                target_eta_poly = float(loss_fn(row, upstream))  # type: ignore[arg-type]
+                target_eta_poly = float(np.mean(loss_fn(row, upstream)))  # type: ignore[arg-type]
         elif loss_type == LossType.Entropy:
             if np.any(row.entropy_rise):
                 target_entropy = float(np.mean(row.entropy_rise))
             elif callable(loss_fn):
-                target_entropy = float(loss_fn(row, upstream))  # type: ignore[arg-type]
+                target_entropy = float(np.mean(loss_fn(row, upstream)))  # type: ignore[arg-type]
         elif loss_type == LossType.Enthalpy:
             raise NotImplementedError(
                 f"{type(loss_fn).__name__} declares LossType.Enthalpy. The "

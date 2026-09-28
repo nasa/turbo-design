@@ -33,6 +33,11 @@ class Traupel(LossBaseClass):
         The stage loss is assembled at the rotor, as CraigCox does, because the turbine solver
         applies the whole stage loss to the rotor Yp and treats stators as lossless.
 
+        Note:
+            TurbineSpool's LossType.Enthalpy path (turbine_spool.py, balance_loop) does not
+            currently work for any enthalpy model: it converts this array with float(), and
+            its search for Yp does not depend on Yp. Calling this model directly is fine.
+
         Args:
             row (BladeRow): Blade row being evaluated. Stators return zeros.
             upstream (BladeRow): Upstream (stator) row supplying inlet conditions.

@@ -83,7 +83,8 @@ class TD2_Reynolds_Correction(LossBaseClass):
         # Reynolds group massflow/(mu * r_mean) is dimensionless and corresponds to
         # FLWP/VISC/RST(MEAN) in td2-2.f. The legacy 0.2 turbulent exponent was dropped
         # in the original Python port and is restored here.
-        Re_group = row.massflow / (row.mu * row.r.mean())
+        # row.massflow is cumulative from the hub (0 at the hub streamline), so use the total.
+        Re_group = row.total_massflow / (np.mean(row.mu) * row.r.mean())
         Y = Y * (0.35 + 0.65*18.21) / (0.35 + 0.65*Re_group**0.2)
         row.Yp = Y
         return Y

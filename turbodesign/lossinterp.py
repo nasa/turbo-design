@@ -114,13 +114,12 @@ class LossInterp:
             float: y
         """
             
-        if self.is_xy or c==None:
+        if self.is_xy or c is None:
             if self.logX10:
                 x = np.log10(x)
             if isinstance(x, np.ndarray):
                 return self.func(x)
-            elif isinstance(x, float):
-                return float(self.func(x))
+            return float(self.func(float(x)))
         else:
             # Clamp the third-axis (c) query into the digitized chart range. An out-of-range c
             # would otherwise raise inside fxc_max/fxc_min on the array path (or clamp silently
@@ -137,13 +136,13 @@ class LossInterp:
                 if np.any(x > xmax) or np.any(x < xmin):
                     warnings.warn(f"{self.name}: x outside chart range for the given c; "
                                   "clamping.", UserWarning, stacklevel=2)
-                x[x>xmax] = xmax
-                x[x<xmin] = xmin
+                x = np.clip(x, xmin, xmax) # new array; the caller's x is not modified
                 if self.logX10:
                     y = self.func(np.log10(x),c)
                 else:
                     y = self.func(x,c)
-            elif isinstance(x, float):
+            else:
+                x = float(x)
                 xmax = float(self.fxc_max(c))
                 xmin = float(self.fxc_min(c))
                 if x < xmin or x > xmax:
